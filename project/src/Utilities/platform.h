@@ -23,7 +23,7 @@ namespace Utilities {
 
 #define PATH const char*
 
-constexpr char *kEngineName = "Test";
+constexpr char *kEngineName = "FenixEngine";
 constexpr u32 kEngineVersion = VK_MAKE_VERSION(0, 0, 1);
 }
 }

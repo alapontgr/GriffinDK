@@ -4,7 +4,7 @@
 #include "Framework/app.h"
 #include "Rendering/context.h"
 
-class TestApp : public dk::Framework::App
+class TestApp : public fdk::Framework::App
 {
 public:
   TestApp() {}

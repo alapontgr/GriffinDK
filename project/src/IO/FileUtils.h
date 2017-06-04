@@ -2,7 +2,7 @@
 #include "Utilities\types.h"
 #include "Utilities\platform.h"
 
-namespace dk
+namespace fdk
 {
   namespace IO 
   {

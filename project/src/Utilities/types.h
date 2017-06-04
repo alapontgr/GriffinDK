@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <cinttypes>
 
-namespace dk {
+namespace fdk {
 #define CHECK(expr, msg) assert(expr &&msg)
 #define ABORT(msg) quick_exit(EXIT_SUCCESS)
 #define UNUSED(arg) (void)(arg)

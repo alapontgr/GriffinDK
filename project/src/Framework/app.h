@@ -3,7 +3,7 @@
 #include "Rendering/context.h"
 #include "Utilities/types.h"
 
-namespace dk {
+namespace fdk {
 namespace Framework {
 
 class App {

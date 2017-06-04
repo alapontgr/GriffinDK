@@ -3,7 +3,7 @@
 #include "context.h"
 #include "Utilities\ClassHelpers.h"
 
-namespace dk
+namespace fdk
 {
 namespace Rendering
 {

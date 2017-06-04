@@ -4,7 +4,7 @@
 #include <fstream>
 #include "Memory\MemUtils.h"
 
-namespace dk
+namespace fdk
 {
   namespace IO 
   {

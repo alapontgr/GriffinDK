@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <chrono>
 
-namespace dk {
+namespace fdk {
 namespace Framework {
 // Time features
 static std::chrono::high_resolution_clock::time_point g_lastFrame;

@@ -9,7 +9,7 @@
 #include "RenderPass.h"
 #include "Shader.h"
 
-namespace dk {
+namespace fdk {
 namespace Rendering {
 
 constexpr u32 kDesiredSwapChainImageCount = 3;

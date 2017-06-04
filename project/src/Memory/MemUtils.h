@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #endif
 
-namespace dk
+namespace fdk
 {
 namespace Memory
 {

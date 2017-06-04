@@ -6,7 +6,7 @@
 #include "Framework\app.h"
 #include "Utilities\platform.h"
 
-namespace dk {
+namespace fdk {
 namespace Rendering {
 
 Framebuffer::Framebuffer() {}

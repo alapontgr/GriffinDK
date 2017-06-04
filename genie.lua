@@ -1,4 +1,4 @@
-solution "PlayingWithVulkan"
+solution "FenixDK"
     configurations {
         "Debug",
         "Release",
@@ -12,7 +12,7 @@ solution "PlayingWithVulkan"
     language "C++"
 
 --Engine project that will be used as a static library
-project "TestingVulkan"
+project "Core"
     --kind "ConsoleApp"
     --In case of using WindowedApp we have to specify te entry point
     kind "WindowedApp"

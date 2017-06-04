@@ -2,7 +2,7 @@
 
 #include "Utilities/types.h"
 
-namespace dk
+namespace fdk
 {
 namespace Maths
 {

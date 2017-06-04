@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-namespace dk {
+namespace fdk {
 void debug_msg(const char *format, ...) {
 #ifdef _DEBUG
   constexpr u32 kMaxSize = 256;

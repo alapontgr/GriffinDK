@@ -5,7 +5,7 @@
 #include "../Utilities/VulkanInclude.h"
 #include "Utilities/platform.h"
 
-namespace dk {
+namespace fdk {
 namespace Rendering {
 
 RenderPass::RenderPass() {}

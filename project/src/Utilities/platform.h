@@ -5,7 +5,7 @@
 #include "VulkanInclude.h"
 #include "types.h"
 
-namespace dk {
+namespace fdk {
 namespace Utilities {
 
 // Windows definitions

@@ -11,3 +11,5 @@ project/obj/
 *.pdb
 project/build/
 *.nvuser
+Core/obj/
+Core/build/

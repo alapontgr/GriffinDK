@@ -18,31 +18,27 @@ project "Core"
     kind "WindowedApp"
     flags { "WinMain" }
 
-    EnginePath = "./project/"
-
     includedirs {
         "C:/VulkanSDK/1.0.39.1/Include",
-        path.join(EnginePath, "src"),
-        path.join(EnginePath, "external/"),
+        "Core/src",
+        "External/",
+    }
+    files {
+        "Core/src/**",
+        "./External/**",     
     }
 
-    files {
-        path.join(EnginePath, "src/**"),
-        path.join(EnginePath, "external/glm/**"),     
-    }
+    targetdir "./Core/build/$(Configuration)/$(Platform)"
+    objdir "./Core/obj/$(Platform)"
+    debugdir "./Res"
 
     configuration "Release"
-        targetdir "./project/build/release" 
-        debugdir "./project/res"
         defines { "_NDEBUG" }
-        objdir "./project/obj"
         flags { "OptimizeSpeed" }
 
-    configuration "Debug"
-        targetdir "./project/build/debug" 
-        debugdir "./project/res"
+    configuration "Debug" 
+        debugdir "./Res"
         defines { "_DEBUG" }
-        objdir "./project/obj"
         flags {"Symbols"}
 
     configuration "x32"
@@ -61,8 +57,7 @@ project "Core"
         libdirs { 
             "C:/VulkanSDK/1.0.39.1/Bin",
         }
-        links {"vulkan-1"}
-        
+        links {"vulkan-1"}      
         defines 
         {
             "x64", 

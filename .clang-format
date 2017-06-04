@@ -1,0 +1,19 @@
+
+UseTab: Always
+BreakConstructorInitializersBeforeComma: true
+IndentWidth: 2
+TabWidth: 2
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+IndentCaseLabels: false
+ColumnLimit: 0
+AlignEscapedNewlinesLeft: true
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
+PointerAlignment: Left
+NamespaceIndentation: Inner
+Language: Cpp
+SortIncludes: false

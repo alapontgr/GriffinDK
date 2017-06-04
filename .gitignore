@@ -1,0 +1,13 @@
+project/obj/
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.opendb
+*.suo
+*.db
+*.idb
+*.ilk
+*.pdb
+project/build/
+*.nvuser

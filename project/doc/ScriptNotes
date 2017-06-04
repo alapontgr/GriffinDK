@@ -1,0 +1,3 @@
+Build Shader:
+
+glslangValidator.exe -V -H <srcName> -o <dstName> > <logName>

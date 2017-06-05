@@ -13,3 +13,7 @@ project/build/
 *.nvuser
 Core/obj/
 Core/build/
+FenixDK/obj/
+FenixDK/build/
+Tests/build/
+Tests/obj/

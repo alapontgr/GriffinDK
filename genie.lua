@@ -1,4 +1,5 @@
-solution "FenixDK"
+solution "FenixEngine"
+    location "./FenixDK"
     configurations {
         "Debug",
         "Release",
@@ -12,25 +13,26 @@ solution "FenixDK"
     language "C++"
 
 --Engine project that will be used as a static library
-project "Core"
+project "FenixDK"
+    location "./FenixDK"
     --kind "ConsoleApp"
     --In case of using WindowedApp we have to specify te entry point
     kind "StaticLib"
     flags { "WinMain" }
 
+    targetdir "./FenixDK/build/$(Configuration)/$(Platform)"
+    objdir "./FenixDK/obj/$(Platform)"
+    debugdir "./Res"
+
     includedirs {
         "C:/VulkanSDK/1.0.39.1/Include",
-        "Core/src",
+        "FenixDK/src",
         "External/",
     }
     files {
-        "Core/src/**",
+        "FenixDK/src/**",
         "./External/**",     
     }
-
-    targetdir "./Core/build/$(Configuration)/$(Platform)"
-    objdir "./Core/obj/$(Platform)"
-    debugdir "./Res"
 
     configuration "Release"
         defines { "_NDEBUG" }
@@ -65,26 +67,41 @@ project "Core"
             "VK_USE_PLATFORM_WIN32_KHR",
         }
 
-project "UnitTest"
+solution "TestingFenix" 
+    location "./Tests"
+    configurations {
+        "Debug",
+        "Release",
+    }
+ 
+    platforms {
+        "x32",
+        "x64",
+    }
+
+    language "C++"
+
+project "UnitTests"
+    location "./Tests"
     --kind "ConsoleApp"
     --In case of using WindowedApp we have to specify te entry point
     kind "WindowedApp"
     flags { "WinMain" }
 
+    targetdir "./Tests/build/$(Configuration)/$(Platform)"
+    objdir "./Tests/obj/$(Platform)"
+    debugdir "./Res"
+    prebuildcommands { "call ../scripts/compile_x32.bat" }
+
     includedirs {
         "C:/VulkanSDK/1.0.39.1/Include",
-        "Core/src",
+        "FenixDK/src",
         "External/",
-        "UnitTest/src" 
+        "Tests/src" 
     }
     files {
-        "UnitTest/src/**"     
+        "Tests/src/**"     
     }
-
-    targetdir "./UnitTest/build/$(Configuration)/$(Platform)"
-    objdir "./UnitTest/obj/$(Platform)"
-    debugdir "./Res"
-    dependency()
 
     configuration "Release"
         defines { "_NDEBUG" }
@@ -96,9 +113,9 @@ project "UnitTest"
         flags {"Symbols"}
 
         libdirs { 
-            "./Core/build/$(Configuration)/$(Platform)",
+            "./FenixDK/build/$(Configuration)/$(Platform)",
         }
-        links {"Core"}
+        links {"FenixDK"}
 
 
     configuration "x32"

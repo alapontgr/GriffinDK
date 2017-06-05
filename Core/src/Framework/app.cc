@@ -31,7 +31,7 @@ namespace Framework
 															LPARAM lParam);
 	bool ProcessEvents(MSG* msg);
 
-	void App::run(const char* title, HINSTANCE hInstance, int nCmdShow)
+	void App::run(const char* title)
 	{
     s_rCurrentApp = this;
 		TimeParams::totalTime = 0.0;
@@ -40,7 +40,7 @@ namespace Framework
     // User pre init
 		on_pre_init();
 		
-    init(title, hInstance, nCmdShow);
+    init(title);
 		
     // User start
     on_start();
@@ -103,7 +103,7 @@ namespace Framework
 		m_context.end_scene();
 	}
 
-	void App::init(const char* title, HINSTANCE hInstance, int nCmdShow)
+	void App::init(const char* title)
 	{
 		// this struct holds information for the window class
 		WNDCLASSEX wc;
@@ -115,7 +115,7 @@ namespace Framework
 		wc.cbSize = sizeof(WNDCLASSEX);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = WindowProc;
-		wc.hInstance = hInstance;
+		wc.hInstance = GetModuleHandle(0);
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 		// wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 		wc.lpszClassName = "SampleClass";
@@ -150,7 +150,7 @@ namespace Framework
 		AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE); // adjust the size
 
 		// create the window and use the result as the handle
-		m_hwnd = CreateWindowEx(NULL,
+		auto hwnd = CreateWindowEx(NULL,
 														"SampleClass",			 // name of the window class
 														title,							 // title of the window
 														WS_OVERLAPPEDWINDOW, // window style
@@ -160,14 +160,14 @@ namespace Framework
 														wr.bottom - wr.top,	// height of the window
 														NULL,								 // we have no parent window, NULL
 														NULL,								 // we aren't using menus, NULL
-														hInstance,					 // application handle
+                            GetModuleHandle(0),					 // application handle
 														NULL);							 // used with multiple windows, NULL
 
 		// display the window on the screen
-		ShowWindow(m_hwnd, nCmdShow);
+		ShowWindow(hwnd, SW_SHOWNORMAL);
 
 		// init graphic context
-		m_context.init(hInstance, m_hwnd);
+		m_context.init();
 		// Init Input context
 		// input::Init(hInstance, hwnd, width_, height_);
 	}

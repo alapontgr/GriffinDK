@@ -48,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   int nCmdShow)
 {
   TestApp app;
-  app.run("Test Vulkan Application", hInstance, nCmdShow);
+  app.run("Test Vulkan Application");
 
   return 0;
 }

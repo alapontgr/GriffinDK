@@ -68,7 +68,7 @@ class Context {
 public:
   Context() {}
 
-  void init(HINSTANCE hInstance, HWND hwnd);
+  void init();
   
   void clean_cmd_buffers();
   
@@ -105,7 +105,7 @@ private:
   VkPresentModeKHR select_swap_chain_present_mode();
   void create_device();
   void get_queue();
-  void create_surface(HINSTANCE hInstance, HWND hwnd);
+  void create_surface();
   void create_sync_objects();
   void create_swap_chain();
   void check_swap_chain_images();

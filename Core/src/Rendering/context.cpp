@@ -101,12 +101,12 @@ namespace Rendering
 		return true;
 	}
 
-	void Context::init(HINSTANCE hInstance, HWND hwnd)
+	void Context::init()
 	{
 
 		create_instance();
 
-		create_surface(hInstance, hwnd);
+		create_surface();
 
 		create_device();
 
@@ -349,22 +349,19 @@ namespace Rendering
 		vkGetDeviceQueue(m_device, m_presentFamilyIndex, 0, &m_presentQueue);
 	}
 
-	void Context::create_surface(HINSTANCE hInstance, HWND hwnd)
+	void Context::create_surface()
 	{
 #ifdef WinPlatform
 		VkWin32SurfaceCreateInfoKHR surfaceInfo;
 		surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 		surfaceInfo.pNext = nullptr;
 		surfaceInfo.flags = 0;
-		surfaceInfo.hinstance = hInstance;
-		surfaceInfo.hwnd = hwnd;
+		surfaceInfo.hinstance = GetModuleHandle(0);
+		surfaceInfo.hwnd = GetActiveWindow();
 
-		auto result =
-				vkCreateWin32SurfaceKHR(m_instance, &surfaceInfo, nullptr, &m_surface);
+		auto result = vkCreateWin32SurfaceKHR(m_instance, &surfaceInfo, nullptr, &m_surface);
 		VK_CHECK(result, "Failed to create Win32 Surface");
 #else
-		UNUSED(hInstance);
-		UNUSED(hwnd);
 		ABORT("Invalid platform");
 #endif
 	}

@@ -15,7 +15,7 @@ public:
   static u32 width() { return s_width; }
   static u32 height() { return s_height; }
 
-  void run(const char *title, HINSTANCE hInstance, int nCmdShow);
+  void run(const char *title);
 
   // Used to edit some of the initial parameter of the application
   virtual void on_pre_init() = 0;
@@ -29,7 +29,7 @@ public:
   virtual void on_release() = 0;
 
 private:
-  void init(const char *title, HINSTANCE hInstance, int nCmdShow);
+  void init(const char *title);
   void frame();
   void update();
   void render();
@@ -43,7 +43,6 @@ protected:
   bool m_fullscreen = false;
   bool m_vSync = false;
   v4 m_clearColor = v4(0.5f, 0.5f, 1.0f, 1.0f);
-  HWND m_hwnd;
 };
 }
 }

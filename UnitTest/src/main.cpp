@@ -1,9 +1,8 @@
-#include <windows.h>
-
 #include "Utilities/types.h" 
 #include "Framework/app.h"
 #include "Rendering/context.h"
 #include "Framework/Time.h"
+#include "Entry.h"
 
 
 using namespace fdk;
@@ -42,13 +41,9 @@ public:
   }
 };
 
-int WINAPI WinMain(HINSTANCE hInstance,
-  HINSTANCE hPrevInstance,
-  LPSTR lpCmdLine,
-  int nCmdShow)
+s32 fdk::Framework::__fenix_entry__() 
 {
   TestApp app;
   app.run("Test Vulkan Application");
-
   return 0;
 }

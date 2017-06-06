@@ -91,7 +91,7 @@ project "UnitTests"
     targetdir "./Tests/build/$(Configuration)/$(Platform)"
     objdir "./Tests/obj/$(Platform)"
     debugdir "./Res"
-    prebuildcommands { "call ../scripts/compile_x32.bat" }
+    prebuildcommands { "call ../scripts/compile_engine.bat $(Platform) $(Configuration)" }
 
     includedirs {
         "C:/VulkanSDK/1.0.39.1/Include",

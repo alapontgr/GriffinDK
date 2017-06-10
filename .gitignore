@@ -17,3 +17,5 @@ FenixDK/obj/
 FenixDK/build/
 Tests/build/
 Tests/obj/
+Samples/UnitTests/build/
+Samples/UnitTests/obj/

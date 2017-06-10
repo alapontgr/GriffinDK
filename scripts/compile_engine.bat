@@ -6,4 +6,4 @@ REM /maxcpucount:8 /v:m
 
 echo Compiling FenixEngine.sln Platform: %1, Configuration: %2
 
-msbuild.exe ../FenixDK/FenixEngine.sln /verbosity:minimal /m /p:Platform=%1 /p:Configuration=%2
+msbuild.exe %3 /verbosity:minimal /m /p:Platform=%1 /p:Configuration=%2

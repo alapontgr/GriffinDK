@@ -68,7 +68,7 @@ project "FenixDK"
         }
 
 solution "TestingFenix" 
-    location "./Tests"
+    location "./Samples"
     configurations {
         "Debug",
         "Release",
@@ -82,40 +82,39 @@ solution "TestingFenix"
     language "C++"
 
 project "UnitTests"
-    location "./Tests"
+    location "./Samples/UnitTests"
     --kind "ConsoleApp"
     --In case of using WindowedApp we have to specify te entry point
     kind "WindowedApp"
     flags { "WinMain" }
 
-    targetdir "./Tests/build/$(Configuration)/$(Platform)"
-    objdir "./Tests/obj/$(Platform)"
-    debugdir "./Res"
-    prebuildcommands { "call ../scripts/compile_engine.bat $(Platform) $(Configuration)" }
+    targetdir "./Samples/UnitTests/build/$(Configuration)/$(Platform)"
+    objdir "./Samples/UnitTests/obj/$(Platform)"
+    debugdir "./Samples/Res"
+    --prebuildcommands { "call ../../scripts/compile_engine.bat $(Platform) $(Configuration) ../../FenixDK/FenixEngine.sln" }
 
     includedirs {
         "C:/VulkanSDK/1.0.39.1/Include",
         "FenixDK/src",
         "External/",
-        "Tests/src" 
+        "./Samples/UnitTests/src" 
     }
     files {
-        "Tests/src/**"     
+        "./Samples/UnitTests/src/**"     
     }
+    libdirs 
+    { 
+        "./FenixDK/build/$(Configuration)/$(Platform)",
+    }
+    links {"FenixDK"}
 
     configuration "Release"
         defines { "_NDEBUG" }
         flags { "OptimizeSpeed" }
 
     configuration "Debug" 
-        debugdir "./Res"
         defines { "_DEBUG" }
         flags {"Symbols"}
-
-        libdirs { 
-            "./FenixDK/build/$(Configuration)/$(Platform)",
-        }
-        links {"FenixDK"}
 
 
     configuration "x32"

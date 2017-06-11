@@ -8,20 +8,20 @@ namespace fdk
 {
   namespace IO 
   {
-    File::mem_t* File::load(PATH path, const u32 padding, const u32 alignment)
+    Memory::mem_ptr_t File::load(PATH path, const u32 padding, const u32 alignment)
     {
       std::ifstream fs;
-      CHECK(path, "Trying to load invalid path");
+      FDK_ASSERT(path, "Trying to load invalid path");
 
       fs.open(path, std::ios::binary);
       if (fs.good())
       {
         fs.seekg(0, std::ios::end);
-        m_size = static_cast<u32>(fs.tellg());
+        m_size = static_cast<Memory::mem_size_t>(fs.tellg());
         fs.seekg(0, std::ios::beg);
 
         // TODO: Replace by allocators
-        m_data = Memory::allocate_memory<mem_t>(m_size + padding, alignment);
+        m_data = Memory::allocate_memory(m_size + padding, alignment);
 
         fs.read(m_data, m_size);
         if (padding > 0)

@@ -1,6 +1,7 @@
 #pragma once
 #include "Utilities\types.h"
 #include "Utilities\platform.h"
+#include "Memory\MemUtils.h"
 
 namespace fdk
 {
@@ -9,25 +10,22 @@ namespace fdk
     class File 
     {
     public:
-      using mem_t = char;
-      using size_t = u32;
-
       File() {}
 
       ~File(){}
 
-      mem_t* load(PATH path, const u32 padding, const u32 alignment);
+      Memory::mem_ptr_t load(PATH path, const u32 padding, const u32 alignment);
       
       void release();
       
-      mem_t* data() { return m_data; }
+      Memory::mem_ptr_t data() { return m_data; }
 
-      size_t size() const { return m_size; }
+      Memory::mem_size_t size() const { return m_size; }
     
     private:
 
-      mem_t* m_data = nullptr;
-      size_t m_size = 0;
+      Memory::mem_ptr_t m_data = nullptr;
+      Memory::mem_size_t m_size = 0;
     };
 
   }

@@ -1,7 +1,7 @@
-#include "Shader.h"
 #include "IO\FileUtils.h"
 #include "context.h"
 #include "Utilities\ClassHelpers.h"
+#include "Shader.h"
 
 namespace fdk
 {
@@ -22,7 +22,7 @@ namespace Rendering
   {
     IO::File source;
     source.load(path, 0, alignof(u32));
-    CHECK(source.size() > 0, "Loaded empty file");
+    FDK_ASSERT(source.size() > 0, "Loaded empty file");
 
     VkShaderModuleCreateInfo info;
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

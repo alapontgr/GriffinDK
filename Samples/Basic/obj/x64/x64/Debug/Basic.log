@@ -1,8 +1,0 @@
-﻿  Compiling FenixEngine.sln Platform: x64, Configuration: Debug
-  Microsoft (R) Build Engine version 14.0.25420.1
-  Copyright (C) Microsoft Corporation. All rights reserved.
-  
-    FenixMain.cpp
-c:\users\user\documents\workspace\repositories\engine\fenixdk\src\fenixmain.cpp : fatal error C1041: cannot open program database 'C:\Users\User\Documents\workspace\repositories\Engine\FenixDK\build\Debug\x64\FenixDK.pdb'; if multiple CL.EXE write to the same .PDB file, please use /FS [C:\Users\User\Documents\workspace\repositories\Engine\FenixDK\FenixDK.vcxproj]
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(123,5): error MSB3073: The command "call ../../scripts/compile_engine.bat x64 Debug ../../FenixDK/FenixEngine.sln
-C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(123,5): error MSB3073: :VCEnd" exited with code 1.

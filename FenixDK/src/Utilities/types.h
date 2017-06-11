@@ -5,8 +5,9 @@
 #include <assert.h>
 #include <cinttypes>
 
-namespace fdk {
-#define CHECK(expr, msg) assert(expr &&msg)
+namespace fdk
+{
+#define FDK_ASSERT(expr, msg) assert(expr&& msg)
 #define ABORT(msg) quick_exit(EXIT_SUCCESS)
 #define UNUSED(arg) (void)(arg)
 
@@ -29,5 +30,5 @@ typedef glm::quat quat;
 typedef glm::mat3 m3;
 typedef glm::mat4 m4;
 
-void debug_msg(const char *format, ...);
+void debug_msg(const char* format, ...);
 }

@@ -9,11 +9,12 @@ namespace Rendering
 	public:
     static RenderInterface* create();
 
-    void test();
-
     void init();
 
     void release();
+
+    void on_resize();
+
 	protected:
 		RenderInterface();
 	};

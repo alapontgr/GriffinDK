@@ -8,12 +8,23 @@ namespace fdk
 {
   namespace Rendering 
   { 
-    RenderInterface::RenderInterface() {}
-    
-    void RenderInterface::test()
+    RenderInterface::RenderInterface() {} 
+
+    void RenderInterface::init()
     {
-      IMPLEMENTATION(RenderInterface, this)->test();
-    }    
+      IMPLEMENTATION(RenderInterface, this)->init();
+    }
+
+    void RenderInterface::release()
+    {
+      IMPLEMENTATION(RenderInterface, this)->release();
+    }
+
+    void RenderInterface::on_resize()
+    {
+      IMPLEMENTATION(RenderInterface, this)->on_resize();
+    }
+
   }
 }
 

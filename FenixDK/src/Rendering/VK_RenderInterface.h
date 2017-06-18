@@ -10,6 +10,13 @@ namespace fdk
 {
 namespace Rendering
 {
+  struct FrameInfoVK 
+  {
+    //VkFramebuffer frameBuffer = VK_NULL_HANDLE;
+    VkSemaphore imageAvailable = VK_NULL_HANDLE; // Signaled by the presentation engine with the image is available
+    VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed   
+  };
+
 	class VKRenderInterface : public RenderInterface
 	{
 	public:
@@ -51,6 +58,18 @@ namespace Rendering
 
     void create_cmd_pool();
 
+    void clean_frame_infos();
+
+    void create_frame_infos();
+
+    void release_swap_chain();
+
+    void release_device();
+
+    void release_surface();
+
+    void release_render_instance();
+
     //Windows
     VkSurfaceKHR m_surface; 
     VkSwapchainKHR m_swapChain;
@@ -71,7 +90,11 @@ namespace Rendering
     std::vector<VkImage> m_swapChainImages;
     std::vector<VkImageView> m_swapChainImageView;
     VkCommandPool m_commandPool;
+    std::vector<FrameInfoVK> m_frames; // We use N buffering so every frame we will need to use the correct frame info
     
+    u32 m_currentFrame;
+    u32 m_currentImageIndex;
+
     Containers::Mask<u32> m_flags;
   };
 

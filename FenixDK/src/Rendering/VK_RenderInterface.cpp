@@ -104,15 +104,31 @@ namespace Rendering
 		create_logical_device();
     create_swap_chain();
     create_cmd_pool();
+    create_frame_infos();
 	}
 
 	void VKRenderInterface::release()
 	{
+    clean_frame_infos();
+
+    // Wait for the device to be idle
+    vkDeviceWaitIdle(m_device);
+
+    release_swap_chain();
+
+    release_device();
+
+    release_device();
+
+    release_surface();
+
+    release_render_instance();
 	}
 
   void VKRenderInterface::on_resize()
   {
-    
+    m_flags.set(kPendingResize, true);
+    create_swap_chain();
   }
 
   void VKRenderInterface::validate_vk_extensions()
@@ -439,11 +455,34 @@ namespace Rendering
       vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, nullptr);
     VK_CHECK(result, "Failed to enumerate the images of a swap chain");
 
+    m_swapChainImages.resize(imageCount);
+    result = vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount,
+      &m_swapChainImages[0]);
+    VK_CHECK(result, "Failed to get the images of the swap chain");
+
+    // Create views for all the images of the swap chain
+    m_swapChainImageView.resize(m_swapChainImages.size());
+    for (u32 i = 0; i < m_swapChainImages.size(); i++)
     {
-      m_swapChainImages.resize(imageCount);
-      result = vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount,
-        &m_swapChainImages[0]);
-      VK_CHECK(result, "Failed to get the images of the swap chain");
+      VkImageViewCreateInfo imageViewInfo{};
+      imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+      imageViewInfo.pNext = nullptr;
+      imageViewInfo.flags = 0;
+      imageViewInfo.image = m_swapChainImages[i];
+      imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+      imageViewInfo.format = m_swapChainFormat.format;
+      imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+      imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+      imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+      imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+      imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      imageViewInfo.subresourceRange.baseMipLevel = 0;
+      imageViewInfo.subresourceRange.levelCount = 1;
+      imageViewInfo.subresourceRange.baseArrayLayer = 0;
+      imageViewInfo.subresourceRange.layerCount = 1;
+
+      auto result = vkCreateImageView(m_device, &imageViewInfo, nullptr, &m_swapChainImageView[i]);
+      VK_CHECK(result, "Failed to create image view");
     }
   }
 
@@ -457,6 +496,83 @@ namespace Rendering
     info.queueFamilyIndex = m_presentFamilyIndex;
     auto result = vkCreateCommandPool(m_device, &info, nullptr, &m_commandPool);
     VK_CHECK(result, "Failed to create command pool");
+  }
+
+  void VKRenderInterface::clean_frame_infos()
+  {
+    for (FrameInfoVK& frame : m_frames) 
+    {
+      if (frame.finishedRendering) 
+      {
+        vkDestroySemaphore(m_device, frame.finishedRendering, nullptr);
+      }
+      if (frame.imageAvailable)
+      {
+        vkDestroySemaphore(m_device, frame.imageAvailable, nullptr);
+      }
+    }
+    m_frames.clear();
+  }
+
+  void VKRenderInterface::create_frame_infos()
+  {
+    m_currentFrame = 0;
+    m_frames.resize(kBufferCount);
+
+    // Semaphore config
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = nullptr;
+    semaphoreInfo.flags = 0;
+
+    for (FrameInfoVK& frame : m_frames) 
+    {
+      auto result = vkCreateSemaphore(m_device, &semaphoreInfo, nullptr,
+        &frame.finishedRendering);
+      VK_CHECK(result, "Failed to create semaphore");
+      result = vkCreateSemaphore(m_device, &semaphoreInfo, nullptr,
+        &frame.imageAvailable);
+      VK_CHECK(result, "Failed to create semaphore");
+    }
+  }
+
+  void VKRenderInterface::release_swap_chain()
+  {
+    // Destroy the image views of the swap chain
+    for (VkImageView& rView : m_swapChainImageView)
+    {
+      vkDestroyImageView(m_device, rView, nullptr);
+    }
+    m_swapChainImageView.clear();
+
+    if (m_swapChain) 
+    {
+      vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
+    }
+  }
+
+  void VKRenderInterface::release_device()
+  {
+    if (m_device) 
+    {
+      vkDestroyDevice(m_device, nullptr);
+    }
+  }
+
+  void VKRenderInterface::release_surface()
+  {
+    if (m_surface) 
+    {
+      vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    }
+  }
+
+  void VKRenderInterface::release_render_instance()
+  {
+    if (m_instance) 
+    {
+      vkDestroyInstance(m_instance, nullptr);
+    }
   }
 
 }

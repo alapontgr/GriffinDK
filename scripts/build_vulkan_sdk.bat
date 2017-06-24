@@ -2,7 +2,7 @@ call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat"
 
 REM BUILD VULKAN LIBRARY
 
-cd C:\VulkanSDK\1.0.51.0\glslang
+cd %VK_SDK_PATH%\glslang
 @RD /S /Q "./build"
 mkdir build
 cd build
@@ -12,7 +12,7 @@ msbuild.exe glslang.sln /verbosity:minimal /m /p:Platform=x64 /p:Configuration=R
 
 REM BUILD VULKAN TOOLS
 
-cd C:\VulkanSDK\1.0.51.0\spirv-tools
+cd %VK_SDK_PATH%\spirv-tools
 mkdir build
 cd build
 cmake -G "Visual Studio 14 Win64" ..
@@ -21,7 +21,7 @@ msbuild.exe spirv-tools.sln /verbosity:minimal /m /p:Platform=x64 /p:Configurati
 
 REM BUILD VULKAN SAMPLES
 
-cd C:\VulkanSDK\1.0.51.0\Samples
+cd %VK_SDK_PATH%\Samples
 mkdir build
 cd build
 cmake -G "Visual Studio 14 Win64" ..

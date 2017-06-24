@@ -25,7 +25,7 @@ project "FenixDK"
     debugdir "./Res"
 
     includedirs {
-        "C:/VulkanSDK/1.0.51.0/Include",
+        os.getenv("VK_SDK_PATH") .. "/Include",
         "FenixDK/src",
         "External/",
     }
@@ -45,7 +45,7 @@ project "FenixDK"
 
     configuration "x32"
         libdirs { 
-            "C:/VulkanSDK/1.0.51.0/Lib32",
+            os.getenv("VK_SDK_PATH") .. "/Lib32",
         }
         links {"vulkan-1"}
         defines 
@@ -57,7 +57,7 @@ project "FenixDK"
 
     configuration "x64"
         libdirs { 
-            "C:/VulkanSDK/1.0.51.0/Lib",
+            os.getenv("VK_SDK_PATH") .. "/Lib",
         }
         links {"vulkan-1"}      
         defines 

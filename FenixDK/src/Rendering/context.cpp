@@ -162,6 +162,9 @@ namespace Rendering
 		check_instance_available_extensions();
 #endif // _DEBUG
 
+    check_validation_layer_support();
+
+
 		VkApplicationInfo appInfo;
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pNext = nullptr;
@@ -1441,5 +1444,28 @@ namespace Rendering
 		vkFlushMappedMemoryRanges(m_device, 1, &memRange); // Flush data to the gpu
 #endif // _DEBUG
 	}
+
+  void Context::check_validation_layer_support()
+  {
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+  
+    for (const char* layerName : kLayerNames) {
+      bool layerFound = false;
+
+      for (const auto& layerProperties : availableLayers) 
+      {
+        if (strcmp(layerName, layerProperties.layerName) == 0) {
+          layerFound = true;
+          break;
+        }
+      }
+      FDK_ASSERT(layerFound, "Failed to get validation layers");
+    }
+  }
+
 }
 }

@@ -98,6 +98,9 @@ private:
                                         u32 &swapChainFamilyIndex);
   void check_instance_available_extensions();
   void create_instance();
+
+  void check_validation_layer_support();
+
   void check_device_available_extensions(VkPhysicalDevice pPhysicalDevice);
   VkSurfaceFormatKHR select_swap_chain_format();
   VkImageUsageFlags select_swap_chain_flags();

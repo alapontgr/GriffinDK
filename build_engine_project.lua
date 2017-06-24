@@ -25,7 +25,7 @@ project "FenixDK"
     debugdir "./Res"
 
     includedirs {
-        "C:/VulkanSDK/1.0.39.1/Include",
+        "C:/VulkanSDK/1.0.51.0/Include",
         "FenixDK/src",
         "External/",
     }
@@ -45,7 +45,7 @@ project "FenixDK"
 
     configuration "x32"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin32",
+            "C:/VulkanSDK/1.0.51.0/Lib32",
         }
         links {"vulkan-1"}
         defines 
@@ -57,7 +57,7 @@ project "FenixDK"
 
     configuration "x64"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin",
+            "C:/VulkanSDK/1.0.51.0/Lib",
         }
         links {"vulkan-1"}      
         defines 

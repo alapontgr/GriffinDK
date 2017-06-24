@@ -22,7 +22,7 @@ project "UnitTests"
     prebuildcommands { "call ../../scripts/compile_engine.bat $(Platform) $(Configuration) ../../FenixDK/FenixEngine.sln" }
 
     includedirs {
-        "C:/VulkanSDK/1.0.39.1/Include",
+        "C:/VulkanSDK/1.0.51.0/Include",
         "FenixDK/src",
         "External/",
         "./Samples/UnitTests/src" 
@@ -47,7 +47,7 @@ project "UnitTests"
 
     configuration "x32"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin32",
+            "C:/VulkanSDK/1.0.51.0/Lib32",
         }
         links {"vulkan-1"}
         defines 
@@ -59,7 +59,7 @@ project "UnitTests"
 
     configuration "x64"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin",
+            "C:/VulkanSDK/1.0.51.0/Lib",
         }
         links {"vulkan-1"}      
         defines 
@@ -83,7 +83,7 @@ project "Basic"
     prebuildcommands { "call ../../scripts/compile_engine.bat $(Platform) $(Configuration) ../../FenixDK/FenixEngine.sln" }
 
     includedirs {
-        "C:/VulkanSDK/1.0.39.1/Include",
+        "C:/VulkanSDK/1.0.51.0/Include",
         "FenixDK/src",
         "External/",
         "./Samples/Basic/src" 
@@ -108,7 +108,7 @@ project "Basic"
 
     configuration "x32"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin32",
+            "C:/VulkanSDK/1.0.51.0/Lib32",
         }
         links {"vulkan-1"}
         defines 
@@ -120,7 +120,7 @@ project "Basic"
 
     configuration "x64"
         libdirs { 
-            "C:/VulkanSDK/1.0.39.1/Bin",
+            "C:/VulkanSDK/1.0.51.0/Lib",
         }
         links {"vulkan-1"}      
         defines 

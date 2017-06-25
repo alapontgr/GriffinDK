@@ -18,7 +18,10 @@ namespace Rendering
 
 
 #ifdef WinPlatform
-#define GPUIMPL_ID VK
+
+#define FENIX_VK_IMPL // This macro enables the implementation of vulkan
+#define GPUIMPL_ID VK_
+
 #endif // WinPlatform
 }
 }

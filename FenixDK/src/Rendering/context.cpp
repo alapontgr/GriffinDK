@@ -365,7 +365,7 @@ namespace Rendering
 		auto result = vkCreateWin32SurfaceKHR(m_instance, &surfaceInfo, nullptr, &m_surface);
 		VK_CHECK(result, "Failed to create Win32 Surface");
 #else
-		ABORT("Invalid platform");
+		FDK_ABORT("Invalid platform");
 #endif
 	}
 
@@ -949,7 +949,7 @@ namespace Rendering
 				return i;
 			}
 		}
-		ABORT("Failed to find a type of memory with the given filter and properties");
+		FDK_ABORT("Failed to find a type of memory with the given filter and properties");
 	}
 
 	void Context::create_buffer(

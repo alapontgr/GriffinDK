@@ -1,10 +1,11 @@
 #pragma once
 
 #include "RenderInterface.h"
-#include "Utilities/VulkanInclude.h"
 #include "Utilities/types.h"
 #include <vector>
 #include "Containers/Mask.h"
+
+#include "Utilities/VulkanInclude.h"
 
 namespace fdk
 {
@@ -17,16 +18,11 @@ namespace Rendering
     VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed   
   };
 
-	class VKRenderInterface : public RenderInterface
+	class VK_RenderInterface : public RenderInterface
 	{
 	public:
-    enum ERenderFlags : u32 
-    {
-      kPendingResize = 1<<0
-    };
-
-		VKRenderInterface();
-		~VKRenderInterface();
+		VK_RenderInterface();
+		~VK_RenderInterface();
 
     void init();
 
@@ -34,7 +30,13 @@ namespace Rendering
 
     void on_resize();
 
-    bool is_pending_resize() const { m_flags.is_enable(kPendingResize); };
+    void create_buffer(Buffer& rBuffer);
+
+    void destroy_buffer(Buffer& rBuffer);
+
+    void copy_buffer(Buffer& rFrom, Buffer& rTo);
+
+    void send_buffer_memory_to_gpu(Buffer& rBuffer);
 
   private:
 
@@ -94,8 +96,6 @@ namespace Rendering
     
     u32 m_currentFrame;
     u32 m_currentImageIndex;
-
-    Containers::Mask<u32> m_flags;
   };
 
 }

@@ -2,6 +2,7 @@
 #include "Utilities\platform.h"
 #include "Utilities\types.h"
 
+#include <new>
 #include <malloc.h>
 #include <stdlib.h>
 

@@ -48,7 +48,7 @@ struct FragShaderUniforms
   v4 colour;
 };
 
-struct Buffer 
+struct TMPBuffer 
 {
   u32 size;
   VkBuffer pBuffer;
@@ -183,7 +183,7 @@ private:
   VkDescriptorSet m_fragDescSet;
   VkPipelineLayout m_pipelineLayout;
   VkPipeline m_pipeline = VK_NULL_HANDLE; // Example of a graphics pipeline
-  Buffer m_fragUniformBuffer;
+  TMPBuffer m_fragUniformBuffer;
 
   // Mesh
   VertexBuffer m_vertexBuffer;

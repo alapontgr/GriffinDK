@@ -8,7 +8,7 @@
 namespace fdk
 {
 #define FDK_ASSERT(expr, msg) assert(expr&& msg)
-#define ABORT(msg) quick_exit(EXIT_SUCCESS)
+#define FDK_ABORT(msg) quick_exit(EXIT_SUCCESS)
 #define UNUSED(arg) (void)(arg)
 
 typedef std::uint8_t u8;

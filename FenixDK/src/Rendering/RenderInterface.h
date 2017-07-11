@@ -7,6 +7,7 @@ namespace fdk
 namespace Rendering
 {
   class Buffer;
+  class Material;
 
 	class RenderInterface
 	{
@@ -33,6 +34,8 @@ namespace Rendering
     void copy_buffer(Buffer& rFrom, Buffer& rTo);
 
     void send_buffer_memory_to_gpu(Buffer& rBuffer);
+
+    void bind_material(Material& rMaterial);
 
 	protected:
 		RenderInterface();

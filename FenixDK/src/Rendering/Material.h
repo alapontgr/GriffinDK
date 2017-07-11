@@ -11,13 +11,14 @@ namespace fdk
     
     public:
 
-      Material();
-
       ~Material();
 
-
+      static Material* create();
 
     private:
+      
+      Material();
+      
       Containers::Mask<u32> m_flags;
     };
 

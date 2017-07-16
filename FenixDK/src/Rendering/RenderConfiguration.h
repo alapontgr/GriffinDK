@@ -16,8 +16,10 @@ namespace Rendering
 
 	struct Scissor
 	{
-		v2 m_offset;
-		v2 m_dimensions;
+		s32 m_offsetX;
+		s32 m_offsetY;
+    u32 m_width;
+    u32 m_height;
 	};
 
 	struct RasterState
@@ -70,64 +72,64 @@ namespace Rendering
 
 	struct BlendState
 	{
-    enum EBlendFactor : u32 
-    {
-      Zero = 0,
-      One,
-      Src_Color,
-      One_Minus_Src_Color,
-      Dst_Color,
-      One_Minus_Dst_Color,
-      Src_Alpha,
-      One_Minus_Src_Alpha,
-      Dst_Alpha,
-      One_Minus_Dst_Alpha,
-      Constant_Color,
-      One_Minus_Constant_Color,
-      Constant_Alpha,
-      One_Minus_Contant_Alpha,
-    };
+		enum EBlendFactor : u32
+		{
+			Zero = 0,
+			One,
+			Src_Color,
+			One_Minus_Src_Color,
+			Dst_Color,
+			One_Minus_Dst_Color,
+			Src_Alpha,
+			One_Minus_Src_Alpha,
+			Dst_Alpha,
+			One_Minus_Dst_Alpha,
+			Constant_Color,
+			One_Minus_Constant_Color,
+			Constant_Alpha,
+			One_Minus_Contant_Alpha,
+		};
 
-    enum EBlendOP : u32 
-    {
-      Add = 0,
-      Substract,
-      Reverse_Substract,
-      Min,
-      Max
-    };
+		enum EBlendOP : u32
+		{
+			Add = 0,
+			Substract,
+			Reverse_Substract,
+			Min,
+			Max
+		};
 
-    enum EBlendLogicOperation : u32 
-    {
-      Clear = 0,
-      And,
-      And_Reverse,
-      Copy,
-      And_Inverted,
-      No_OP,
-      Xor,
-      Or,
-      Nor,
-      Equivalent,
-      Invert,
-      Reverse,
-      Copy_Inverted,
-      Or_Inverted,
-      Nand,
-      Set
-    };
+		enum EBlendLogicOperation : u32
+		{
+			Clear = 0,
+			And,
+			And_Reverse,
+			Copy,
+			And_Inverted,
+			No_OP,
+			Xor,
+			Or,
+			Nor,
+			Equivalent,
+			Invert,
+			Reverse,
+			Copy_Inverted,
+			Or_Inverted,
+			Nand,
+			Set
+		};
 
-    EBlendFactor m_srcColorBlendFactor;
-    EBlendFactor m_dstColorBlendFactor;
-    EBlendOP m_colorBlendOP;
-    EBlendFactor m_srcAlphaBlendFactor;
-    EBlendFactor m_dstAlphaBlendFactor;
-    EBlendOP m_alphaBlendOP;
+		EBlendFactor m_srcColorBlendFactor;
+		EBlendFactor m_dstColorBlendFactor;
+		EBlendOP m_colorBlendOP;
+		EBlendFactor m_srcAlphaBlendFactor;
+		EBlendFactor m_dstAlphaBlendFactor;
+		EBlendOP m_alphaBlendOP;
 		bool m_enabledBlending;
 
-    EBlendLogicOperation m_logicOP;
-    bool m_enableLogicOperations;
-    v4 m_blendConstants;
+		EBlendLogicOperation m_logicOP;
+		bool m_enableLogicOperations;
+		v4 m_blendConstants;
 	};
 }
 }

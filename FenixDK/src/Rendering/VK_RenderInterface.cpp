@@ -5,9 +5,11 @@
 #include "Framework\app.h"
 #include "Maths\math_utils.h"
 #include "RenderDefines.h"
+#include "Framework\Mesh.h"
 
 // Objects with vulkan implementation
 #include "VK_Buffer.h"
+#include "VK_Material.h"
 
 namespace fdk
 {
@@ -658,6 +660,53 @@ namespace Rendering
   void VK_RenderInterface::send_buffer_memory_to_gpu(Buffer& rBuffer)
   {
     FDK_ABORT("Not implemented");
+  }
+
+  void VK_RenderInterface::use_mesh(Framework::Mesh& rMesh)
+  {
+    FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");    
+    VK_Buffer* pVertexBuffer = IMPLEMENTATION(Buffer, rMesh.vertex_buffer());
+    VK_Buffer* pIndexBuffer = IMPLEMENTATION(Buffer, rMesh.index_buffer());
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, 1, &pVertexBuffer->m_pBuffer, &offset);
+    vkCmdBindIndexBuffer(m_currentCommandBuffer, pIndexBuffer->m_pBuffer, offset, VK_INDEX_TYPE_UINT16); // Force indices of 16 bits
+  }
+
+  void VK_RenderInterface::bind_material(Material& rMaterial)
+  {
+    FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");  
+    VK_Material* pMaterial = IMPLEMENTATION(Material, &rMaterial);
+    vkCmdBindPipeline(m_currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pMaterial->m_pipeline);
+  }
+
+  void VK_RenderInterface::set_viewport(const Viewport& rViewport)
+  {
+    FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    VkViewport viewport{};
+    viewport.x = rViewport.m_offset.x;
+    viewport.y = rViewport.m_offset.y;
+    viewport.width = rViewport.m_dimensions.x;
+    viewport.height = rViewport.m_dimensions.y;
+    viewport.minDepth = rViewport.m_minDepth;
+    viewport.maxDepth = rViewport.m_maxDepth;
+    vkCmdSetViewport(m_currentCommandBuffer, 0, 1, &viewport);
+  }
+
+  void VK_RenderInterface::set_scissor(const Scissor& rScissor)
+  {
+    FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    VkRect2D scissor{};
+    scissor.offset.x = rScissor.m_offsetX;
+    scissor.offset.y = rScissor.m_offsetY;
+    scissor.extent.width = rScissor.m_width;
+    scissor.extent.height = rScissor.m_height;
+    vkCmdSetScissor(m_currentCommandBuffer, 0, 1, &scissor);
+  }
+
+  void VK_RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset)
+  {
+    FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    vkCmdDrawIndexed(m_currentCommandBuffer, indexCount, instanceCount, indexOffset, vertexOffset, 0);
   }
 
 }

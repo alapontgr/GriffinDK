@@ -44,6 +44,32 @@ namespace fdk
     {
       IMPLEMENTATION(RenderInterface, this)->send_buffer_memory_to_gpu(rBuffer);
     }
+
+    void RenderInterface::use_mesh(Framework::Mesh& rMesh)
+    {
+      IMPLEMENTATION(RenderInterface, this)->use_mesh(rMesh);
+    }
+
+    void RenderInterface::bind_material(Material& rMaterial)
+    {
+      IMPLEMENTATION(RenderInterface, this)->bind_material(rMaterial);
+    }
+
+    void RenderInterface::set_viewport(const Viewport& rViewport)
+    {
+      IMPLEMENTATION(RenderInterface, this)->set_viewport(rViewport);
+    }
+
+    void RenderInterface::set_scissor(const Scissor& rScissor)
+    {
+      IMPLEMENTATION(RenderInterface, this)->set_scissor(rScissor);
+    }
+
+    void RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset)
+    {
+      IMPLEMENTATION(RenderInterface, this)->draw_indexed(indexCount, instanceCount, indexOffset, vertexOffset);
+    }
+
   }
 }
 

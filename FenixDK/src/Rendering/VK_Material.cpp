@@ -7,7 +7,7 @@ namespace fdk
   namespace Rendering 
   {
     
-    struct VertexDesc
+    struct VertexDesc // Temporary
     {
       v4 position;
       v4 colour;
@@ -18,8 +18,6 @@ namespace fdk
       // Load shader modules
       VkShaderModule vsMmodule = create_shader_module(pDevice, m_desc.m_vsPath.c_str());
       VkShaderModule psMmodule = create_shader_module(pDevice, m_desc.m_psPath.c_str());
-
-      // TODO Parse parameters
 
       // Define stages
       static constexpr u32 kStageCount = 2;

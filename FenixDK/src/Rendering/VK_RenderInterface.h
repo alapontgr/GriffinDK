@@ -38,6 +38,16 @@ namespace Rendering
 
     void send_buffer_memory_to_gpu(Buffer& rBuffer);
 
+    void use_mesh(Framework::Mesh& rMesh);
+
+    void bind_material(Material& rMaterial);
+
+    void set_viewport(const Viewport& rViewport);
+
+    void set_scissor(const Scissor& rScissor);
+
+    void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset);
+
   private:
 
     void validate_vk_extensions();
@@ -96,6 +106,9 @@ namespace Rendering
     
     u32 m_currentFrame;
     u32 m_currentImageIndex;
+
+    // Render state
+    VkCommandBuffer m_currentCommandBuffer;
   };
 
 }

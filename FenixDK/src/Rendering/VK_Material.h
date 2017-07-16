@@ -22,6 +22,8 @@ namespace fdk
 
       VkShaderModule create_shader_module(VkDevice pDevice, const char* pFilePath);
 
+      void destroy_shader_module(VkDevice pDevice, VkShaderModule pShaderModule);
+
       VkViewport get_viewport_desc(const Viewport& rViewport);
 
       VkRect2D get_scissors_desc(const Scissor& rScissor);
@@ -31,6 +33,8 @@ namespace fdk
       VkPipelineColorBlendAttachmentState configure_blend_attachment_state(const BlendState& rBlendState);
 
       VkPipelineColorBlendStateCreateInfo get_blend_state_desc(const BlendState& rBlendState, VkPipelineColorBlendAttachmentState* pBlendAttachmentState);
+    
+      void define_stage_info(VkShaderStageFlagBits stageFlags, VkShaderModule pShaderModule, const char* pEntryName, VkPipelineShaderStageCreateInfo* pStageInfoOut);
     };
 
   }

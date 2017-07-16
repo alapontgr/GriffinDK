@@ -15,6 +15,11 @@ namespace fdk
 
     }
 
+    void Material::init(const MaterialDesc& rDesc)
+    {
+      m_desc = rDesc;
+    }
+
   }
 }
 

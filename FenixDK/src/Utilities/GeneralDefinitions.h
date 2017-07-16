@@ -11,4 +11,12 @@ enum EResultType : u32
   kInvalidLoadedFile
 };
 
+enum EVertexParameterType : u32 
+{
+  Float,
+  Float2,
+  Float3,
+  Float4
+};
+
 }

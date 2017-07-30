@@ -34,14 +34,19 @@ namespace Rendering
 		};
 		using MemoryProperties = Containers::Mask<u32>;
 
+    struct BufferDesc 
+    {
+      UsageFlags m_bufferUsage;
+      MemoryProperties m_memoryProperties;
+      Memory::mem_size_t m_size;
+      Memory::mem_size_t m_alignment;
+    };
+
 		static Buffer* create(Memory::MemAllocator& rAllocator);
 
 		void init(
-				const UsageFlags& bufferUsage,
-				const MemoryProperties& memoryProperties,
+				const BufferDesc& rDesc,
 				Memory::MemAllocator& rAllocator,
-				Memory::mem_size_t size,
-				Memory::mem_size_t alignment,
 				Memory::mem_ptr_t pInitialData = nullptr);
 
 		void release(Memory::MemAllocator& rAllocator);
@@ -55,22 +60,22 @@ namespace Rendering
 			return reinterpret_cast<T*>(m_data.memory());
 		}
 
-		Memory::mem_size_t size() const { return m_data.size(); };
+    Memory::mem_size_t size() const { return m_desc.m_size; };
 
-		UsageFlags usage() const { return m_usage; }
+		UsageFlags usage() const { return m_desc.m_bufferUsage; }
 
-    MemoryProperties mem_properties() const { return m_memProperties; }
+		MemoryProperties mem_properties() const { return m_desc.m_memoryProperties; }
 
 	private:
 		Buffer& operator=(const Buffer&) = delete;
 		Buffer(const Buffer&) = delete;
 
 	protected:
-		Buffer();
+
+    Buffer();
 
 		Memory::MemBlock m_data;
-		UsageFlags m_usage;
-    MemoryProperties m_memProperties;
+    BufferDesc m_desc;
 	};
 }
 }

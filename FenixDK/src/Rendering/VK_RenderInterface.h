@@ -11,12 +11,12 @@ namespace fdk
 {
 namespace Rendering
 {
-  struct FrameInfoVK 
-  {
-    //VkFramebuffer frameBuffer = VK_NULL_HANDLE;
-    VkSemaphore imageAvailable = VK_NULL_HANDLE; // Signaled by the presentation engine with the image is available
-    VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed   
-  };
+	struct FrameInfoVK
+	{
+		//VkFramebuffer frameBuffer = VK_NULL_HANDLE;
+		VkSemaphore imageAvailable = VK_NULL_HANDLE;		// Signaled by the presentation engine with the image is available
+		VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed
+	};
 
 	class VK_RenderInterface : public RenderInterface
 	{
@@ -24,92 +24,98 @@ namespace Rendering
 		VK_RenderInterface();
 		~VK_RenderInterface();
 
-    void init();
+		void init();
 
-    void release();
+		void release();
 
-    void on_resize();
+		void on_resize();
 
-    void create_buffer(Buffer& rBuffer);
+		void create_buffer(Buffer& rBuffer);
 
-    void destroy_buffer(Buffer& rBuffer);
+		void destroy_buffer(Buffer& rBuffer);
 
-    void copy_buffer(Buffer& rFrom, Buffer& rTo);
+		void copy_buffer(Buffer& rFrom, Buffer& rTo);
 
-    void send_buffer_memory_to_gpu(Buffer& rBuffer);
+		void send_buffer_memory_to_gpu(Buffer& rBuffer);
 
-    void use_mesh(Framework::Mesh& rMesh);
+		void create_mesh(Framework::Mesh& rMesh, Memory::MemAllocator& rAllocator);
 
-    void bind_material(Material& rMaterial);
+		void use_mesh(Framework::Mesh& rMesh);
 
-    void set_viewport(const Viewport& rViewport);
+		void bind_material(Material& rMaterial);
 
-    void set_scissor(const Scissor& rScissor);
+		void set_viewport(const Viewport& rViewport);
 
-    void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset);
+		void set_scissor(const Scissor& rScissor);
 
-  private:
+		void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset);
 
-    void validate_vk_extensions();
+		void create_command_buffer(CommandBuffer& rCommandBuffer);
 
-    void check_device_extensions(VkPhysicalDevice pPhysicalDevice);
+    void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
-    bool check_physical_device_properties(VkPhysicalDevice device,
-      u32& selectedFamilyIndex,
-      u32& swapChainFamilyIndex);
+    void unmap_buffer_gpu_memory(Buffer& rBuffer);
 
-    void create_render_instance();
+	private:
+		void validate_vk_extensions();
 
-    void create_screen_surface();
+		void check_device_extensions(VkPhysicalDevice pPhysicalDevice);
 
-    void create_logical_device();
+		bool check_physical_device_properties(VkPhysicalDevice device,
+																					u32& selectedFamilyIndex,
+																					u32& swapChainFamilyIndex);
 
-    void create_swap_chain();
+		void create_render_instance();
 
-    void get_swap_chain_images();
+		void create_screen_surface();
 
-    void create_cmd_pool();
+		void create_logical_device();
 
-    void clean_frame_infos();
+		void create_swap_chain();
 
-    void create_frame_infos();
+		void get_swap_chain_images();
 
-    void release_swap_chain();
+		void create_cmd_pool();
 
-    void release_device();
+		void clean_frame_infos();
 
-    void release_surface();
+		void create_frame_infos();
 
-    void release_render_instance();
+		void release_swap_chain();
 
-    //Windows
-    VkSurfaceKHR m_surface; 
-    VkSwapchainKHR m_swapChain;
-    VkSurfaceFormatKHR m_swapChainFormat;
-    VkSurfaceCapabilitiesKHR m_Capabilities;
-    std::vector<VkSurfaceFormatKHR> m_supportedFormats;
-    std::vector<VkPresentModeKHR> m_supportedPresentModes;
-    //
+		void release_device();
 
-    // Context state
-    VkInstance m_instance;
-    VkPhysicalDevice m_physicalDevice;
-    VkDevice m_device;
-    VkQueue m_graphicsQueue;
-    VkQueue m_presentQueue;
-    u32 m_graphicsFamilyIndex;
-    u32 m_presentFamilyIndex;
-    std::vector<VkImage> m_swapChainImages;
-    std::vector<VkImageView> m_swapChainImageView;
-    VkCommandPool m_commandPool;
-    std::vector<FrameInfoVK> m_frames; // We use N buffering so every frame we will need to use the correct frame info
-    
-    u32 m_currentFrame;
-    u32 m_currentImageIndex;
+		void release_surface();
 
-    // Render state
-    VkCommandBuffer m_currentCommandBuffer;
-  };
+		void release_render_instance();
 
+		//Windows
+		VkSurfaceKHR m_surface;
+		VkSwapchainKHR m_swapChain;
+		VkSurfaceFormatKHR m_swapChainFormat;
+		VkSurfaceCapabilitiesKHR m_Capabilities;
+		std::vector<VkSurfaceFormatKHR> m_supportedFormats;
+		std::vector<VkPresentModeKHR> m_supportedPresentModes;
+		//
+
+		// Context state
+		VkInstance m_instance;
+		VkPhysicalDevice m_physicalDevice;
+		VkDevice m_device;
+		VkQueue m_graphicsQueue;
+		VkQueue m_presentQueue;
+		u32 m_graphicsFamilyIndex;
+		u32 m_presentFamilyIndex;
+		std::vector<VkImage> m_swapChainImages;
+		std::vector<VkImageView> m_swapChainImageView;
+		VkCommandPool m_commandPool;
+		std::vector<FrameInfoVK> m_frames; // We use N buffering so every frame we will need to use the correct frame info
+
+		u32 m_currentFrame;
+		u32 m_currentImageIndex;
+
+		// Render state
+		VkCommandBuffer m_currentCommandBuffer;
+	};
 }
 }

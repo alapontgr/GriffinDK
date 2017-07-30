@@ -3,24 +3,26 @@
 
 namespace fdk
 {
-  namespace Framework 
-  {
-    class Mesh 
-    {
-    public:
+namespace Framework
+{
+	class Mesh
+	{
+	public:
+		Mesh();
 
-      Mesh();
+    void init(
+      const f32* pVertices, const u32 vertexCount,
+      const u16* pIndices, const u32 indexCount,
+      Memory::MemAllocator& rAllocator);
 
-      void load_mesh(const char* pMeshPath);
+		Rendering::Buffer* vertex_buffer() { return m_pVertexBuffer; }
 
-      Rendering::Buffer* vertex_buffer() { return &m_vertexBuffer; }
+		Rendering::Buffer* index_buffer() { return m_pIndexBuffer; }
 
-      Rendering::Buffer* index_buffer() { return &m_vertexBuffer; }
+	private:
+		Rendering::Buffer* m_pVertexBuffer;
+		Rendering::Buffer* m_pIndexBuffer;
+	};
 
-    private:
-    
-      Rendering::Buffer m_vertexBuffer;
-      Rendering::Buffer m_indexBuffer;
-    };
-  }
+}
 }

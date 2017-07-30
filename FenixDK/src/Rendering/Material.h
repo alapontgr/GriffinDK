@@ -6,6 +6,7 @@
 #include <string>
 #include "RenderPass.h"
 #include "RenderConfiguration.h"
+#include "Memory\MemAllocator.h"
 
 namespace fdk
 {
@@ -31,7 +32,7 @@ namespace fdk
 
       ~Material();
 
-      static Material* create();
+      static Material* create(Memory::MemAllocator& rAllocator);
 
       void init(const MaterialDesc& rDesc);
 

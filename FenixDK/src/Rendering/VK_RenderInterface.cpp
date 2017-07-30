@@ -662,6 +662,42 @@ namespace Rendering
     FDK_ABORT("Not implemented");
   }
 
+  void VK_RenderInterface::create_mesh(Framework::Mesh& rMesh, Memory::MemAllocator& rAllocator)
+  {
+    // Create the vertex buffer
+    Buffer* pVertexBuffer = rMesh.vertex_buffer();
+    FDK_ASSERT(pVertexBuffer, "The vertex buffer has not been allocated");
+    
+    Rendering::Buffer::BufferDesc vertexDesc;
+    vertexDesc.m_bufferUsage = Buffer::UsageFlags(Buffer::Transfer_Src);
+    vertexDesc.m_memoryProperties = Buffer::MemoryProperties(Buffer::CPU_Visible | Buffer::CPU_GPU_Coherent);
+    vertexDesc.m_size = pVertexBuffer->size();
+    vertexDesc.m_alignment = alignof(f32);
+
+    VK_Buffer stagingVertexBuffer;
+    stagingVertexBuffer.init(vertexDesc, rAllocator, nullptr);
+    create_buffer(stagingVertexBuffer);
+	  create_buffer(*pVertexBuffer);
+    copy_buffer(stagingVertexBuffer, *pVertexBuffer);
+    destroy_buffer(stagingVertexBuffer);
+
+    // Create the index buffer
+    Buffer* pIndexBuffer = rMesh.index_buffer();
+    FDK_ASSERT(pIndexBuffer, "The index buffer has not been allocated");
+
+    Rendering::Buffer::BufferDesc indexDesc;
+    indexDesc.m_bufferUsage = Buffer::UsageFlags(Buffer::Transfer_Src);
+    indexDesc.m_memoryProperties = Buffer::MemoryProperties(Buffer::CPU_Visible | Buffer::CPU_GPU_Coherent);
+    indexDesc.m_size = pIndexBuffer->size();
+    indexDesc.m_alignment = alignof(u16);
+    
+    VK_Buffer stagingIndexBuffer;
+    stagingIndexBuffer.init(indexDesc, rAllocator, nullptr);
+    create_buffer(stagingIndexBuffer);
+    create_buffer(*pIndexBuffer);
+    copy_buffer(stagingIndexBuffer, *pIndexBuffer);
+  }
+
   void VK_RenderInterface::use_mesh(Framework::Mesh& rMesh)
   {
     FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");    
@@ -707,6 +743,28 @@ namespace Rendering
   {
     FDK_ASSERT(m_currentCommandBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     vkCmdDrawIndexed(m_currentCommandBuffer, indexCount, instanceCount, indexOffset, vertexOffset, 0);
+  }
+
+  void VK_RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
+  {
+    FDK_ABORT("Not implemented");
+  }
+
+  void* VK_RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)
+  {
+    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
+    FDK_ASSERT(pBuffer->m_pMemory, "The memory of the buffer has not been allocated");
+    FDK_ASSERT(memoryOffset + rangeSize < pBuffer->size(), "Trying to map out of range");
+    void* pData = nullptr;
+    auto result = vkMapMemory(m_device, pBuffer->m_pMemory, memoryOffset, rangeSize, 0, &pData);
+    VK_CHECK(result, "Failed to map memory");
+    return pData;
+  }
+
+  void VK_RenderInterface::unmap_buffer_gpu_memory(Buffer& rBuffer)
+  {
+    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
+    vkUnmapMemory(m_device, pBuffer->m_pMemory);
   }
 
 }

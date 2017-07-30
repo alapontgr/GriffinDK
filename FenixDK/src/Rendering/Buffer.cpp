@@ -1,31 +1,31 @@
 #include "Buffer.h"
 
+#include "VK_Buffer.h"
+
+#include "RenderDefines.h"
+
 namespace fdk
 {
   namespace Rendering 
   {
 
     void Buffer::init(
-      const UsageFlags& bufferUsage,
-      const MemoryProperties& memoryProperties,
-      Memory::MemAllocator& rAllocator, 
-      Memory::mem_size_t size, 
-      Memory::mem_size_t alignment, 
+      const BufferDesc& rDesc,
+      Memory::MemAllocator& rAllocator,
       Memory::mem_ptr_t pInitialData)
     {
+      m_desc = rDesc;
       FDK_ASSERT(this->size() == 0, "A buffer must be freed before allocating a new chunk of memory");
-      m_data.allocate(rAllocator, size, alignment);
       if (pInitialData) 
       {
-        memcpy(m_data.memory(), pInitialData, size);
+        m_data.allocate(rAllocator, rDesc.m_size, rDesc.m_alignment);
+        memcpy(m_data.memory(), pInitialData, rDesc.m_size);
       }
-      m_usage = bufferUsage;
-      m_memProperties = memoryProperties;
     }
 
     void Buffer::release(Memory::MemAllocator& rAllocator)
     {
-      if (this->size() > 0) 
+      if (m_data.size() > 0) 
       {
         m_data.release(rAllocator);
       }
@@ -37,6 +37,12 @@ namespace fdk
     }
 
     Buffer::Buffer() {}
+
+
+    Buffer* Buffer::create(Memory::MemAllocator& rAllocator)
+    {
+      return rAllocator.create<IMPL_NAME(Buffer)>();
+    }
 
   }
 }

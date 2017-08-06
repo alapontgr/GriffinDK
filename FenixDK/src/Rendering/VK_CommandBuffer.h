@@ -15,6 +15,8 @@ namespace fdk
       VK_CommandBuffer();
 
       VkCommandBuffer m_commandBuffer;
+      VkFence m_fence;
+      VkSemaphore m_semaphore;
     };
 
   }

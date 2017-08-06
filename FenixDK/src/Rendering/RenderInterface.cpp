@@ -35,9 +35,9 @@ namespace Rendering
 		IMPLEMENTATION(RenderInterface, this)->destroy_buffer(rBuffer);
 	}
 
-	void RenderInterface::copy_buffer(Buffer& rFrom, Buffer& rTo)
+	void RenderInterface::copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->copy_buffer(rFrom, rTo);
+		IMPLEMENTATION(RenderInterface, this)->copy_buffer(rFrom, fromOffset, rTo, toOffset, rangeSize, rCmdBuffer);
 	}
 
 	void RenderInterface::send_buffer_memory_to_gpu(Buffer& rBuffer)
@@ -45,40 +45,45 @@ namespace Rendering
 		IMPLEMENTATION(RenderInterface, this)->send_buffer_memory_to_gpu(rBuffer);
 	}
 
-	void RenderInterface::create_mesh(Framework::Mesh& rMesh, Memory::MemAllocator& rAllocator)
+	void RenderInterface::use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->create_mesh(rMesh, rAllocator);
+		IMPLEMENTATION(RenderInterface, this)->use_mesh(rMesh, rCmdBuffer);
 	}
 
-	void RenderInterface::use_mesh(Framework::Mesh& rMesh)
+	void RenderInterface::bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->use_mesh(rMesh);
+		IMPLEMENTATION(RenderInterface, this)->bind_material(rMaterial, rCmdBuffer);
 	}
 
-	void RenderInterface::bind_material(Material& rMaterial)
+	void RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->bind_material(rMaterial);
+		IMPLEMENTATION(RenderInterface, this)->set_viewport(rViewport, rCmdBuffer);
 	}
 
-	void RenderInterface::set_viewport(const Viewport& rViewport)
+	void RenderInterface::set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->set_viewport(rViewport);
+		IMPLEMENTATION(RenderInterface, this)->set_scissor(rScissor, rCmdBuffer);
 	}
 
-	void RenderInterface::set_scissor(const Scissor& rScissor)
+	void RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer)
 	{
-		IMPLEMENTATION(RenderInterface, this)->set_scissor(rScissor);
+		IMPLEMENTATION(RenderInterface, this)->draw_indexed(indexCount, instanceCount, indexOffset, vertexOffset, rCmdBuffer);
 	}
 
-	void RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset)
-	{
-		IMPLEMENTATION(RenderInterface, this)->draw_indexed(indexCount, instanceCount, indexOffset, vertexOffset);
-	}
+  CommandBuffer* RenderInterface::get_command_buffer(CommandBuffer::ECommandBufferType type, Memory::MemAllocator& rAllocator)
+  {
+    return IMPLEMENTATION(RenderInterface, this)->get_command_buffer(type, rAllocator);
+  }
 
-	void RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
+  void RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
 	{
 		IMPLEMENTATION(RenderInterface, this)->create_command_buffer(rCommandBuffer);
 	}
+
+  void RenderInterface::wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer)
+  {
+    IMPLEMENTATION(RenderInterface, this)->wait_command_buffer_to_finish(rCmdBuffer);
+  }
 
   void* RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)
   {
@@ -89,5 +94,16 @@ namespace Rendering
   {
     IMPLEMENTATION(RenderInterface, this)->unmap_buffer_gpu_memory(rBuffer);
   }
+
+  void RenderInterface::beginFrame()
+  {
+    IMPLEMENTATION(RenderInterface, this)->beginFrame();
+  }
+
+  void RenderInterface::endFrame()
+  {
+    IMPLEMENTATION(RenderInterface, this)->endFrame();
+  }
+
 }
 }

@@ -2,8 +2,10 @@
 
 #include "Utilities/platform.h"
 #include "../Utilities/VulkanInclude.h"
-#include "Rendering/VK_RenderInterface.h"
 #include "RenderDefines.h"
+
+#include "Rendering/VK_RenderInterface.h"
+#include "Rendering/VK_CommandBuffer.h"
 
 namespace fdk {
 namespace Rendering {
@@ -91,6 +93,43 @@ void RenderPass::release(RenderInterface& rRI)
     vkDestroyRenderPass(pRI->m_device, m_renderPassImpl, nullptr);
   }
   m_renderPassImpl = VK_NULL_HANDLE;
+}
+
+void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
+{
+  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+  
+  // Begin render pass
+//   u32 width = Framework::App::width();
+//   u32 height = Framework::App::height();
+//   VkRenderPassBeginInfo passBeginInfo{};
+//   passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//   passBeginInfo.pNext = nullptr;
+//   passBeginInfo.renderPass = m_renderPass.handle();
+//   passBeginInfo.framebuffer = frame.frameBuffer;
+//   passBeginInfo.renderArea.extent.width = width;
+//   passBeginInfo.renderArea.extent.height = height;
+//   passBeginInfo.renderArea.offset.x = 0;
+//   passBeginInfo.renderArea.offset.y = 0;
+//   passBeginInfo.clearValueCount = 1;
+//   passBeginInfo.pClearValues = &clearColor;
+//   vkCmdBeginRenderPass(frame.cmdBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RenderPass::next_subpass(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
+{
+  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+
+  //vkCmdNextSubpass(pCmdBuff->m_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RenderPass::end(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
+{
+  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+  //vkCmdEndRenderPass(pCmdBuff->m_commandBuffer);
 }
 
 }

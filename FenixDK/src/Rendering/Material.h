@@ -12,6 +12,8 @@ namespace fdk
 {
   namespace Rendering 
   {
+    class RenderInterface;
+
     class Material 
     {
     
@@ -35,6 +37,8 @@ namespace fdk
       static Material* create(Memory::MemAllocator& rAllocator);
 
       void init(const MaterialDesc& rDesc);
+
+      void create_material(RenderInterface& rRI);
 
     protected:
       

@@ -13,7 +13,7 @@ namespace fdk
     {
     public:
 
-      EResultType create(VkDevice pDevice);
+      void create_material(RenderInterface& rRI);
 
       VkPipelineLayout m_layout;
       VkPipeline m_pipeline;

@@ -11,8 +11,8 @@ namespace Framework
 		Mesh();
 
     void init(
-      const f32* pVertices, const u32 vertexCount,
-      const u16* pIndices, const u32 indexCount,
+      const f32* pVertices, const u32 vertexCount, const u32 vertexSize,
+      const u16* pIndices, const u32 indexCount, const u32 indexSize,
       Memory::MemAllocator& rAllocator);
 
 		Rendering::Buffer* vertex_buffer() { return m_pVertexBuffer; }

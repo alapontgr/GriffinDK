@@ -58,6 +58,7 @@ namespace Rendering
 
     void wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer);
 
+
     void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
     void unmap_buffer_gpu_memory(Buffer& rBuffer);
@@ -66,7 +67,7 @@ namespace Rendering
 
     void endFrame();
 
-	private:
+	//private:
 		void validate_vk_extensions();
 
 		void check_device_extensions(VkPhysicalDevice pPhysicalDevice);

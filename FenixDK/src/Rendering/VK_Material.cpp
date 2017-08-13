@@ -2,6 +2,9 @@
 #include "Utilities\platform.h"
 #include "IO\FileUtils.h"
 
+#include "VK_RenderInterface.h"
+#include "RenderDefines.h"
+
 namespace fdk
 {
   namespace Rendering 
@@ -13,11 +16,13 @@ namespace fdk
       v4 colour;
     };
 
-    EResultType VK_Material::create(VkDevice pDevice)
+    void VK_Material::create_material(RenderInterface& rRI)
     {
+      VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+
       // Load shader modules
-      VkShaderModule vsMmodule = create_shader_module(pDevice, m_desc.m_vsPath.c_str());
-      VkShaderModule psMmodule = create_shader_module(pDevice, m_desc.m_psPath.c_str());
+      VkShaderModule vsMmodule = create_shader_module(pRI->m_device, m_desc.m_vsPath.c_str());
+      VkShaderModule psMmodule = create_shader_module(pRI->m_device, m_desc.m_psPath.c_str());
 
       // Define stages
       static constexpr u32 kStageCount = 2;
@@ -151,7 +156,7 @@ namespace fdk
       dynamicStateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
       dynamicStateInfo.pDynamicStates = &dynamicStates[0];
 
-      create_layout(pDevice);
+      create_layout(pRI->m_device);
 
       // Create the graphic pipeline
       VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -175,14 +180,13 @@ namespace fdk
       pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
       pipelineInfo.basePipelineIndex = -1;
 
-      auto result = vkCreateGraphicsPipelines(pDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
+      auto result = vkCreateGraphicsPipelines(pRI->m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
       VK_CHECK(result, "Failed to create Graphics Pipeline");
 
       // Destroy modules now that are not needed
-      destroy_shader_module(pDevice, vsMmodule);
-      destroy_shader_module(pDevice, psMmodule);
+      destroy_shader_module(pRI->m_device, vsMmodule);
+      destroy_shader_module(pRI->m_device, psMmodule);
 
-      return kNoError;
     }
 
     EResultType VK_Material::create_layout(VkDevice pDevice)

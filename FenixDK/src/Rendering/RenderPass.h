@@ -5,7 +5,7 @@
 namespace fdk {
 namespace Rendering {
 
-class Context;
+class RenderInterface;
 
 class RenderPass {
 
@@ -13,9 +13,9 @@ public:
   RenderPass();
   ~RenderPass();
 
-  void init(const Context& rContext);
+  void init(RenderInterface& rRI);
 
-  void release(const Context& context);
+  void release(RenderInterface& rRI);
 
   VkRenderPass handle() const { return m_renderPassImpl; }
 

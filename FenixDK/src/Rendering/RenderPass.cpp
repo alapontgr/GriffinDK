@@ -1,9 +1,9 @@
 #include "RenderPass.h"
 
-#include "context.h"
-
-#include "../Utilities/VulkanInclude.h"
 #include "Utilities/platform.h"
+#include "../Utilities/VulkanInclude.h"
+#include "Rendering/VK_RenderInterface.h"
+#include "RenderDefines.h"
 
 namespace fdk {
 namespace Rendering {
@@ -12,11 +12,13 @@ RenderPass::RenderPass() {}
 
 RenderPass::~RenderPass() {}
 
-void RenderPass::init(const Context &context) {
+void RenderPass::init(RenderInterface& rRI) {
+  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+
   // Description of the whole render pass
   VkAttachmentDescription renderPassDesc{};
   renderPassDesc.flags = 0;
-  renderPassDesc.format = context.swap_chain_images_format();
+  renderPassDesc.format = pRI->m_swapChainFormat.format;
   renderPassDesc.samples = VK_SAMPLE_COUNT_1_BIT;
   renderPassDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   renderPassDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -25,7 +27,7 @@ void RenderPass::init(const Context &context) {
   renderPassDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // The first frame the layout is not VK_IMAGE_LAYOUT_PRESENT_SRC_KHR. So using Undefined solves the problem with the validation layer
   renderPassDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-  // Reference for the color attachment of the subpass 0
+  // Reference for the color attachment of the sub pass 0
   VkAttachmentReference colorAttachmentRef{};
   colorAttachmentRef.attachment = 0;
   colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -75,16 +77,18 @@ void RenderPass::init(const Context &context) {
   renderPassInfo.dependencyCount = static_cast<u32>(dependencies.size());
   renderPassInfo.pDependencies = &dependencies[0];
 
-  auto result = vkCreateRenderPass(context.device(), &renderPassInfo, nullptr,
+  auto result = vkCreateRenderPass(pRI->m_device, &renderPassInfo, nullptr,
                                    &m_renderPassImpl);
   VK_CHECK(result, "Failed to create render pass");
 }
 
-void RenderPass::release(const Context& context)
+void RenderPass::release(RenderInterface& rRI)
 {
+  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+
   if (m_renderPassImpl) 
   {
-    vkDestroyRenderPass(context.device(), m_renderPassImpl, nullptr);
+    vkDestroyRenderPass(pRI->m_device, m_renderPassImpl, nullptr);
   }
   m_renderPassImpl = VK_NULL_HANDLE;
 }

@@ -150,7 +150,7 @@ namespace Rendering
 																							 prop.extensionName) == 0;
 															 });
 				FDK_ASSERT(it != properties.end(),
-							"Couldn't find the required instance extensions");
+									 "Couldn't find the required instance extensions");
 			}
 		}
 	}
@@ -162,8 +162,7 @@ namespace Rendering
 		check_instance_available_extensions();
 #endif // _DEBUG
 
-    check_validation_layer_support();
-
+		check_validation_layer_support();
 
 		VkApplicationInfo appInfo;
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -198,7 +197,7 @@ namespace Rendering
 		VK_CHECK(result,
 						 "Swap chain extensions is not supported in the physical device");
 		FDK_ASSERT(extensionCount > 0,
-					"Could not find extensions for the physical device");
+							 "Could not find extensions for the physical device");
 
 		{
 			std::vector<VkExtensionProperties> properties(extensionCount);
@@ -213,7 +212,7 @@ namespace Rendering
 																 return strcmp(name, prop.extensionName) == 0;
 															 });
 				FDK_ASSERT(it != properties.end(),
-							"Couldn't find the required device extensions");
+									 "Couldn't find the required device extensions");
 			}
 		}
 	}
@@ -640,7 +639,8 @@ namespace Rendering
 
 	void Context::init_render_pass()
 	{
-		m_renderPass.init(*this);
+#if 0
+m_renderPass.init(*this);
 
 		m_swapChainImageView.resize(m_swapChainImages.size());
 		for (u32 i = 0; i < m_swapChainImages.size(); i++)
@@ -665,6 +665,7 @@ namespace Rendering
 			auto result = vkCreateImageView(m_device, &imageViewInfo, nullptr, &m_swapChainImageView[i]);
 			VK_CHECK(result, "Failed to create image view");
 		}
+#endif // 0
 	}
 
 	void Context::create_pipeline_layout()
@@ -872,7 +873,7 @@ namespace Rendering
 		VkDescriptorSetLayoutBinding descSetLayout{};
 		descSetLayout.binding = 0; // The slot where this descriptor is going to be bound in the shader
 		descSetLayout.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descSetLayout.descriptorCount = 1;											 // It is possible to create an array of uniform blocks
+		descSetLayout.descriptorCount = 1; // It is possible to create an array of uniform blocks
 		descSetLayout.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // In our example we want parameters in the fragment shader
 		descSetLayout.pImmutableSamplers = nullptr;
 
@@ -1080,7 +1081,7 @@ namespace Rendering
 		memRange.offset = 0;
 		memRange.size = VK_WHOLE_SIZE;
 		vkFlushMappedMemoryRanges(m_device, 1, &memRange); // Flush data to the gpu
-#endif																								 // _DEBUG
+#endif // _DEBUG
 
 		create_buffer(
 				m_vertexBuffer.size,
@@ -1126,7 +1127,7 @@ namespace Rendering
 		memRange.offset = 0;
 		memRange.size = VK_WHOLE_SIZE;
 		vkFlushMappedMemoryRanges(m_device, 1, &memRange); // Flush data to the gpu
-#endif																								 // DEAD
+#endif // DEAD
 
 		create_buffer(
 				m_indexBuffer.size,
@@ -1259,7 +1260,7 @@ namespace Rendering
 			// Wait until the device is not using any resources and is idle
 			vkDeviceWaitIdle(m_device);
 
-      // Release the meshes
+			// Release the meshes
 			release_mesh();
 
 			// Destroy the image views of the swap chain
@@ -1299,7 +1300,8 @@ namespace Rendering
 
 	void Context::clean_materials()
 	{
-		// Destroy the render pass
+#if 0
+// Destroy the render pass
 		m_renderPass.release(*this);
 		// Destroy the shaders
 		m_dummyVS.release();
@@ -1324,6 +1326,7 @@ namespace Rendering
 		{
 			vkDestroyDescriptorPool(m_device, m_fragDescPool, nullptr);
 		}
+#endif // 0
 	}
 
 	void Context::begin_scene(const v4& clearColor)
@@ -1445,27 +1448,27 @@ namespace Rendering
 #endif // _DEBUG
 	}
 
-  void Context::check_validation_layer_support()
-  {
-    uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+	void Context::check_validation_layer_support()
+	{
+		uint32_t layerCount;
+		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
-    std::vector<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-  
-    for (const char* layerName : kLayerNames) {
-      bool layerFound = false;
+		std::vector<VkLayerProperties> availableLayers(layerCount);
+		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-      for (const auto& layerProperties : availableLayers) 
-      {
-        if (strcmp(layerName, layerProperties.layerName) == 0) {
-          layerFound = true;
-          break;
-        }
-      }
-      FDK_ASSERT(layerFound, "Failed to get validation layers");
-    }
-  }
+		for (const char* layerName : kLayerNames)
+		{
+			bool layerFound = false;
 
+			for (const auto& layerProperties : availableLayers)
+			{
+				if (strcmp(layerName, layerProperties.layerName) == 0) {
+					layerFound = true;
+					break;
+				}
+			}
+			FDK_ASSERT(layerFound, "Failed to get validation layers");
+		}
+	}
 }
 }

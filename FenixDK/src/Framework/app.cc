@@ -98,9 +98,9 @@ namespace Framework
 
 	void App::render()
 	{
-		m_context.begin_scene(m_clearColor);
+		//m_context.begin_scene(m_clearColor);
 		on_render();
-		m_context.end_scene();
+		//m_context.end_scene();
 	}
 
 	void App::init(const char* title)
@@ -167,10 +167,12 @@ namespace Framework
 		ShowWindow(hwnd, SW_SHOWNORMAL);
 
 		// init graphic context
-		m_context.init();
+		//m_context.init();
 		// Init Input context
 		// input::Init(hInstance, hwnd, width_, height_);
-	}
+    m_pRenderInterface = Rendering::RenderInterface::create();
+    m_pRenderInterface->init();
+  }
 
 	bool ProcessEvents(MSG* msg)
 	{

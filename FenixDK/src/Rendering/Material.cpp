@@ -29,6 +29,11 @@ namespace fdk
       m_desc = rDesc;
     }
 
+    void Material::create_material(RenderInterface& rRI)
+    {
+      IMPLEMENTATION(Material, this)->create_material(rRI);
+    }
+
   }
 }
 

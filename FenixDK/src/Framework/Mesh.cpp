@@ -5,7 +5,7 @@ namespace fdk
 namespace Framework
 {
 
-  Mesh::Mesh()
+  Mesh::Mesh() : m_pVertexBuffer{ nullptr }, m_pIndexBuffer{nullptr}
   {
 
   }

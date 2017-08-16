@@ -1069,7 +1069,7 @@ m_renderPass.init(*this);
 		// Upload data to the staging buffer
 		void* pData = nullptr;
 		auto result = vkMapMemory(m_device, m_vertexBuffer.pStagingBufferMem, 0, m_vertexBuffer.size, 0, &pData);
-		VK_CHECK(result, "Failed tyo map memory");
+		VK_CHECK(result, "Failed to map memory");
 		memcpy(pData, vertices, m_vertexBuffer.size);
 		vkUnmapMemory(m_device, m_vertexBuffer.pStagingBufferMem);
 

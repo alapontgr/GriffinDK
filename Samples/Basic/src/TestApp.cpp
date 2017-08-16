@@ -120,10 +120,29 @@ void TestApp::create_material()
 
 void TestApp::create_mesh()
 {
+  Rendering::Buffer::BufferDesc desc;
+  desc.m_size = 1024 * 1024 * 16; // 16 MB
+  desc.m_alignment = 16;
+  desc.m_bufferUsage = Rendering::Buffer::EBufferUsage::Transfer_Src;
+  desc.m_memoryProperties = Rendering::Buffer::EMemoryProperties::CPU_Visible | Rendering::Buffer::EMemoryProperties::CPU_GPU_Coherent;
+
+  m_pStagingBuffer = Rendering::Buffer::create(m_mallocAllocator);
+  m_pStagingBuffer->init(desc, m_mallocAllocator);
+
   m_mesh.init(reinterpret_cast<const f32*>(
     &g_vertices[0]), 4, sizeof(VertexDesc),
     g_indices, 6, sizeof(u16),
     m_mallocAllocator);
+
+  m_pRenderInterface->create_buffer(*m_pStagingBuffer);
+  m_pRenderInterface->create_buffer(*m_mesh.index_buffer());
+  m_pRenderInterface->create_buffer(*m_mesh.vertex_buffer());
+
+  // TODO: Map staging buffer and upload the data of the vertex buffer
+  // TODO: Map the staging buffer and upload the data of the vertex buffer
+
+  // TODO: Copy region from the staging buffer to the vertex buffer
+  // TODO: Copy region from the staging buffer to the index buffer
 }
 
 void TestApp::create_command_buffers()

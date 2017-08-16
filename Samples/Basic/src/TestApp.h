@@ -51,6 +51,7 @@ private:
   Rendering::RenderPass m_renderPass;
   Framework::Mesh m_mesh;
   Rendering::Material* m_pMaterial;
+  Rendering::Buffer* m_pStagingBuffer;
 
   Rendering::CommandBuffer* m_pCmdBuffer;
 

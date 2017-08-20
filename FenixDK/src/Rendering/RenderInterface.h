@@ -56,6 +56,8 @@ namespace Rendering
 
     void unmap_buffer_gpu_memory(Buffer& rBuffer);
 
+    void create_fence(Fence& rFence);
+
     void beginFrame();
 
     void endFrame();

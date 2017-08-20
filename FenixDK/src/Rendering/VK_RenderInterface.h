@@ -19,6 +19,7 @@ namespace Rendering
   class CommandBuffer;
 	struct Viewport;
 	struct Scissor;
+  class Fence;
 
 	struct FrameInfoVK
 	{
@@ -62,6 +63,8 @@ namespace Rendering
 		void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
 		void unmap_buffer_gpu_memory(Buffer& rBuffer);
+
+    void create_fence(Fence& rFence);
 
 		void beginFrame();
 

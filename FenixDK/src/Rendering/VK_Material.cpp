@@ -14,6 +14,12 @@ namespace fdk
       v4 colour;
     };
 
+    VK_Material::VK_Material()
+      : m_pipeline{VK_NULL_HANDLE}
+    {
+
+    }
+
     void VK_Material::init(const MaterialDesc& rDesc)
     {
       m_desc = rDesc;

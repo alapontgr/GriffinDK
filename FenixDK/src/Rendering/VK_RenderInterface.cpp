@@ -11,6 +11,7 @@
 #include "VK_Material.h"
 #include "VK_CommandBuffer.h"
 #include "Material.h"
+#include "Fence.h"
 
 namespace fdk
 {
@@ -748,6 +749,18 @@ namespace Rendering
   void VK_RenderInterface::unmap_buffer_gpu_memory(Buffer& rBuffer)
   {
     vkUnmapMemory(m_device, rBuffer.m_pMemory);
+  }
+
+  void VK_RenderInterface::create_fence(Fence& rFence)
+  {
+    // Fence config
+    VkFenceCreateInfo fenceInfo;
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.pNext = nullptr;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Signaled by default
+
+    auto result = vkCreateFence(m_device, &fenceInfo, nullptr, &rFence.m_fence);
+    VK_CHECK(result, "Failed to create a fence");
   }
 
   void VK_RenderInterface::beginFrame()

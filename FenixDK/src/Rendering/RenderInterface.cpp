@@ -81,6 +81,11 @@ namespace Rendering
     BaseT::unmap_buffer_gpu_memory(rBuffer);
   }
 
+  void RenderInterface::create_fence(Fence& rFence)
+  {
+    BaseT::create_fence(rFence);
+  }
+
   void RenderInterface::beginFrame()
   {
     BaseT::beginFrame();

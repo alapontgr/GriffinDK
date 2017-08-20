@@ -5,7 +5,8 @@ namespace fdk
   namespace Rendering 
   {
     
-    VK_CommandBuffer::VK_CommandBuffer()
+    VK_CommandBuffer::VK_CommandBuffer() 
+      : m_commandBuffer{VK_NULL_HANDLE}
     {
 
     }

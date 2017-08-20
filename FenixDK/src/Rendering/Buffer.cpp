@@ -1,9 +1,5 @@
 #include "Buffer.h"
 
-#include "VK_Buffer.h"
-
-#include "RenderDefines.h"
-
 namespace fdk
 {
 namespace Rendering
@@ -42,7 +38,7 @@ namespace Rendering
 
 	Buffer* Buffer::create(Memory::MemAllocator& rAllocator)
 	{
-		return rAllocator.create<IMPL_NAME(Buffer)>();
+		return rAllocator.create<Buffer>();
 	}
 }
 }

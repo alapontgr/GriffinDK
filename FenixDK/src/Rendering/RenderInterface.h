@@ -7,25 +7,24 @@
 #include "CommandBuffer.h"
 #include "CommandBufferFactory.h"
 
+#include "Utilities/platform.h"
+#ifdef FENIX_VK_IMPL
+#include "VK_RenderInterface.h"
+#endif
+
 namespace fdk
 {
-namespace Framework
-{
-	class Mesh;
-}
-
 namespace Rendering
 {
-	class Buffer;
-	class Material;
-	struct Viewport;
-	struct Scissor;
-
-	class RenderInterface
+	class RenderInterface : public IMPLEMENTATION(RenderInterface)
 	{
 	public:
 
-		static RenderInterface* create();
+    using BaseT = IMPLEMENTATION(RenderInterface);
+
+		static RenderInterface* instance();
+
+    RenderInterface();
 
 		void init();
 
@@ -60,10 +59,6 @@ namespace Rendering
     void beginFrame();
 
     void endFrame();
-
-  protected: 
-    
-    RenderInterface();
   };
 }
 }

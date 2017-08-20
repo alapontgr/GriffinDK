@@ -1,7 +1,5 @@
 #include "VK_Buffer.h"
 
-#include "RenderDefines.h"
-
 namespace fdk
 {
 namespace Rendering

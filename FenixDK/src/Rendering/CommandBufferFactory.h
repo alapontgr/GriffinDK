@@ -9,17 +9,18 @@ namespace fdk
 {
   namespace Rendering 
   {
+    class RenderInterface;
+
     // TODO: Adapt it for multi threading
     class CommandBufferFactory 
-    {
-    
+    {    
     public:
 
       void init(const u32 bufferCount); // N-Buffering for N frames
 
-      CommandBuffer* get_primary_command_buffer(Memory::MemAllocator& rAllocator);
+      CommandBuffer* get_primary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator);
 
-      CommandBuffer* get_secondary_command_buffer(Memory::MemAllocator& rAllocator);
+      CommandBuffer* get_secondary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator);
 
       void flip();
 

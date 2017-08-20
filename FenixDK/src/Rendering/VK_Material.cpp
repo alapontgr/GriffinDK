@@ -1,9 +1,7 @@
 #include "VK_Material.h"
 #include "Utilities\platform.h"
 #include "IO\FileUtils.h"
-
-#include "VK_RenderInterface.h"
-#include "RenderDefines.h"
+#include "RenderInterface.h"
 
 namespace fdk
 {
@@ -16,13 +14,17 @@ namespace fdk
       v4 colour;
     };
 
+    void VK_Material::init(const MaterialDesc& rDesc)
+    {
+      m_desc = rDesc;
+    }
+
     void VK_Material::create_material(RenderInterface& rRI)
     {
-      VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
 
       // Load shader modules
-      VkShaderModule vsMmodule = create_shader_module(pRI->m_device, m_desc.m_vsPath.c_str());
-      VkShaderModule psMmodule = create_shader_module(pRI->m_device, m_desc.m_psPath.c_str());
+      VkShaderModule vsMmodule = create_shader_module(rRI.m_device, m_desc.m_vsPath.c_str());
+      VkShaderModule psMmodule = create_shader_module(rRI.m_device, m_desc.m_psPath.c_str());
 
       // Define stages
       static constexpr u32 kStageCount = 2;
@@ -156,7 +158,7 @@ namespace fdk
       dynamicStateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
       dynamicStateInfo.pDynamicStates = &dynamicStates[0];
 
-      create_layout(pRI->m_device);
+      create_layout(rRI.m_device);
 
       // Create the graphic pipeline
       VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -180,12 +182,12 @@ namespace fdk
       pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
       pipelineInfo.basePipelineIndex = -1;
 
-      auto result = vkCreateGraphicsPipelines(pRI->m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
+      auto result = vkCreateGraphicsPipelines(rRI.m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
       VK_CHECK(result, "Failed to create Graphics Pipeline");
 
       // Destroy modules now that are not needed
-      destroy_shader_module(pRI->m_device, vsMmodule);
-      destroy_shader_module(pRI->m_device, psMmodule);
+      destroy_shader_module(rRI.m_device, vsMmodule);
+      destroy_shader_module(rRI.m_device, psMmodule);
 
     }
 

@@ -1,9 +1,5 @@
 #include "Material.h"
 
-#include "VK_Material.h"
-
-#include "RenderDefines.h"
-
 namespace fdk
 {
   namespace Rendering
@@ -21,17 +17,17 @@ namespace fdk
 
     Material* Material::create(Memory::MemAllocator& rAllocator)
     {
-      return rAllocator.create<IMPL_NAME(Material)>();
+      return rAllocator.create<Material>();
     }
 
     void Material::init(const MaterialDesc& rDesc)
     {
-      m_desc = rDesc;
+      BaseT::init(rDesc);
     }
 
     void Material::create_material(RenderInterface& rRI)
     {
-      IMPLEMENTATION(Material, this)->create_material(rRI);
+      BaseT::create_material(rRI);
     }
 
   }

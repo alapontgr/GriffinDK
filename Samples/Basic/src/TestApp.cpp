@@ -1,6 +1,6 @@
 #include "TestApp.h"
-#include "Rendering\RenderDefines.h"
 #include "Rendering\VK_Material.h"
+#include "Rendering\context.h"
 
 struct VertexDesc // Temporary
 {
@@ -43,6 +43,8 @@ void TestApp::on_start()
   // Use the Vulkan render interface
   m_pRi = reinterpret_cast<Rendering::VK_RenderInterface*>(m_pRenderInterface);
 
+  m_cmdBufferFactory.init(Rendering::kBufferCount);
+
   create_render_pass();
 
   create_material();
@@ -75,6 +77,8 @@ void TestApp::on_render()
 
 
   m_pRi->endFrame();
+
+  m_cmdBufferFactory.flip();
 }
 
 void TestApp::on_release()
@@ -111,7 +115,7 @@ void TestApp::create_material()
 
   m_pMaterial = Rendering::Material::create(m_mallocAllocator);
 
-  Rendering::Material::MaterialDesc matDesc;
+  Rendering::MaterialDesc matDesc;
 
   matDesc.m_pRenderPass = &m_renderPass;
   matDesc.m_vsPath = "Shaders/bin/dummy.vert.spv";

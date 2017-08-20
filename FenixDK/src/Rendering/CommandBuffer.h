@@ -3,19 +3,28 @@
 #include "Memory\MemAllocator.h"
 #include "Containers\Mask.h"
 
+#include "Utilities/platform.h"
+#ifdef FENIX_VK_IMPL
+#include "VK_CommandBuffer.h"
+#endif
+
 namespace fdk
 {
   namespace Rendering 
   {
-    class CommandBuffer 
+    class CommandBuffer : public IMPLEMENTATION(CommandBuffer)
     {
     public:
+
+      using BaseT = IMPLEMENTATION(CommandBuffer);
 
       enum ECommandBufferType : u32 
       {
         kTypePrimary = 1<<0,
         kTypeSecondary = 1<<1
       };
+
+      CommandBuffer();
 
       static CommandBuffer* create(Memory::MemAllocator& rAllocator);
 
@@ -24,8 +33,6 @@ namespace fdk
       u32 type() const { return m_type; }
 
     protected:
-      
-      CommandBuffer();
 
       u32 m_type;
     };

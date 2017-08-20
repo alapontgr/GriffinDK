@@ -2,10 +2,10 @@
 
 #include "Utilities/platform.h"
 #include "../Utilities/VulkanInclude.h"
-#include "RenderDefines.h"
 
 #include "Rendering/VK_RenderInterface.h"
 #include "Rendering/VK_CommandBuffer.h"
+#include "RenderInterface.h"
 
 namespace fdk {
 namespace Rendering {
@@ -15,12 +15,10 @@ RenderPass::RenderPass() {}
 RenderPass::~RenderPass() {}
 
 void RenderPass::init(RenderInterface& rRI) {
-  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
-
   // Description of the whole render pass
   VkAttachmentDescription attachmentsDesc{};
   attachmentsDesc.flags = 0;
-  attachmentsDesc.format = pRI->m_swapChainFormat.format;
+  attachmentsDesc.format = rRI.m_swapChainFormat.format;
   attachmentsDesc.samples = VK_SAMPLE_COUNT_1_BIT;
   attachmentsDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   attachmentsDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -79,26 +77,24 @@ void RenderPass::init(RenderInterface& rRI) {
   renderPassInfo.dependencyCount = static_cast<u32>(dependencies.size());
   renderPassInfo.pDependencies = &dependencies[0];
 
-  auto result = vkCreateRenderPass(pRI->m_device, &renderPassInfo, nullptr,
+  auto result = vkCreateRenderPass(rRI.m_device, &renderPassInfo, nullptr,
                                    &m_renderPassImpl);
   VK_CHECK(result, "Failed to create render pass");
 }
 
 void RenderPass::release(RenderInterface& rRI)
 {
-  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
-
   if (m_renderPassImpl) 
   {
-    vkDestroyRenderPass(pRI->m_device, m_renderPassImpl, nullptr);
+    vkDestroyRenderPass(rRI.m_device, m_renderPassImpl, nullptr);
   }
   m_renderPassImpl = VK_NULL_HANDLE;
 }
 
 void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
 {
-  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
-  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+  //VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  //VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
   
   // Begin render pass
 //   u32 width = Framework::App::width();
@@ -119,17 +115,17 @@ void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
 
 void RenderPass::next_subpass(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
 {
-  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
-  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+  //VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  //VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
 
   //vkCmdNextSubpass(pCmdBuff->m_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void RenderPass::end(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
 {
-  VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
-  VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-  //vkCmdEndRenderPass(pCmdBuff->m_commandBuffer);
+  // VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
+  // VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
+  // vkCmdEndRenderPass(pCmdBuff->m_commandBuffer);
 }
 
 }

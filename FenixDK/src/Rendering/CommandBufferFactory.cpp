@@ -1,5 +1,6 @@
 #include "CommandBufferFactory.h"
 #include "Maths\math_utils.h"
+#include "RenderInterface.h"
 
 namespace fdk
 {
@@ -17,7 +18,7 @@ namespace fdk
       }
     }
 
-    CommandBuffer* CommandBufferFactory::get_primary_command_buffer(Memory::MemAllocator& rAllocator)
+    CommandBuffer* CommandBufferFactory::get_primary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator)
     {
       auto& rCache = m_frameCaches[m_currentIndex];
       if (rCache.m_primaryCursor != rCache.m_primaryCmdBuffers.end()) 
@@ -29,12 +30,14 @@ namespace fdk
       // Else create a new one
       auto* pCmdBuffer = CommandBuffer::create(rAllocator);
       pCmdBuffer->set_type(CommandBuffer::kTypePrimary);
+      rRi.create_command_buffer(*pCmdBuffer);
+
       rCache.m_primaryCmdBuffers.push_back(pCmdBuffer);
       rCache.m_primaryCursor = rCache.m_primaryCmdBuffers.end();
       return pCmdBuffer;
     }
 
-    CommandBuffer* CommandBufferFactory::get_secondary_command_buffer(Memory::MemAllocator& rAllocator)
+    CommandBuffer* CommandBufferFactory::get_secondary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator)
     {
       auto& rCache = m_frameCaches[m_currentIndex];
       if (rCache.m_secondaryCursor != rCache.m_secondaryCmdBuffers.end())
@@ -46,6 +49,8 @@ namespace fdk
       // Else create a new one
       auto* pCmdBuffer = CommandBuffer::create(rAllocator);
       pCmdBuffer->set_type(CommandBuffer::kTypeSecondary);
+      rRi.create_command_buffer(*pCmdBuffer);
+
       rCache.m_secondaryCmdBuffers.push_back(pCmdBuffer);
       rCache.m_secondaryCursor = rCache.m_secondaryCmdBuffers.end();
       return pCmdBuffer;

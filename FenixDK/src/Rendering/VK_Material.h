@@ -1,17 +1,23 @@
 #pragma once
-#include "Material.h"
 
 #include "Utilities/VulkanInclude.h"
 #include "Utilities/GeneralDefinitions.h"
 #include "RenderConfiguration.h"
 
+#include "MaterialDefinitions.h"
+#include "Containers/Mask.h"
+
 namespace fdk
 {
   namespace Rendering 
   {
-    class VK_Material : public Material
+    class RenderInterface;
+
+    class VK_Material
     {
     public:
+
+      void init(const MaterialDesc& rDesc);
 
       void create_material(RenderInterface& rRI);
 
@@ -35,6 +41,10 @@ namespace fdk
       VkPipelineColorBlendStateCreateInfo get_blend_state_desc(const BlendState& rBlendState, VkPipelineColorBlendAttachmentState* pBlendAttachmentState);
     
       void define_stage_info(VkShaderStageFlagBits stageFlags, VkShaderModule pShaderModule, const char* pEntryName, VkPipelineShaderStageCreateInfo* pStageInfoOut);
+    
+    private:
+      MaterialDesc m_desc;
+      Containers::Mask<u32> m_flags;
     };
 
   }

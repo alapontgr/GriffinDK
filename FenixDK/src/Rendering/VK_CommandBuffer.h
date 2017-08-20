@@ -1,14 +1,12 @@
 #pragma once
 
-#include "CommandBuffer.h"
-
 #include "Utilities/VulkanInclude.h"
 
 namespace fdk
 {
-  namespace Rendering 
+  namespace Rendering
   {
-    class VK_CommandBuffer : public CommandBuffer
+    class VK_CommandBuffer
     {
     public:
 

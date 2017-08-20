@@ -4,13 +4,13 @@
 #include "Utilities\platform.h"
 #include "Framework\app.h"
 #include "Maths\math_utils.h"
-#include "RenderDefines.h"
 #include "Framework\Mesh.h"
 
 // Objects with Vulkan implementation
 #include "VK_Buffer.h"
 #include "VK_Material.h"
 #include "VK_CommandBuffer.h"
+#include "Material.h"
 
 namespace fdk
 {
@@ -41,9 +41,9 @@ namespace Rendering
 
 
 #ifdef FENIX_VK_IMPL
-	RenderInterface* RenderInterface::create()
+	RenderInterface* RenderInterface::instance()
 	{
-		static VK_RenderInterface s_renderInterface;
+		static RenderInterface s_renderInterface;
 		return &s_renderInterface;
 	}
 #endif // FENIX_VK_IMPL
@@ -606,23 +606,22 @@ namespace Rendering
 
   void VK_RenderInterface::create_buffer(Buffer& rBuffer)
   {
-    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.pNext = nullptr;
     bufferCreateInfo.flags = 0;
-    bufferCreateInfo.size = pBuffer->size();
-    bufferCreateInfo.usage = pBuffer->usage().flags();
+    bufferCreateInfo.size = rBuffer.size();
+    bufferCreateInfo.usage = rBuffer.usage().flags();
     bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     bufferCreateInfo.queueFamilyIndexCount = 0;
     bufferCreateInfo.pQueueFamilyIndices = nullptr;  
     
-    auto result = vkCreateBuffer(m_device, &bufferCreateInfo, nullptr, &pBuffer->m_pBuffer);
+    auto result = vkCreateBuffer(m_device, &bufferCreateInfo, nullptr, &rBuffer.m_pBuffer);
     VK_CHECK(result, "Failed to create buffer");
 
     // Get the requirements
     VkMemoryRequirements bufferRequirements{};
-    vkGetBufferMemoryRequirements(m_device, pBuffer->m_pBuffer, &bufferRequirements);
+    vkGetBufferMemoryRequirements(m_device, rBuffer.m_pBuffer, &bufferRequirements);
 
     // Allocate the memory
     VkMemoryAllocateInfo allocateInfo{};
@@ -630,43 +629,39 @@ namespace Rendering
     allocateInfo.pNext = nullptr;
     allocateInfo.allocationSize = bufferRequirements.size;
     allocateInfo.memoryTypeIndex = 
-      vulkan_helpers::find_memory_type_index(bufferRequirements.memoryTypeBits, pBuffer->mem_properties().flags(), m_physicalDevice);
+      vulkan_helpers::find_memory_type_index(bufferRequirements.memoryTypeBits, rBuffer.mem_properties().flags(), m_physicalDevice);
     
-    result = vkAllocateMemory(m_device, &allocateInfo, nullptr, &pBuffer->m_pMemory);
+    result = vkAllocateMemory(m_device, &allocateInfo, nullptr, &rBuffer.m_pMemory);
     VK_CHECK(result, "Failed to allocate memory");
 
     // Bind it to the buffer
-    vkBindBufferMemory(m_device, pBuffer->m_pBuffer, pBuffer->m_pMemory, 0);
+    vkBindBufferMemory(m_device, rBuffer.m_pBuffer, rBuffer.m_pMemory, 0);
   }
 
   void VK_RenderInterface::destroy_buffer(Buffer& rBuffer)
   {
-    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
-    if (pBuffer->m_pBuffer != VK_NULL_HANDLE) 
+    if (rBuffer.m_pBuffer != VK_NULL_HANDLE) 
     {
-      vkDestroyBuffer(m_device, pBuffer->m_pBuffer, nullptr);
+      vkDestroyBuffer(m_device, rBuffer.m_pBuffer, nullptr);
     }
-    if (pBuffer->m_pMemory != VK_NULL_HANDLE)
+    if (rBuffer.m_pMemory != VK_NULL_HANDLE)
     {
-      vkFreeMemory(m_device, pBuffer->m_pMemory, nullptr);
+      vkFreeMemory(m_device, rBuffer.m_pMemory, nullptr);
     }
   }
 
   void VK_RenderInterface::copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer)
   {
-    VK_Buffer* pFrom = IMPLEMENTATION(Buffer, &rFrom);
-    VK_Buffer* pTo = IMPLEMENTATION(Buffer, &rTo);
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
-    FDK_ASSERT(pFrom->m_pBuffer != VK_NULL_HANDLE, "Trying to copy from a non created buffer");
-    FDK_ASSERT(pTo->m_pBuffer != VK_NULL_HANDLE, "Trying to copy to a non created buffer");
+    FDK_ASSERT(rFrom.m_pBuffer != VK_NULL_HANDLE, "Trying to copy from a non created buffer");
+    FDK_ASSERT(rTo.m_pBuffer != VK_NULL_HANDLE, "Trying to copy to a non created buffer");
 
     VkBufferCopy buffCopy{};
     buffCopy.srcOffset = fromOffset;
     buffCopy.dstOffset = toOffset;
     buffCopy.size = rangeSize;
-    vkCmdCopyBuffer(cmdBuffer, pFrom->m_pBuffer, pTo->m_pBuffer, 1, &buffCopy);
+    vkCmdCopyBuffer(cmdBuffer, rFrom.m_pBuffer, rTo.m_pBuffer, 1, &buffCopy);
   }
 
   void VK_RenderInterface::send_buffer_memory_to_gpu(Buffer& rBuffer)
@@ -676,12 +671,11 @@ namespace Rendering
 
   void VK_RenderInterface::use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     
-    VK_Buffer* pVertexBuffer = IMPLEMENTATION(Buffer, rMesh.vertex_buffer());
-    VK_Buffer* pIndexBuffer = IMPLEMENTATION(Buffer, rMesh.index_buffer());
+    Buffer* pVertexBuffer = rMesh.vertex_buffer();
+    Buffer* pIndexBuffer = rMesh.index_buffer();
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &pVertexBuffer->m_pBuffer, &offset);
     vkCmdBindIndexBuffer(cmdBuffer, pIndexBuffer->m_pBuffer, offset, VK_INDEX_TYPE_UINT16); // Force indices of 16 bits
@@ -689,17 +683,14 @@ namespace Rendering
 
   void VK_RenderInterface::bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
-    VK_Material* pMaterial = IMPLEMENTATION(Material, &rMaterial);
-    vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pMaterial->m_pipeline);
+    vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rMaterial.m_pipeline);
   }
 
   void VK_RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     VkViewport viewport{};
     viewport.x = rViewport.m_offset.x;
@@ -713,8 +704,7 @@ namespace Rendering
 
   void VK_RenderInterface::set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     VkRect2D scissor{};
     scissor.offset.x = rScissor.m_offsetX;
@@ -726,16 +716,14 @@ namespace Rendering
 
   void VK_RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto cmdBuffer = pCmdBuffer->m_commandBuffer;
+    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
     FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     vkCmdDrawIndexed(cmdBuffer, indexCount, instanceCount, indexOffset, vertexOffset, 0);
   }
 
   void VK_RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
   {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCommandBuffer);
-    bool isPrimary = pCmdBuffer->type() == CommandBuffer::kTypePrimary;
+    bool isPrimary = rCommandBuffer.type() == CommandBuffer::kTypePrimary;
     
     VkCommandBufferAllocateInfo info;
     info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -743,25 +731,23 @@ namespace Rendering
     info.commandPool = m_commandPool;
     info.level = isPrimary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
     info.commandBufferCount = 1;
-    auto result = vkAllocateCommandBuffers(m_device, &info, &pCmdBuffer->m_commandBuffer);
+    auto result = vkAllocateCommandBuffers(m_device, &info, &rCommandBuffer.m_commandBuffer);
     VK_CHECK(result, "Failed to allocate command buffers");
   }
 
   void* VK_RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)
   {
-    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
-    FDK_ASSERT(pBuffer->m_pMemory, "The memory of the buffer has not been allocated");
-    FDK_ASSERT(memoryOffset + rangeSize < pBuffer->size(), "Trying to map out of range");
+    FDK_ASSERT(rBuffer.m_pMemory, "The memory of the buffer has not been allocated");
+    FDK_ASSERT(memoryOffset + rangeSize < rBuffer.size(), "Trying to map out of range");
     void* pData = nullptr;
-    auto result = vkMapMemory(m_device, pBuffer->m_pMemory, memoryOffset, rangeSize, 0, &pData);
+    auto result = vkMapMemory(m_device, rBuffer.m_pMemory, memoryOffset, rangeSize, 0, &pData);
     VK_CHECK(result, "Failed to map memory");
     return pData;
   }
 
   void VK_RenderInterface::unmap_buffer_gpu_memory(Buffer& rBuffer)
   {
-    VK_Buffer* pBuffer = IMPLEMENTATION(Buffer, &rBuffer);
-    vkUnmapMemory(m_device, pBuffer->m_pMemory);
+    vkUnmapMemory(m_device, rBuffer.m_pMemory);
   }
 
   void VK_RenderInterface::beginFrame()

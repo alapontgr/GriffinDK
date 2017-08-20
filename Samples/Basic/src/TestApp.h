@@ -12,6 +12,7 @@
 #include "Memory/MemAllocator.h"
 #include "Memory/MallocAllocator.h"
 #include "Rendering/Material.h"
+#include "Rendering/CommandBufferFactory.h"
 
 
 using namespace fdk;
@@ -64,6 +65,7 @@ private:
 
   Memory::MallocAllocator m_mallocAllocator;
 
+  Rendering::CommandBufferFactory m_cmdBufferFactory;
   std::vector<VkCommandBuffer> m_cmdList;
 
   bool m_meshDirty;

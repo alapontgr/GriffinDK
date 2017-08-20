@@ -170,7 +170,7 @@ namespace Framework
 		//m_context.init();
 		// Init Input context
 		// input::Init(hInstance, hwnd, width_, height_);
-    m_pRenderInterface = Rendering::RenderInterface::create();
+    m_pRenderInterface = Rendering::RenderInterface::instance();
     m_pRenderInterface->init();
   }
 

@@ -3,13 +3,21 @@
 #include "Memory/memallocator.h"
 #include "Containers/Mask.h"
 
+#include "Utilities/platform.h"
+#ifdef FENIX_VK_IMPL
+#include "VK_Buffer.h"
+#endif
+
 namespace fdk
 {
 namespace Rendering
 {
-	class Buffer
+	class Buffer : public IMPLEMENTATION(Buffer)
 	{
 	public:
+
+    using BaseT = IMPLEMENTATION(Buffer);
+
 		enum EBufferUsage : u32
 		{
 			Transfer_Src = 1 << 0,
@@ -24,7 +32,7 @@ namespace Rendering
 		};
 		using UsageFlags = Containers::Mask<u32>;
 
-		enum EMemoryProperties
+		enum EMemoryProperties : u32
 		{
 			GPU_Local = 1 << 0,
 			CPU_Visible = 1 << 1,
@@ -41,6 +49,8 @@ namespace Rendering
       Memory::mem_size_t m_size;
       Memory::mem_size_t m_alignment;
     };
+
+    Buffer();
 
 		static Buffer* create(Memory::MemAllocator& rAllocator);
 
@@ -71,8 +81,6 @@ namespace Rendering
 		Buffer(const Buffer&) = delete;
 
 	protected:
-
-    Buffer();
 
 		Memory::MemBlock m_data;
     BufferDesc m_desc;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "RenderInterface.h"
 #include "Utilities/types.h"
 #include <vector>
 #include "Containers/Mask.h"
@@ -9,16 +8,26 @@
 
 namespace fdk
 {
+namespace Framework
+{
+	class Mesh;
+}
 namespace Rendering
 {
+	class Buffer;
+	class Material;
+  class CommandBuffer;
+	struct Viewport;
+	struct Scissor;
+
 	struct FrameInfoVK
 	{
 		//VkFramebuffer frameBuffer = VK_NULL_HANDLE;
-		VkSemaphore imageAvailable = VK_NULL_HANDLE;		// Signaled by the presentation engine with the image is available
+		VkSemaphore imageAvailable = VK_NULL_HANDLE; // Signaled by the presentation engine with the image is available
 		VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed
-  };
+	};
 
-	class VK_RenderInterface : public RenderInterface
+	class VK_RenderInterface
 	{
 	public:
 		VK_RenderInterface();
@@ -50,15 +59,15 @@ namespace Rendering
 
 		void create_command_buffer(CommandBuffer& rCommandBuffer);
 
-    void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
+		void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
-    void unmap_buffer_gpu_memory(Buffer& rBuffer);
+		void unmap_buffer_gpu_memory(Buffer& rBuffer);
 
-    void beginFrame();
+		void beginFrame();
 
-    void endFrame();
+		void endFrame();
 
-	//private:
+		//private:
 		void validate_vk_extensions();
 
 		void check_device_extensions(VkPhysicalDevice pPhysicalDevice);
@@ -115,7 +124,6 @@ namespace Rendering
 
 		u32 m_currentFrame;
 		u32 m_currentImageIndex;
-
 	};
 }
 }

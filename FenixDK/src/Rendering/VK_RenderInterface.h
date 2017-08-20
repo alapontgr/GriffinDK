@@ -16,10 +16,6 @@ namespace Rendering
 		//VkFramebuffer frameBuffer = VK_NULL_HANDLE;
 		VkSemaphore imageAvailable = VK_NULL_HANDLE;		// Signaled by the presentation engine with the image is available
 		VkSemaphore finishedRendering = VK_NULL_HANDLE; // Signaled when a queue has finished being processed
-    std::vector<CommandBuffer*> m_framePrimaryCommandBuffers;
-    std::vector<CommandBuffer*> m_frameSecondaryCommandBuffers;
-    std::vector<CommandBuffer*>::iterator m_primaryCmdBufferCursor;
-    std::vector<CommandBuffer*>::iterator m_secondaryCmdBufferCursor;
   };
 
 	class VK_RenderInterface : public RenderInterface
@@ -52,12 +48,7 @@ namespace Rendering
 
 		void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
 
-    CommandBuffer* get_command_buffer(CommandBuffer::ECommandBufferType type, Memory::MemAllocator& rAllocator);
-
 		void create_command_buffer(CommandBuffer& rCommandBuffer);
-
-    void wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer);
-
 
     void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 

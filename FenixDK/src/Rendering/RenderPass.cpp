@@ -18,16 +18,16 @@ void RenderPass::init(RenderInterface& rRI) {
   VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
 
   // Description of the whole render pass
-  VkAttachmentDescription renderPassDesc{};
-  renderPassDesc.flags = 0;
-  renderPassDesc.format = pRI->m_swapChainFormat.format;
-  renderPassDesc.samples = VK_SAMPLE_COUNT_1_BIT;
-  renderPassDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  renderPassDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-  renderPassDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-  renderPassDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-  renderPassDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // The first frame the layout is not VK_IMAGE_LAYOUT_PRESENT_SRC_KHR. So using Undefined solves the problem with the validation layer
-  renderPassDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  VkAttachmentDescription attachmentsDesc{};
+  attachmentsDesc.flags = 0;
+  attachmentsDesc.format = pRI->m_swapChainFormat.format;
+  attachmentsDesc.samples = VK_SAMPLE_COUNT_1_BIT;
+  attachmentsDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  attachmentsDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  attachmentsDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+  attachmentsDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  attachmentsDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // The first frame the layout is not VK_IMAGE_LAYOUT_PRESENT_SRC_KHR. So using Undefined solves the problem with the validation layer
+  attachmentsDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   // Reference for the color attachment of the sub pass 0
   VkAttachmentReference colorAttachmentRef{};
@@ -73,7 +73,7 @@ void RenderPass::init(RenderInterface& rRI) {
   renderPassInfo.pNext = nullptr;
   renderPassInfo.flags = 0;
   renderPassInfo.attachmentCount = 1;
-  renderPassInfo.pAttachments = &renderPassDesc;
+  renderPassInfo.pAttachments = &attachmentsDesc;
   renderPassInfo.subpassCount = 1;
   renderPassInfo.pSubpasses = &subPassDesc;
   renderPassInfo.dependencyCount = static_cast<u32>(dependencies.size());

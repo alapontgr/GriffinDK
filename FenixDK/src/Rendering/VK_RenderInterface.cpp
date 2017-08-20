@@ -157,9 +157,8 @@ namespace Rendering
 
 	void VK_RenderInterface::on_resize()
 	{
-		m_flags.set(kPendingResize, true);
-		create_swap_chain();
-	}
+    // TODO: Handle resize
+  }
 
   void VK_RenderInterface::validate_vk_extensions()
 	{
@@ -733,32 +732,6 @@ namespace Rendering
     vkCmdDrawIndexed(cmdBuffer, indexCount, instanceCount, indexOffset, vertexOffset, 0);
   }
 
-  CommandBuffer* VK_RenderInterface::get_command_buffer(CommandBuffer::ECommandBufferType type, Memory::MemAllocator& rAllocator)
-  {
-    bool isPrimary = type == CommandBuffer::kTypePrimary;
-    auto& rFrame = m_frames[m_currentFrame];
-    auto& rList = rFrame.m_framePrimaryCommandBuffers;
-    auto& rCursor = rFrame.m_primaryCmdBufferCursor;
-    if (!isPrimary) 
-    {
-      rList = rFrame.m_frameSecondaryCommandBuffers;
-      rCursor = rFrame.m_secondaryCmdBufferCursor;
-    }
-    // If we are not at the end of the list we return the cursor and increment it
-    if (rCursor != rList.end())
-    {
-      CommandBuffer* pCmdBuffer = *rCursor;
-      rCursor++;
-      return pCmdBuffer;
-    }
-    // If we are at the end of the list we allocate a new command buffer
-    CommandBuffer* pCmdBuffer = CommandBuffer::create(rAllocator);
-    pCmdBuffer->set_type(type);
-    rList.push_back(pCmdBuffer);
-    rCursor == rList.end();
-    return pCmdBuffer;
-  }
-
   void VK_RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
   {
     VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCommandBuffer);
@@ -772,32 +745,6 @@ namespace Rendering
     info.commandBufferCount = 1;
     auto result = vkAllocateCommandBuffers(m_device, &info, &pCmdBuffer->m_commandBuffer);
     VK_CHECK(result, "Failed to allocate command buffers");
-
-    // Semaphore config
-    VkSemaphoreCreateInfo semaphoreInfo{};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphoreInfo.pNext = nullptr;
-    semaphoreInfo.flags = 0;
-    // Fence config
-    VkFenceCreateInfo fenceInfo;
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.pNext = nullptr;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Signaled by default
-  
-    result = vkCreateSemaphore(m_device, &semaphoreInfo, nullptr,
-      &pCmdBuffer->m_semaphore);
-    VK_CHECK(result, "Failed to create semaphore");
-    result = vkCreateFence(m_device, &fenceInfo, nullptr, &pCmdBuffer->m_fence);
-    VK_CHECK(result, "Failed to create a fence");
-  }
-
-  void VK_RenderInterface::wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer)
-  {
-    VK_CommandBuffer* pCmdBuffer = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
-    auto result = vkWaitForFences(m_device, 1, &pCmdBuffer->m_fence, VK_FALSE, 1000000000);
-    VK_CHECK(result, "Waited to long for fences");
-    result = vkResetFences(m_device, 1, &pCmdBuffer->m_fence);
-    VK_CHECK(result, "Failed to reset the fences");
   }
 
   void* VK_RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)

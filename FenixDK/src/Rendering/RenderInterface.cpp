@@ -70,20 +70,10 @@ namespace Rendering
 		IMPLEMENTATION(RenderInterface, this)->draw_indexed(indexCount, instanceCount, indexOffset, vertexOffset, rCmdBuffer);
 	}
 
-  CommandBuffer* RenderInterface::get_command_buffer(CommandBuffer::ECommandBufferType type, Memory::MemAllocator& rAllocator)
-  {
-    return IMPLEMENTATION(RenderInterface, this)->get_command_buffer(type, rAllocator);
-  }
-
   void RenderInterface::create_command_buffer(CommandBuffer& rCommandBuffer)
 	{
 		IMPLEMENTATION(RenderInterface, this)->create_command_buffer(rCommandBuffer);
 	}
-
-  void RenderInterface::wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer)
-  {
-    IMPLEMENTATION(RenderInterface, this)->wait_command_buffer_to_finish(rCmdBuffer);
-  }
 
   void* RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)
   {

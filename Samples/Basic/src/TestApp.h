@@ -42,6 +42,12 @@ private:
 
   void create_command_buffers();
 
+  void update_assets();
+
+  void draw_geometry();
+
+  void submit_work();
+
   Rendering::BlendState m_blendState;
   Rendering::RasterState m_rasterState;
   Rendering::MultiSampleState m_multiSampleState;
@@ -54,6 +60,11 @@ private:
   Rendering::Buffer* m_pStagingBuffer;
 
   Rendering::CommandBuffer* m_pCmdBuffer;
+  Rendering::CommandBuffer* m_pTransferCmdBuffer;
 
   Memory::MallocAllocator m_mallocAllocator;
+
+  std::vector<VkCommandBuffer> m_cmdList;
+
+  bool m_meshDirty;
 };

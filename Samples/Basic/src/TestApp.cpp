@@ -64,6 +64,15 @@ void TestApp::on_render()
   auto time = Framework::Time::total_time_secs();
   //m_context.test_render(time);
 
+  m_cmdList.clear();
+  if (m_meshDirty) 
+  {
+    m_meshDirty = false;
+    update_assets();
+  }
+  draw_geometry();
+
+
 
   m_pRi->endFrame();
 }
@@ -143,9 +152,32 @@ void TestApp::create_mesh()
 
   // TODO: Copy region from the staging buffer to the vertex buffer
   // TODO: Copy region from the staging buffer to the index buffer
+
+  m_meshDirty = true;
 }
 
 void TestApp::create_command_buffers()
 {
   m_pCmdBuffer = Rendering::CommandBuffer::create(m_mallocAllocator);
+  m_pCmdBuffer->set_type(Rendering::CommandBuffer::kTypePrimary);
+  m_pRenderInterface->create_command_buffer(*m_pCmdBuffer);
+
+  m_pTransferCmdBuffer = Rendering::CommandBuffer::create(m_mallocAllocator);
+  m_pTransferCmdBuffer->set_type(Rendering::CommandBuffer::kTypePrimary);
+  m_pRenderInterface->create_command_buffer(*m_pTransferCmdBuffer);
+}
+
+void TestApp::update_assets()
+{
+
+}
+
+void TestApp::draw_geometry()
+{
+
+}
+
+void TestApp::submit_work()
+{
+
 }

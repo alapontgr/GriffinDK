@@ -5,6 +5,7 @@
 #include "Memory\MemAllocator.h"
 
 #include "CommandBuffer.h"
+#include "CommandBufferFactory.h"
 
 namespace fdk
 {
@@ -23,18 +24,12 @@ namespace Rendering
 	class RenderInterface
 	{
 	public:
-		enum ERenderFlags : u32
-		{
-			kPendingResize = 1 << 0
-		};
 
 		static RenderInterface* create();
 
 		void init();
 
 		void release();
-
-		bool is_pending_resize() const { m_flags.is_enable(kPendingResize); };
 
 		void on_resize();
 
@@ -56,11 +51,7 @@ namespace Rendering
 
 		void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
 
-    CommandBuffer* get_command_buffer(CommandBuffer::ECommandBufferType type, Memory::MemAllocator& rAllocator);
-
     void create_command_buffer(CommandBuffer& rCommandBuffer);
-
-    void wait_command_buffer_to_finish(CommandBuffer& rCmdBuffer);
 
     void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
@@ -70,10 +61,9 @@ namespace Rendering
 
     void endFrame();
 
-	protected:
-		RenderInterface();
-
-		Containers::Mask<u32> m_flags;
-	};
+  protected: 
+    
+    RenderInterface();
+  };
 }
 }

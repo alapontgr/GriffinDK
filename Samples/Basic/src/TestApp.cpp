@@ -66,6 +66,11 @@ void TestApp::on_render()
   auto time = Framework::Time::total_time_secs();
   //m_context.test_render(time);
 
+  // Update the surface to use to draw
+  m_renderSurface.m_width = static_cast<u32>(width());
+  m_renderSurface.m_height = static_cast<u32>(height());
+  m_renderSurface.m_pColorTexture = m_pRenderInterface->get_screen();
+
   m_cmdList.clear();
   if (m_meshDirty) 
   {
@@ -74,6 +79,7 @@ void TestApp::on_render()
   }
   draw_geometry();
 
+  submit_work();
 
 
   m_pRi->endFrame();
@@ -173,7 +179,7 @@ void TestApp::create_command_buffers()
 
 void TestApp::update_assets()
 {
-
+  // TODO: Update vertex and index buffers
 }
 
 void TestApp::draw_geometry()

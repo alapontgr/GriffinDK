@@ -6,6 +6,7 @@
 #include "Framework\app.h"
 #include "Utilities\platform.h"
 #include "RenderSurface.h"
+#include "Texture2D.h"
 
 namespace fdk {
 namespace Rendering {
@@ -27,7 +28,7 @@ void VK_Framebuffer::create(
   info.flags = 0;
   info.renderPass = rRenderPass.handle();
   info.attachmentCount = 1;
-  info.pAttachments = &rRenderSurface.m_colorTexture;
+  info.pAttachments = &rRenderSurface.m_pColorTexture->m_view;
   info.width = rRenderSurface.m_width;
   info.height = rRenderSurface.m_height;
   info.layers = 1;

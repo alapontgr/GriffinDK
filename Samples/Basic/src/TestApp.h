@@ -13,6 +13,7 @@
 #include "Memory/MallocAllocator.h"
 #include "Rendering/Material.h"
 #include "Rendering/CommandBufferFactory.h"
+#include "Rendering/RenderSurface.h"
 
 
 using namespace fdk;
@@ -59,6 +60,7 @@ private:
   Framework::Mesh m_mesh;
   Rendering::Material* m_pMaterial;
   Rendering::Buffer* m_pStagingBuffer;
+  Rendering::RenderSurface m_renderSurface;
 
   Rendering::CommandBuffer* m_pCmdBuffer;
   Rendering::CommandBuffer* m_pTransferCmdBuffer;

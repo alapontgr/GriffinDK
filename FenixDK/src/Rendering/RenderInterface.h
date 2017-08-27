@@ -60,6 +60,8 @@ namespace Rendering
 
     void create_fence(Fence& rFence);
 
+    void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence);
+
     void beginFrame();
 
     void endFrame();

@@ -91,6 +91,11 @@ namespace Rendering
     BaseT::create_fence(rFence);
   }
 
+  void RenderInterface::submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence)
+  {
+    BaseT::submit_work(rCmdBuffer, rSyncFence);
+  }
+
   void RenderInterface::beginFrame()
   {
     BaseT::beginFrame();

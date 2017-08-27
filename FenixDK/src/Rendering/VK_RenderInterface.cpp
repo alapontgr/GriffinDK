@@ -821,5 +821,25 @@ namespace Rendering
     m_currentFrame = Maths::wrap(m_currentFrame + 1, 0U, kBufferCount);
   }
 
+  void VK_RenderInterface::submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence)
+  {
+    auto& rFrame = m_frames[m_currentFrame];
+
+    VkPipelineStageFlags flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkSubmitInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    info.pNext = nullptr;
+    info.waitSemaphoreCount = 1;
+    info.pWaitSemaphores = &rFrame.imageAvailable;
+    info.pWaitDstStageMask = &flags;
+    info.commandBufferCount = 1;
+    info.pCommandBuffers = &rCmdBuffer.m_commandBuffer;
+    info.signalSemaphoreCount = 1;
+    info.pSignalSemaphores = &rFrame.finishedRendering;
+    auto result = vkQueueSubmit(m_presentQueue, 1, &info,
+      rSyncFence.m_fence);
+    VK_CHECK(result, "Failed to submit cmd block");
+  }
+
 }
 }

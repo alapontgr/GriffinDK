@@ -73,6 +73,8 @@ namespace Rendering
 
 		void endFrame();
 
+    void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rsyncFence);
+
 		//private:
 		void validate_vk_extensions();
 

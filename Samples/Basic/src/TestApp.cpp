@@ -43,15 +43,13 @@ void TestApp::on_start()
   // Use the Vulkan render interface
   m_pRi = reinterpret_cast<Rendering::VK_RenderInterface*>(m_pRenderInterface);
 
-  m_cmdBufferFactory.init(Rendering::kBufferCount);
+  m_cmdBufferFactory.init(Rendering::kBufferCount, *m_pRenderInterface);
 
   create_render_pass();
 
   create_material();
 
   create_mesh();
-
-  create_command_buffers();
 }
 
 void TestApp::on_update()
@@ -62,6 +60,12 @@ void TestApp::on_update()
 void TestApp::on_render()
 {
   m_pRi->beginFrame();
+
+  m_cmdBufferFactory.get_current_fence()->wait(*m_pRenderInterface);
+
+  auto* pCmdBuffer = m_cmdBufferFactory.get_primary_command_buffer(*m_pRenderInterface, m_mallocAllocator);
+  pCmdBuffer->start_recording();
+
 
   auto time = Framework::Time::total_time_secs();
   //m_context.test_render(time);
@@ -75,11 +79,13 @@ void TestApp::on_render()
   if (m_meshDirty) 
   {
     m_meshDirty = false;
-    update_assets();
+    update_assets(*pCmdBuffer);
   }
-  draw_geometry();
+  draw_geometry(*pCmdBuffer);
 
-  submit_work();
+  pCmdBuffer->end_recording();
+
+  submit_work(*pCmdBuffer);
 
 
   m_pRi->endFrame();
@@ -166,28 +172,19 @@ void TestApp::create_mesh()
   m_meshDirty = true;
 }
 
-void TestApp::create_command_buffers()
-{
-  m_pCmdBuffer = Rendering::CommandBuffer::create(m_mallocAllocator);
-  m_pCmdBuffer->set_type(Rendering::CommandBuffer::kTypePrimary);
-  m_pRenderInterface->create_command_buffer(*m_pCmdBuffer);
-
-  m_pTransferCmdBuffer = Rendering::CommandBuffer::create(m_mallocAllocator);
-  m_pTransferCmdBuffer->set_type(Rendering::CommandBuffer::kTypePrimary);
-  m_pRenderInterface->create_command_buffer(*m_pTransferCmdBuffer);
-}
-
-void TestApp::update_assets()
+void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
 {
   // TODO: Update vertex and index buffers
 }
 
-void TestApp::draw_geometry()
+void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
 {
+  m_renderPass.start(*m_pRenderInterface, rCmdBuffer, m_renderSurface);
 
+  m_renderPass.end(*m_pRenderInterface, rCmdBuffer);
 }
 
-void TestApp::submit_work()
+void TestApp::submit_work(Rendering::CommandBuffer& rCmdBuffer)
 {
-
+  m_pRenderInterface->submit_work(rCmdBuffer, *m_cmdBufferFactory.get_current_fence());
 }

@@ -12,7 +12,13 @@ namespace fdk
     class Fence : public IMPLEMENTATION(Fence)
     {
     public:
+
+      using BaseT = IMPLEMENTATION(Fence);
+
       Fence() {}
+
+      void wait(const RenderInterface& rRi);
     };
+
   }
 }

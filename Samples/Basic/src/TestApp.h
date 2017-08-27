@@ -42,13 +42,11 @@ private:
 
   void create_mesh();
 
-  void create_command_buffers();
+  void update_assets(Rendering::CommandBuffer& rCmdBuffer);
 
-  void update_assets();
+  void draw_geometry(Rendering::CommandBuffer& rCmdBuffer);
 
-  void draw_geometry();
-
-  void submit_work();
+  void submit_work(Rendering::CommandBuffer& rCmdBuffer);
 
   Rendering::BlendState m_blendState;
   Rendering::RasterState m_rasterState;
@@ -61,9 +59,6 @@ private:
   Rendering::Material* m_pMaterial;
   Rendering::Buffer* m_pStagingBuffer;
   Rendering::RenderSurface m_renderSurface;
-
-  Rendering::CommandBuffer* m_pCmdBuffer;
-  Rendering::CommandBuffer* m_pTransferCmdBuffer;
 
   Memory::MallocAllocator m_mallocAllocator;
 

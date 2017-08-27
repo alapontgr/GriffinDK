@@ -7,14 +7,14 @@ namespace fdk
   namespace Rendering 
   {
     
-    void CommandBufferFactory::init(const u32 bufferCount)
+    void CommandBufferFactory::init(const u32 bufferCount, RenderInterface& rRi)
     {
       m_currentIndex = 0;
       m_BufferingCount = bufferCount;
       m_frameCaches.resize(bufferCount);
       for (u32 i=0; i<bufferCount; i++) 
       {
-        init_cache(i);
+        init_cache(i, rRi);
       }
     }
 
@@ -65,16 +65,18 @@ namespace fdk
       rCache.m_secondaryCursor = rCache.m_secondaryCmdBuffers.begin();
     }
 
-    void CommandBufferFactory::sync_command_buffers()
+    Fence* CommandBufferFactory::get_current_fence()
     {
-      // TODO: Wait for the fence of the frame to be signaled
+      FrameGetter& rCache = m_frameCaches[m_currentIndex];
+      return &rCache.m_cmdBufferFence;
     }
 
-    void CommandBufferFactory::init_cache(const u32 index)
+    void CommandBufferFactory::init_cache(const u32 index, RenderInterface& rRi)
     {
       FrameGetter& rCache = m_frameCaches[index];
       rCache.m_primaryCursor = rCache.m_primaryCmdBuffers.begin();
       rCache.m_secondaryCursor = rCache.m_secondaryCmdBuffers.begin();
+      rRi.create_fence(rCache.m_cmdBufferFence);
     }
   }
 }

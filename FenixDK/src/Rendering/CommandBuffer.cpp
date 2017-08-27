@@ -14,6 +14,17 @@ namespace fdk
     {
       return rAllocator.create<CommandBuffer>();
     }
+
+    void CommandBuffer::start_recording()
+    {
+      BaseT::start_recording();
+    }
+
+    void CommandBuffer::end_recording()
+    {
+      BaseT::end_recording();
+    }
+
   }
 }
 

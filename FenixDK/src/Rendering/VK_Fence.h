@@ -6,13 +6,18 @@ namespace fdk
 {
   namespace Rendering 
   {
+    class RenderInterface;
+
     class VK_Fence 
     {
     public:
 
-      VK_Fence() : m_fence{ VK_NULL_HANDLE } {}
+      VK_Fence();
+
+      void wait(const RenderInterface& rRi);
 
       VkFence m_fence;
     };
+
   }
 }

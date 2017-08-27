@@ -32,6 +32,10 @@ namespace fdk
 
       u32 type() const { return m_type; }
 
+      void start_recording();
+
+      void end_recording();
+
     protected:
 
       u32 m_type;

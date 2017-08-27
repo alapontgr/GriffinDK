@@ -12,6 +12,10 @@ namespace fdk
 
       VK_CommandBuffer();
 
+      void start_recording();
+
+      void end_recording();
+
       VkCommandBuffer m_commandBuffer;
     };
 

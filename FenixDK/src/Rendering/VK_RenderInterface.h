@@ -16,6 +16,7 @@ namespace Rendering
 {
 	class Buffer;
 	class Material;
+  class Texture2D;
   class CommandBuffer;
 	struct Viewport;
 	struct Scissor;
@@ -39,6 +40,8 @@ namespace Rendering
 		void release();
 
 		void on_resize();
+
+    Texture2D* get_screen();
 
 		void create_buffer(Buffer& rBuffer);
 

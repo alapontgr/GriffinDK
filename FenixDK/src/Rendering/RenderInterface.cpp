@@ -21,7 +21,12 @@ namespace Rendering
     BaseT::on_resize();
 	}
 
-	void RenderInterface::create_buffer(Buffer& rBuffer)
+  fdk::Rendering::Texture2D* RenderInterface::get_screen()
+  {
+    return BaseT::get_screen();
+  }
+
+  void RenderInterface::create_buffer(Buffer& rBuffer)
 	{
     BaseT::create_buffer(rBuffer);
 	}

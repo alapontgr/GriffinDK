@@ -1,0 +1,105 @@
+
+Rates Of Change:Shader Info
+
+http://realtimecollisiondetection.net/blog/?p=86
+
+struct {
+   u32 matId : 16
+   u32 pipeId : 8
+   u32 fronttoback : 16
+} SortKey
+
+u32 key
+ u32 build_key()
+ {
+    ((matId & 0xff) << 16) | ...
+ }
+
+struct MeshInstanceDrawPacket
+{
+    SortKey key;
+    MeshInstanceId id;
+}
+std::vector<MeshInstanceDrawPacket> packets;
+std::sort(packets, )
+
+{{O, O}, {O, O, O}, {O, O , O, O}, {O, O}}
+{{0,2}, {}}
+
+-> Assume Scene graph {O, O, ...}
+{ Per Pass/View (Parallel)
+1. Culling (Parallel)
+2. Sort (Choose predicate, based on front-back, back-front, sshadows etc.)
+3. Split in buckets
+4. Record N-threads
+}
+5. Submit
+
+Scene
+	--- Node
+			- MeshInstance
+	-- Node
+
+Materials: 
+- Material A
+	- MI1
+	- MI2
+	- ...
+- Material B
+
+for (Mat mat : Materials)
+{
+	-- Cull MI in mat->meshInstances
+}
+
+MeshInstances   allInstances[]
+	MeshInstance{
+		meshid;
+		materialid;
+		pipelineid;
+		localMatId;
+		worldMatId;
+	}
+
+Buffer of 
+
+Assume that:
+	We have a big list of meshes sorted front to back, by pipeline and material.
+
+// Compute
+Per Frame (or system update rate, )
+     Dispatch DynamicMeshInstance Updates :  Particle generation/ Skinning/ physics CS
+
+// Graphics
+Per Scene( i.e. when we load scene data, GPU assets creation )
+	- Update Static Materials
+	- Update Static Model Matrices 
+	- Update Static Mesh Instance Data 
+
+Per Frame
+	time, frame counter
+	- Update Dynamic Materials
+	- Update Dynamic Model Matrices (double buffering)
+	- Update Dynamic Mesh Instance Data (double buffering) , Not for streaming
+	- Update instancing buffers
+
+Per Renderpass (Render scene from a camera or light perspective)
+	Camera : view matrix, projection matrix
+	inverses matrices.
+	Viewport / Scissor
+
+Per Pipeline Switch
+	pipeline : including all pipeline control registers.
+    - Bind less (more global) descriptor sets
+
+Per MaterialInstance Switch
+	Texture bindings.
+	Sampler states.	
+	- Bind descriptor sets
+
+Per Draw ( Push Constants )
+	- bind vertex buffer and index buffer.
+	- Mesh Instance Id (to lookup model matrix and any other instance params)
+
+Per InstancedDraw ( Push Constants )
+	- Bind descriptor set with buffer of Mesh Instance Ids

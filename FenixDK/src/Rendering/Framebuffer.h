@@ -1,28 +1,29 @@
 #pragma once
 
-#include "Utilities/VulkanInclude.h"
+#include "Utilities/platform.h"
+#ifdef FENIX_VK_IMPL
+#include "VK_Framebuffer.h"
+#endif
 
-namespace fdk {
-namespace Rendering {
+namespace fdk
+{
+  namespace Rendering 
+  {
+    class Framebuffer : public IMPLEMENTATION(Framebuffer)
+    {
+    public:
 
-class Context;
-class RenderPass;
+      using BaseT = IMPLEMENTATION(Framebuffer);
 
-class Framebuffer {
-public:
-  Framebuffer();
-  ~Framebuffer();
+      Framebuffer();
 
-  void init(const Context& rContext, const RenderPass& rRenderPass);
+      void create(
+        const RenderInterface& rRI,
+        const RenderPass& rRenderPass,
+        const RenderSurface& rRenderSurface);
 
-  void release(const Context& context);
+      void destroy(const RenderInterface& rRI);
+    };
 
-  VkFramebuffer get() { return m_handle; }
-
-  VkImageView m_imageView;
-private:
-  VkFramebuffer m_handle;
-};
-
-}
+  }
 }

@@ -12,6 +12,7 @@
 #include "VK_CommandBuffer.h"
 #include "Material.h"
 #include "Fence.h"
+#include "Texture2D.h"
 
 namespace fdk
 {
@@ -159,6 +160,13 @@ namespace Rendering
 	void VK_RenderInterface::on_resize()
 	{
     // TODO: Handle resize
+  }
+
+  fdk::Rendering::Texture2D* VK_RenderInterface::get_screen()
+  {
+    static Texture2D s_screenTexture;
+    s_screenTexture.m_view = m_swapChainImageView[m_currentImageIndex];
+    return &s_screenTexture;
   }
 
   void VK_RenderInterface::validate_vk_extensions()

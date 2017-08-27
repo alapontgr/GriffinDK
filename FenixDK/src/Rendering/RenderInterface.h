@@ -32,6 +32,8 @@ namespace Rendering
 
 		void on_resize();
 
+    Texture2D* get_screen();
+
 		void create_buffer(Buffer& rBuffer);
 
 		void destroy_buffer(Buffer& rBuffer);

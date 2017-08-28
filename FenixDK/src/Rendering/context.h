@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Rendering/DisplayList.h"
 #include "Utilities/types.h"
 
 #include "Utilities/VulkanInclude.h"

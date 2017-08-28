@@ -11,7 +11,7 @@ namespace fdk
     Memory::mem_ptr_t File::load(PATH path, const u32 padding, const u32 alignment)
     {
       std::ifstream fs;
-      FDK_ASSERT(path, "Trying to load invalid path");
+      FDASSERT(path, "Trying to load invalid path");
 
       fs.open(path, std::ios::binary);
       if (fs.good())

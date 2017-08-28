@@ -218,7 +218,7 @@ namespace fdk
     {
       IO::File source;
       source.load(pFilePath, 0, alignof(u32));
-      FDK_ASSERT(source.size() > 0, "Loaded empty file");
+      FDASSERT(source.size() > 0, "Loaded empty file");
 
       VkShaderModuleCreateInfo info;
       info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -238,7 +238,7 @@ namespace fdk
 
     void VK_Material::destroy_shader_module(VkDevice pDevice, VkShaderModule pShaderModule)
     {
-      FDK_ASSERT(pShaderModule != VK_NULL_HANDLE, "Invalid shader module");
+      FDASSERT(pShaderModule != VK_NULL_HANDLE, "Invalid shader module");
       vkDestroyShaderModule(pDevice, pShaderModule, nullptr);
     }
 

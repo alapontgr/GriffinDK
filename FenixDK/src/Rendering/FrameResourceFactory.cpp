@@ -24,7 +24,7 @@ namespace fdk
       for (auto& rFrame : m_frameCaches) 
       {
         auto it = rFrame.m_framebufferCache.find(pRenderPass);
-        FDK_ASSERT(it == rFrame.m_framebufferCache.end(), "This Render pass has already created its resources");
+        FDASSERT(it == rFrame.m_framebufferCache.end(), "This Render pass has already created its resources");
         rFrame.m_framebufferCache[pRenderPass] = Framebuffer();
       }
     }

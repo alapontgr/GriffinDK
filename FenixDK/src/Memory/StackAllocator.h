@@ -14,7 +14,7 @@ namespace fdk
 
       void init(MemAllocator& rAllocator, const mem_size_t size, const mem_align_t alignment) 
       {
-        FDK_ASSERT((m_block.memory() == nullptr), "Stack has already been initialise");
+        FDASSERT((m_block.memory() == nullptr), "Stack has already been initialise");
         m_block.allocate(rAllocator, size, alignment);
         reset();
       }
@@ -27,7 +27,7 @@ namespace fdk
       virtual mem_ptr_t allocate(const mem_size_t size, const mem_align_t alignment) 
       {
         mem_size_t offset = get_alignment_offset(m_pivot, alignment);
-        FDK_ASSERT(((offset + size) <= space_left()), "Not enough memory to allocate that resource");
+        FDASSERT(((offset + size) <= space_left()), "Not enough memory to allocate that resource");
         m_pivot += offset;
         mem_ptr_t pData = m_pivot;
         m_pivot += size;

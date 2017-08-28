@@ -19,8 +19,8 @@ namespace fdk
       T* create(Args&&... args) 
       {
         auto pData = allocate(sizeof(T), alignof(T));
-        FDK_ASSERT(pData, "Failed to allocate memory");
-        FDK_ASSERT(is_aligned(pData, alignof(T)), "Bad alignment");
+        FDASSERT(pData, "Failed to allocate memory");
+        FDASSERT(is_aligned(pData, alignof(T)), "Bad alignment");
         return new (pData) T(args...);
       }
 
@@ -42,7 +42,7 @@ namespace fdk
 
       void allocate(MemAllocator& rAllocator, const mem_size_t size, const mem_align_t alignment) 
       {
-        FDK_ASSERT(m_data == nullptr, "Trying to allocate without releasing the previous memory");
+        FDASSERT(m_data == nullptr, "Trying to allocate without releasing the previous memory");
         m_data = rAllocator.allocate(size, alignment);
         m_size = size;
         m_alignment = alignment;

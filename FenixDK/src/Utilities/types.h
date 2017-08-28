@@ -7,7 +7,7 @@
 
 namespace fdk
 {
-#define FDK_ASSERT(expr, msg) assert(expr&& msg)
+#define FDASSERT(expr, msg) assert(expr&& msg)
 #define FDK_ABORT(msg) quick_exit(EXIT_SUCCESS)
 #define UNUSED(arg) (void)(arg)
 

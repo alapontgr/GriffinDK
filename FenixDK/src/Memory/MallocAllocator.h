@@ -18,7 +18,7 @@ namespace fdk
 
       virtual void release(mem_ptr_t pMemory) 
       {
-        FDK_ASSERT(pMemory, "Invalid memory block");
+        FDASSERT(pMemory, "Invalid memory block");
         release_memory(pMemory);
       }
     };

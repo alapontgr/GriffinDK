@@ -22,7 +22,7 @@ namespace Rendering
   {
     IO::File source;
     source.load(path, 0, alignof(u32));
-    FDK_ASSERT(source.size() > 0, "Loaded empty file");
+    FDASSERT(source.size() > 0, "Loaded empty file");
 
     VkShaderModuleCreateInfo info;
     info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

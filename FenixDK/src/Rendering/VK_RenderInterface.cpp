@@ -189,7 +189,7 @@ namespace Rendering
 																 return strcmp(kInstanceExtensions[i],
 																							 prop.extensionName) == 0;
 															 });
-				FDK_ASSERT(it != properties.end(),
+				FDASSERT(it != properties.end(),
 									 "Couldn't find the required instance extensions");
 			}
 		}
@@ -202,7 +202,7 @@ namespace Rendering
 																											 &extensionCount, nullptr);
 		VK_CHECK(result,
 						 "Swap chain extensions is not supported in the physical device");
-		FDK_ASSERT(extensionCount > 0,
+		FDASSERT(extensionCount > 0,
 							 "Could not find extensions for the physical device");
 
 		{
@@ -217,7 +217,7 @@ namespace Rendering
 															 [&name](const VkExtensionProperties& prop) {
 																 return strcmp(name, prop.extensionName) == 0;
 															 });
-				FDK_ASSERT(it != properties.end(),
+				FDASSERT(it != properties.end(),
 									 "Couldn't find the required device extensions");
 			}
 		}
@@ -246,7 +246,7 @@ namespace Rendering
 
 		u32 familyQueuesCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &familyQueuesCount, nullptr);
-		FDK_ASSERT(familyQueuesCount != 0, "Incorrect count of families found");
+		FDASSERT(familyQueuesCount != 0, "Incorrect count of families found");
 
 		{
 			std::vector<VkBool32> swapChainSupport(familyQueuesCount);
@@ -344,7 +344,7 @@ namespace Rendering
 		u32 deviceCount = 0;
 		auto result = vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 		VK_CHECK(result, "Failed to get number of physical devices");
-		FDK_ASSERT(deviceCount != 0, "Incorrect number of physical devices");
+		FDASSERT(deviceCount != 0, "Incorrect number of physical devices");
 
 		{
 			std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -367,7 +367,7 @@ namespace Rendering
 			check_device_extensions(m_physicalDevice);
 #endif // _DEBUG
 
-			FDK_ASSERT(m_physicalDevice, "A valid physical device was not found");
+			FDASSERT(m_physicalDevice, "A valid physical device was not found");
 			static constexpr u32 kPrioritiesCount = 1;
 			f32 queuePriorities[kPrioritiesCount] = {1.0f};
 
@@ -662,9 +662,9 @@ namespace Rendering
   void VK_RenderInterface::copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
-    FDK_ASSERT(rFrom.m_pBuffer != VK_NULL_HANDLE, "Trying to copy from a non created buffer");
-    FDK_ASSERT(rTo.m_pBuffer != VK_NULL_HANDLE, "Trying to copy to a non created buffer");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(rFrom.m_pBuffer != VK_NULL_HANDLE, "Trying to copy from a non created buffer");
+    FDASSERT(rTo.m_pBuffer != VK_NULL_HANDLE, "Trying to copy to a non created buffer");
 
     VkBufferCopy buffCopy{};
     buffCopy.srcOffset = fromOffset;
@@ -681,7 +681,7 @@ namespace Rendering
   void VK_RenderInterface::use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     
     Buffer* pVertexBuffer = rMesh.vertex_buffer();
     Buffer* pIndexBuffer = rMesh.index_buffer();
@@ -693,14 +693,14 @@ namespace Rendering
   void VK_RenderInterface::bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rMaterial.m_pipeline);
   }
 
   void VK_RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     VkViewport viewport{};
     viewport.x = rViewport.m_offset.x;
     viewport.y = rViewport.m_offset.y;
@@ -714,7 +714,7 @@ namespace Rendering
   void VK_RenderInterface::set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     VkRect2D scissor{};
     scissor.offset.x = rScissor.m_offsetX;
     scissor.offset.y = rScissor.m_offsetY;
@@ -726,7 +726,7 @@ namespace Rendering
   void VK_RenderInterface::draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDK_ASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
+    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
     vkCmdDrawIndexed(cmdBuffer, indexCount, instanceCount, indexOffset, vertexOffset, 0);
   }
 
@@ -746,8 +746,8 @@ namespace Rendering
 
   void* VK_RenderInterface::map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize)
   {
-    FDK_ASSERT(rBuffer.m_pMemory, "The memory of the buffer has not been allocated");
-    FDK_ASSERT(memoryOffset + rangeSize < rBuffer.size(), "Trying to map out of range");
+    FDASSERT(rBuffer.m_pMemory, "The memory of the buffer has not been allocated");
+    FDASSERT(memoryOffset + rangeSize < rBuffer.size(), "Trying to map out of range");
     void* pData = nullptr;
     auto result = vkMapMemory(m_device, rBuffer.m_pMemory, memoryOffset, rangeSize, 0, &pData);
     VK_CHECK(result, "Failed to map memory");

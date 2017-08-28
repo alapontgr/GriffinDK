@@ -19,7 +19,7 @@ namespace Utilities {
 #define  UnixPlatform
 #endif
 
-#define VK_CHECK(result, failMsg) FDK_ASSERT(result == VkResult::VK_SUCCESS, failMsg)
+#define VK_CHECK(result, failMsg) FDASSERT(result == VkResult::VK_SUCCESS, failMsg)
 
 #define PATH const char*
 

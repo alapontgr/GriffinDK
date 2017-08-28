@@ -55,7 +55,7 @@ namespace Rendering
 
 		u32 familyQueuesCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(device, &familyQueuesCount, nullptr);
-		FDK_ASSERT(familyQueuesCount != 0, "Incorrect count of families found");
+		FDASSERT(familyQueuesCount != 0, "Incorrect count of families found");
 
 		{
 			std::vector<VkBool32> swapChainSupport(familyQueuesCount);
@@ -149,7 +149,7 @@ namespace Rendering
 																 return strcmp(kInstanceExtensions[i],
 																							 prop.extensionName) == 0;
 															 });
-				FDK_ASSERT(it != properties.end(),
+				FDASSERT(it != properties.end(),
 									 "Couldn't find the required instance extensions");
 			}
 		}
@@ -196,7 +196,7 @@ namespace Rendering
 																											 &extensionCount, nullptr);
 		VK_CHECK(result,
 						 "Swap chain extensions is not supported in the physical device");
-		FDK_ASSERT(extensionCount > 0,
+		FDASSERT(extensionCount > 0,
 							 "Could not find extensions for the physical device");
 
 		{
@@ -211,7 +211,7 @@ namespace Rendering
 															 [&name](const VkExtensionProperties& prop) {
 																 return strcmp(name, prop.extensionName) == 0;
 															 });
-				FDK_ASSERT(it != properties.end(),
+				FDASSERT(it != properties.end(),
 									 "Couldn't find the required device extensions");
 			}
 		}
@@ -279,7 +279,7 @@ namespace Rendering
 		u32 deviceCount = 0;
 		auto result = vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 		VK_CHECK(result, "Failed to get number of physical devices");
-		FDK_ASSERT(deviceCount != 0, "Incorrect number of physical devices");
+		FDASSERT(deviceCount != 0, "Incorrect number of physical devices");
 
 		{
 			std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -302,7 +302,7 @@ namespace Rendering
 			check_device_available_extensions(m_physicalDevice);
 #endif // _DEBUG
 
-			FDK_ASSERT(m_physicalDevice, "A valid physical device was not found");
+			FDASSERT(m_physicalDevice, "A valid physical device was not found");
 			static constexpr u32 kPrioritiesCount = 1;
 			f32 queuePriorities[kPrioritiesCount] = {1.0f};
 
@@ -1467,7 +1467,7 @@ m_renderPass.init(*this);
 					break;
 				}
 			}
-			FDK_ASSERT(layerFound, "Failed to get validation layers");
+			FDASSERT(layerFound, "Failed to get validation layers");
 		}
 	}
 }

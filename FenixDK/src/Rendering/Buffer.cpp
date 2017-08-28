@@ -14,7 +14,7 @@ namespace Rendering
 			Memory::MemAllocator& rAllocator,
 			Memory::mem_ptr_t pInitialData)
 	{
-		FDK_ASSERT(this->size() == 0, "A buffer must be freed before allocating a new chunk of memory");
+		FDASSERT(this->size() == 0, "A buffer must be freed before allocating a new chunk of memory");
 		m_desc = rDesc;
 		if (pInitialData)
 		{

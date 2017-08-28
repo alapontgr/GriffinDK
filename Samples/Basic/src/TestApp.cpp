@@ -2,6 +2,7 @@
 #include "Rendering\VK_Material.h"
 #include "Rendering\context.h"
 #include "Rendering\Framebuffer.h"
+#include "Rendering\RenderConfiguration.h"
 
 struct VertexDesc // Temporary
 {
@@ -167,16 +168,94 @@ void TestApp::create_mesh()
 
   // TODO: Map staging buffer and upload the data of the vertex buffer
   // TODO: Map the staging buffer and upload the data of the vertex buffer
+  u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
+  u32 sizeIndexBuffer = 6 * sizeof(16);
+  u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
 
-  // TODO: Copy region from the staging buffer to the vertex buffer
-  // TODO: Copy region from the staging buffer to the index buffer
+  Memory::mem_t* pData = static_cast<Memory::mem_t*>(
+    m_pRenderInterface->map_buffer_gpu_memory(*m_pStagingBuffer, 0, totalSize));
+
+  memcpy(pData, reinterpret_cast<const void*>(&g_vertices[0]), sizeVertexBuffer);
+  memcpy((pData + sizeVertexBuffer), g_indices, sizeIndexBuffer);
+
+  m_pRenderInterface->unmap_buffer_gpu_memory(*m_pStagingBuffer);
 
   m_meshDirty = true;
 }
 
 void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
 {
-  // TODO: Update vertex and index buffers
+  u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
+  u32 sizeIndexBuffer = 6 * sizeof(u16);
+  u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
+
+  auto* pVertexBuffer = m_mesh.vertex_buffer();
+  auto* pIndexBuffer = m_mesh.index_buffer();
+
+  VkBufferMemoryBarrier barrier;
+  barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+  barrier.pNext = nullptr;
+  barrier.buffer = pVertexBuffer->m_pBuffer;
+  barrier.offset = 0;
+  barrier.size = sizeVertexBuffer;
+  barrier.srcAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+  barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+  vkCmdPipelineBarrier(
+    rCmdBuffer.m_commandBuffer,
+    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+    VK_PIPELINE_STAGE_TRANSFER_BIT,
+    0,
+    0, nullptr,
+    1, &barrier,
+    0, nullptr);
+
+  m_pRenderInterface->copy_buffer(*m_pStagingBuffer, 0, *pVertexBuffer, 0, sizeVertexBuffer, rCmdBuffer);
+
+  barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+  barrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+
+  vkCmdPipelineBarrier(
+    rCmdBuffer.m_commandBuffer,
+    VK_PIPELINE_STAGE_TRANSFER_BIT,
+    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+    0,
+    0, nullptr,
+    1, &barrier,
+    0, nullptr);
+
+  // Index buffer update
+
+  barrier.buffer = pIndexBuffer->m_pBuffer;
+  barrier.offset = 0;
+  barrier.size = sizeIndexBuffer;
+  barrier.srcAccessMask = VK_ACCESS_INDEX_READ_BIT;
+  barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+  vkCmdPipelineBarrier(
+    rCmdBuffer.m_commandBuffer,
+    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+    VK_PIPELINE_STAGE_TRANSFER_BIT,
+    0,
+    0, nullptr,
+    1, &barrier,
+    0, nullptr);
+
+  m_pRenderInterface->copy_buffer(*m_pStagingBuffer, sizeVertexBuffer, *pIndexBuffer, 0, sizeIndexBuffer, rCmdBuffer);
+
+  barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+  barrier.dstAccessMask = VK_ACCESS_INDEX_READ_BIT;
+
+  vkCmdPipelineBarrier(
+    rCmdBuffer.m_commandBuffer,
+    VK_PIPELINE_STAGE_TRANSFER_BIT,
+    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
+    0,
+    0, nullptr,
+    1, &barrier,
+    0, nullptr);
 }
 
 void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
@@ -188,6 +267,24 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
   m_renderPass.start(*m_pRenderInterface, rCmdBuffer, *pFramebuffer);
 
   // Draw
+  Rendering::Viewport viewport;
+  viewport.m_dimensions = v2(width(), height());
+  viewport.m_offset = v2(0.0f);
+  viewport.m_minDepth = 0.0f;
+  viewport.m_maxDepth = 1.0f;
+  Rendering::Scissor scissor;
+  scissor.m_width = pFramebuffer->width();
+  scissor.m_height = pFramebuffer->height();
+  scissor.m_offsetX = 0;
+  scissor.m_offsetY = 0;
+
+  m_pRenderInterface->set_scissor(scissor, rCmdBuffer);
+  m_pRenderInterface->set_viewport(viewport, rCmdBuffer);
+
+  m_pRenderInterface->bind_material(*m_pMaterial, rCmdBuffer);
+  m_pRenderInterface->use_mesh(m_mesh, rCmdBuffer);
+
+  m_pRenderInterface->draw_indexed(6, 1, 0, 0, rCmdBuffer);
 
   m_renderPass.end(*m_pRenderInterface, rCmdBuffer);
 }

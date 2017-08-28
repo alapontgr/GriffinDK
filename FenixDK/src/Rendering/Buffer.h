@@ -12,6 +12,12 @@ namespace fdk
 {
 namespace Rendering
 {
+  struct BufferRange
+  {
+    u32 m_offset;
+    u32 m_size;
+  };
+
 	class Buffer : public IMPLEMENTATION(Buffer)
 	{
 	public:
@@ -66,7 +72,7 @@ namespace Rendering
 		template <typename T>
 		T* data_mutable_as()
 		{
-			FDK_ASSERT(Memory::is_aligned(m_data.memory(), alignof(T)), "The data is not aligned for this type");
+			FDASSERT(Memory::is_aligned(m_data.memory(), alignof(T)), "The data is not aligned for this type");
 			return reinterpret_cast<T*>(m_data.memory());
 		}
 

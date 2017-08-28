@@ -12,6 +12,8 @@ namespace fdk
     {
     public:
 
+      RenderSurface() {}
+
       u32 m_width;
       u32 m_height;
       Texture2D* m_pColorTexture;

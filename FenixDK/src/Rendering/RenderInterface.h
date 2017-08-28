@@ -5,7 +5,7 @@
 #include "Memory\MemAllocator.h"
 
 #include "CommandBuffer.h"
-#include "CommandBufferFactory.h"
+#include "FrameResourceFactory.h"
 
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL

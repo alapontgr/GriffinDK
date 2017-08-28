@@ -1,6 +1,7 @@
 #include "TestApp.h"
 #include "Rendering\VK_Material.h"
 #include "Rendering\context.h"
+#include "Rendering\Framebuffer.h"
 
 struct VertexDesc // Temporary
 {
@@ -43,7 +44,7 @@ void TestApp::on_start()
   // Use the Vulkan render interface
   m_pRi = reinterpret_cast<Rendering::VK_RenderInterface*>(m_pRenderInterface);
 
-  m_cmdBufferFactory.init(Rendering::kBufferCount, *m_pRenderInterface);
+  m_frameResourceFactory.init(Rendering::kBufferCount, *m_pRenderInterface);
 
   create_render_pass();
 
@@ -61,9 +62,9 @@ void TestApp::on_render()
 {
   m_pRi->beginFrame();
 
-  m_cmdBufferFactory.get_current_fence()->wait(*m_pRenderInterface);
+  m_frameResourceFactory.get_current_fence()->wait(*m_pRenderInterface);
 
-  auto* pCmdBuffer = m_cmdBufferFactory.get_primary_command_buffer(*m_pRenderInterface, m_mallocAllocator);
+  auto* pCmdBuffer = m_frameResourceFactory.get_primary_command_buffer(*m_pRenderInterface, m_mallocAllocator);
   pCmdBuffer->start_recording();
 
 
@@ -90,7 +91,7 @@ void TestApp::on_render()
 
   m_pRi->endFrame();
 
-  m_cmdBufferFactory.flip();
+  m_frameResourceFactory.flip();
 }
 
 void TestApp::on_release()
@@ -103,6 +104,7 @@ void TestApp::on_release()
 void TestApp::create_render_pass()
 {
   m_renderPass.init(*m_pRenderInterface);
+  m_frameResourceFactory.create_render_pass_resources(&m_renderPass);
 }
 
 void TestApp::create_material()
@@ -179,12 +181,18 @@ void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
 
 void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
 {
-  m_renderPass.start(*m_pRenderInterface, rCmdBuffer, m_renderSurface);
+  auto* pFramebuffer = m_frameResourceFactory.get_render_pass_framebuffer(&m_renderPass);
+  pFramebuffer->destroy(*m_pRenderInterface);
+  pFramebuffer->create(*m_pRenderInterface, m_renderPass, m_renderSurface);
+
+  m_renderPass.start(*m_pRenderInterface, rCmdBuffer, *pFramebuffer);
+
+  // Draw
 
   m_renderPass.end(*m_pRenderInterface, rCmdBuffer);
 }
 
 void TestApp::submit_work(Rendering::CommandBuffer& rCmdBuffer)
 {
-  m_pRenderInterface->submit_work(rCmdBuffer, *m_cmdBufferFactory.get_current_fence());
+  m_pRenderInterface->submit_work(rCmdBuffer, *m_frameResourceFactory.get_current_fence());
 }

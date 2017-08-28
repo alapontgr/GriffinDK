@@ -12,7 +12,7 @@
 #include "Memory/MemAllocator.h"
 #include "Memory/MallocAllocator.h"
 #include "Rendering/Material.h"
-#include "Rendering/CommandBufferFactory.h"
+#include "Rendering/FrameResourceFactory.h"
 #include "Rendering/RenderSurface.h"
 
 
@@ -62,7 +62,7 @@ private:
 
   Memory::MallocAllocator m_mallocAllocator;
 
-  Rendering::CommandBufferFactory m_cmdBufferFactory;
+  Rendering::FrameResourceFactory m_frameResourceFactory;
   std::vector<VkCommandBuffer> m_cmdList;
 
   bool m_meshDirty;

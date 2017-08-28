@@ -4,6 +4,7 @@
 #ifdef FENIX_VK_IMPL
 #include "VK_Framebuffer.h"
 #endif
+#include "Utilities/types.h"
 
 namespace fdk
 {
@@ -23,6 +24,14 @@ namespace fdk
         const RenderSurface& rRenderSurface);
 
       void destroy(const RenderInterface& rRI);
+
+      u32 width() const { return m_width; }
+      u32 height() const { return m_height; }
+
+    private:
+
+      u32 m_width;
+      u32 m_height;
     };
 
   }

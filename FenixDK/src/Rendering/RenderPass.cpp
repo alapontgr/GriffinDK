@@ -6,7 +6,7 @@
 #include "Rendering/VK_RenderInterface.h"
 #include "Rendering/VK_CommandBuffer.h"
 #include "RenderInterface.h"
-#include "RenderSurface.h"
+#include "Framebuffer.h"
 
 namespace fdk {
 namespace Rendering {
@@ -92,26 +92,23 @@ void RenderPass::release(RenderInterface& rRI)
   m_renderPassImpl = VK_NULL_HANDLE;
 }
 
-void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer, RenderSurface& rSurface)
+void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer)
 {
-  m_framebuffer.destroy(rRI);
-  m_framebuffer.create(rRI, *this, rSurface);
-
   //VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
   //VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
 
   // Begin render pass
 
   // TODO: Refactor that
-  VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+  VkClearValue clearColor = { 0.0f, 1.0f, 0.0f, 0.0f };
 
   VkRenderPassBeginInfo passBeginInfo{};
   passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   passBeginInfo.pNext = nullptr;
   passBeginInfo.renderPass = m_renderPassImpl;
-  passBeginInfo.framebuffer = m_framebuffer.handle();
-  passBeginInfo.renderArea.extent.width = rSurface.m_width;
-  passBeginInfo.renderArea.extent.height = rSurface.m_height;
+  passBeginInfo.framebuffer = rFramebuffer.handle();
+  passBeginInfo.renderArea.extent.width = rFramebuffer.width();
+  passBeginInfo.renderArea.extent.height = rFramebuffer.height();
   passBeginInfo.renderArea.offset.x = 0;
   passBeginInfo.renderArea.offset.y = 0;
   passBeginInfo.clearValueCount = 1;

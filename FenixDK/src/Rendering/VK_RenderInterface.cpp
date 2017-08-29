@@ -659,25 +659,6 @@ namespace Rendering
     }
   }
 
-  void VK_RenderInterface::copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer)
-  {
-    auto cmdBuffer = rCmdBuffer.m_commandBuffer;
-    FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
-    FDASSERT(rFrom.m_pBuffer != VK_NULL_HANDLE, "Trying to copy from a non created buffer");
-    FDASSERT(rTo.m_pBuffer != VK_NULL_HANDLE, "Trying to copy to a non created buffer");
-
-    VkBufferCopy buffCopy{};
-    buffCopy.srcOffset = fromOffset;
-    buffCopy.dstOffset = toOffset;
-    buffCopy.size = rangeSize;
-    vkCmdCopyBuffer(cmdBuffer, rFrom.m_pBuffer, rTo.m_pBuffer, 1, &buffCopy);
-  }
-
-  void VK_RenderInterface::send_buffer_memory_to_gpu(Buffer& rBuffer)
-  {
-    FDK_ABORT("Not implemented");
-  }
-
   void VK_RenderInterface::use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer)
   {
     auto cmdBuffer = rCmdBuffer.m_commandBuffer;

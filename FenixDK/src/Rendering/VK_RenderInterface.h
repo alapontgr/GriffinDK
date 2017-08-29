@@ -47,10 +47,6 @@ namespace Rendering
 
 		void destroy_buffer(Buffer& rBuffer);
 
-		void copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer);
-
-		void send_buffer_memory_to_gpu(Buffer& rBuffer);
-
 		void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
 
 		void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);

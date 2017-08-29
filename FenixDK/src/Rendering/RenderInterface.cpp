@@ -36,16 +36,6 @@ namespace Rendering
     BaseT::destroy_buffer(rBuffer);
 	}
 
-	void RenderInterface::copy_buffer(Buffer& rFrom, const u32 fromOffset, Buffer& rTo, const u32 toOffset, const u32 rangeSize, CommandBuffer& rCmdBuffer)
-	{
-    BaseT::copy_buffer(rFrom, fromOffset, rTo, toOffset, rangeSize, rCmdBuffer);
-	}
-
-	void RenderInterface::send_buffer_memory_to_gpu(Buffer& rBuffer)
-	{
-    BaseT::send_buffer_memory_to_gpu(rBuffer);
-	}
-
 	void RenderInterface::use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer)
 	{
     BaseT::use_mesh(rMesh, rCmdBuffer);

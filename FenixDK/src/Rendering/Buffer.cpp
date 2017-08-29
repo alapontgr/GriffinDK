@@ -5,7 +5,7 @@ namespace fdk
 namespace Rendering
 {
 
-  Buffer::Buffer() : m_desc{ BufferDesc{0,0,0,1} }
+  Buffer::Buffer() : m_desc{ BufferDesc{InvalidUsage,0,0,0,1} }
 	{
 	}
 
@@ -31,7 +31,17 @@ namespace Rendering
 		}
 	}
 
-	Memory::mem_ptr_t Buffer::data_mutable()
+  void Buffer::copy_range_from(
+    const Buffer& rFrom, 
+    const u32 fromOffset, 
+    const u32 offset, 
+    const u32 size, 
+    CommandBuffer& rCmdBuffer)
+  {
+    BaseT::copy_buffer_range(rFrom, m_desc, fromOffset, offset, size, rCmdBuffer);
+  }
+
+  Memory::mem_ptr_t Buffer::data_mutable()
 	{
 		return m_data.memory();
 	}

@@ -148,11 +148,13 @@ void TestApp::create_material()
 
 void TestApp::create_mesh()
 {
-  Rendering::Buffer::BufferDesc desc;
+  Rendering::BufferDesc desc;
+  
   desc.m_size = 1024 * 1024 * 16; // 16 MB
+  desc.m_currentUsage = Rendering::Transfer_Src;
   desc.m_alignment = 16;
-  desc.m_bufferUsage = Rendering::Buffer::EBufferUsage::Transfer_Src;
-  desc.m_memoryProperties = Rendering::Buffer::EMemoryProperties::CPU_Visible | Rendering::Buffer::EMemoryProperties::CPU_GPU_Coherent;
+  desc.m_bufferUsage = Rendering::EBufferUsage::Transfer_Src;
+  desc.m_memoryProperties = Rendering::EMemoryProperties::CPU_Visible | Rendering::EMemoryProperties::CPU_GPU_Coherent;
 
   m_pStagingBuffer = Rendering::Buffer::create(m_mallocAllocator);
   m_pStagingBuffer->init(desc, m_mallocAllocator);
@@ -192,70 +194,8 @@ void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
   auto* pVertexBuffer = m_mesh.vertex_buffer();
   auto* pIndexBuffer = m_mesh.index_buffer();
 
-  VkBufferMemoryBarrier barrier;
-  barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-  barrier.pNext = nullptr;
-  barrier.buffer = pVertexBuffer->m_pBuffer;
-  barrier.offset = 0;
-  barrier.size = sizeVertexBuffer;
-  barrier.srcAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
-  barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-
-  vkCmdPipelineBarrier(
-    rCmdBuffer.m_commandBuffer,
-    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
-    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    0,
-    0, nullptr,
-    1, &barrier,
-    0, nullptr);
-
-  m_pRenderInterface->copy_buffer(*m_pStagingBuffer, 0, *pVertexBuffer, 0, sizeVertexBuffer, rCmdBuffer);
-
-  barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-  barrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
-
-  vkCmdPipelineBarrier(
-    rCmdBuffer.m_commandBuffer,
-    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
-    0,
-    0, nullptr,
-    1, &barrier,
-    0, nullptr);
-
-  // Index buffer update
-
-  barrier.buffer = pIndexBuffer->m_pBuffer;
-  barrier.offset = 0;
-  barrier.size = sizeIndexBuffer;
-  barrier.srcAccessMask = VK_ACCESS_INDEX_READ_BIT;
-  barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-  vkCmdPipelineBarrier(
-    rCmdBuffer.m_commandBuffer,
-    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
-    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    0,
-    0, nullptr,
-    1, &barrier,
-    0, nullptr);
-
-  m_pRenderInterface->copy_buffer(*m_pStagingBuffer, sizeVertexBuffer, *pIndexBuffer, 0, sizeIndexBuffer, rCmdBuffer);
-
-  barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-  barrier.dstAccessMask = VK_ACCESS_INDEX_READ_BIT;
-
-  vkCmdPipelineBarrier(
-    rCmdBuffer.m_commandBuffer,
-    VK_PIPELINE_STAGE_TRANSFER_BIT,
-    VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
-    0,
-    0, nullptr,
-    1, &barrier,
-    0, nullptr);
+  pVertexBuffer->copy_range_from(*m_pStagingBuffer, 0, 0, sizeVertexBuffer, rCmdBuffer);
+  pIndexBuffer->copy_range_from(*m_pStagingBuffer, sizeVertexBuffer, 0, sizeIndexBuffer, rCmdBuffer);
 }
 
 void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)

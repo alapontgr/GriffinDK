@@ -24,20 +24,22 @@ namespace Framework
       m_pIndexBuffer = Rendering::Buffer::create(rAllocator);
     }
 
-    Rendering::Buffer::BufferDesc vertexDesc;
-    vertexDesc.m_bufferUsage = Rendering::Buffer::UsageFlags(
-				Rendering::Buffer::Transfer_Dst |
-				Rendering::Buffer::Vertex_Buffer);
-    vertexDesc.m_memoryProperties = Rendering::Buffer::MemoryProperties(Rendering::Buffer::GPU_Local);
+    Rendering::BufferDesc vertexDesc;
+    vertexDesc.m_currentUsage = Rendering::Vertex_Buffer;
+    vertexDesc.m_bufferUsage = Rendering::UsageFlags(
+				Rendering::Transfer_Dst |
+				Rendering::Vertex_Buffer);
+    vertexDesc.m_memoryProperties = Rendering::MemoryProperties(Rendering::GPU_Local);
     vertexDesc.m_size = vertexCount * vertexSize;
     vertexDesc.m_alignment = alignof(f32);
     m_pVertexBuffer->init(vertexDesc, rAllocator, (Memory::mem_ptr_t)pVertices);
 
-    Rendering::Buffer::BufferDesc indexDesc;
-    indexDesc.m_bufferUsage = Rendering::Buffer::UsageFlags(
-      Rendering::Buffer::Transfer_Dst |
-      Rendering::Buffer::Index_Buffer);
-    indexDesc.m_memoryProperties = Rendering::Buffer::MemoryProperties(Rendering::Buffer::GPU_Local);
+    Rendering::BufferDesc indexDesc;
+    indexDesc.m_currentUsage = Rendering::Index_Buffer;
+    indexDesc.m_bufferUsage = Rendering::UsageFlags(
+      Rendering::Transfer_Dst |
+      Rendering::Index_Buffer);
+    indexDesc.m_memoryProperties = Rendering::MemoryProperties(Rendering::GPU_Local);
     indexDesc.m_size = indexCount * indexSize;
     indexDesc.m_alignment = alignof(u16);
     m_pIndexBuffer->init(indexDesc, rAllocator, (Memory::mem_ptr_t)pIndices);

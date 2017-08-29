@@ -168,8 +168,6 @@ void TestApp::create_mesh()
   m_pRenderInterface->create_buffer(*m_mesh.index_buffer());
   m_pRenderInterface->create_buffer(*m_mesh.vertex_buffer());
 
-  // TODO: Map staging buffer and upload the data of the vertex buffer
-  // TODO: Map the staging buffer and upload the data of the vertex buffer
   u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
   u32 sizeIndexBuffer = 6 * sizeof(16);
   u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
@@ -190,7 +188,6 @@ void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
   u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
   u32 sizeIndexBuffer = 6 * sizeof(u16);
   u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
-
   auto* pVertexBuffer = m_mesh.vertex_buffer();
   auto* pIndexBuffer = m_mesh.index_buffer();
 
@@ -205,7 +202,6 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
   pFramebuffer->create(*m_pRenderInterface, m_renderPass, m_renderSurface);
 
   m_renderPass.start(*m_pRenderInterface, rCmdBuffer, *pFramebuffer);
-
   // Draw
   Rendering::Viewport viewport;
   viewport.m_dimensions = v2(width(), height());
@@ -217,13 +213,11 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
   scissor.m_height = pFramebuffer->height();
   scissor.m_offsetX = 0;
   scissor.m_offsetY = 0;
-
   m_pRenderInterface->set_scissor(scissor, rCmdBuffer);
   m_pRenderInterface->set_viewport(viewport, rCmdBuffer);
 
   m_pRenderInterface->bind_material(*m_pMaterial, rCmdBuffer);
   m_pRenderInterface->use_mesh(m_mesh, rCmdBuffer);
-
   m_pRenderInterface->draw_indexed(6, 1, 0, 0, rCmdBuffer);
 
   m_renderPass.end(*m_pRenderInterface, rCmdBuffer);

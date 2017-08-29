@@ -12,6 +12,7 @@ namespace fdk
 
     void VK_CommandBuffer::start_recording()
     {
+      // TODO: Refactor to be possible to use it as a secondary command buffer (Inheritance info)
       VkCommandBufferBeginInfo info;
       info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
       info.pNext = nullptr;

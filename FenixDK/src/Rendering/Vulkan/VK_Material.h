@@ -4,7 +4,7 @@
 #include "Utilities/GeneralDefinitions.h"
 #include "../RenderConfiguration.h"
 
-#include "../MaterialDefinitions.h"
+#include "../MaterialUtils.h"
 #include "Containers/Mask.h"
 
 namespace fdk

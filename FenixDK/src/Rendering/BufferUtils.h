@@ -7,6 +7,8 @@ namespace fdk
 {
   namespace Rendering 
   {
+    class Buffer;
+
     enum EBufferUsage : u32
     {
       InvalidUsage = 0,
@@ -39,6 +41,13 @@ namespace fdk
       MemoryProperties m_memoryProperties;
       Memory::mem_size_t m_size;
       Memory::mem_size_t m_alignment;
+    };
+
+    struct BufferChunk 
+    {
+      Buffer* m_pBuffer;
+      u32 m_dataOffset;
+      u32 m_dataSize;
     };
   }
 }

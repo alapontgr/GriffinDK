@@ -1,6 +1,5 @@
 #include "IO\FileUtils.h"
 #include "context.h"
-#include "Utilities\ClassHelpers.h"
 #include "Shader.h"
 
 namespace fdk

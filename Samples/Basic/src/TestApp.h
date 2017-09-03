@@ -7,7 +7,7 @@
 #include "Entry.h"
 
 
-#include "Rendering/VK_RenderInterface.h"
+#include "Rendering/RenderInterface.h"
 #include "Framework/Mesh.h"
 #include "Memory/MemAllocator.h"
 #include "Memory/MallocAllocator.h"
@@ -51,8 +51,6 @@ private:
   Rendering::BlendState m_blendState;
   Rendering::RasterState m_rasterState;
   Rendering::MultiSampleState m_multiSampleState;
-
-  Rendering::VK_RenderInterface* m_pRi;
 
   Rendering::RenderPass m_renderPass;
   Framework::Mesh m_mesh;

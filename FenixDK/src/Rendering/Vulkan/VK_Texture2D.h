@@ -4,16 +4,17 @@
 
 namespace fdk
 {
-  namespace Rendering 
-  {
-    class VK_Texture2D 
-    {
-    public:
+namespace Rendering
+{
+	namespace Vulkan
+	{
+		class VK_Texture2D
+		{
+		public:
+			VK_Texture2D();
 
-      VK_Texture2D();
-      
-      VkImageView m_view;
-    };
-
-  }
+			VkImageView m_view;
+		};
+	}
+}
 }

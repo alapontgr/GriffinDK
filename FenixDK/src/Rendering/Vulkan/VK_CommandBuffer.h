@@ -4,20 +4,21 @@
 
 namespace fdk
 {
-  namespace Rendering
-  {
-    class VK_CommandBuffer
-    {
-    public:
+namespace Rendering
+{
+	namespace Vulkan
+	{
+		class VK_CommandBuffer
+		{
+		public:
+			VK_CommandBuffer();
 
-      VK_CommandBuffer();
+			void start_recording();
 
-      void start_recording();
+			void end_recording();
 
-      void end_recording();
-
-      VkCommandBuffer m_commandBuffer;
-    };
-
-  }
+			VkCommandBuffer m_commandBuffer;
+		};
+	}
+}
 }

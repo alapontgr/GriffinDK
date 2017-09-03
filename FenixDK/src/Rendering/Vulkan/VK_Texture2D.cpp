@@ -2,15 +2,15 @@
 
 namespace fdk
 {
-  namespace Rendering 
-  {
-    
-    VK_Texture2D::VK_Texture2D()
-      : m_view{VK_NULL_HANDLE}
-    {
+namespace Rendering
+{
 
-    }
-
-  }
+	namespace Vulkan
+	{
+		VK_Texture2D::VK_Texture2D()
+				: m_view{VK_NULL_HANDLE}
+		{
+		}
+	}
 }
-
+}

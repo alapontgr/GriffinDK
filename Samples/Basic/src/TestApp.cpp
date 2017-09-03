@@ -1,5 +1,5 @@
 #include "TestApp.h"
-#include "Rendering\VK_Material.h"
+
 #include "Rendering\context.h"
 #include "Rendering\Framebuffer.h"
 #include "Rendering\RenderConfiguration.h"
@@ -42,9 +42,6 @@ void TestApp::on_pre_init()
 
 void TestApp::on_start()
 {
-  // Use the Vulkan render interface
-  m_pRi = reinterpret_cast<Rendering::VK_RenderInterface*>(m_pRenderInterface);
-
   m_frameResourceFactory.init(Rendering::kBufferCount, *m_pRenderInterface);
 
   create_render_pass();
@@ -61,7 +58,7 @@ void TestApp::on_update()
 
 void TestApp::on_render()
 {
-  m_pRi->beginFrame();
+  m_pRenderInterface->beginFrame();
 
   m_frameResourceFactory.get_current_fence()->wait(*m_pRenderInterface);
 
@@ -90,7 +87,7 @@ void TestApp::on_render()
   submit_work(*pCmdBuffer);
 
 
-  m_pRi->endFrame();
+  m_pRenderInterface->endFrame();
 
   m_frameResourceFactory.flip();
 }

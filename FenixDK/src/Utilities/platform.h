@@ -36,7 +36,7 @@ constexpr u32 kEngineVersion = VK_MAKE_VERSION(0, 0, 1);
 #ifdef WinPlatform
 
 #define FENIX_VK_IMPL // This macro enables the implementation of vulkan
-#define GPUIMPL_ID VK_
+#define GPUIMPL_ID Vulkan::VK_
 
 #endif // WinPlatform
 

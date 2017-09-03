@@ -2,31 +2,35 @@
 
 #include "Utilities/VulkanInclude.h"
 
-namespace fdk {
-namespace Rendering {
+namespace fdk
+{
+namespace Rendering
+{
 
-class RenderInterface;
-class RenderPass;
-class RenderSurface;
+	class RenderInterface;
+	class RenderPass;
+	class RenderSurface;
 
-class VK_Framebuffer {
-public:
-  VK_Framebuffer();
-  ~VK_Framebuffer();
+	namespace Vulkan
+	{
+		class VK_Framebuffer
+		{
+		public:
+			VK_Framebuffer();
+			~VK_Framebuffer();
 
-  void create(
-    const RenderInterface& rRI, 
-    const RenderPass& rRenderPass,
-    const RenderSurface& rRenderSurface);
+			void create(
+					const RenderInterface& rRI,
+					const RenderPass& rRenderPass,
+					const RenderSurface& rRenderSurface);
 
-  void destroy(const RenderInterface& rRI);
+			void destroy(const RenderInterface& rRI);
 
-  VkFramebuffer handle() { return m_handle; }
+			VkFramebuffer handle() { return m_handle; }
 
-private:
-
-  VkFramebuffer m_handle;
-};
-
+		private:
+			VkFramebuffer m_handle;
+		};
+	}
 }
 }

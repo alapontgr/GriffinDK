@@ -4,20 +4,21 @@
 
 namespace fdk
 {
-  namespace Rendering 
-  {
-    class RenderInterface;
+namespace Rendering
+{
+	class RenderInterface;
 
-    class VK_Fence 
-    {
-    public:
+	namespace Vulkan
+	{
+		class VK_Fence
+		{
+		public:
+			VK_Fence();
 
-      VK_Fence();
+			void wait(const RenderInterface& rRi);
 
-      void wait(const RenderInterface& rRi);
-
-      VkFence m_fence;
-    };
-
-  }
+			VkFence m_fence;
+		};
+	}
+}
 }

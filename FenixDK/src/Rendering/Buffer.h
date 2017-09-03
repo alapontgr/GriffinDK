@@ -5,7 +5,7 @@
 
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
-#include "VK_Buffer.h"
+#include "Vulkan/VK_Buffer.h"
 #endif
 
 namespace fdk

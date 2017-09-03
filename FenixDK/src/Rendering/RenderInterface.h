@@ -9,7 +9,7 @@
 
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
-#include "VK_RenderInterface.h"
+#include "Vulkan/VK_RenderInterface.h"
 #endif
 
 namespace fdk

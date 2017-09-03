@@ -1,7 +1,7 @@
 #include "VK_Material.h"
 #include "Utilities\platform.h"
 #include "IO\FileUtils.h"
-#include "RenderInterface.h"
+#include "../RenderInterface.h"
 
 namespace fdk
 {

@@ -1,12 +1,11 @@
 #include "VK_Framebuffer.h"
 
-#include "context.h"
-#include "RenderPass.h"
+#include "../RenderPass.h"
 
 #include "Framework\app.h"
 #include "Utilities\platform.h"
-#include "RenderSurface.h"
-#include "Texture2D.h"
+#include "../RenderSurface.h"
+#include "../Texture2D.h"
 
 namespace fdk {
 namespace Rendering {

@@ -3,7 +3,7 @@
 
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
-#include "VK_Material.h"
+#include "Vulkan/VK_Material.h"
 #endif
 
 namespace fdk

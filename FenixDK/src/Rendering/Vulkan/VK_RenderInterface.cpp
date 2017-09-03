@@ -7,12 +7,11 @@
 #include "Framework\Mesh.h"
 
 // Objects with Vulkan implementation
-#include "VK_Buffer.h"
-#include "VK_Material.h"
-#include "VK_CommandBuffer.h"
-#include "Material.h"
-#include "Fence.h"
-#include "Texture2D.h"
+#include "../Buffer.h"
+#include "../Material.h"
+#include "../CommandBuffer.h"
+#include "../Fence.h"
+#include "../Texture2D.h"
 
 namespace fdk
 {

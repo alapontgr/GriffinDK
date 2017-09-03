@@ -2,7 +2,7 @@
 
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
-#include "VK_Fence.h"
+#include "Vulkan/VK_Fence.h"
 #endif
 
 namespace fdk

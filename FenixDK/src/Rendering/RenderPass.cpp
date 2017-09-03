@@ -3,8 +3,8 @@
 #include "Utilities/platform.h"
 #include "../Utilities/VulkanInclude.h"
 
-#include "Rendering/VK_RenderInterface.h"
-#include "Rendering/VK_CommandBuffer.h"
+#include "Rendering/RenderInterface.h"
+#include "Rendering/CommandBuffer.h"
 #include "RenderInterface.h"
 #include "Framebuffer.h"
 

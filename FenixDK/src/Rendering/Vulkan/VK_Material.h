@@ -2,9 +2,9 @@
 
 #include "Utilities/VulkanInclude.h"
 #include "Utilities/GeneralDefinitions.h"
-#include "RenderConfiguration.h"
+#include "../RenderConfiguration.h"
 
-#include "MaterialDefinitions.h"
+#include "../MaterialDefinitions.h"
 #include "Containers/Mask.h"
 
 namespace fdk

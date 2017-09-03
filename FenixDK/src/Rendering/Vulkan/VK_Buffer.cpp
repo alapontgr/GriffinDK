@@ -1,7 +1,7 @@
 #include "VK_Buffer.h"
 
-#include "CommandBuffer.h"
-#include "Buffer.h"
+#include "../CommandBuffer.h"
+#include "../Buffer.h"
 #include <unordered_map>
 
 namespace fdk

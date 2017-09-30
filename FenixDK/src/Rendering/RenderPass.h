@@ -9,6 +9,7 @@ class RenderInterface;
 class CommandBuffer;
 class Framebuffer;
 
+// TODO: Refactor that. Hide VK implementation of a render pass.
 class RenderPass {
 
 public:

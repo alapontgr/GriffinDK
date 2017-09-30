@@ -45,6 +45,12 @@ namespace Memory
     return (reinterpret_cast<mem_size_t>(pData) & (alignment-1)) == 0;
   }
 
+  inline mem_size_t get_alignment_offset(mem_size_t pBase, const mem_align_t alignment)
+  {
+    auto offset = pBase & (alignment - 1));
+    return offset != 0 ? (alignment - offset) : 0;
+  }
+
   inline mem_size_t get_alignment_offset(mem_ptr_t pData, const mem_align_t alignment)
   {
     auto offset = (reinterpret_cast<mem_size_t>(pData) & (alignment - 1));

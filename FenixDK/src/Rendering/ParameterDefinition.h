@@ -1,23 +1,27 @@
 #pragma once
 #include "Utilities\types.h"
+#include "Utilities\Name.h"
 #include "BufferUtils.h"
 
 namespace fdk
 {
   namespace Rendering 
   {
-    class Texture2D;
 
-    struct ConstantBufferParameter
+    enum EShaderParameterType : u32 
     {
-      u32 m_slot;
-      BufferChunk m_dataChunk;
+      Type_ConstantBuffer = 0,
+      Type_Texture2D
     };
 
-    struct Texture2DParameter 
+    struct ParameterDefinition 
     {
-      u32 m_slot;
-      Texture2D* m_boundTexture;
+      Utilities::Name m_paramName;
+      EShaderParameterType m_paramType;
+      u32 m_bindingSlot;
+      u32 m_offset;
+      u32 m_size;
+      u32 m_alignment;
     };
   }
 }

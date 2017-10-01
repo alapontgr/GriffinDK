@@ -6,6 +6,7 @@
 #ifdef FENIX_VK_IMPL
 #include "Vulkan/VK_ParameterBuffer.h"
 #endif
+#include "Memory/MemAllocator.h"
 
 namespace fdk
 {
@@ -21,11 +22,13 @@ namespace fdk
 
       ParameterBuffer();
 
-      void create(RenderInterface& rRI);
+      void create(RenderInterface& rRI, Memory::MemAllocator& rAllocator);
 
+      void release(RenderInterface& rRI);
+      
       void update();
-
-      void release();
+      
+      void bind();
 
       u32 slot() const { return m_bindingSlot; }
 
@@ -33,6 +36,7 @@ namespace fdk
 
     private:
 
+      Memory::mem_ptr_t m_pParametersData;
       MaterialParameterSet* m_pParameterSetLayout;
       u32 m_bindingSlot;
     };

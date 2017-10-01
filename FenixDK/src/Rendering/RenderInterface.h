@@ -50,11 +50,11 @@ namespace Rendering
 
     void create_command_buffer(CommandBuffer& rCommandBuffer);
 
+    void create_fence(Fence& rFence);
+
     void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
     void unmap_buffer_gpu_memory(Buffer& rBuffer);
-
-    void create_fence(Fence& rFence);
 
     void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence);
 

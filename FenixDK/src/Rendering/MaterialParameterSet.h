@@ -20,9 +20,9 @@ namespace Rendering
 
     void add_parameter(const ParameterDefinition& rParameterDefinition);
   
-    ParameterDefinition* get_parameter(const Utilities::Name& rParamName);
+    const ParameterDefinition* get_parameter(const Utilities::Name& rParamName) const;
 
-    u32 total_size();
+    u32 total_size() const;
 
   private:
    

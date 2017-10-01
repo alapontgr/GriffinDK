@@ -32,9 +32,9 @@ namespace Rendering
     rParam.m_offset = offset + alignmentOffset;
 	}
 
-  ParameterDefinition* MaterialParameterSet::get_parameter(const Utilities::Name& rParamName)
+  const ParameterDefinition* MaterialParameterSet::get_parameter(const Utilities::Name& rParamName) const
   {
-    for (auto& rParam : m_parameters) 
+    for (const auto& rParam : m_parameters) 
     {
       if (rParam.m_paramName == rParamName) 
       {
@@ -44,7 +44,7 @@ namespace Rendering
     return nullptr;
   }
 
-  u32 MaterialParameterSet::total_size()
+  u32 MaterialParameterSet::total_size() const
   {
     auto& rParam = m_parameters[m_parameters.size() - 1];
     return rParam.m_offset + rParam.m_size;

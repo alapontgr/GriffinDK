@@ -11,9 +11,12 @@ namespace fdk
 
     }
 
-    void ParameterBuffer::create(RenderInterface& rRI, Memory::MemAllocator& rAllocator)
+    void ParameterBuffer::create(
+      const MaterialParameterSet& rParameterSetLayout,
+      RenderInterface& rRI, 
+      Memory::MemAllocator& rAllocator)
     {
-      FDASSERT(m_pParameterSetLayout, "Parameter layout has not been set");
+      m_pParameterSetLayout = &rParameterSetLayout;
       u32 size = m_pParameterSetLayout->total_size();
       m_pParametersData = rAllocator.allocate(size, 16);
       BaseT::create(rRI, *m_pParameterSetLayout, m_bindingSlot);

@@ -22,7 +22,10 @@ namespace fdk
 
       ParameterBuffer();
 
-      void create(RenderInterface& rRI, Memory::MemAllocator& rAllocator);
+      void create(
+        const MaterialParameterSet& rParameterSetLayout,
+        RenderInterface& rRI, 
+        Memory::MemAllocator& rAllocator);
 
       void release(RenderInterface& rRI);
       
@@ -37,7 +40,7 @@ namespace fdk
     private:
 
       Memory::mem_ptr_t m_pParametersData;
-      MaterialParameterSet* m_pParameterSetLayout;
+      const MaterialParameterSet* m_pParameterSetLayout;
       u32 m_bindingSlot;
     };
 

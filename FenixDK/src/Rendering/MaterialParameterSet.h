@@ -6,8 +6,7 @@
 namespace fdk
 {
 namespace Rendering
-{
-
+{  
 	class MaterialParameterSet
 	{
 
@@ -20,16 +19,13 @@ namespace Rendering
     void clear();
 
     void add_parameter(const ParameterDefinition& rParameterDefinition);
-
-    u32 slot() const { return m_bindingSlot; }
-    
-    void set_bindingSlot( const u32 slot) { m_bindingSlot = slot; }
   
     ParameterDefinition* get_parameter(const Utilities::Name& rParamName);
 
+    u32 total_size();
+
   private:
-    
-    u32 m_bindingSlot; 
+   
     ParameterCollection m_parameters;
 	};
 

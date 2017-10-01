@@ -43,5 +43,12 @@ namespace Rendering
     }
     return nullptr;
   }
+
+  u32 MaterialParameterSet::total_size()
+  {
+    auto& rParam = m_parameters[m_parameters.size() - 1];
+    return rParam.m_offset + rParam.m_size;
+  }
+
 }
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ParameterDefinition.h" 
-#include <vector>
 
 namespace fdk
 {
@@ -11,8 +10,6 @@ namespace Rendering
 	{
 
 	public:
-
-    using ParameterCollection = std::vector<ParameterDefinition>;
 
     MaterialParameterSet();
 

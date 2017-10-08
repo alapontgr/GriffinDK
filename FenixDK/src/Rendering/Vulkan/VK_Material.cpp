@@ -26,12 +26,12 @@ namespace Rendering
 			m_desc = rDesc;
 		}
 
-		void VK_Material::create_material(RenderInterface& rRI)
-		{
+		void VK_Material::create_material()
+{
 
 			// Load shader modules
-			VkShaderModule vsMmodule = create_shader_module(rRI.m_device, m_desc.m_vsPath.c_str());
-			VkShaderModule psMmodule = create_shader_module(rRI.m_device, m_desc.m_psPath.c_str());
+			VkShaderModule vsMmodule = create_shader_module(RenderInterface::s_device, m_desc.m_vsPath.c_str());
+			VkShaderModule psMmodule = create_shader_module(RenderInterface::s_device, m_desc.m_psPath.c_str());
 
 			// Define stages
 			static constexpr u32 kStageCount = 2;
@@ -163,7 +163,7 @@ namespace Rendering
 			dynamicStateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
 			dynamicStateInfo.pDynamicStates = &dynamicStates[0];
 
-			create_layout(rRI.m_device);
+			create_layout(RenderInterface::s_device);
 
 			// Create the graphic pipeline
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -187,12 +187,12 @@ namespace Rendering
 			pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 			pipelineInfo.basePipelineIndex = -1;
 
-			auto result = vkCreateGraphicsPipelines(rRI.m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
+			auto result = vkCreateGraphicsPipelines(RenderInterface::s_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
 			VK_CHECK(result, "Failed to create Graphics Pipeline");
 
 			// Destroy modules now that are not needed
-			destroy_shader_module(rRI.m_device, vsMmodule);
-			destroy_shader_module(rRI.m_device, psMmodule);
+			destroy_shader_module(RenderInterface::s_device, vsMmodule);
+			destroy_shader_module(RenderInterface::s_device, psMmodule);
 		}
 
 		EResultType VK_Material::create_layout(VkDevice pDevice)

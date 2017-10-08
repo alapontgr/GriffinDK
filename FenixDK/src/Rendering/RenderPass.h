@@ -16,7 +16,7 @@ public:
   RenderPass();
   ~RenderPass();
 
-  void init(RenderInterface& rRI);
+  void init();
 
   void release(RenderInterface& rRI);
 

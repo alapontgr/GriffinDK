@@ -22,7 +22,6 @@ namespace Rendering
 		VK_Framebuffer::~VK_Framebuffer() {}
 
 		void VK_Framebuffer::create(
-				const RenderInterface& rRI,
 				const RenderPass& rRenderPass,
 				const RenderSurface& rRenderSurface)
 		{
@@ -36,7 +35,7 @@ namespace Rendering
 			info.width = rRenderSurface.m_width;
 			info.height = rRenderSurface.m_height;
 			info.layers = 1;
-			auto result = vkCreateFramebuffer(rRI.m_device, &info, nullptr, &m_handle);
+			auto result = vkCreateFramebuffer(RenderInterface::s_device, &info, nullptr, &m_handle);
 			VK_CHECK(result, "Failed to create framebuffer");
 		}
 
@@ -44,7 +43,7 @@ namespace Rendering
 		{
 			if (m_handle != VK_NULL_HANDLE)
 			{
-				vkDestroyFramebuffer(rRI.m_device, m_handle, nullptr);
+				vkDestroyFramebuffer(RenderInterface::s_device, m_handle, nullptr);
 				m_handle = VK_NULL_HANDLE;
 			}
 		}

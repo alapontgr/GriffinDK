@@ -15,7 +15,7 @@ namespace Rendering
 		public:
 			VK_Fence();
 
-			void wait(const RenderInterface& rRi);
+			void wait();
 
 			VkFence m_fence;
 		};

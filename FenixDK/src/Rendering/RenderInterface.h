@@ -22,45 +22,41 @@ namespace Rendering
 
     using BaseT = IMPLEMENTATION(RenderInterface);
 
-		static RenderInterface* instance();
+		static void init();
 
-    RenderInterface();
+    static void release();
 
-		void init();
+    static void on_resize();
 
-		void release();
+    static Texture2D* get_screen();
 
-		void on_resize();
+    static void create_buffer(Buffer& rBuffer);
 
-    Texture2D* get_screen();
+    static void destroy_buffer(Buffer& rBuffer);
 
-		void create_buffer(Buffer& rBuffer);
+    static void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
 
-		void destroy_buffer(Buffer& rBuffer);
+    static void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);
 
-		void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
+    static void set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer);
 
-		void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);
+    static void set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer);
 
-		void set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer);
+    static void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
 
-		void set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer);
+    static void create_command_buffer(CommandBuffer& rCommandBuffer);
 
-		void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
+    static void create_fence(Fence& rFence);
 
-    void create_command_buffer(CommandBuffer& rCommandBuffer);
+    static void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
-    void create_fence(Fence& rFence);
+    static void unmap_buffer_gpu_memory(Buffer& rBuffer);
 
-    void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
+    static void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence);
 
-    void unmap_buffer_gpu_memory(Buffer& rBuffer);
+    static void beginFrame();
 
-    void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence);
-
-    void beginFrame();
-
-    void endFrame();
+    static void endFrame();
   };
 }
 }

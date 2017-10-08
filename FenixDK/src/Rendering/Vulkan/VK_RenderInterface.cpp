@@ -135,7 +135,7 @@ namespace Rendering
 			clean_frame_infos();
 
 			// Wait for the device to be idle
-			vkDeviceWaitIdle(m_device);
+			vkDeviceWaitIdle(s_device);
 
 			release_swap_chain();
 
@@ -156,7 +156,7 @@ namespace Rendering
 		fdk::Rendering::Texture2D* VK_RenderInterface::get_screen()
 		{
 			static Texture2D s_screenTexture;
-			s_screenTexture.m_view = m_swapChainImageView[m_currentImageIndex];
+			s_screenTexture.m_view = s_swapChainImageView[s_currentImageIndex];
 			return &s_screenTexture;
 		}
 
@@ -246,7 +246,7 @@ namespace Rendering
 																								 &families[0]);
 				for (u32 i = 0; i < familyQueuesCount; i++)
 				{
-					vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface,
+					vkGetPhysicalDeviceSurfaceSupportKHR(device, i, s_surface,
 																							 &swapChainSupport[i]);
 					VkQueueFamilyProperties& prop = families[i];
 					// We should check different flags for the types of queues we will want to
@@ -254,14 +254,14 @@ namespace Rendering
 					if (prop.queueCount > 0 &&
 							prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) // Can queue graphic commands
 					{
-						if (m_graphicsFamilyIndex == UINT32_MAX) // Not assigned yet
+						if (s_graphicsFamilyIndex == UINT32_MAX) // Not assigned yet
 						{
-							m_graphicsFamilyIndex = i;
+							s_graphicsFamilyIndex = i;
 						}
 
 						if (swapChainSupport[i]) {
-							m_graphicsFamilyIndex = i;
-							m_presentFamilyIndex = i;
+							s_graphicsFamilyIndex = i;
+							s_presentFamilyIndex = i;
 							return true;
 						}
 					}
@@ -271,12 +271,12 @@ namespace Rendering
 				for (u32 i = 0; i < familyQueuesCount; i++)
 				{
 					if (swapChainSupport[i]) {
-						m_presentFamilyIndex = i;
+						s_presentFamilyIndex = i;
 						break;
 					}
 				}
-				if (m_presentFamilyIndex == UINT32_MAX ||
-						m_presentFamilyIndex == UINT32_MAX) {
+				if (s_presentFamilyIndex == UINT32_MAX ||
+						s_presentFamilyIndex == UINT32_MAX) {
 					return false;
 				}
 			}
@@ -309,7 +309,7 @@ namespace Rendering
 			info.ppEnabledExtensionNames = &kInstanceExtensions[0];
 
 			// Create Vulkan instance
-			VkResult result = vkCreateInstance(&info, nullptr, &m_instance);
+			VkResult result = vkCreateInstance(&info, nullptr, &s_instance);
 			VK_CHECK(result, "Failed to create VKInstance");
 		}
 
@@ -323,7 +323,7 @@ namespace Rendering
 			surfaceInfo.hinstance = GetModuleHandle(0);
 			surfaceInfo.hwnd = GetActiveWindow();
 
-			auto result = vkCreateWin32SurfaceKHR(m_instance, &surfaceInfo, nullptr, &m_surface);
+			auto result = vkCreateWin32SurfaceKHR(s_instance, &surfaceInfo, nullptr, &s_surface);
 			VK_CHECK(result, "Failed to create Win32 Surface");
 #else
 			FDK_ABORT("Invalid platform");
@@ -333,32 +333,32 @@ namespace Rendering
 		void VK_RenderInterface::create_logical_device()
 		{
 			u32 deviceCount = 0;
-			auto result = vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+			auto result = vkEnumeratePhysicalDevices(s_instance, &deviceCount, nullptr);
 			VK_CHECK(result, "Failed to get number of physical devices");
 			FDASSERT(deviceCount != 0, "Incorrect number of physical devices");
 
 			{
 				std::vector<VkPhysicalDevice> devices(deviceCount);
-				result = vkEnumeratePhysicalDevices(m_instance, &deviceCount, &devices[0]);
+				result = vkEnumeratePhysicalDevices(s_instance, &deviceCount, &devices[0]);
 				VK_CHECK(result, "Failed to get physical devices");
 
-				m_graphicsFamilyIndex = UINT32_MAX;
-				m_presentFamilyIndex = UINT32_MAX;
+				s_graphicsFamilyIndex = UINT32_MAX;
+				s_presentFamilyIndex = UINT32_MAX;
 				for (u32 i = 0; i < deviceCount; i++)
 				{
 					if (check_physical_device_properties(
-									devices[i], m_graphicsFamilyIndex, m_presentFamilyIndex)) {
+									devices[i], s_graphicsFamilyIndex, s_presentFamilyIndex)) {
 						// This device supports graphics and using swap chains
-						m_physicalDevice = devices[i];
+						s_physicalDevice = devices[i];
 					}
 				}
 
 				// Check extensions
 #ifdef _DEBUG
-				check_device_extensions(m_physicalDevice);
+				check_device_extensions(s_physicalDevice);
 #endif // _DEBUG
 
-				FDASSERT(m_physicalDevice, "A valid physical device was not found");
+				FDASSERT(s_physicalDevice, "A valid physical device was not found");
 				static constexpr u32 kPrioritiesCount = 1;
 				f32 queuePriorities[kPrioritiesCount] = {1.0f};
 
@@ -367,16 +367,16 @@ namespace Rendering
 				queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 				queueInfo.pNext = nullptr;
 				queueInfo.flags = 0;
-				queueInfo.queueFamilyIndex = m_graphicsFamilyIndex;
+				queueInfo.queueFamilyIndex = s_graphicsFamilyIndex;
 				queueInfo.queueCount = kPrioritiesCount;
 				queueInfo.pQueuePriorities = queuePriorities;
 
 				std::vector<VkDeviceQueueCreateInfo> queueInfoList;
 				queueInfoList.push_back(queueInfo);
 
-				if (m_graphicsFamilyIndex != m_presentFamilyIndex) {
+				if (s_graphicsFamilyIndex != s_presentFamilyIndex) {
 					// Almost the same configuration apart of the family index to use
-					queueInfo.queueFamilyIndex = m_presentFamilyIndex;
+					queueInfo.queueFamilyIndex = s_presentFamilyIndex;
 					queueInfoList.push_back(queueInfo);
 				}
 
@@ -395,39 +395,39 @@ namespace Rendering
 						static_cast<u32>(kDeviceExtensions.size());
 				deviceInfo.ppEnabledExtensionNames = &kDeviceExtensions[0];
 				deviceInfo.pEnabledFeatures = &features;
-				result = vkCreateDevice(m_physicalDevice, &deviceInfo, nullptr, &m_device);
+				result = vkCreateDevice(s_physicalDevice, &deviceInfo, nullptr, &s_device);
 				VK_CHECK(result, "Failed to create logical device");
 			}
 
 			// Get access to the queues we will use
-			vkGetDeviceQueue(m_device, m_graphicsFamilyIndex, 0, &m_graphicsQueue);
-			vkGetDeviceQueue(m_device, m_presentFamilyIndex, 0, &m_presentQueue);
+			vkGetDeviceQueue(s_device, s_graphicsFamilyIndex, 0, &s_graphicsQueue);
+			vkGetDeviceQueue(s_device, s_presentFamilyIndex, 0, &s_presentQueue);
 		}
 
 		void VK_RenderInterface::create_swap_chain()
 		{
 			// Get the capabilities of the surface
 			auto result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-					m_physicalDevice, m_surface, &m_Capabilities);
+					s_physicalDevice, s_surface, &s_Capabilities);
 			VK_CHECK(result, "Failed to get the capabilities of the surface");
 			// Get the range of image formats allowed in the surface
 			u32 formatCount = 0;
-			result = vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, m_surface,
+			result = vkGetPhysicalDeviceSurfaceFormatsKHR(s_physicalDevice, s_surface,
 																										&formatCount, nullptr);
 			VK_CHECK(result, "Failed to enumerate the formats of the surface");
-			m_supportedFormats.resize(formatCount);
+			s_supportedFormats.resize(formatCount);
 			result = vkGetPhysicalDeviceSurfaceFormatsKHR(
-					m_physicalDevice, m_surface, &formatCount, &m_supportedFormats[0]);
+					s_physicalDevice, s_surface, &formatCount, &s_supportedFormats[0]);
 			VK_CHECK(result, "Failed to get the formats of the surface");
 			// Get the supported present modes
 			u32 presentModeCount = 0;
 			result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-					m_physicalDevice, m_surface, &presentModeCount, nullptr);
+					s_physicalDevice, s_surface, &presentModeCount, nullptr);
 			VK_CHECK(result, "Failed to enumerate the present modes");
-			m_supportedPresentModes.resize(presentModeCount);
+			s_supportedPresentModes.resize(presentModeCount);
 			result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-					m_physicalDevice, m_surface, &presentModeCount,
-					&m_supportedPresentModes[0]);
+					s_physicalDevice, s_surface, &presentModeCount,
+					&s_supportedPresentModes[0]);
 			VK_CHECK(result, "Failed to get the supported present modes");
 
 			// Images extend
@@ -435,28 +435,28 @@ namespace Rendering
 			extend.width = Framework::App::width();
 			extend.height = Framework::App::height();
 			// Get the number of buffers to create in the swap chain
-			u32 bufferCount = Maths::clamp(m_Capabilities.minImageCount, m_Capabilities.maxImageCount,
+			u32 bufferCount = Maths::clamp(s_Capabilities.minImageCount, s_Capabilities.maxImageCount,
 																		 kDesiredSwapChainImageCount);
 
 			// Select a image format to use in the swap chain
-			m_swapChainFormat = vulkan_helpers::get_swap_chain_format(m_supportedFormats);
+			s_swapChainFormat = vulkan_helpers::get_swap_chain_format(s_supportedFormats);
 			// Get the transform to apply to the swap chain (Useful in mobiles when using
 			// Landscape or portrait)
-			VkSurfaceTransformFlagBitsKHR transform = vulkan_helpers::get_swap_chain_transform(m_Capabilities);
+			VkSurfaceTransformFlagBitsKHR transform = vulkan_helpers::get_swap_chain_transform(s_Capabilities);
 			// Get the flags to use in the images of the swap chain
-			VkImageUsageFlags usageFlags = vulkan_helpers::get_swap_chain_flags(m_Capabilities);
+			VkImageUsageFlags usageFlags = vulkan_helpers::get_swap_chain_flags(s_Capabilities);
 			// Get the Present mode to use
-			VkPresentModeKHR presentMode = vulkan_helpers::get_swap_chain_present_mode(m_supportedPresentModes);
+			VkPresentModeKHR presentMode = vulkan_helpers::get_swap_chain_present_mode(s_supportedPresentModes);
 
 			VkSwapchainKHR oldSwapChain = VK_NULL_HANDLE;
 			VkSwapchainCreateInfoKHR swapChainInfo{};
 			swapChainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			swapChainInfo.pNext = nullptr;
 			swapChainInfo.flags = 0;
-			swapChainInfo.surface = m_surface;
+			swapChainInfo.surface = s_surface;
 			swapChainInfo.minImageCount = bufferCount;
-			swapChainInfo.imageFormat = m_swapChainFormat.format;
-			swapChainInfo.imageColorSpace = m_swapChainFormat.colorSpace;
+			swapChainInfo.imageFormat = s_swapChainFormat.format;
+			swapChainInfo.imageColorSpace = s_swapChainFormat.colorSpace;
 			swapChainInfo.imageExtent = extend;
 			swapChainInfo.imageArrayLayers = 1;
 			swapChainInfo.imageUsage = usageFlags;
@@ -469,10 +469,10 @@ namespace Rendering
 			swapChainInfo.clipped = VK_TRUE;
 			swapChainInfo.oldSwapchain = oldSwapChain;
 
-			result = vkCreateSwapchainKHR(m_device, &swapChainInfo, nullptr, &m_swapChain);
+			result = vkCreateSwapchainKHR(s_device, &swapChainInfo, nullptr, &s_swapChain);
 			VK_CHECK(result, "Failed to create swap chain");
 			if (oldSwapChain != VK_NULL_HANDLE) {
-				vkDestroySwapchainKHR(m_device, oldSwapChain, nullptr);
+				vkDestroySwapchainKHR(s_device, oldSwapChain, nullptr);
 			}
 			get_swap_chain_images();
 		}
@@ -481,25 +481,25 @@ namespace Rendering
 		{
 			u32 imageCount = 0;
 			auto result =
-					vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount, nullptr);
+					vkGetSwapchainImagesKHR(s_device, s_swapChain, &imageCount, nullptr);
 			VK_CHECK(result, "Failed to enumerate the images of a swap chain");
 
-			m_swapChainImages.resize(imageCount);
-			result = vkGetSwapchainImagesKHR(m_device, m_swapChain, &imageCount,
-																			 &m_swapChainImages[0]);
+			s_swapChainImages.resize(imageCount);
+			result = vkGetSwapchainImagesKHR(s_device, s_swapChain, &imageCount,
+																			 &s_swapChainImages[0]);
 			VK_CHECK(result, "Failed to get the images of the swap chain");
 
 			// Create views for all the images of the swap chain
-			m_swapChainImageView.resize(m_swapChainImages.size());
-			for (u32 i = 0; i < m_swapChainImages.size(); i++)
+			s_swapChainImageView.resize(s_swapChainImages.size());
+			for (u32 i = 0; i < s_swapChainImages.size(); i++)
 			{
 				VkImageViewCreateInfo imageViewInfo{};
 				imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 				imageViewInfo.pNext = nullptr;
 				imageViewInfo.flags = 0;
-				imageViewInfo.image = m_swapChainImages[i];
+				imageViewInfo.image = s_swapChainImages[i];
 				imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-				imageViewInfo.format = m_swapChainFormat.format;
+				imageViewInfo.format = s_swapChainFormat.format;
 				imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 				imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 				imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -510,7 +510,7 @@ namespace Rendering
 				imageViewInfo.subresourceRange.baseArrayLayer = 0;
 				imageViewInfo.subresourceRange.layerCount = 1;
 
-				auto result = vkCreateImageView(m_device, &imageViewInfo, nullptr, &m_swapChainImageView[i]);
+				auto result = vkCreateImageView(s_device, &imageViewInfo, nullptr, &s_swapChainImageView[i]);
 				VK_CHECK(result, "Failed to create image view");
 			}
 		}
@@ -522,31 +522,31 @@ namespace Rendering
 			info.pNext = nullptr;
 			info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
 									 VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-			info.queueFamilyIndex = m_presentFamilyIndex;
-			auto result = vkCreateCommandPool(m_device, &info, nullptr, &m_commandPool);
+			info.queueFamilyIndex = s_presentFamilyIndex;
+			auto result = vkCreateCommandPool(s_device, &info, nullptr, &s_commandPool);
 			VK_CHECK(result, "Failed to create command pool");
 		}
 
 		void VK_RenderInterface::clean_frame_infos()
 		{
-			for (FrameInfoVK& frame : m_frames)
+			for (FrameInfoVK& frame : s_frames)
 			{
 				if (frame.finishedRendering)
 				{
-					vkDestroySemaphore(m_device, frame.finishedRendering, nullptr);
+					vkDestroySemaphore(s_device, frame.finishedRendering, nullptr);
 				}
 				if (frame.imageAvailable)
 				{
-					vkDestroySemaphore(m_device, frame.imageAvailable, nullptr);
+					vkDestroySemaphore(s_device, frame.imageAvailable, nullptr);
 				}
 			}
-			m_frames.clear();
+			s_frames.clear();
 		}
 
 		void VK_RenderInterface::create_frame_infos()
 		{
-			m_currentFrame = 0;
-			m_frames.resize(kBufferCount);
+			s_currentFrame = 0;
+			s_frames.resize(kBufferCount);
 
 			// Semaphore config
 			VkSemaphoreCreateInfo semaphoreInfo{};
@@ -554,12 +554,12 @@ namespace Rendering
 			semaphoreInfo.pNext = nullptr;
 			semaphoreInfo.flags = 0;
 
-			for (FrameInfoVK& frame : m_frames)
+			for (FrameInfoVK& frame : s_frames)
 			{
-				auto result = vkCreateSemaphore(m_device, &semaphoreInfo, nullptr,
+				auto result = vkCreateSemaphore(s_device, &semaphoreInfo, nullptr,
 																				&frame.finishedRendering);
 				VK_CHECK(result, "Failed to create semaphore");
-				result = vkCreateSemaphore(m_device, &semaphoreInfo, nullptr,
+				result = vkCreateSemaphore(s_device, &semaphoreInfo, nullptr,
 																	 &frame.imageAvailable);
 				VK_CHECK(result, "Failed to create semaphore");
 			}
@@ -568,39 +568,39 @@ namespace Rendering
 		void VK_RenderInterface::release_swap_chain()
 		{
 			// Destroy the image views of the swap chain
-			for (VkImageView& rView : m_swapChainImageView)
+			for (VkImageView& rView : s_swapChainImageView)
 			{
-				vkDestroyImageView(m_device, rView, nullptr);
+				vkDestroyImageView(s_device, rView, nullptr);
 			}
-			m_swapChainImageView.clear();
+			s_swapChainImageView.clear();
 
-			if (m_swapChain)
+			if (s_swapChain)
 			{
-				vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
+				vkDestroySwapchainKHR(s_device, s_swapChain, nullptr);
 			}
 		}
 
 		void VK_RenderInterface::release_device()
 		{
-			if (m_device)
+			if (s_device)
 			{
-				vkDestroyDevice(m_device, nullptr);
+				vkDestroyDevice(s_device, nullptr);
 			}
 		}
 
 		void VK_RenderInterface::release_surface()
 		{
-			if (m_surface)
+			if (s_surface)
 			{
-				vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+				vkDestroySurfaceKHR(s_instance, s_surface, nullptr);
 			}
 		}
 
 		void VK_RenderInterface::release_render_instance()
 		{
-			if (m_instance)
+			if (s_instance)
 			{
-				vkDestroyInstance(m_instance, nullptr);
+				vkDestroyInstance(s_instance, nullptr);
 			}
 		}
 
@@ -616,12 +616,12 @@ namespace Rendering
 			bufferCreateInfo.queueFamilyIndexCount = 0;
 			bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-			auto result = vkCreateBuffer(m_device, &bufferCreateInfo, nullptr, &rBuffer.m_pBuffer);
+			auto result = vkCreateBuffer(s_device, &bufferCreateInfo, nullptr, &rBuffer.m_pBuffer);
 			VK_CHECK(result, "Failed to create buffer");
 
 			// Get the requirements
 			VkMemoryRequirements bufferRequirements{};
-			vkGetBufferMemoryRequirements(m_device, rBuffer.m_pBuffer, &bufferRequirements);
+			vkGetBufferMemoryRequirements(s_device, rBuffer.m_pBuffer, &bufferRequirements);
 
 			// Allocate the memory
 			VkMemoryAllocateInfo allocateInfo{};
@@ -629,24 +629,24 @@ namespace Rendering
 			allocateInfo.pNext = nullptr;
 			allocateInfo.allocationSize = bufferRequirements.size;
 			allocateInfo.memoryTypeIndex =
-					vulkan_helpers::find_memory_type_index(bufferRequirements.memoryTypeBits, rBuffer.mem_properties().flags(), m_physicalDevice);
+					vulkan_helpers::find_memory_type_index(bufferRequirements.memoryTypeBits, rBuffer.mem_properties().flags(), s_physicalDevice);
 
-			result = vkAllocateMemory(m_device, &allocateInfo, nullptr, &rBuffer.m_pMemory);
+			result = vkAllocateMemory(s_device, &allocateInfo, nullptr, &rBuffer.m_pMemory);
 			VK_CHECK(result, "Failed to allocate memory");
 
 			// Bind it to the buffer
-			vkBindBufferMemory(m_device, rBuffer.m_pBuffer, rBuffer.m_pMemory, 0);
+			vkBindBufferMemory(s_device, rBuffer.m_pBuffer, rBuffer.m_pMemory, 0);
 		}
 
 		void VK_RenderInterface::destroy_buffer(Buffer& rBuffer)
 		{
 			if (rBuffer.m_pBuffer != VK_NULL_HANDLE)
 			{
-				vkDestroyBuffer(m_device, rBuffer.m_pBuffer, nullptr);
+				vkDestroyBuffer(s_device, rBuffer.m_pBuffer, nullptr);
 			}
 			if (rBuffer.m_pMemory != VK_NULL_HANDLE)
 			{
-				vkFreeMemory(m_device, rBuffer.m_pMemory, nullptr);
+				vkFreeMemory(s_device, rBuffer.m_pMemory, nullptr);
 			}
 		}
 
@@ -709,10 +709,10 @@ namespace Rendering
 			VkCommandBufferAllocateInfo info;
 			info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 			info.pNext = nullptr;
-			info.commandPool = m_commandPool;
+			info.commandPool = s_commandPool;
 			info.level = isPrimary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
 			info.commandBufferCount = 1;
-			auto result = vkAllocateCommandBuffers(m_device, &info, &rCommandBuffer.m_commandBuffer);
+			auto result = vkAllocateCommandBuffers(s_device, &info, &rCommandBuffer.m_commandBuffer);
 			VK_CHECK(result, "Failed to allocate command buffers");
 		}
 
@@ -721,14 +721,14 @@ namespace Rendering
 			FDASSERT(rBuffer.m_pMemory, "The memory of the buffer has not been allocated");
 			FDASSERT(memoryOffset + rangeSize < rBuffer.size(), "Trying to map out of range");
 			void* pData = nullptr;
-			auto result = vkMapMemory(m_device, rBuffer.m_pMemory, memoryOffset, rangeSize, 0, &pData);
+			auto result = vkMapMemory(s_device, rBuffer.m_pMemory, memoryOffset, rangeSize, 0, &pData);
 			VK_CHECK(result, "Failed to map memory");
 			return pData;
 		}
 
 		void VK_RenderInterface::unmap_buffer_gpu_memory(Buffer& rBuffer)
 		{
-			vkUnmapMemory(m_device, rBuffer.m_pMemory);
+			vkUnmapMemory(s_device, rBuffer.m_pMemory);
 		}
 
 		void VK_RenderInterface::create_fence(Fence& rFence)
@@ -739,17 +739,17 @@ namespace Rendering
 			fenceInfo.pNext = nullptr;
 			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Signaled by default
 
-			auto result = vkCreateFence(m_device, &fenceInfo, nullptr, &rFence.m_fence);
+			auto result = vkCreateFence(s_device, &fenceInfo, nullptr, &rFence.m_fence);
 			VK_CHECK(result, "Failed to create a fence");
 		}
 
 		void VK_RenderInterface::beginFrame()
 		{
-			auto& rFrame = m_frames[m_currentFrame];
+			auto& rFrame = s_frames[s_currentFrame];
 
-			auto result = vkAcquireNextImageKHR(m_device, m_swapChain, UINT64_MAX,
+			auto result = vkAcquireNextImageKHR(s_device, s_swapChain, UINT64_MAX,
 																					rFrame.imageAvailable, VK_NULL_HANDLE,
-																					&m_currentImageIndex);
+																					&s_currentImageIndex);
 			switch (result)
 			{
 			case VK_SUCCESS:
@@ -764,7 +764,7 @@ namespace Rendering
 
 		void VK_RenderInterface::endFrame()
 		{
-			auto& rFrame = m_frames[m_currentFrame];
+			auto& rFrame = s_frames[s_currentFrame];
 
 			VkPresentInfoKHR info;
 			info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -772,10 +772,10 @@ namespace Rendering
 			info.waitSemaphoreCount = 1;
 			info.pWaitSemaphores = &rFrame.finishedRendering;
 			info.swapchainCount = 1;
-			info.pSwapchains = &m_swapChain;
-			info.pImageIndices = &m_currentImageIndex;
+			info.pSwapchains = &s_swapChain;
+			info.pImageIndices = &s_currentImageIndex;
 			info.pResults = nullptr;
-			auto result = vkQueuePresentKHR(m_presentQueue, &info);
+			auto result = vkQueuePresentKHR(s_presentQueue, &info);
 			switch (result)
 			{
 			case VK_SUCCESS:
@@ -790,12 +790,12 @@ namespace Rendering
 			}
 
 			// Flip command buffers
-			m_currentFrame = Maths::wrap(m_currentFrame + 1, 0U, kBufferCount);
+			s_currentFrame = Maths::wrap(s_currentFrame + 1, 0U, kBufferCount);
 		}
 
 		void VK_RenderInterface::submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence)
 		{
-			auto& rFrame = m_frames[m_currentFrame];
+			auto& rFrame = s_frames[s_currentFrame];
 
 			VkPipelineStageFlags flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			VkSubmitInfo info{};
@@ -808,7 +808,7 @@ namespace Rendering
 			info.pCommandBuffers = &rCmdBuffer.m_commandBuffer;
 			info.signalSemaphoreCount = 1;
 			info.pSignalSemaphores = &rFrame.finishedRendering;
-			auto result = vkQueueSubmit(m_presentQueue, 1, &info,
+			auto result = vkQueueSubmit(s_presentQueue, 1, &info,
 																	rSyncFence.m_fence);
 			VK_CHECK(result, "Failed to submit cmd block");
 		}

@@ -5,7 +5,7 @@ namespace fdk
 namespace Rendering
 {
 
-  static inline u32 get_offset(const MaterialParameterSet::ParameterCollection& rParamaterList) 
+  static inline u32 get_offset(const ParameterCollection& rParamaterList) 
   {
     u32 offset = 0;
     for (const auto& rParam : rParamaterList) 

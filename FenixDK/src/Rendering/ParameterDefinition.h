@@ -3,6 +3,8 @@
 #include "Utilities\Name.h"
 #include "BufferUtils.h"
 
+#include <vector>
+
 namespace fdk
 {
   namespace Rendering 
@@ -23,5 +25,7 @@ namespace fdk
       u32 m_size;
       u32 m_alignment;
     };
+
+    using ParameterCollection = std::vector<ParameterDefinition>;
   }
 }

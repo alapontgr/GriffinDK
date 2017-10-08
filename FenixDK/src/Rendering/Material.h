@@ -27,7 +27,7 @@ namespace fdk
 
       void init(const MaterialDesc& rDesc);
 
-      void create_material(RenderInterface& rRI);
+      void create_material();
     };
 
   }

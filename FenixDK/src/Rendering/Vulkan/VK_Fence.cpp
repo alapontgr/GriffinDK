@@ -13,11 +13,11 @@ namespace Rendering
 		{
 		}
 
-		void VK_Fence::wait(const RenderInterface& rRi)
-		{
-			auto result = vkWaitForFences(rRi.m_device, 1, &m_fence, VK_FALSE, 1000000000);
+		void VK_Fence::wait()
+{
+			auto result = vkWaitForFences(RenderInterface::s_device, 1, &m_fence, VK_FALSE, 1000000000);
 			VK_CHECK(result, "Waited to long for fences");
-			result = vkResetFences(rRi.m_device, 1, &m_fence);
+			result = vkResetFences(RenderInterface::s_device, 1, &m_fence);
 			VK_CHECK(result, "Failed to reset the fences");
 		}
 	}

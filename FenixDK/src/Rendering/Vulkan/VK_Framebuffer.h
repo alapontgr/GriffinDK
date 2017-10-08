@@ -20,7 +20,6 @@ namespace Rendering
 			~VK_Framebuffer();
 
 			void create(
-					const RenderInterface& rRI,
 					const RenderPass& rRenderPass,
 					const RenderSurface& rRenderSurface);
 

@@ -34,102 +34,103 @@ namespace Rendering
 		class VK_RenderInterface
 		{
 		public:
+
 			VK_RenderInterface();
 			~VK_RenderInterface();
 
-			void init();
+      static void init();
 
-			void release();
+      static void release();
 
-			void on_resize();
+      static void on_resize();
 
-			Texture2D* get_screen();
+      static Texture2D* get_screen();
 
-			void create_buffer(Buffer& rBuffer);
+      static void create_buffer(Buffer& rBuffer);
 
-			void destroy_buffer(Buffer& rBuffer);
+      static void destroy_buffer(Buffer& rBuffer);
 
-			void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
+      static void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
 
-			void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);
+      static void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);
 
-			void set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer);
+      static void set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer);
 
-			void set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer);
+      static void set_scissor(const Scissor& rScissor, CommandBuffer& rCmdBuffer);
 
-			void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
+      static void draw_indexed(const u32 indexCount, const u32 instanceCount, const u32 indexOffset, const u32 vertexOffset, CommandBuffer& rCmdBuffer);
 
-			void create_command_buffer(CommandBuffer& rCommandBuffer);
+      static void create_command_buffer(CommandBuffer& rCommandBuffer);
 
-			void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
+      static void* map_buffer_gpu_memory(Buffer& rBuffer, const u32 memoryOffset, const u32 rangeSize);
 
-			void unmap_buffer_gpu_memory(Buffer& rBuffer);
+      static void unmap_buffer_gpu_memory(Buffer& rBuffer);
 
-			void create_fence(Fence& rFence);
+      static void create_fence(Fence& rFence);
 
-			void beginFrame();
+      static void beginFrame();
 
-			void endFrame();
+      static void endFrame();
 
-			void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rsyncFence);
+      static void submit_work(const CommandBuffer& rCmdBuffer, const Fence& rsyncFence);
 
 			//private:
-			void validate_vk_extensions();
+      static void validate_vk_extensions();
 
-			void check_device_extensions(VkPhysicalDevice pPhysicalDevice);
+      static void check_device_extensions(VkPhysicalDevice pPhysicalDevice);
 
-			bool check_physical_device_properties(VkPhysicalDevice device,
+      static bool check_physical_device_properties(VkPhysicalDevice device,
 																						u32& selectedFamilyIndex,
 																						u32& swapChainFamilyIndex);
 
-			void create_render_instance();
+      static void create_render_instance();
 
-			void create_screen_surface();
+      static void create_screen_surface();
 
-			void create_logical_device();
+      static void create_logical_device();
 
-			void create_swap_chain();
+      static void create_swap_chain();
 
-			void get_swap_chain_images();
+      static void get_swap_chain_images();
 
-			void create_cmd_pool();
+      static void create_cmd_pool();
 
-			void clean_frame_infos();
+      static void clean_frame_infos();
 
-			void create_frame_infos();
+      static void create_frame_infos();
 
-			void release_swap_chain();
+      static void release_swap_chain();
 
-			void release_device();
+      static void release_device();
 
-			void release_surface();
+      static void release_surface();
 
-			void release_render_instance();
+      static void release_render_instance();
 
 			//Windows
-			VkSurfaceKHR m_surface;
-			VkSwapchainKHR m_swapChain;
-			VkSurfaceFormatKHR m_swapChainFormat;
-			VkSurfaceCapabilitiesKHR m_Capabilities;
-			std::vector<VkSurfaceFormatKHR> m_supportedFormats;
-			std::vector<VkPresentModeKHR> m_supportedPresentModes;
+			static VkSurfaceKHR s_surface;
+			static VkSwapchainKHR s_swapChain;
+			static VkSurfaceFormatKHR s_swapChainFormat;
+			static VkSurfaceCapabilitiesKHR s_Capabilities;
+			static std::vector<VkSurfaceFormatKHR> s_supportedFormats;
+			static std::vector<VkPresentModeKHR> s_supportedPresentModes;
 			//
 
 			// Context state
-			VkInstance m_instance;
-			VkPhysicalDevice m_physicalDevice;
-			VkDevice m_device;
-			VkQueue m_graphicsQueue;
-			VkQueue m_presentQueue;
-			u32 m_graphicsFamilyIndex;
-			u32 m_presentFamilyIndex;
-			std::vector<VkImage> m_swapChainImages;
-			std::vector<VkImageView> m_swapChainImageView;
-			VkCommandPool m_commandPool;
-			std::vector<FrameInfoVK> m_frames; // We use N buffering so every frame we will need to use the correct frame info
+      static VkInstance s_instance;
+      static VkPhysicalDevice s_physicalDevice;
+      static VkDevice s_device;
+      static VkQueue s_graphicsQueue;
+      static VkQueue s_presentQueue;
+      static u32 s_graphicsFamilyIndex;
+      static u32 s_presentFamilyIndex;
+      static std::vector<VkImage> s_swapChainImages;
+      static std::vector<VkImageView> s_swapChainImageView;
+      static VkCommandPool s_commandPool;
+      static std::vector<FrameInfoVK> s_frames; // We use N buffering so every frame we will need to use the correct frame info
 
-			u32 m_currentFrame;
-			u32 m_currentImageIndex;
+			static u32 s_currentFrame;
+			static u32 s_currentImageIndex;
 		};
 	}
 }

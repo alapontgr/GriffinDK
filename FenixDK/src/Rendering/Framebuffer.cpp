@@ -11,11 +11,11 @@ namespace fdk
 
     }
 
-    void Framebuffer::create(const RenderInterface& rRI, const RenderPass& rRenderPass, const RenderSurface& rRenderSurface)
+    void Framebuffer::create(const RenderPass& rRenderPass, const RenderSurface& rRenderSurface)
     {
       m_width = rRenderSurface.m_width;
       m_height = rRenderSurface.m_height;
-      BaseT::create(rRI, rRenderPass, rRenderSurface);
+      BaseT::create(rRenderPass, rRenderSurface);
     }
 
     void Framebuffer::destroy(const RenderInterface& rRI)

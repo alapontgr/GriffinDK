@@ -4,13 +4,6 @@ namespace fdk
 {
 namespace Rendering
 {
-	RenderInterface::RenderInterface() {}
-
-  RenderInterface* RenderInterface::instance()
-  {
-    static RenderInterface s_renderInterface;
-    return &s_renderInterface;
-  }
 
 	void RenderInterface::init()
 	{

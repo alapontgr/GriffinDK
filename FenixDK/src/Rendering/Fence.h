@@ -17,7 +17,7 @@ namespace fdk
 
       Fence() {}
 
-      void wait(const RenderInterface& rRi);
+      void wait();
     };
 
   }

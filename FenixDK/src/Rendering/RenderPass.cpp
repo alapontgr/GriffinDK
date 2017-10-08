@@ -15,11 +15,12 @@ RenderPass::RenderPass() {}
 
 RenderPass::~RenderPass() {}
 
-void RenderPass::init(RenderInterface& rRI) {
+void RenderPass::init()
+{
   // Description of the whole render pass
   VkAttachmentDescription attachmentsDesc{};
   attachmentsDesc.flags = 0;
-  attachmentsDesc.format = rRI.m_swapChainFormat.format;
+  attachmentsDesc.format = RenderInterface::s_swapChainFormat.format;
   attachmentsDesc.samples = VK_SAMPLE_COUNT_1_BIT;
   attachmentsDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   attachmentsDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -78,7 +79,7 @@ void RenderPass::init(RenderInterface& rRI) {
   renderPassInfo.dependencyCount = static_cast<u32>(dependencies.size());
   renderPassInfo.pDependencies = &dependencies[0];
 
-  auto result = vkCreateRenderPass(rRI.m_device, &renderPassInfo, nullptr,
+  auto result = vkCreateRenderPass(RenderInterface::s_device, &renderPassInfo, nullptr,
                                    &m_renderPassImpl);
   VK_CHECK(result, "Failed to create render pass");
 }
@@ -87,7 +88,7 @@ void RenderPass::release(RenderInterface& rRI)
 {
   if (m_renderPassImpl) 
   {
-    vkDestroyRenderPass(rRI.m_device, m_renderPassImpl, nullptr);
+    vkDestroyRenderPass(RenderInterface::s_device, m_renderPassImpl, nullptr);
   }
   m_renderPassImpl = VK_NULL_HANDLE;
 }

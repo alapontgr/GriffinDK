@@ -22,7 +22,7 @@ namespace Rendering
 
 			void init(const MaterialDesc& rDesc);
 
-			void create_material(RenderInterface& rRI);
+			void create_material();
 
 			EResultType create_layout(VkDevice pDevice);
 

@@ -2,14 +2,12 @@
 
 namespace fdk
 {
-  namespace Rendering 
-  {
-    
-    void Fence::wait(const RenderInterface& rRi)
-    {
-      BaseT::wait(rRi);
-    }
+namespace Rendering
+{
 
-  }
+	void Fence::wait()
+	{
+		BaseT::wait();
+	}
 }
-
+}

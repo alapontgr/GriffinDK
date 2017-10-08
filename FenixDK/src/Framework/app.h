@@ -36,7 +36,7 @@ private:
   void release();
 
 protected:
-  Rendering::RenderInterface* m_pRenderInterface;
+
   Rendering::Context m_context;
   static u32 s_width;
   static u32 s_height;

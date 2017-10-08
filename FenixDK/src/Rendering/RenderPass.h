@@ -5,7 +5,6 @@
 namespace fdk {
 namespace Rendering {
 
-class RenderInterface;
 class CommandBuffer;
 class Framebuffer;
 
@@ -18,15 +17,15 @@ public:
 
   void init();
 
-  void release(RenderInterface& rRI);
+  void release();
 
   VkRenderPass handle() const { return m_renderPassImpl; }
 
-  void start(RenderInterface& rRI, CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer);
+  void start(CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer);
 
-  void next_subpass(RenderInterface& rRI, CommandBuffer& rCmdBuffer);
+  void next_subpass(CommandBuffer& rCmdBuffer);
 
-  void end(RenderInterface& rRI, CommandBuffer& rCmdBuffer);
+  void end(CommandBuffer& rCmdBuffer);
 
 private:
 

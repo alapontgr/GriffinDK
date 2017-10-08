@@ -4,9 +4,6 @@
 #include "Containers\Mask.h"
 #include "Memory\MemAllocator.h"
 
-#include "CommandBuffer.h"
-#include "FrameResourceFactory.h"
-
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
 #include "Vulkan/VK_RenderInterface.h"

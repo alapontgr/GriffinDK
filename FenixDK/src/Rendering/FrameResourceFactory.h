@@ -3,6 +3,7 @@
 #include "Memory\MemAllocator.h"
 
 #include "CommandBuffer.h"
+#include "Framebuffer.h"
 #include "Fence.h"
 
 #include <vector>
@@ -12,22 +13,20 @@ namespace fdk
 {
   namespace Rendering 
   {
-    class RenderInterface;
     class RenderPass;
-    class Framebuffer;
 
     // TODO: Adapt it for multi threading
     class FrameResourceFactory 
     {    
     public:
 
-      void init(const u32 bufferCount, RenderInterface& rRi); // N-Buffering for N frames
+      void init(const u32 bufferCount); // N-Buffering for N frames
 
       void create_render_pass_resources(const RenderPass* pRenderPass);
 
-      CommandBuffer* get_primary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator);
+      CommandBuffer* get_primary_command_buffer(Memory::MemAllocator& rAllocator);
 
-      CommandBuffer* get_secondary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator);
+      CommandBuffer* get_secondary_command_buffer(Memory::MemAllocator& rAllocator);
 
       void flip();
 
@@ -37,7 +36,7 @@ namespace fdk
 
     private:
 
-      void init_cache(const u32 index, RenderInterface& rRi);
+      void init_cache(const u32 index);
 
       using CmdBufferCache = std::vector<CommandBuffer*>;
       using CmdBufferCursor = std::vector<CommandBuffer*>::iterator;

@@ -1,8 +1,6 @@
 #include "TestApp.h"
-
-#include "Rendering\context.h"
-#include "Rendering\Framebuffer.h"
-#include "Rendering\RenderConfiguration.h"
+#include "Rendering\RenderInterface.h"
+#include "Rendering\RenderConstants.h"
 
 struct VertexDesc // Temporary
 {
@@ -42,7 +40,7 @@ void TestApp::on_pre_init()
 
 void TestApp::on_start()
 {
-  m_frameResourceFactory.init(Rendering::kBufferCount, *m_pRenderInterface);
+  m_frameResourceFactory.init(Rendering::kFrameBufferingCount);
 
   create_render_pass();
 
@@ -58,11 +56,11 @@ void TestApp::on_update()
 
 void TestApp::on_render()
 {
-  m_pRenderInterface->beginFrame();
+  Rendering::RenderInterface::beginFrame();
 
-  m_frameResourceFactory.get_current_fence()->wait(*m_pRenderInterface);
+  m_frameResourceFactory.get_current_fence()->wait();
 
-  auto* pCmdBuffer = m_frameResourceFactory.get_primary_command_buffer(*m_pRenderInterface, m_mallocAllocator);
+  auto* pCmdBuffer = m_frameResourceFactory.get_primary_command_buffer(m_mallocAllocator);
   pCmdBuffer->start_recording();
 
 
@@ -72,7 +70,7 @@ void TestApp::on_render()
   // Update the surface to use to draw
   m_renderSurface.m_width = static_cast<u32>(width());
   m_renderSurface.m_height = static_cast<u32>(height());
-  m_renderSurface.m_pColorTexture = m_pRenderInterface->get_screen();
+  m_renderSurface.m_pColorTexture = Rendering::RenderInterface::get_screen();
 
   m_cmdList.clear();
   if (m_meshDirty) 
@@ -87,7 +85,7 @@ void TestApp::on_render()
   submit_work(*pCmdBuffer);
 
 
-  m_pRenderInterface->endFrame();
+  Rendering::RenderInterface::endFrame();
 
   m_frameResourceFactory.flip();
 }
@@ -101,7 +99,7 @@ void TestApp::on_release()
 
 void TestApp::create_render_pass()
 {
-  m_renderPass.init(*m_pRenderInterface);
+  m_renderPass.init();
   m_frameResourceFactory.create_render_pass_resources(&m_renderPass);
 }
 
@@ -140,7 +138,7 @@ void TestApp::create_material()
   m_pMaterial->init(matDesc);
 
   // Create the GPU Material
-  m_pMaterial->create_material(*m_pRenderInterface);
+  m_pMaterial->create_material();
 }
 
 void TestApp::create_mesh()
@@ -161,21 +159,21 @@ void TestApp::create_mesh()
     g_indices, 6, sizeof(u16),
     m_mallocAllocator);
 
-  m_pRenderInterface->create_buffer(*m_pStagingBuffer);
-  m_pRenderInterface->create_buffer(*m_mesh.index_buffer());
-  m_pRenderInterface->create_buffer(*m_mesh.vertex_buffer());
+  Rendering::RenderInterface::create_buffer(*m_pStagingBuffer);
+  Rendering::RenderInterface::create_buffer(*m_mesh.index_buffer());
+  Rendering::RenderInterface::create_buffer(*m_mesh.vertex_buffer());
 
   u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
   u32 sizeIndexBuffer = 6 * sizeof(16);
   u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
 
   Memory::mem_t* pData = static_cast<Memory::mem_t*>(
-    m_pRenderInterface->map_buffer_gpu_memory(*m_pStagingBuffer, 0, totalSize));
+    Rendering::RenderInterface::map_buffer_gpu_memory(*m_pStagingBuffer, 0, totalSize));
 
   memcpy(pData, reinterpret_cast<const void*>(&g_vertices[0]), sizeVertexBuffer);
   memcpy((pData + sizeVertexBuffer), g_indices, sizeIndexBuffer);
 
-  m_pRenderInterface->unmap_buffer_gpu_memory(*m_pStagingBuffer);
+  Rendering::RenderInterface::unmap_buffer_gpu_memory(*m_pStagingBuffer);
 
   m_meshDirty = true;
 }
@@ -195,10 +193,10 @@ void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
 void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
 {
   auto* pFramebuffer = m_frameResourceFactory.get_render_pass_framebuffer(&m_renderPass);
-  pFramebuffer->destroy(*m_pRenderInterface);
-  pFramebuffer->create(*m_pRenderInterface, m_renderPass, m_renderSurface);
+  pFramebuffer->destroy();
+  pFramebuffer->create(m_renderPass, m_renderSurface);
 
-  m_renderPass.start(*m_pRenderInterface, rCmdBuffer, *pFramebuffer);
+  m_renderPass.start(rCmdBuffer, *pFramebuffer);
   // Draw
   Rendering::Viewport viewport;
   viewport.m_dimensions = v2(width(), height());
@@ -210,17 +208,17 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
   scissor.m_height = pFramebuffer->height();
   scissor.m_offsetX = 0;
   scissor.m_offsetY = 0;
-  m_pRenderInterface->set_scissor(scissor, rCmdBuffer);
-  m_pRenderInterface->set_viewport(viewport, rCmdBuffer);
+  Rendering::RenderInterface::set_scissor(scissor, rCmdBuffer);
+  Rendering::RenderInterface::set_viewport(viewport, rCmdBuffer);
 
-  m_pRenderInterface->bind_material(*m_pMaterial, rCmdBuffer);
-  m_pRenderInterface->use_mesh(m_mesh, rCmdBuffer);
-  m_pRenderInterface->draw_indexed(6, 1, 0, 0, rCmdBuffer);
+  Rendering::RenderInterface::bind_material(*m_pMaterial, rCmdBuffer);
+  Rendering::RenderInterface::use_mesh(m_mesh, rCmdBuffer);
+  Rendering::RenderInterface::draw_indexed(6, 1, 0, 0, rCmdBuffer);
 
-  m_renderPass.end(*m_pRenderInterface, rCmdBuffer);
+  m_renderPass.end(rCmdBuffer);
 }
 
 void TestApp::submit_work(Rendering::CommandBuffer& rCmdBuffer)
 {
-  m_pRenderInterface->submit_work(rCmdBuffer, *m_frameResourceFactory.get_current_fence());
+  Rendering::RenderInterface::submit_work(rCmdBuffer, *m_frameResourceFactory.get_current_fence());
 }

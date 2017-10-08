@@ -116,6 +116,7 @@ project "Basic"
             "Win32", 
             "VK_PROTOTYPES",
             "VK_USE_PLATFORM_WIN32_KHR",
+            "FENIX_VK_IMPL"
         }
 
     configuration "x64"
@@ -128,4 +129,5 @@ project "Basic"
             "x64", 
             "VK_PROTOTYPES",
             "VK_USE_PLATFORM_WIN32_KHR",
+            "FENIX_VK_IMPL"
         }

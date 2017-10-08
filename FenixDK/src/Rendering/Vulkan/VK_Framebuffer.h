@@ -23,7 +23,7 @@ namespace Rendering
 					const RenderPass& rRenderPass,
 					const RenderSurface& rRenderSurface);
 
-			void destroy(const RenderInterface& rRI);
+			void destroy();
 
 			VkFramebuffer handle() { return m_handle; }
 

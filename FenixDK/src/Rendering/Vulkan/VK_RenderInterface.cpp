@@ -12,6 +12,7 @@
 #include "../CommandBuffer.h"
 #include "../Fence.h"
 #include "../Texture2D.h"
+#include "..\RenderConstants.h"
 
 namespace fdk
 {
@@ -114,6 +115,26 @@ namespace Rendering
 				FDK_ABORT("Failed to find a type of memory with the given filter and properties");
 			}
 		} // End vulkan_helpers
+
+    VkSurfaceKHR VK_RenderInterface::s_surface;
+    VkSwapchainKHR VK_RenderInterface::s_swapChain;
+    VkSurfaceFormatKHR VK_RenderInterface::s_swapChainFormat;
+    VkSurfaceCapabilitiesKHR VK_RenderInterface::s_Capabilities;
+    std::vector<VkSurfaceFormatKHR> VK_RenderInterface::s_supportedFormats;
+    std::vector<VkPresentModeKHR> VK_RenderInterface::s_supportedPresentModes;
+    VkInstance VK_RenderInterface::s_instance;
+    VkPhysicalDevice VK_RenderInterface::s_physicalDevice;
+    VkDevice VK_RenderInterface::s_device;
+    VkQueue VK_RenderInterface::s_graphicsQueue;
+    VkQueue VK_RenderInterface::s_presentQueue;
+    fdk::u32 VK_RenderInterface::s_graphicsFamilyIndex;
+    std::vector<fdk::Rendering::Vulkan::FrameInfoVK> VK_RenderInterface::s_frames;
+    VkCommandPool VK_RenderInterface::s_commandPool;
+    std::vector<VkImageView> VK_RenderInterface::s_swapChainImageView;
+    std::vector<VkImage> VK_RenderInterface::s_swapChainImages;
+    u32 VK_RenderInterface::s_presentFamilyIndex;
+    u32 VK_RenderInterface::s_currentFrame;
+    u32 VK_RenderInterface::s_currentImageIndex;
 
 		VK_RenderInterface::VK_RenderInterface()
 		{
@@ -546,7 +567,7 @@ namespace Rendering
 		void VK_RenderInterface::create_frame_infos()
 		{
 			s_currentFrame = 0;
-			s_frames.resize(kBufferCount);
+			s_frames.resize(kFrameBufferingCount);
 
 			// Semaphore config
 			VkSemaphoreCreateInfo semaphoreInfo{};
@@ -602,9 +623,9 @@ namespace Rendering
 			{
 				vkDestroyInstance(s_instance, nullptr);
 			}
-		}
+		}  
 
-		void VK_RenderInterface::create_buffer(Buffer& rBuffer)
+    void VK_RenderInterface::create_buffer(Buffer& rBuffer)
 		{
 			VkBufferCreateInfo bufferCreateInfo{};
 			bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -790,7 +811,7 @@ namespace Rendering
 			}
 
 			// Flip command buffers
-			s_currentFrame = Maths::wrap(s_currentFrame + 1, 0U, kBufferCount);
+			s_currentFrame = Maths::wrap(s_currentFrame + 1, 0U, kFrameBufferingCount);
 		}
 
 		void VK_RenderInterface::submit_work(const CommandBuffer& rCmdBuffer, const Fence& rSyncFence)
@@ -812,6 +833,7 @@ namespace Rendering
 																	rSyncFence.m_fence);
 			VK_CHECK(result, "Failed to submit cmd block");
 		}
-	}
+
+  }
 }
 }

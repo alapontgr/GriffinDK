@@ -84,7 +84,7 @@ void RenderPass::init()
   VK_CHECK(result, "Failed to create render pass");
 }
 
-void RenderPass::release(RenderInterface& rRI)
+void RenderPass::release()
 {
   if (m_renderPassImpl) 
   {
@@ -93,7 +93,7 @@ void RenderPass::release(RenderInterface& rRI)
   m_renderPassImpl = VK_NULL_HANDLE;
 }
 
-void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer)
+void RenderPass::start(CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer)
 {
   //VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
   //VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
@@ -117,7 +117,7 @@ void RenderPass::start(RenderInterface& rRI, CommandBuffer& rCmdBuffer, Framebuf
   vkCmdBeginRenderPass(rCmdBuffer.m_commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void RenderPass::next_subpass(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
+void RenderPass::next_subpass(CommandBuffer& rCmdBuffer)
 {
   //VK_RenderInterface* pRI = IMPLEMENTATION(RenderInterface, &rRI);
   //VK_CommandBuffer* pCmdBuff = IMPLEMENTATION(CommandBuffer, &rCmdBuffer);
@@ -125,7 +125,7 @@ void RenderPass::next_subpass(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
   //vkCmdNextSubpass(pCmdBuff->m_commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void RenderPass::end(RenderInterface& rRI, CommandBuffer& rCmdBuffer)
+void RenderPass::end(CommandBuffer& rCmdBuffer)
 {
   vkCmdEndRenderPass(rCmdBuffer.m_commandBuffer);
 }

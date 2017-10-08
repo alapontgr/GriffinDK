@@ -18,9 +18,9 @@ namespace fdk
       BaseT::create(rRenderPass, rRenderSurface);
     }
 
-    void Framebuffer::destroy(const RenderInterface& rRI)
-    {
-      BaseT::destroy(rRI);
+    void Framebuffer::destroy()
+{
+      BaseT::destroy();
     }
 
   }

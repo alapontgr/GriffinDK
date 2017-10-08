@@ -6,6 +6,7 @@
 #include "Utilities\platform.h"
 #include "../RenderSurface.h"
 #include "../Texture2D.h"
+#include "../RenderInterface.h"
 
 namespace fdk
 {
@@ -39,8 +40,8 @@ namespace Rendering
 			VK_CHECK(result, "Failed to create framebuffer");
 		}
 
-		void VK_Framebuffer::destroy(const RenderInterface& rRI)
-		{
+		void VK_Framebuffer::destroy()
+{
 			if (m_handle != VK_NULL_HANDLE)
 			{
 				vkDestroyFramebuffer(RenderInterface::s_device, m_handle, nullptr);

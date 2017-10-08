@@ -22,7 +22,7 @@ namespace fdk
         const RenderPass& rRenderPass,
         const RenderSurface& rRenderSurface);
 
-      void destroy(const RenderInterface& rRI);
+      void destroy();
 
       u32 width() const { return m_width; }
       u32 height() const { return m_height; }

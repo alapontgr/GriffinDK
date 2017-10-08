@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <chrono>
 #include "Time.h"
+#include "Rendering\RenderInterface.h"
 
 namespace fdk
 {
@@ -64,7 +65,6 @@ namespace Framework
 	{
 		on_release();
 		// input::Release();
-		m_context.release();
 	}
 
 	void App::frame()

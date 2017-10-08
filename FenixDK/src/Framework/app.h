@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Rendering/context.h"
-#include "Rendering/RenderInterface.h"
 #include "Utilities/types.h"
 
 namespace fdk {
@@ -37,7 +35,6 @@ private:
 
 protected:
 
-  Rendering::Context m_context;
   static u32 s_width;
   static u32 s_height;
   bool m_fullscreen = false;

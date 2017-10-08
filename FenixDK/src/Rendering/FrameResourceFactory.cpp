@@ -8,14 +8,14 @@ namespace fdk
   namespace Rendering 
   {
     
-    void FrameResourceFactory::init(const u32 bufferCount, RenderInterface& rRi)
+    void FrameResourceFactory::init(const u32 bufferCount)
     {
       m_currentIndex = 0;
       m_BufferingCount = bufferCount;
       m_frameCaches.resize(bufferCount);
       for (u32 i=0; i<bufferCount; i++) 
       {
-        init_cache(i, rRi);
+        init_cache(i);
       }
     }
 
@@ -29,7 +29,7 @@ namespace fdk
       }
     }
 
-    CommandBuffer* FrameResourceFactory::get_primary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator)
+    fdk::Rendering::CommandBuffer* FrameResourceFactory::get_primary_command_buffer(Memory::MemAllocator& rAllocator)
     {
       auto& rCache = m_frameCaches[m_currentIndex];
       if (rCache.m_primaryCmdCursor != rCache.m_primaryCmdBuffers.end()) 
@@ -41,14 +41,14 @@ namespace fdk
       // Else create a new one
       auto* pCmdBuffer = CommandBuffer::create(rAllocator);
       pCmdBuffer->set_type(CommandBuffer::kTypePrimary);
-      rRi.create_command_buffer(*pCmdBuffer);
+      RenderInterface::create_command_buffer(*pCmdBuffer);
 
       rCache.m_primaryCmdBuffers.push_back(pCmdBuffer);
       rCache.m_primaryCmdCursor = rCache.m_primaryCmdBuffers.end();
       return pCmdBuffer;
     }
 
-    CommandBuffer* FrameResourceFactory::get_secondary_command_buffer(RenderInterface& rRi, Memory::MemAllocator& rAllocator)
+    fdk::Rendering::CommandBuffer* FrameResourceFactory::get_secondary_command_buffer(Memory::MemAllocator& rAllocator)
     {
       auto& rCache = m_frameCaches[m_currentIndex];
       if (rCache.m_secondaryCmdCursor != rCache.m_secondaryCmdBuffers.end())
@@ -60,7 +60,7 @@ namespace fdk
       // Else create a new one
       auto* pCmdBuffer = CommandBuffer::create(rAllocator);
       pCmdBuffer->set_type(CommandBuffer::kTypeSecondary);
-      rRi.create_command_buffer(*pCmdBuffer);
+      RenderInterface::create_command_buffer(*pCmdBuffer);
 
       rCache.m_secondaryCmdBuffers.push_back(pCmdBuffer);
       rCache.m_secondaryCmdCursor = rCache.m_secondaryCmdBuffers.end();
@@ -88,12 +88,12 @@ namespace fdk
       return &rCache.m_framebufferCache[pRenderPass];
     }
 
-    void FrameResourceFactory::init_cache(const u32 index, RenderInterface& rRi)
+    void FrameResourceFactory::init_cache(const u32 index)
     {
       FrameResources& rCache = m_frameCaches[index];
       rCache.m_primaryCmdCursor = rCache.m_primaryCmdBuffers.begin();
       rCache.m_secondaryCmdCursor = rCache.m_secondaryCmdBuffers.begin();
-      rRi.create_fence(rCache.m_cmdBufferFence);
+      RenderInterface::create_fence(rCache.m_cmdBufferFence);
     }
   }
 }

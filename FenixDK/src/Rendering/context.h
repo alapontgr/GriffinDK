@@ -11,10 +11,6 @@
 namespace fdk {
 namespace Rendering {
 
-constexpr u32 kDesiredSwapChainImageCount = 3;
-
-constexpr u32 kBufferCount = 3;
-
 // Configure vertex shader
 struct VertexDesc
 {

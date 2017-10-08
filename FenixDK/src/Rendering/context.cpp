@@ -5,6 +5,7 @@
 #include "Utilities/platform.h"
 #include <algorithm>
 #include <vector>
+#include "RenderConstants.h"
 
 namespace fdk
 {
@@ -500,7 +501,7 @@ namespace Rendering
 	void Context::allocate_cmd_buffers()
 	{
 		// Use N buffering for the command buffers
-		m_cmdBuffers.resize(kBufferCount);
+		m_cmdBuffers.resize(kFrameBufferingCount);
 
 		VkCommandBufferAllocateInfo info;
 		info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1371,7 +1372,7 @@ m_renderPass.init(*this);
 		}
 
 		// Flip command buffers
-		m_currentCmd = Maths::wrap(m_currentCmd + 1, 0U, kBufferCount);
+		m_currentCmd = Maths::wrap(m_currentCmd + 1, 0U, kFrameBufferingCount);
 	}
 
 	void Context::release_mesh()

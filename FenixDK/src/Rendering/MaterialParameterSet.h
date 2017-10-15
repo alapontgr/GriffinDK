@@ -1,15 +1,20 @@
 #pragma once
 
-#include "ParameterDefinition.h" 
+#include "Utilities/platform.h"
+#ifdef FENIX_VK_IMPL
+#include "Vulkan/VK_MaterialParameterSet.h"
+#endif
 
 namespace fdk
 {
 namespace Rendering
 {  
-	class MaterialParameterSet
+	class MaterialParameterSet : public IMPLEMENTATION(MaterialParameterSet)
 	{
 
 	public:
+
+    using BaseT = IMPLEMENTATION(MaterialParameterSet);
 
     MaterialParameterSet();
 
@@ -21,9 +26,8 @@ namespace Rendering
 
     u32 total_size() const;
 
-  private:
-   
-    ParameterCollection m_parameters;
+    void create();
+
 	};
 
 }

@@ -50,5 +50,10 @@ namespace Rendering
     return rParam.m_offset + rParam.m_size;
   }
 
+  void MaterialParameterSet::create()
+  {
+    BaseT::create();
+  }
+
 }
 }

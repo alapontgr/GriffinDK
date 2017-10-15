@@ -1,5 +1,6 @@
 #include "ParameterBuffer.h"
 #include "RenderInterface.h"
+#include "MaterialParameterSet.h"
 
 namespace fdk
 {

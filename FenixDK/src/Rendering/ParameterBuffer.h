@@ -1,12 +1,10 @@
 #pragma once
 
-#include "MaterialParameterSet.h"
-
 #include "Utilities/platform.h"
 #ifdef FENIX_VK_IMPL
 #include "Vulkan/VK_ParameterBuffer.h"
 #endif
-#include "Memory/MemAllocator.h"
+
 
 namespace fdk
 {
@@ -36,12 +34,6 @@ namespace fdk
       u32 slot() const { return m_bindingSlot; }
 
       void set_bindingSlot(const u32 slot) { m_bindingSlot = slot; }
-
-    private:
-
-      Memory::mem_ptr_t m_pParametersData;
-      const MaterialParameterSet* m_pParameterSetLayout;
-      u32 m_bindingSlot;
     };
 
   }

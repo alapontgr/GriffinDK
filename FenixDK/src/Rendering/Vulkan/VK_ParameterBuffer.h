@@ -4,6 +4,7 @@
 
 #include "Utilities\types.h"
 #include "Memory/MemUtils.h"
+#include "../ParameterBufferBase.h"
 
 namespace fdk
 {
@@ -14,7 +15,7 @@ namespace fdk
 
     namespace Vulkan 
     {
-      class VK_ParameterBuffer 
+      class VK_ParameterBuffer : public ParameterBufferBase
       {
       public:
 

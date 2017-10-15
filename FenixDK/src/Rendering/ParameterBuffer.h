@@ -22,10 +22,9 @@ namespace fdk
 
       void create(
         const MaterialParameterSet& rParameterSetLayout,
-        RenderInterface& rRI, 
         Memory::MemAllocator& rAllocator);
 
-      void release(RenderInterface& rRI);
+      void release();
       
       void update();
       

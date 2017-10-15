@@ -23,16 +23,13 @@ namespace fdk
 
       protected:
 
-         void create(
-           RenderInterface& rRI,
-           const MaterialParameterSet& rParameterSet,
-           const u32 bindingSlot);
+         void create();
 
-        void update(const MaterialParameterSet& rParameterSet, Memory::mem_ptr_t pData);
+        void update();
 
-        void release(RenderInterface& rRI);
+        void release();
 
-        void bind(const MaterialParameterSet& rParameterSet);
+        void bind();
 
       private:
 

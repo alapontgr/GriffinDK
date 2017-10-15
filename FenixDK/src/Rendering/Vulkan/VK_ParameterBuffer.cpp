@@ -15,25 +15,30 @@ namespace fdk
 
       }
 
-      void VK_ParameterBuffer::create(
-        RenderInterface& rRI,
-        const MaterialParameterSet& rParameterSet,
-        const u32 bindingSlot)
+      void VK_ParameterBuffer::create()
+      {
+        /*VkDescriptorSetAllocateInfo descSetAllocInfo{};
+        descSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descSetAllocInfo.pNext = nullptr;
+        descSetAllocInfo.descriptorPool = RenderInterface::s_po;
+        descSetAllocInfo.descriptorSetCount = 1;
+        descSetAllocInfo.pSetLayouts = &m_fragUniformLayout;
+        auto result = vkAllocateDescriptorSets(m_device, &descSetAllocInfo, &m_fragDescSet);
+        VK_CHECK(result, "Failed to allocate the descriptor set");
+*/
+      }
+
+      void VK_ParameterBuffer::update()
       {
 
       }
 
-      void VK_ParameterBuffer::update(const MaterialParameterSet& rParameterSet, Memory::mem_ptr_t pData)
+      void VK_ParameterBuffer::release()
       {
 
       }
 
-      void VK_ParameterBuffer::release(RenderInterface& rRI)
-      {
-
-      }
-
-      void VK_ParameterBuffer::bind(const MaterialParameterSet& rParameterSet)
+      void VK_ParameterBuffer::bind()
       {
 
       }

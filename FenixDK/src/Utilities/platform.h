@@ -5,8 +5,10 @@
 #include "VulkanInclude.h"
 #include "types.h"
 
-namespace fdk {
-namespace Utilities {
+namespace fdk
+{
+namespace Utilities
+{
 
 // Windows definitions
 #if defined(Win32) || defined(x64)
@@ -16,16 +18,15 @@ namespace Utilities {
 #endif // end Windows definitions
 
 #if defined(Unix)
-#define  UnixPlatform
+#define UnixPlatform
 #endif
 
 #define VK_CHECK(result, failMsg) FDASSERT(result == VkResult::VK_SUCCESS, failMsg)
 
 #define PATH const char*
 
-constexpr char *kEngineName = "FenixEngine";
-constexpr u32 kEngineVersion = VK_MAKE_VERSION(0, 0, 1);
-
+	constexpr char* kEngineName = "FenixEngine";
+	constexpr u32 kEngineVersion = VK_MAKE_VERSION(0, 0, 1);
 
 #define IMPLEMENTATION_TYPE(API, ClassName) API##ClassName
 #define IMPL_CONCAT(API, ClassName) IMPLEMENTATION_TYPE(API, ClassName)
@@ -33,11 +34,10 @@ constexpr u32 kEngineVersion = VK_MAKE_VERSION(0, 0, 1);
 // Define used to get the base class of the API dependent classes (Material, Buffer, ...)
 #define IMPLEMENTATION(ClassName) IMPL_CONCAT(GPUIMPL_ID, ClassName)
 
-#ifdef WinPlatform
+#ifdef FENIX_VK_IMPL
 
 #define GPUIMPL_ID Vulkan::VK_
 
 #endif // WinPlatform
-
 }
 }

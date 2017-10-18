@@ -10,7 +10,7 @@ namespace fdk
 {
   namespace Rendering 
   {
-    class RenderInterface;
+    class ParameterBufferGroup;
 
     class ParameterBuffer : public IMPLEMENTATION(ParameterBuffer)
     {
@@ -22,6 +22,7 @@ namespace fdk
 
       void create(
         const MaterialParameterSet& rParameterSetLayout,
+        const ParameterBufferGroup& rAllocationGroup,
         Memory::MemAllocator& rAllocator);
 
       void release();

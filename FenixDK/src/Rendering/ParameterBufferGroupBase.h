@@ -6,6 +6,7 @@ namespace fdk
   namespace Rendering 
   {
     class ParameterBuffer;
+    class ParameterSet;
 
     class ParameterBufferGroupBase
     {

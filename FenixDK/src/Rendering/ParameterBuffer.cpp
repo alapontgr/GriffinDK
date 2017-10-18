@@ -1,6 +1,7 @@
 #include "ParameterBuffer.h"
 #include "RenderInterface.h"
 #include "MaterialParameterSet.h"
+#include "ParameterBufferGroup.h"
 
 namespace fdk
 {
@@ -14,6 +15,7 @@ namespace fdk
 
     void ParameterBuffer::create(
       const MaterialParameterSet& rParameterSetLayout,
+      const ParameterBufferGroup& rAllocationGroup,
       Memory::MemAllocator& rAllocator)
     {
       m_pParameterSetLayout = &rParameterSetLayout;

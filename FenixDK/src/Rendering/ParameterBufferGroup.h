@@ -17,7 +17,7 @@ namespace Rendering
 
 		ParameterBufferGroup();
 
-		void create(const u32 maxElements);
+		void create();
   };
 }
 }

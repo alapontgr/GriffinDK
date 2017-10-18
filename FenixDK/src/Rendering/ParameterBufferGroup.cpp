@@ -2,19 +2,18 @@
 
 namespace fdk
 {
-  namespace Rendering 
-  {   
+namespace Rendering
+{
 
-    ParameterBufferGroup::ParameterBufferGroup()
-    {
+	ParameterBufferGroup::ParameterBufferGroup()
+	{
+	}
 
-    }
-
-    void ParameterBufferGroup::create(const u32 maxElements)
-    {
-      FDASSERT(m_maxElementCount == 0, "This group has already been initialized");
-      m_maxElementCount = maxElements;
-    }
-  }
+	void ParameterBufferGroup::create()
+	{
+		FDASSERT(m_maxElementCount == 0, "This group has already been initialized");
+		m_maxElementCount = 1;
+		BaseT::create();
+	}
 }
-
+}

@@ -10,8 +10,6 @@ namespace fdk
 {
   namespace Rendering 
   {
-    class ParameterBufferGroup;
-
     class ParameterBuffer : public IMPLEMENTATION(ParameterBuffer)
     {
     public:

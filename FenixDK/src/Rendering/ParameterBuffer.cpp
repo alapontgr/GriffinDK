@@ -19,6 +19,7 @@ namespace fdk
       Memory::MemAllocator& rAllocator)
     {
       m_pParameterSetLayout = &rParameterSetLayout;
+      m_pAllocationGroup = &rAllocationGroup;
       u32 size = m_pParameterSetLayout->total_size();
       m_pParametersData = rAllocator.allocate(size, 16);
       BaseT::create();

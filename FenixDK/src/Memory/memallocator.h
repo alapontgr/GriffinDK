@@ -31,6 +31,36 @@ namespace fdk
         release(reinterpret_cast<mem_ptr_t>(pObj));
       }
 
+      // TODO: Implement unit test
+      template <typename T, typename... Args>
+      T* create_array(const u32 elementCount, Args&&... args)
+      {
+        auto pData = allocate(elementCount * sizeof(T), alignof(T));
+        FDASSERT(pData, "Failed to allocate memory");
+        FDASSERT(is_aligned(pData, alignof(T)), "Bad alignment");
+        auto pTData = reinterpret_cast<T*>(pData);
+        auto pAux = pTData;
+        for (u32 i=0; i<elementCount; ++i) 
+        {
+          new (pAux) T(args...);
+          pAux++;
+        }
+        return pTData;
+      }
+
+      // TODO: Implement unit test
+      template <typename T>
+      void destroy_array(T* pObj, const u32 elementCount)
+      {
+        auto pAux = pObj;
+        for (u32 i = 0; i < elementCount; ++i)
+        {
+          pAux::~T();
+          pAux++;
+        }
+        release(reinterpret_cast<mem_ptr_t>(pObj));
+      }
+
     private:
     };
 

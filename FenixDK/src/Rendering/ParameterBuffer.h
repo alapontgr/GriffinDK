@@ -25,7 +25,7 @@ namespace fdk
 
       void release();
       
-      void update();
+      void update(Memory::MemAllocator& rTmpAllocator);
       
       void bind();
 

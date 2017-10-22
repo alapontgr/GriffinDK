@@ -25,13 +25,23 @@ namespace fdk
 
          void create();
 
-        void update();
+        void update(Memory::MemAllocator& rTmpAllocator);
 
         void release();
 
         void bind();
 
       private:
+
+        void fill_write_data_for_param(
+          const ParameterDefinition& rParam, 
+          VkWriteDescriptorSet* pParamWrite, 
+          Memory::MemAllocator& rTmpAllocator);
+
+        void fill_constant_buffer_write(
+          const ParameterDefinition& rParam,
+          VkWriteDescriptorSet* pParamWrite,
+          Memory::MemAllocator& rTmpAllocator);
 
         VkDescriptorSet m_descriptorSet;
       };

@@ -23,9 +23,7 @@ namespace fdk
 
       ~Material();
 
-      static Material* create(Memory::MemAllocator& rAllocator);
-
-      void init(const MaterialDesc& rDesc);
+      void init(const MaterialDesc& rDesc, const MaterialParameterSet* pSetArray, const u32 setArrayCount);
 
       void create_material();
     };

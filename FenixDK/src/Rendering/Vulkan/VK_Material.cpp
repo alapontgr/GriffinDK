@@ -1,6 +1,9 @@
 #include "VK_Material.h"
+
 #include "Utilities\platform.h"
 #include "IO\FileUtils.h"
+
+#include "../MaterialParameterSet.h"
 #include "../RenderInterface.h"
 
 namespace fdk
@@ -197,14 +200,20 @@ namespace Rendering
 
 		EResultType VK_Material::create_layout(VkDevice pDevice)
 		{
+      VkDescriptorSetLayout layoutArray[kMaxParameterSetLayouts];
+      for (u32 i=0; i<m_setLayoutCount; ++i) 
+      {
+        FDASSERT(m_parameterSetLayouts[i], "This element is not initialized");
+        layoutArray[i] = m_parameterSetLayouts[i]->m_pLayout;
+      }
 			// Create an empty layout without descriptors (No parameters)
 			// TODO Add parameters
 			VkPipelineLayoutCreateInfo layoutInfo{};
 			layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			layoutInfo.pNext = nullptr;
 			layoutInfo.flags = 0;
-			layoutInfo.setLayoutCount = 0;
-			layoutInfo.pSetLayouts = nullptr;
+			layoutInfo.setLayoutCount = m_setLayoutCount;
+			layoutInfo.pSetLayouts = layoutArray;
 			layoutInfo.pushConstantRangeCount = 0;
 			layoutInfo.pPushConstantRanges = nullptr;
 			auto result = vkCreatePipelineLayout(pDevice, &layoutInfo, nullptr, &m_layout);

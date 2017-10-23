@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "MaterialParameterSet.h"
 
 namespace fdk
 {
@@ -13,13 +14,13 @@ namespace Rendering
 	{
 	}
 
-	Material* Material::create(Memory::MemAllocator& rAllocator)
+	void Material::init(const MaterialDesc& rDesc, const MaterialParameterSet* pSetArray, const u32 setArrayCount)
 	{
-		return rAllocator.create<Material>();
-	}
-
-	void Material::init(const MaterialDesc& rDesc)
-	{
+    m_setLayoutCount = setArrayCount;
+    for (u32 i=0; i<setArrayCount; ++i)
+    {
+      m_parameterSetLayouts[i] = &pSetArray[i];
+    }
 		BaseT::init(rDesc);
 	}
 

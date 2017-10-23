@@ -1,9 +1,11 @@
 #pragma once
 
+#include "../MaterialBase.h"
+
 #include "Utilities/VulkanInclude.h"
+
 #include "Utilities/GeneralDefinitions.h"
 #include "../RenderConfiguration.h"
-
 #include "../MaterialUtils.h"
 #include "Containers/Mask.h"
 
@@ -15,7 +17,7 @@ namespace Rendering
 
 	namespace Vulkan
 	{
-		class VK_Material
+		class VK_Material : public MaterialBase
 		{
 		public:
 			VK_Material();

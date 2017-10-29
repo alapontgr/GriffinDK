@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "VK_Texture2D.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(Texture2D)
 
 namespace fdk
 {

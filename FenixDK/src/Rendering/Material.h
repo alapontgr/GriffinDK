@@ -2,9 +2,7 @@
 #include "Memory\MemAllocator.h"
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_Material.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(Material)
 
 namespace fdk
 {

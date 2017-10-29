@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_Framebuffer.h"
-#endif
 #include "Utilities/types.h"
+
+#include "Utilities/platform.h"
+#include INCLUDE_IMPLEMENTATION(Framebuffer)
 
 namespace fdk
 {

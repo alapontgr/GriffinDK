@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_Fence.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(Fence)
 
 namespace fdk
 {

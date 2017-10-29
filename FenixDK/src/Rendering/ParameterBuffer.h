@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_ParameterBuffer.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(ParameterBuffer)
 
 
 namespace fdk

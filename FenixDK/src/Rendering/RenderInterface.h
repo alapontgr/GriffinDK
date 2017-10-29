@@ -5,9 +5,7 @@
 #include "Memory\MemAllocator.h"
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_RenderInterface.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(RenderInterface)
 
 namespace fdk
 {

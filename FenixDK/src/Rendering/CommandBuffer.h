@@ -4,9 +4,7 @@
 #include "Containers\Mask.h"
 
 #include "Utilities/platform.h"
-#ifdef FENIX_VK_IMPL
-#include "Vulkan/VK_CommandBuffer.h"
-#endif
+#include INCLUDE_IMPLEMENTATION(CommandBuffer)
 
 namespace fdk
 {

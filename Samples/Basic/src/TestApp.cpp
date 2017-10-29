@@ -22,6 +22,9 @@ static const VertexDesc g_vertices[] =
 
 static const u16 g_indices[] = { 0, 1, 2, 2, 3, 0 };
 
+static constexpr u32 kTmpStackAllocatorSize = 1024 * 1024; // 1MB
+static constexpr u32 kResourceStackAllocatorSize = 1024 * 1024; // 1MB
+
 TestApp::TestApp()
 {
 
@@ -41,6 +44,10 @@ void TestApp::on_pre_init()
 void TestApp::on_start()
 {
   m_frameResourceFactory.init(Rendering::kFrameBufferingCount);
+
+  // Initialize the allocators
+  m_tmpStackAllocator.init(m_mallocAllocator, kTmpStackAllocatorSize, 16);
+  m_resStackAllocator.init(m_mallocAllocator, kTmpStackAllocatorSize, 16);
 
   create_render_pass();
 
@@ -105,6 +112,8 @@ void TestApp::create_render_pass()
 
 void TestApp::create_material()
 {
+  initialize_param_set();
+
   m_blendState.m_enabledBlending = false;
   m_blendState.m_enableLogicOperations = false;
   m_blendState.m_srcColorBlendFactor = Rendering::BlendState::One;
@@ -123,10 +132,7 @@ void TestApp::create_material()
   m_multiSampleState.m_enabled = false;
   m_multiSampleState.m_samplesCount = Rendering::MultiSampleState::x1;
 
-  m_pMaterial = Rendering::Material::create(m_mallocAllocator);
-
   Rendering::MaterialDesc matDesc;
-
   matDesc.m_pRenderPass = &m_renderPass;
   matDesc.m_vsPath = "Shaders/bin/dummy.vert.spv";
   matDesc.m_psPath = "Shaders/bin/dummy.frag.spv";
@@ -135,10 +141,36 @@ void TestApp::create_material()
   matDesc.m_pRasterState = &m_rasterState;
   matDesc.m_pMultiSamplingState = &m_multiSampleState;
 
-  m_pMaterial->init(matDesc);
+  m_material.init(matDesc, &m_parameterSet, 1);
 
   // Create the GPU Material
-  m_pMaterial->create_material();
+  m_material.create_material();
+}
+
+void TestApp::init_constant_buffer()
+{
+
+}
+
+void TestApp::initialize_param_set()
+{
+  static Utilities::Name cbParamName("test_cb");
+  Rendering::ShaderStageMask stagesMask = Rendering::EShaderStageFlag::Fragment;
+  m_parameterSet.add_parameter(0, cbParamName, Rendering::Type_ConstantBuffer, stagesMask);
+  m_parameterSet.create();
+
+  m_paramBufferGroup.create();
+
+  m_parameterBuffer.create(m_parameterSet, m_paramBufferGroup, m_resStackAllocator);
+
+  auto pLayout = m_parameterBuffer.layout();
+  auto slot = pLayout->get_parameter(cbParamName);
+  m_parameterBuffer.set_parameter(slot, &m_testCB);
+
+  init_constant_buffer();
+
+  // Once all the resources of the parameter set are ready we can update it
+  m_parameterBuffer.update(m_tmpStackAllocator);
 }
 
 void TestApp::create_mesh()
@@ -211,7 +243,7 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
   Rendering::RenderInterface::set_scissor(scissor, rCmdBuffer);
   Rendering::RenderInterface::set_viewport(viewport, rCmdBuffer);
 
-  Rendering::RenderInterface::bind_material(*m_pMaterial, rCmdBuffer);
+  Rendering::RenderInterface::bind_material(m_material, rCmdBuffer);
   Rendering::RenderInterface::use_mesh(m_mesh, rCmdBuffer);
   Rendering::RenderInterface::draw_indexed(6, 1, 0, 0, rCmdBuffer);
 

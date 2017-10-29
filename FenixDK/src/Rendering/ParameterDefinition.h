@@ -33,16 +33,24 @@ namespace Rendering
     StageCount = 6
 	};
 
+  using ShaderStageMask = u32;
+
 	struct ParameterDefinition
 	{
 		Utilities::Name m_paramName;
 		EShaderParameterType m_paramType;
+    ShaderStageMask m_stages;
 		u32 m_bindingSlot;
-    u32 m_stages;
 		u32 m_offset;
 		u32 m_size;
 		u32 m_alignment;
 	};
+
+  struct ParameterSlot 
+  {
+    u32 m_offset;
+    u32 m_size;
+  };
 
 	using ParameterCollection = std::vector<ParameterDefinition>;
 }

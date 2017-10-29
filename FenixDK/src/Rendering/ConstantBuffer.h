@@ -26,5 +26,6 @@ namespace fdk
 
       BufferChunk m_gpuData;
     };
+
   }
 }

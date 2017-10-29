@@ -23,25 +23,32 @@ namespace Rendering
     m_parameters.clear();
 	}
 
-	void MaterialParameterSet::add_parameter(const ParameterDefinition& rParameterDefinition)
-	{
+  void MaterialParameterSet::add_parameter(const u32 bindingSlot, const Utilities::Name& rParamName, const EShaderParameterType paramType, const ShaderStageMask stages)
+  {
     u32 offset = get_offset(m_parameters);
-    u32 alignmentOffset = Memory::get_alignment_offset(offset, rParameterDefinition.m_alignment);
-    m_parameters.push_back(rParameterDefinition);
+    ParameterDefinition parameter;
+    parameter.m_paramName = rParamName;
+    parameter.m_paramType = paramType;
+    parameter.m_stages = stages;
+    parameter.m_bindingSlot = bindingSlot;
+    parameter.m_size = sizeof(u32*);
+    parameter.m_alignment = alignof(u32*);
+    u32 alignmentOffset = Memory::get_alignment_offset(offset, parameter.m_alignment);
+    m_parameters.push_back(parameter);
     auto& rParam = m_parameters[m_parameters.size() - 1];
     rParam.m_offset = offset + alignmentOffset;
-	}
+  }
 
-  const ParameterDefinition* MaterialParameterSet::get_parameter(const Utilities::Name& rParamName) const
+  ParameterSlot MaterialParameterSet::get_parameter(const Utilities::Name& rParamName) const
   {
     for (const auto& rParam : m_parameters) 
     {
       if (rParam.m_paramName == rParamName) 
       {
-        return &rParam;
+        return {rParam.m_offset, rParam.m_size};
       }
     }
-    return nullptr;
+    return {0,0};
   }
 
   u32 MaterialParameterSet::total_size() const

@@ -31,12 +31,13 @@ namespace Rendering
 		BaseT::update(rTmpAllocator);
 	}
 
-	void ParameterBuffer::bind()
-	{
-		BaseT::bind();
-	}
+  void ParameterBuffer::set_parameter(const ParameterSlot& rSlot, const ConstantBuffer* pConstantBuffer)
+  {
+    FDASSERT(m_pParametersData, "The parameter buffer has not been created and initialized yet");
+    memcpy(m_pParametersData + rSlot.m_offset, &pConstantBuffer, sizeof(ConstantBuffer*));
+  }
 
-	void ParameterBuffer::release()
+  void ParameterBuffer::release()
 	{
 		BaseT::release();
 	}

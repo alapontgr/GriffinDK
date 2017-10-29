@@ -19,8 +19,6 @@ project "UnitTests"
     targetdir "./Samples/UnitTests/build/$(Configuration)/$(Platform)"
     objdir "./Samples/UnitTests/obj/$(Platform)"
     debugdir "./Samples/Res"
-    prebuildcommands { "call ../../scripts/compile_engine.bat $(Platform) $(Configuration) ../../FenixDK/FenixEngine.sln" }
-
     includedirs {
         os.getenv("VK_SDK_PATH") .. "/Include",
         "FenixDK/src",
@@ -80,8 +78,6 @@ project "Basic"
     targetdir "./Samples/Basic/build/$(Configuration)/$(Platform)"
     objdir "./Samples/Basic/obj/$(Platform)"
     debugdir "./Samples/Res"
-    prebuildcommands { "call ../../scripts/compile_engine.bat $(Platform) $(Configuration) ../../FenixDK/FenixEngine.sln" }
-
     includedirs {
         os.getenv("VK_SDK_PATH") ..  "/Include",
         "FenixDK/src",

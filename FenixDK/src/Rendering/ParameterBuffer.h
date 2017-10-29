@@ -10,6 +10,9 @@ namespace fdk
 {
   namespace Rendering 
   {
+    struct ParameterSlot;
+    class ConstantBuffer;
+
     class ParameterBuffer : public IMPLEMENTATION(ParameterBuffer)
     {
     public:
@@ -26,12 +29,9 @@ namespace fdk
       void release();
       
       void update(Memory::MemAllocator& rTmpAllocator);
-      
-      void bind();
+     
+      void set_parameter(const ParameterSlot& rSlot, const ConstantBuffer* pConstantBuffer);
 
-      u32 slot() const { return m_bindingSlot; }
-
-      void set_bindingSlot(const u32 slot) { m_bindingSlot = slot; }
     };
 
   }

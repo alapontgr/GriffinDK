@@ -1,19 +1,25 @@
 #pragma once
 
+#include "Entry.h"
+
 #include "Utilities/types.h" 
 #include "Memory/MallocAllocator.h"
+#include "Memory/StackAllocator.h"
+
 #include "Framework/app.h"
 #include "Framework/Time.h"
-#include "Entry.h"
+#include "Framework/Mesh.h"
 
 #include "Rendering/CommandBuffer.h"
 #include "Rendering/RenderConfiguration.h"
-#include "Framework/Mesh.h"
 #include "Rendering/Material.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/RenderSurface.h"
 #include "Rendering/FrameResourceFactory.h"
-
+#include "Rendering/MaterialParameterSet.h"
+#include "Rendering/ParameterBuffer.h"
+#include "Rendering/ParameterBufferGroup.h"
+#include "Rendering/ConstantBuffer.h"
 
 
 
@@ -41,6 +47,10 @@ private:
 
   void create_material();
 
+  void init_constant_buffer();
+
+  void initialize_param_set();
+
   void create_mesh();
 
   void update_assets(Rendering::CommandBuffer& rCmdBuffer);
@@ -55,11 +65,17 @@ private:
 
   Rendering::RenderPass m_renderPass;
   Framework::Mesh m_mesh;
-  Rendering::Material* m_pMaterial;
+  Rendering::Material m_material;
+  Rendering::ConstantBuffer m_testCB;
+  Rendering::MaterialParameterSet m_parameterSet;
+  Rendering::ParameterBufferGroup m_paramBufferGroup;
+  Rendering::ParameterBuffer m_parameterBuffer;
   Rendering::Buffer* m_pStagingBuffer;
   Rendering::RenderSurface m_renderSurface;
 
   Memory::MallocAllocator m_mallocAllocator;
+  Memory::StackAllocator m_resStackAllocator; // Buffer used to allocate resources
+  Memory::StackAllocator m_tmpStackAllocator; // Ring buffer for temporal allocations (no wrap)
 
   Rendering::FrameResourceFactory m_frameResourceFactory;
   std::vector<VkCommandBuffer> m_cmdList;

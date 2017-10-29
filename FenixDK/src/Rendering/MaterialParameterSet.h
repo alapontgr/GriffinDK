@@ -8,27 +8,28 @@
 namespace fdk
 {
 namespace Rendering
-{  
+{
 	class MaterialParameterSet : public IMPLEMENTATION(MaterialParameterSet)
 	{
 
 	public:
+		using BaseT = IMPLEMENTATION(MaterialParameterSet);
 
-    using BaseT = IMPLEMENTATION(MaterialParameterSet);
+		MaterialParameterSet();
 
-    MaterialParameterSet();
+		void clear();
 
-    void clear();
+		void add_parameter(
+				const u32 bindingSlot,
+				const Utilities::Name& rParamName,
+				const EShaderParameterType paramType,
+				const ShaderStageMask stages);
 
-    void add_parameter(const ParameterDefinition& rParameterDefinition);
-  
-    const ParameterDefinition* get_parameter(const Utilities::Name& rParamName) const;
+    ParameterSlot get_parameter(const Utilities::Name& rParamName) const;
 
-    u32 total_size() const;
+		u32 total_size() const;
 
-    void create();
-
+		void create();
 	};
-
 }
 }

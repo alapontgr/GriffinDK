@@ -49,10 +49,6 @@ namespace Rendering
 		{
 		}
 
-		void VK_ParameterBuffer::bind()
-		{
-		}
-
     void VK_ParameterBuffer::fill_write_data_for_param(const ParameterDefinition& rParam, VkWriteDescriptorSet* pParamWrite, Memory::MemAllocator& rTmpAllocator)
     {
       // TODO: Refactor that. Use the type as an index to a table of pointers to functions instead

@@ -29,8 +29,6 @@ namespace fdk
 
         void release();
 
-        void bind();
-
       private:
 
         void fill_write_data_for_param(

@@ -1,4 +1,5 @@
 #include "ConstantBuffer.h"
+#include "Buffer.h"
 
 namespace fdk
 {
@@ -10,9 +11,9 @@ namespace fdk
 
     }
 
-    void ConstantBuffer::initialize(const BufferChunk& rdataDescriptor)
+    void ConstantBuffer::initialize(Buffer& rDataBuffer, Memory::MemAllocator& rResourceAllocator)
     {
-
+      
     }
 
   }

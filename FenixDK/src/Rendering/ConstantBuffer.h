@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BufferUtils.h"
+#include "Memory\MemAllocator.h"
 #include "ParameterDefinition.h"
 
 namespace fdk
@@ -16,7 +17,7 @@ namespace fdk
 
       ConstantBuffer();
 
-      void initialize(const BufferChunk& rdataDescriptor);
+      void initialize(Buffer& rDataBuffer, Memory::MemAllocator& rResourceAllocator);
 
       EShaderParameterType type() const { return Type_ConstantBuffer; }
 

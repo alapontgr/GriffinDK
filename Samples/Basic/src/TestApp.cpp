@@ -170,7 +170,7 @@ void TestApp::initialize_param_set()
   init_constant_buffer();
 
   // Once all the resources of the parameter set are ready we can update it
-  m_parameterBuffer.update(m_tmpStackAllocator);
+  //m_parameterBuffer.update(m_tmpStackAllocator);
 }
 
 void TestApp::create_mesh()

@@ -70,8 +70,9 @@ private:
   Rendering::MaterialParameterSet m_parameterSet;
   Rendering::ParameterBufferGroup m_paramBufferGroup;
   Rendering::ParameterBuffer m_parameterBuffer;
-  Rendering::Buffer* m_pStagingBuffer;
   Rendering::RenderSurface m_renderSurface;
+  Rendering::Buffer* m_pStagingBuffer;
+  Rendering::Buffer* m_pUniformBuffer;
 
   Memory::MallocAllocator m_mallocAllocator;
   Memory::StackAllocator m_resStackAllocator; // Buffer used to allocate resources

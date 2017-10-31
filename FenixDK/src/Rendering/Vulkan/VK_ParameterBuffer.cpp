@@ -71,7 +71,7 @@ namespace Rendering
     {
       auto pParamData = get_parameter_data(rParam);
       FDASSERT(pParamData, "Invalid parameter");
-      auto pConstantBuffer = reinterpret_cast<ConstantBuffer*>(pParamData);
+      ConstantBuffer* pConstantBuffer = *(reinterpret_cast<ConstantBuffer**>(pParamData));
       auto bufferChunk = pConstantBuffer->buffer_chunk();
       FDASSERT(bufferChunk.m_pBuffer, "Invalid buffer");
       VkDescriptorBufferInfo* pBufferInfo = rTmpAllocator.create<VkDescriptorBufferInfo>();

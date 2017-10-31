@@ -11,9 +11,9 @@ namespace fdk
 
     }
 
-    void ConstantBuffer::initialize(Buffer& rDataBuffer, Memory::MemAllocator& rResourceAllocator)
+    void ConstantBuffer::initialize(const BufferChunk& rBufferChunk)
     {
-      
+      m_gpuData = rBufferChunk;
     }
 
   }

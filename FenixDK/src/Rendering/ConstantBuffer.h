@@ -17,7 +17,7 @@ namespace fdk
 
       ConstantBuffer();
 
-      void initialize(Buffer& rDataBuffer, Memory::MemAllocator& rResourceAllocator);
+      void initialize(const BufferChunk& rBufferChunk);
 
       EShaderParameterType type() const { return Type_ConstantBuffer; }
 

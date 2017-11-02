@@ -151,6 +151,8 @@ void TestApp::init_constant_buffer()
 	m_pUniformBuffer = Rendering::Buffer::create(m_mallocAllocator);
 	m_pUniformBuffer->init(desc, m_mallocAllocator);
 
+  Rendering::RenderInterface::create_buffer(*m_pUniformBuffer);
+
 	/* Uniform buffer defined in the shader
     layout(binding = 0) uniform UniformBufferObject
     {

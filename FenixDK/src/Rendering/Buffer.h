@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Memory/memallocator.h"
-#include "BufferUtils.h"
-
 #include "Utilities/platform.h"
 #include INCLUDE_IMPLEMENTATION(Buffer)
 
@@ -28,6 +25,8 @@ namespace Rendering
 		void release(Memory::MemAllocator& rAllocator);
 
     void copy_range_from(const Buffer& rFrom, const u32 fromOffset, const u32 offset, const u32 size, CommandBuffer& rCmdBuffer);
+
+    void update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer);
 
 		Memory::mem_ptr_t data_mutable();
 

@@ -23,7 +23,7 @@ namespace Rendering
 				{Index_Buffer, {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_INDEX_READ_BIT}},
 				{Vertex_Buffer, {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT}}};
 
-		static StageAccessConfig get_access_and_stage(EBufferUsage bufferUsage)
+		static inline StageAccessConfig get_access_and_stage(EBufferUsage bufferUsage)
 		{
 			return g_vulkanStageAccessFlagsMap.at(bufferUsage);
 		}
@@ -34,19 +34,18 @@ namespace Rendering
 		{
 		}
 
-		void VK_Buffer::copy_buffer_range(
+    void VK_Buffer::copy_buffer_range(
 				const Buffer& rFrom,
-				const BufferDesc& rMyDesc,
 				const u32 fromOffset,
 				const u32 offset,
 				const u32 size,
 				CommandBuffer& rCmdBuffer)
-		{
-			auto fromCurrentToTransfer = get_access_and_stage(rMyDesc.m_currentUsage);
-			auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
+    {
+      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_currentUsage);
+      auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
 
-			VkBufferMemoryBarrier barrier;
-			barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+      VkBufferMemoryBarrier barrier;
+      barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 			barrier.pNext = nullptr;
 			barrier.buffer = m_pBuffer;
 			barrier.offset = offset;
@@ -82,6 +81,49 @@ namespace Rendering
 					1, &barrier,
 					0, nullptr);
 		}
-	}
+
+    void VK_Buffer::update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer)
+    {
+      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_currentUsage);
+      auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
+
+      // Sync to transfer operations
+      VkBufferMemoryBarrier barrier;
+      barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+      barrier.pNext = nullptr;
+      barrier.buffer = m_pBuffer;
+      barrier.offset = regionOffset;
+      barrier.size = regionSize;
+      barrier.srcAccessMask = fromCurrentToTransfer.m_access;
+      barrier.dstAccessMask = fromTransferToCurrent.m_access;
+      barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+      barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+      vkCmdPipelineBarrier(
+        rCmdBuffer.m_commandBuffer,
+        fromCurrentToTransfer.m_stage,
+        fromTransferToCurrent.m_stage,
+        0,
+        0, nullptr,
+        1, &barrier,
+        0, nullptr);
+
+      // Update data
+      vkCmdUpdateBuffer(rCmdBuffer.m_commandBuffer, m_pBuffer, regionOffset, regionSize, pData);
+
+      // Sync back
+      barrier.srcAccessMask = fromTransferToCurrent.m_access;
+      barrier.dstAccessMask = fromCurrentToTransfer.m_access;
+      vkCmdPipelineBarrier(
+        rCmdBuffer.m_commandBuffer,
+        fromTransferToCurrent.m_stage,
+        fromCurrentToTransfer.m_stage,
+        0,
+        0, nullptr,
+        1, &barrier,
+        0, nullptr);
+    }
+
+  }
 }
 }

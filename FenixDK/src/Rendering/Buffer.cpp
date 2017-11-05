@@ -5,10 +5,6 @@ namespace fdk
 namespace Rendering
 {
 
-  Buffer::Buffer() : m_desc{ BufferDesc{InvalidUsage,0,0,0,1} }
-	{
-	}
-
 	void Buffer::init(
 			const BufferDesc& rDesc,
 			Memory::MemAllocator& rAllocator,
@@ -38,7 +34,12 @@ namespace Rendering
     const u32 size, 
     CommandBuffer& rCmdBuffer)
   {
-    BaseT::copy_buffer_range(rFrom, m_desc, fromOffset, offset, size, rCmdBuffer);
+    BaseT::copy_buffer_range(rFrom, fromOffset, offset, size, rCmdBuffer);
+  }
+
+  void Buffer::update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer)
+  {
+    BaseT::update_region(regionOffset, regionSize, pData, rCmdBuffer);
   }
 
   Memory::mem_ptr_t Buffer::data_mutable()
@@ -46,9 +47,14 @@ namespace Rendering
 		return m_data.memory();
 	}
 
-	Buffer* Buffer::create(Memory::MemAllocator& rAllocator)
+  Buffer::Buffer()
+  {
+  }
+
+  Buffer* Buffer::create(Memory::MemAllocator& rAllocator)
 	{
 		return rAllocator.create<Buffer>();
 	}
+
 }
 }

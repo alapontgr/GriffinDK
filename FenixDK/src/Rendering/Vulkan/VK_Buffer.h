@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Utilities/VulkanInclude.h"
+#include "../BufferBase.h"
 #include "Utilities/types.h"
-#include "../BufferUtils.h"
+
+#include "Utilities/VulkanInclude.h"
 
 namespace fdk
 {
@@ -13,7 +14,7 @@ namespace Rendering
 
 	namespace Vulkan
 	{
-		class VK_Buffer
+    class VK_Buffer : public BufferBase
 		{
 		public:
 			VK_Buffer();
@@ -22,13 +23,19 @@ namespace Rendering
 			VkDeviceMemory m_pMemory;
 
 		protected:
+
 			void copy_buffer_range(
 					const Buffer& rFrom,
-					const BufferDesc& rMyDesc,
 					const u32 fromOffset,
 					const u32 offset,
 					const u32 size,
 					CommandBuffer& rCmdBuffer);
+
+      void update_region(
+        const u32 regionOffset, 
+        const u32 regionSize, 
+        const Memory::mem_ptr_t pData, 
+        CommandBuffer& rCmdBuffer);
 		};
 	}
 }

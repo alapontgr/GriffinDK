@@ -37,9 +37,9 @@ namespace Rendering
     BaseT::copy_buffer_range(rFrom, fromOffset, offset, size, rCmdBuffer);
   }
 
-  void Buffer::update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer)
+  void Buffer::update_region(const BufferRange& rRange, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer)
   {
-    BaseT::update_region(regionOffset, regionSize, pData, rCmdBuffer);
+    BaseT::update_region(rRange, pData, rCmdBuffer);
   }
 
   Memory::mem_ptr_t Buffer::data_mutable()

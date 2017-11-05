@@ -18,6 +18,7 @@ namespace Rendering
 		void clear();
 
 		void add_parameter(
+				const EParameterSetFramerateType slotType,
 				const u32 bindingSlot,
 				const Utilities::Name& rParamName,
 				const EShaderParameterType paramType,

@@ -16,11 +16,13 @@ namespace fdk
 
         void create();
 
-        VkDescriptorSetLayout m_pLayout;
+        VkDescriptorSetLayout m_setLayout[Framerate_Count];
 
       private:
 
-        VkDescriptorSetLayoutBinding* populateConfigurationsForVulkan();
+        void create_set_layout(const EParameterSetFramerateType framerate);
+
+        VkDescriptorSetLayoutBinding* populateConfigurationsForVulkan(const EParameterSetFramerateType framerate);
 
       };
 

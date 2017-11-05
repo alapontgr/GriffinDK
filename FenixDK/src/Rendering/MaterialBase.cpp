@@ -6,8 +6,7 @@ namespace fdk
   {
   
     MaterialBase::MaterialBase()
-      : m_setLayoutCount{ 0 }
-      , m_parameterSetLayouts{nullptr, nullptr, nullptr}
+      : m_pParameterSetLayout{nullptr}
     {
     }
 

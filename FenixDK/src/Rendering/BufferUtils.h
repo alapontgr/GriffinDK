@@ -43,6 +43,12 @@ namespace fdk
       Memory::mem_size_t m_alignment;
     };
 
+    struct BufferRange 
+    {
+      u32 m_offset;
+      u32 m_size;
+    };
+
     struct BufferChunk 
     {
       Buffer* m_pBuffer;

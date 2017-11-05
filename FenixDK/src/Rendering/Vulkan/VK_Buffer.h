@@ -32,8 +32,7 @@ namespace Rendering
 					CommandBuffer& rCmdBuffer);
 
       void update_region(
-        const u32 regionOffset, 
-        const u32 regionSize, 
+        const BufferRange& rRange,
         const Memory::mem_ptr_t pData, 
         CommandBuffer& rCmdBuffer);
 		};

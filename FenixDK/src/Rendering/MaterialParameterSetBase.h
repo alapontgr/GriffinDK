@@ -1,5 +1,6 @@
 #pragma once
 #include "ParameterDefinition.h"
+#include "..\MaterialUtils.h"
 
 namespace fdk
 {
@@ -15,8 +16,11 @@ namespace fdk
 
       const ParameterCollection& parameters() const { return m_parameters; }
 
+      u32 set_count() const { m_setCount; }
+
     protected:
 
+      u32 m_setCount;
       ParameterCollection m_parameters;
     };
   }

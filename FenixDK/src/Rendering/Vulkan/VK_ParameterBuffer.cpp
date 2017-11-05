@@ -24,7 +24,7 @@ namespace Rendering
 			descSetAllocInfo.pNext = nullptr;
 			descSetAllocInfo.descriptorPool = m_pAllocationGroup->m_descriptorPool;
 			descSetAllocInfo.descriptorSetCount = 1;
-			descSetAllocInfo.pSetLayouts = &m_pParameterSetLayout->m_pLayout;
+			descSetAllocInfo.pSetLayouts = &m_pParameterSetLayout->m_setLayout[m_framerate];
 			auto result = vkAllocateDescriptorSets(RenderInterface::s_device, &descSetAllocInfo, &m_descriptorSet);
 			VK_CHECK(result, "Failed to allocate the descriptor set");
 		}

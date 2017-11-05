@@ -21,5 +21,13 @@ namespace fdk
       std::string m_psPath;
       // ...
     };
+
+    enum EParameterSetFramerateType : u32
+    {
+      Framerate_Scene = 0,
+      Framerate_Material = 1,
+      Framerate_Instance = 2,
+      Framerate_Count = 3
+    };
   }
 }

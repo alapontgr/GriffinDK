@@ -11,14 +11,11 @@ namespace fdk
     {
     public:
 
-      static constexpr u32 kMaxParameterSetLayouts = 3;
-
       MaterialBase();
 
     protected:
     
-      u32 m_setLayoutCount;
-      const MaterialParameterSet* m_parameterSetLayouts[kMaxParameterSetLayouts];
+      const MaterialParameterSet* m_pParameterSetLayout;
     };
 
   }

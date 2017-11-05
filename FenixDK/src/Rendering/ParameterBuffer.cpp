@@ -13,10 +13,13 @@ namespace Rendering
 	}
 
 	void ParameterBuffer::create(
+			const EParameterSetFramerateType framerate,
 			const MaterialParameterSet& rParameterSetLayout,
 			const ParameterBufferGroup& rAllocationGroup,
 			Memory::MemAllocator& rAllocator)
 	{
+    m_framerate = framerate;
+
 		m_pParameterSetLayout = &rParameterSetLayout;
 		m_pAllocationGroup = &rAllocationGroup;
 		u32 size = m_pParameterSetLayout->total_size();

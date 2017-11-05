@@ -82,7 +82,10 @@ namespace Rendering
 					0, nullptr);
 		}
 
-    void VK_Buffer::update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer)
+    void VK_Buffer::update_region(
+      const BufferRange& rRange,
+      Memory::mem_ptr_t pData, 
+      CommandBuffer& rCmdBuffer)
     {
       auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_currentUsage);
       auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
@@ -92,8 +95,8 @@ namespace Rendering
       barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
       barrier.pNext = nullptr;
       barrier.buffer = m_pBuffer;
-      barrier.offset = regionOffset;
-      barrier.size = regionSize;
+      barrier.offset = rRange.m_offset;
+      barrier.size = rRange.m_size;
       barrier.srcAccessMask = fromCurrentToTransfer.m_access;
       barrier.dstAccessMask = fromTransferToCurrent.m_access;
       barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -109,7 +112,7 @@ namespace Rendering
         0, nullptr);
 
       // Update data
-      vkCmdUpdateBuffer(rCmdBuffer.m_commandBuffer, m_pBuffer, regionOffset, regionSize, pData);
+      vkCmdUpdateBuffer(rCmdBuffer.m_commandBuffer, m_pBuffer, rRange.m_offset, rRange.m_size, pData);
 
       // Sync back
       barrier.srcAccessMask = fromTransferToCurrent.m_access;

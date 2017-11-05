@@ -1,5 +1,7 @@
 #include "MaterialParameterSet.h"
 
+#include <algorithm>
+
 namespace fdk
 {
 namespace Rendering
@@ -23,20 +25,26 @@ namespace Rendering
     m_parameters.clear();
 	}
 
-  void MaterialParameterSet::add_parameter(const u32 bindingSlot, const Utilities::Name& rParamName, const EShaderParameterType paramType, const ShaderStageMask stages)
+  void MaterialParameterSet::add_parameter(
+    const EParameterSetFramerateType slotType, 
+    const u32 bindingSlot,
+    const Utilities::Name& rParamName, 
+    const EShaderParameterType paramType, 
+    const ShaderStageMask stages)
   {
-    u32 offset = get_offset(m_parameters);
+    //u32 offset = get_offset(m_parameters);
     ParameterDefinition parameter;
     parameter.m_paramName = rParamName;
     parameter.m_paramType = paramType;
     parameter.m_stages = stages;
+    parameter.m_setSlot = slotType;
     parameter.m_bindingSlot = bindingSlot;
     parameter.m_size = sizeof(u32*);
     parameter.m_alignment = alignof(u32*);
-    u32 alignmentOffset = Memory::get_alignment_offset(offset, parameter.m_alignment);
+    //u32 alignmentOffset = Memory::get_alignment_offset(offset, parameter.m_alignment);
     m_parameters.push_back(parameter);
-    auto& rParam = m_parameters[m_parameters.size() - 1];
-    rParam.m_offset = offset + alignmentOffset;
+    //auto& rParam = m_parameters[m_parameters.size() - 1];
+    //rParam.m_offset = offset + alignmentOffset;
   }
 
   ParameterSlot MaterialParameterSet::get_parameter(const Utilities::Name& rParamName) const
@@ -59,6 +67,30 @@ namespace Rendering
 
   void MaterialParameterSet::create()
   {
+    // First order by set
+    std::sort(m_parameters.begin(), m_parameters.end(), [](const ParameterDefinition& rLParam, const ParameterDefinition& rRParam)
+    {
+      return rLParam.m_setSlot < rRParam.m_setSlot;
+    });
+    
+    // Adjust offsets
+    FDASSERT(m_parameters.size() > 0, "Invalid set of parameters");
+    u32 currentSet = m_parameters[0].m_setSlot;
+    u32 offset = 0;
+    m_setCount = 1;
+    for (auto& rParam : m_parameters) 
+    {
+      if (rParam.m_setSlot != currentSet) // Restart the offset when the set changes
+      {
+        currentSet = rParam.m_setSlot;
+        offset = 0;
+        m_setCount++;
+      }
+      u32 alignmentOffset = Memory::get_alignment_offset(offset, rParam.m_alignment);
+      rParam.m_offset = offset + alignmentOffset;
+      offset = rParam.m_offset + rParam.m_size;
+    }
+
     BaseT::create();
   }
 

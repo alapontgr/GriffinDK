@@ -200,19 +200,25 @@ namespace Rendering
 
 		EResultType VK_Material::create_layout(VkDevice pDevice)
 		{
-      VkDescriptorSetLayout layoutArray[kMaxParameterSetLayouts];
-      for (u32 i=0; i<m_setLayoutCount; ++i) 
+      VkDescriptorSetLayout layoutArray[EParameterSetFramerateType::Framerate_Count];
+      
+      u32 count = 0;
+      for (u32 i=0; i<EParameterSetFramerateType::Framerate_Count; ++i)
       {
-        FDASSERT(m_parameterSetLayouts[i], "This element is not initialized");
-        layoutArray[i] = m_parameterSetLayouts[i]->m_pLayout;
+        if (m_pParameterSetLayout->m_setLayout[i] != VK_NULL_HANDLE) 
+        {        
+          layoutArray[count] = m_pParameterSetLayout->m_setLayout[i];
+          count++;
+        }
       }
+
 			// Create an empty layout without descriptors (No parameters)
 			// TODO Add parameters
 			VkPipelineLayoutCreateInfo layoutInfo{};
 			layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			layoutInfo.pNext = nullptr;
 			layoutInfo.flags = 0;
-			layoutInfo.setLayoutCount = m_setLayoutCount;
+			layoutInfo.setLayoutCount = count;
 			layoutInfo.pSetLayouts = layoutArray;
 			layoutInfo.pushConstantRangeCount = 0;
 			layoutInfo.pPushConstantRanges = nullptr;

@@ -40,6 +40,7 @@ namespace Rendering
 		Utilities::Name m_paramName;
 		EShaderParameterType m_paramType;
     ShaderStageMask m_stages;
+    u32 m_setSlot;
 		u32 m_bindingSlot;
 		u32 m_offset;
 		u32 m_size;

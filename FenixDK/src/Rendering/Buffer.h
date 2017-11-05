@@ -26,7 +26,7 @@ namespace Rendering
 
     void copy_range_from(const Buffer& rFrom, const u32 fromOffset, const u32 offset, const u32 size, CommandBuffer& rCmdBuffer);
 
-    void update_region(const u32 regionOffset, const u32 regionSize, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer);
+    void update_region(const BufferRange& rRange, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer);
 
 		Memory::mem_ptr_t data_mutable();
 

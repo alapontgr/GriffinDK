@@ -49,34 +49,44 @@ namespace Rendering
     }
 
     VK_MaterialParameterSet::VK_MaterialParameterSet()
-      : m_pLayout{VK_NULL_HANDLE} {}
+      : m_setLayout{VK_NULL_HANDLE,VK_NULL_HANDLE ,VK_NULL_HANDLE } {}
 
     void VK_MaterialParameterSet::create()
+    {
+      create_set_layout(Framerate_Scene);
+      create_set_layout(Framerate_Material);
+      create_set_layout(Framerate_Instance);
+    }
+
+    void VK_MaterialParameterSet::create_set_layout(const EParameterSetFramerateType framerate)
     {
       VkDescriptorSetLayoutCreateInfo layoutInfo{};
       layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
       layoutInfo.pNext = nullptr;
       layoutInfo.flags = 0;
       layoutInfo.bindingCount = m_parameters.size();
-      layoutInfo.pBindings = populateConfigurationsForVulkan();   
-      auto result = vkCreateDescriptorSetLayout(RenderInterface::s_device, &layoutInfo, nullptr, &m_pLayout);
+      g_layoutBindingConfig.reserve(m_parameters.size());
+      layoutInfo.pBindings = populateConfigurationsForVulkan(framerate);
+      auto result = vkCreateDescriptorSetLayout(RenderInterface::s_device, &layoutInfo, nullptr, &m_setLayout[framerate]);
       VK_CHECK(result, "Failed to create the descriptor set layout");
     }
 
-    VkDescriptorSetLayoutBinding* VK_MaterialParameterSet::populateConfigurationsForVulkan()
+    VkDescriptorSetLayoutBinding* VK_MaterialParameterSet::populateConfigurationsForVulkan(const EParameterSetFramerateType framerate)
     {
       // TODO: Use a stack allocator to perform this logic. Use the vector as a global var is not secure.
       g_layoutBindingConfig.clear();
-      g_layoutBindingConfig.reserve(m_parameters.size());
       for (auto& rParam : m_parameters) 
       {
-        VkDescriptorSetLayoutBinding binding;
-        binding.binding = rParam.m_bindingSlot;
-        binding.descriptorCount = 1; //TODO: Extend that to give support for arrays.
-        binding.descriptorType = shader_param_to_vk_type(rParam.m_paramType);
-        binding.pImmutableSamplers = nullptr; // TODO: Give support to initialize immutable samplers
-        binding.stageFlags = generate_vk_stage_mask(rParam.m_stages);
-        g_layoutBindingConfig.push_back(binding);
+        if (rParam.m_setSlot == framerate) 
+        {
+          VkDescriptorSetLayoutBinding binding;
+          binding.binding = rParam.m_bindingSlot;
+          binding.descriptorCount = 1; //TODO: Extend that to give support for arrays.
+          binding.descriptorType = shader_param_to_vk_type(rParam.m_paramType);
+          binding.pImmutableSamplers = nullptr; // TODO: Give support to initialize immutable samplers
+          binding.stageFlags = generate_vk_stage_mask(rParam.m_stages);
+          g_layoutBindingConfig.push_back(binding);
+        }
       }
       if (g_layoutBindingConfig.size() > 0)
       {

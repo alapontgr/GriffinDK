@@ -21,7 +21,7 @@ namespace fdk
 
       ~Material();
 
-      void init(const MaterialDesc& rDesc, const MaterialParameterSet* pSetArray, const u32 setArrayCount);
+      void init(const MaterialDesc& rDesc, const MaterialParameterSet& rSetLayout);
 
       void create_material();
     };

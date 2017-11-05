@@ -14,13 +14,9 @@ namespace Rendering
 	{
 	}
 
-	void Material::init(const MaterialDesc& rDesc, const MaterialParameterSet* pSetArray, const u32 setArrayCount)
+	void Material::init(const MaterialDesc& rDesc, const MaterialParameterSet& rSetLayout)
 	{
-    m_setLayoutCount = setArrayCount;
-    for (u32 i=0; i<setArrayCount; ++i)
-    {
-      m_parameterSetLayouts[i] = &pSetArray[i];
-    }
+    m_pParameterSetLayout = &rSetLayout;
 		BaseT::init(rDesc);
 	}
 

@@ -20,6 +20,7 @@ namespace fdk
       ParameterBuffer();
 
       void create(
+        const EParameterSetFramerateType framerate,
         const MaterialParameterSet& rParameterSetLayout,
         const ParameterBufferGroup& rAllocationGroup,
         Memory::MemAllocator& rAllocator);

@@ -9,10 +9,6 @@ namespace fdk
   {
     class BufferBase 
     {    
-    public:
-
-      BufferBase();
-
     protected:
 
       Memory::MemBlock m_data;

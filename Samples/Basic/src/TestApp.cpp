@@ -133,7 +133,7 @@ void TestApp::create_material()
 	matDesc.m_pRasterState = &m_rasterState;
 	matDesc.m_pMultiSamplingState = &m_multiSampleState;
 
-	m_material.init(matDesc, &m_parameterSet, 1);
+	m_material.init(matDesc, m_parameterSet);
 
 	// Create the GPU Material
 	m_material.create_material();
@@ -170,12 +170,12 @@ void TestApp::initialize_param_set()
 {
 	static Utilities::Name cbParamName("test_cb");
 	Rendering::ShaderStageMask stagesMask = Rendering::EShaderStageFlag::Fragment;
-	m_parameterSet.add_parameter(0, cbParamName, Rendering::Type_ConstantBuffer, stagesMask);
+	m_parameterSet.add_parameter(Rendering::Framerate_Scene, 0, cbParamName, Rendering::Type_ConstantBuffer, stagesMask);
 	m_parameterSet.create();
 
 	m_paramBufferGroup.create();
 
-	m_parameterBuffer.create(m_parameterSet, m_paramBufferGroup, m_resStackAllocator);
+	m_parameterBuffer.create(Rendering::Framerate_Scene, m_parameterSet, m_paramBufferGroup, m_resStackAllocator);
 
 	auto pLayout = m_parameterBuffer.layout();
 	auto slot = pLayout->get_parameter(cbParamName);

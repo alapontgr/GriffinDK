@@ -67,10 +67,12 @@ namespace Rendering
 
   void MaterialParameterSet::create()
   {
-    // First order by set
+    // Order the parameters by set
     std::sort(m_parameters.begin(), m_parameters.end(), [](const ParameterDefinition& rLParam, const ParameterDefinition& rRParam)
     {
-      return rLParam.m_setSlot < rRParam.m_setSlot;
+      return (rLParam.m_setSlot == rRParam.m_setSlot) ? 
+        (rLParam.m_bindingSlot < rRParam.m_bindingSlot) : 
+        (rLParam.m_setSlot < rRParam.m_setSlot);
     });
     
     // Adjust offsets

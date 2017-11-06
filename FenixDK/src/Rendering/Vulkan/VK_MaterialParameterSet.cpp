@@ -2,6 +2,7 @@
 
 #include "..\RenderInterface.h"
 #include <unordered_map>
+#include <algorithm>
 
 namespace fdk
 {
@@ -60,15 +61,26 @@ namespace Rendering
 
     void VK_MaterialParameterSet::create_set_layout(const EParameterSetFramerateType framerate)
     {
-      VkDescriptorSetLayoutCreateInfo layoutInfo{};
-      layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-      layoutInfo.pNext = nullptr;
-      layoutInfo.flags = 0;
-      layoutInfo.bindingCount = m_parameters.size();
-      g_layoutBindingConfig.reserve(m_parameters.size());
-      layoutInfo.pBindings = populateConfigurationsForVulkan(framerate);
-      auto result = vkCreateDescriptorSetLayout(RenderInterface::s_device, &layoutInfo, nullptr, &m_setLayout[framerate]);
-      VK_CHECK(result, "Failed to create the descriptor set layout");
+      u32 count = std::count_if(m_parameters.begin(), m_parameters.end(), [&framerate](const ParameterDefinition& rParam) 
+      {
+        return rParam.m_setSlot == framerate; 
+      });
+      if (count != 0) 
+      {
+        VkDescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.pNext = nullptr;
+        layoutInfo.flags = 0;
+        layoutInfo.bindingCount = count;
+        g_layoutBindingConfig.reserve(count);
+        layoutInfo.pBindings = populateConfigurationsForVulkan(framerate);
+        auto result = vkCreateDescriptorSetLayout(RenderInterface::s_device, &layoutInfo, nullptr, &m_setLayout[framerate]);
+        VK_CHECK(result, "Failed to create the descriptor set layout");
+      }
+      else 
+      {
+        m_setLayout[framerate] = VK_NULL_HANDLE;
+      }
     }
 
     VkDescriptorSetLayoutBinding* VK_MaterialParameterSet::populateConfigurationsForVulkan(const EParameterSetFramerateType framerate)

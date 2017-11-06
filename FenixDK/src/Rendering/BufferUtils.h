@@ -36,11 +36,11 @@ namespace fdk
 
     struct BufferDesc
     {
-      EBufferUsage m_currentUsage;
-      UsageFlags m_bufferUsage;
-      MemoryProperties m_memoryProperties;
-      Memory::mem_size_t m_size;
-      Memory::mem_size_t m_alignment;
+      EBufferUsage m_currentUsage         = InvalidUsage;
+      UsageFlags m_bufferUsage            = InvalidUsage;
+      MemoryProperties m_memoryProperties = 0;
+      Memory::mem_size_t m_size           = 0;
+      Memory::mem_size_t m_alignment      = 1;
     };
 
     struct BufferRange 

@@ -23,6 +23,7 @@ def main():
 				srcPath + shaderName,
 				binPath + shaderName + '.spv',
 				logPath + shaderName))
+	os.system("pause")
 
 if __name__ == "__main__":
 	main()

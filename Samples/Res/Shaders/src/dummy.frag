@@ -10,9 +10,8 @@ layout(set = 0, binding = 0) uniform UniformBufferObject
 
 
 layout(location = 0) in vec4 v_Color;
-
 layout(location = 0) out vec4 o_Color;
 
 void main() {
-  o_Color = FDSceneParams.colour * v_Color;
+  o_Color = v_Color + vec4(0.5f, 0.5f, 0.5f, 1.0f);
 }

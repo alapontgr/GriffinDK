@@ -9,7 +9,6 @@ layout(set = 0, binding = 0) uniform UniformBufferObject
 } FDSceneParams; 
 
 layout(location = 0) in vec4 i_Position;
-layout(location = 1) in vec4 i_Color;
 
 out gl_PerVertex
 {
@@ -19,6 +18,6 @@ out gl_PerVertex
 layout(location = 0) out vec4 v_Color;
 
 void main() {
-    gl_Position = i_Position;
-    v_Color = i_Color;
+    gl_Position = FDSceneParams.ViewProjection * i_Position;
+    v_Color = i_Position;
 }

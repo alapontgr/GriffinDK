@@ -7,22 +7,32 @@
 struct VertexDesc // Temporary
 {
 	v4 position;
-	v4 colour;
+	//v4 colour;
 };
 
+static constexpr f32 kVertexCount = 8;
 static const VertexDesc g_vertices[] =
 		{
-				{v4(-0.5f, -0.5f, 0.0f, 1.0f),
-				 v4(1.0f, 0.0f, 0.0f, 1.0f)},
-				{v4(0.5f, -0.5f, 0.0f, 1.0f),
-				 v4(1.0f, 1.0f, 0.0f, 1.0f)},
-				{v4(0.5f, 0.5f, 0.0f, 1.0f),
-				 v4(0.0f, 1.0f, 1.0f, 1.0f)},
-				{v4(-0.5f, 0.5f, 0.0f, 1.0f),
-				 v4(0.0f, 0.0f, 1.0f, 1.0f)},
+				{v4(-0.5f, -0.5f, 0.5f, 1.0f)},   // 0
+				{v4(0.5f, -0.5f, 0.5f, 1.0f)},    // 1
+				{v4(0.5f, 0.5f, 0.5f, 1.0f)},     // 2
+				{v4(-0.5f, 0.5f, 0.5f, 1.0f)},    // 3
+        { v4(-0.5f, -0.5f, -0.5f, 1.0f) },// 4
+        { v4(0.5f, -0.5f, -0.5f, 1.0f) }, // 5
+        { v4(0.5f, 0.5f, -0.5f, 1.0f) },  // 6
+        { v4(-0.5f, 0.5f, -0.5f, 1.0f) }, // 7
 };
 
-static const u16 g_indices[] = {0, 1, 2, 2, 3, 0};
+static constexpr f32 kIndexCount = 36;
+static const u16 g_indices[] = 
+{
+  0U, 1U, 2U, 2U, 3U, 0U, // Front 
+  1U, 5U, 6U, 6U, 2U, 1U, // Left
+  4U, 0U, 3U, 3U, 7U, 4U, // Right
+  5U, 4U, 7U, 7U, 6U, 5U, // Back
+  3U, 2U, 6U, 6U, 7U, 3U, // Up
+  0U, 4U, 5U, 5U, 1U, 0U  // Bottom
+};
 
 static constexpr u32 kTmpStackAllocatorSize = 1024 * 1024; // 1MB
 static constexpr u32 kResourceStackAllocatorSize = 1024 * 1024; // 1MB
@@ -55,48 +65,52 @@ void TestApp::on_start()
 
 	create_mesh();
 
-  m_camera.set_view_matrix(v3(0.0f, 5.0f, 5.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
-  m_camera.setup_perspective(60.0f * Maths::kDegToRad, fwidth() / fheight(), 0.1f, 100.0f);
-  m_camera.update_matrices();
+	m_camera.set_view_matrix(v3(5.0f, 5.0f, 5.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
+	m_camera.setup_perspective(60.0f * Maths::kDegToRad, fwidth() / fheight(), 0.1f, 100.0f);
+	m_camera.update_matrices();
 }
 
 void TestApp::on_update()
 {
-  auto time = Framework::Time::total_time_secs();
-  m_testCBCPU.m_colour = v4(sin(time * 2.0f), cos(time * 2.0f), sin(time * 1.5f) * cos(time * 1.5f), 1.0f);
-  m_testCBCPU.m_colour = m_testCBCPU.m_colour * 0.5f + 0.5f;
+	auto time = Framework::Time::total_time_secs();
+	
+  m_camera.set_view_matrix(v3(sin(time * 2.0f) * 5.0f, 5.0f, 5.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
+  m_camera.update_matrices();
 
-  m_testCBCPU.m_view = m_camera.view();
-  m_testCBCPU.m_projection = m_camera.projection();
-  m_testCBCPU.m_viewProjection = m_camera.view_projection();
+  m_testCBCPU.m_colour = v4(sin(time * 2.0f), cos(time * 2.0f), sin(time * 1.5f) * cos(time * 1.5f), 1.0f);
+	m_testCBCPU.m_colour = m_testCBCPU.m_colour * 0.5f + 0.5f;
+
+	m_testCBCPU.m_view = m_camera.view();
+	m_testCBCPU.m_projection = m_camera.projection();
+	m_testCBCPU.m_viewProjection = m_camera.view_projection();
 }
 
 void TestApp::on_render()
 {
-  // Begin the current frame
+	// Begin the current frame
 	Rendering::RenderInterface::beginFrame();
 
-  auto time = Framework::Time::total_time_secs();
+	auto time = Framework::Time::total_time_secs();
 
-  // Update the surface to use to draw
-  m_renderSurface.m_width = static_cast<u32>(width());
-  m_renderSurface.m_height = static_cast<u32>(height());
-  m_renderSurface.m_pColorTexture = Rendering::RenderInterface::get_screen();
+	// Update the surface to use to draw
+	m_renderSurface.m_width = static_cast<u32>(width());
+	m_renderSurface.m_height = static_cast<u32>(height());
+	m_renderSurface.m_pColorTexture = Rendering::RenderInterface::get_screen();
 
-  // Sync CMD Buffer
+	// Sync CMD Buffer
 	m_frameResourceFactory.get_current_fence()->wait();
 	auto& rCmdBuffer = *m_frameResourceFactory.get_primary_command_buffer(m_mallocAllocator);
 
-  // Record the frame commands
-  record_frame(rCmdBuffer);
+	// Record the frame commands
+	record_frame(rCmdBuffer);
 
-  // Submit the frame commands
+	// Submit the frame commands
 	submit_work(rCmdBuffer);
 
-  // End the frame
+	// End the frame
 	Rendering::RenderInterface::endFrame();
 
-  // Flip frame resources to use the next frame
+	// Flip frame resources to use the next frame
 	m_frameResourceFactory.flip();
 }
 
@@ -106,32 +120,32 @@ void TestApp::on_release()
 
 void TestApp::record_frame(Rendering::CommandBuffer& rCmdBuffer)
 {
-  // Start recording in the CMD Buffer
-  rCmdBuffer.start_recording();
+	// Start recording in the CMD Buffer
+	rCmdBuffer.start_recording();
 
-  if (m_meshDirty)
-  {
-    m_meshDirty = false;
-    update_assets(rCmdBuffer);
-  }
+	if (m_meshDirty)
+	{
+		m_meshDirty = false;
+		update_assets(rCmdBuffer);
+	}
 
-  // Update constant buffers and stuff
-  update_parameters(rCmdBuffer);
+	// Update constant buffers and stuff
+	update_parameters(rCmdBuffer);
 
-  // Draw
-  draw_geometry(rCmdBuffer);
+	// Draw
+	draw_geometry(rCmdBuffer);
 
-  // End recording the frame
-  rCmdBuffer.end_recording();
+	// End recording the frame
+	rCmdBuffer.end_recording();
 }
 
 void TestApp::update_parameters(Rendering::CommandBuffer& rCmdBuffer)
 {
-  auto chunk = m_testCB.buffer_chunk();
-  Rendering::BufferRange range;
-  range.m_offset = chunk.m_dataOffset;
-  range.m_size = chunk.m_dataSize;
-  chunk.m_pBuffer->update_region(range, &m_testCBCPU, rCmdBuffer);
+	auto chunk = m_testCB.buffer_chunk();
+	Rendering::BufferRange range;
+	range.m_offset = chunk.m_dataOffset;
+	range.m_size = chunk.m_dataSize;
+	chunk.m_pBuffer->update_region(range, &m_testCBCPU, rCmdBuffer);
 }
 
 void TestApp::create_render_pass()
@@ -210,7 +224,7 @@ void TestApp::init_constant_buffer()
 void TestApp::initialize_param_set()
 {
 	static Utilities::Name cbParamName("test_cb");
-  Rendering::ShaderStageMask stagesMask{ Rendering::EShaderStageFlag::Vertex | Rendering::EShaderStageFlag::Fragment };
+	Rendering::ShaderStageMask stagesMask{Rendering::EShaderStageFlag::Vertex | Rendering::EShaderStageFlag::Fragment};
 	m_parameterSet.add_parameter(Rendering::Framerate_Scene, 0, cbParamName, Rendering::Type_ConstantBuffer, stagesMask);
 	m_parameterSet.create();
 
@@ -241,18 +255,17 @@ void TestApp::create_mesh()
 	m_pStagingBuffer = Rendering::Buffer::create(m_mallocAllocator);
 	m_pStagingBuffer->init(desc, m_mallocAllocator);
 
-	m_mesh.init(reinterpret_cast<const f32*>(
-									&g_vertices[0]),
-							4, sizeof(VertexDesc),
-							g_indices, 6, sizeof(u16),
+	m_mesh.init(reinterpret_cast<const f32*>(&g_vertices[0]),
+							kVertexCount, sizeof(VertexDesc),
+							g_indices, kIndexCount, sizeof(u16),
 							m_mallocAllocator);
 
 	Rendering::RenderInterface::create_buffer(*m_pStagingBuffer);
 	Rendering::RenderInterface::create_buffer(*m_mesh.index_buffer());
 	Rendering::RenderInterface::create_buffer(*m_mesh.vertex_buffer());
 
-	u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
-	u32 sizeIndexBuffer = 6 * sizeof(16);
+	u32 sizeVertexBuffer = kVertexCount * sizeof(VertexDesc);
+	u32 sizeIndexBuffer = kIndexCount * sizeof(u16);
 	u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
 
 	Memory::mem_t* pData = static_cast<Memory::mem_t*>(
@@ -267,8 +280,8 @@ void TestApp::create_mesh()
 
 void TestApp::update_assets(Rendering::CommandBuffer& rCmdBuffer)
 {
-	u32 sizeVertexBuffer = 4 * sizeof(VertexDesc);
-	u32 sizeIndexBuffer = 6 * sizeof(u16);
+	u32 sizeVertexBuffer = kVertexCount * sizeof(VertexDesc);
+	u32 sizeIndexBuffer = kIndexCount * sizeof(u16);
 	u32 totalSize = sizeVertexBuffer + sizeIndexBuffer;
 	auto* pVertexBuffer = m_mesh.vertex_buffer();
 	auto* pIndexBuffer = m_mesh.index_buffer();
@@ -299,10 +312,10 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
 	Rendering::RenderInterface::set_viewport(viewport, rCmdBuffer);
 
 	Rendering::RenderInterface::bind_material(m_material, rCmdBuffer);
-  Rendering::RenderInterface::bind_parameter_buffer(m_material, m_parameterBuffer, rCmdBuffer);
+	Rendering::RenderInterface::bind_parameter_buffer(m_material, m_parameterBuffer, rCmdBuffer);
 
 	Rendering::RenderInterface::use_mesh(m_mesh, rCmdBuffer);
-	Rendering::RenderInterface::draw_indexed(6, 1, 0, 0, rCmdBuffer);
+	Rendering::RenderInterface::draw_indexed(kIndexCount, 1, 0, 0, rCmdBuffer);
 
 	m_renderPass.end(rCmdBuffer);
 }

@@ -16,7 +16,7 @@ namespace Rendering
 		struct VertexDesc // Temporary
 		{
 			v4 position;
-			v4 colour;
+			//v4 colour;
 		};
 
 		VK_Material::VK_Material()
@@ -48,15 +48,15 @@ namespace Rendering
 			vertexBindingDescriptions[0].stride = sizeof(VertexDesc);
 			vertexBindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-			std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions(2); // One for each parameter in the input layout
+			std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions(1); // One for each parameter in the input layout
 			vertexAttributeDescriptions[0].location = 0;
 			vertexAttributeDescriptions[0].binding = vertexBindingDescriptions[0].binding;
 			vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 			vertexAttributeDescriptions[0].offset = 0;
-			vertexAttributeDescriptions[1].location = 1;
-			vertexAttributeDescriptions[1].binding = vertexBindingDescriptions[0].binding;
-			vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			vertexAttributeDescriptions[1].offset = offsetof(struct VertexDesc, colour);
+			//vertexAttributeDescriptions[1].location = 1;
+			//vertexAttributeDescriptions[1].binding = vertexBindingDescriptions[0].binding;
+			//vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			//vertexAttributeDescriptions[1].offset = offsetof(struct VertexDesc, colour);
 
 			VkPipelineVertexInputStateCreateInfo vertexShaderInfo{};
 			vertexShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

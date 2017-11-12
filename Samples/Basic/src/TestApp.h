@@ -20,13 +20,16 @@
 #include "Rendering/ParameterBuffer.h"
 #include "Rendering/ParameterBufferGroup.h"
 #include "Rendering/ConstantBuffer.h"
-
+#include "Rendering/Camera.h"
 
 
 using namespace fdk;
 
 struct TestCB
 {
+  m4 m_view;
+  m4 m_projection;
+  m4 m_viewProjection;
   v4 m_colour;
 };
 
@@ -82,6 +85,8 @@ private:
   Rendering::RenderSurface m_renderSurface;
   Rendering::Buffer* m_pStagingBuffer;
   Rendering::Buffer* m_pUniformBuffer;
+  Rendering::Camera m_camera;
+
 
   Memory::MallocAllocator m_mallocAllocator;
   Memory::StackAllocator m_resStackAllocator; // Buffer used to allocate resources

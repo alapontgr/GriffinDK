@@ -1,6 +1,9 @@
 #pragma once
 
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+// Matrices
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <assert.h>
 #include <cinttypes>
@@ -30,6 +33,8 @@ typedef glm::vec4 v4;
 typedef glm::quat quat;
 typedef glm::mat3 m3;
 typedef glm::mat4 m4;
+
+namespace FDMath = glm;
 
 void debug_msg(const char* format, ...);
 }

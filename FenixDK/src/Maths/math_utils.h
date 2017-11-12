@@ -6,6 +6,21 @@ namespace fdk
 {
 namespace Maths
 {
+
+  static constexpr f32 kPI = 3.14159265359f;
+  
+  static constexpr f32 k2PI = kPI * 2.0f;
+
+  static constexpr f32 kPI2 = kPI * 0.5f;
+
+  static constexpr f32 kPI4 = kPI * 0.25f;
+
+  // Use: X from Deg to Rad -> X * kDegToRad
+  static constexpr f32 kDegToRad = kPI / 180.0f;
+
+  // Use: X from Rad to Deg -> X * kRadToDeg
+  static constexpr f32 kRadToDeg = 180.0f / kPI;
+
 	template <typename T>
 	T clamp(T value, T min, T max)
 	{
@@ -25,6 +40,6 @@ namespace Maths
 		return value < min ? (value + diff) : value >= max ? value - diff : value;
 	}
 
-	inline f32 mysign(f32 a) { return a >= 0.0f ? 1.0f : -1.0f; }
+	inline f32 my_sign(f32 a) { return a >= 0.0f ? 1.0f : -1.0f; }
 }
 }

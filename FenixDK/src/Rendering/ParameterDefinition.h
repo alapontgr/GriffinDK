@@ -33,7 +33,7 @@ namespace Rendering
     StageCount = 6
 	};
 
-  using ShaderStageMask = u32;
+  using ShaderStageMask = Containers::Mask<u32>;
 
 	struct ParameterDefinition
 	{

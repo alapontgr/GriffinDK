@@ -30,13 +30,13 @@ namespace Rendering
     const u32 bindingSlot,
     const Utilities::Name& rParamName, 
     const EShaderParameterType paramType, 
-    const ShaderStageMask stages)
+    const ShaderStageMask& rStages)
   {
     //u32 offset = get_offset(m_parameters);
     ParameterDefinition parameter;
     parameter.m_paramName = rParamName;
     parameter.m_paramType = paramType;
-    parameter.m_stages = stages;
+    parameter.m_stages = rStages;
     parameter.m_setSlot = slotType;
     parameter.m_bindingSlot = bindingSlot;
     parameter.m_size = sizeof(u32*);

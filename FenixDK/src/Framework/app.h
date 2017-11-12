@@ -11,7 +11,12 @@ public:
   virtual ~App();
 
   static u32 width() { return s_width; }
+  
   static u32 height() { return s_height; }
+
+  static f32 fwidth() { return static_cast<f32>(s_width); }
+
+  static f32 fheight() { return static_cast<f32>(s_height); }
 
   void run(const char *title);
 

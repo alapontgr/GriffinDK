@@ -1,5 +1,13 @@
 #version 450
 
+layout(set = 0, binding = 0) uniform UniformBufferObject
+{
+	mat4 View;
+	mat4 Projection;
+	mat4 ViewProjection;
+	vec4 colour;
+} FDSceneParams; 
+
 layout(location = 0) in vec4 i_Position;
 layout(location = 1) in vec4 i_Color;
 

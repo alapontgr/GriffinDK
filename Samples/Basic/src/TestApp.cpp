@@ -2,6 +2,7 @@
 #include "Rendering\RenderInterface.h"
 #include "Rendering\RenderConstants.h"
 #include "Framework\Time.h"
+#include "Maths\math_utils.h"
 
 struct VertexDesc // Temporary
 {
@@ -53,6 +54,10 @@ void TestApp::on_start()
 	create_material();
 
 	create_mesh();
+
+  m_camera.set_view_matrix(v3(0.0f, 5.0f, 5.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
+  m_camera.setup_perspective(60.0f * Maths::kDegToRad, fwidth() / fheight(), 0.1f, 100.0f);
+  m_camera.update_matrices();
 }
 
 void TestApp::on_update()
@@ -60,6 +65,10 @@ void TestApp::on_update()
   auto time = Framework::Time::total_time_secs();
   m_testCBCPU.m_colour = v4(sin(time * 2.0f), cos(time * 2.0f), sin(time * 1.5f) * cos(time * 1.5f), 1.0f);
   m_testCBCPU.m_colour = m_testCBCPU.m_colour * 0.5f + 0.5f;
+
+  m_testCBCPU.m_view = m_camera.view();
+  m_testCBCPU.m_projection = m_camera.projection();
+  m_testCBCPU.m_viewProjection = m_camera.view_projection();
 }
 
 void TestApp::on_render()
@@ -183,22 +192,25 @@ void TestApp::init_constant_buffer()
 	Rendering::RenderInterface::create_buffer(*m_pUniformBuffer);
 
 	/* Uniform buffer defined in the shader
-    layout(binding = 0) uniform UniformBufferObject
+    layout(set = 0, binding = 0) uniform UniformBufferObject
     {
+      mat4 View;
+      mat4 Projection;
+      mat4 ViewProjection;
       vec4 colour;
-    } test_cb;
+    } FDSceneParams;
   */
 	Rendering::BufferChunk testCBChunk;
 	testCBChunk.m_pBuffer = m_pUniformBuffer;
 	testCBChunk.m_dataOffset = 0;
-	testCBChunk.m_dataSize = sizeof(v4);
+	testCBChunk.m_dataSize = sizeof(TestCB);
 	m_testCB.initialize(testCBChunk);
 }
 
 void TestApp::initialize_param_set()
 {
 	static Utilities::Name cbParamName("test_cb");
-	Rendering::ShaderStageMask stagesMask = Rendering::EShaderStageFlag::Fragment;
+  Rendering::ShaderStageMask stagesMask{ Rendering::EShaderStageFlag::Vertex | Rendering::EShaderStageFlag::Fragment };
 	m_parameterSet.add_parameter(Rendering::Framerate_Scene, 0, cbParamName, Rendering::Type_ConstantBuffer, stagesMask);
 	m_parameterSet.create();
 

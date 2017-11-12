@@ -35,13 +35,13 @@ namespace Rendering
       return g_paramTypeConverterTable[type];
     }
 
-    static inline VkShaderStageFlagBits generate_vk_stage_mask(const u32 stageMask)
+    static inline VkShaderStageFlagBits generate_vk_stage_mask(const ShaderStageMask& rStageMask)
     {
       u32 vkMask = 0;
       for (u32 i=0; i<EShaderStageFlag::StageCount; i++) 
       {
         u32 mask = (1 << i);
-        if (stageMask | mask) 
+        if (rStageMask.is_enable(mask))
         {
           vkMask |= g_vulkanStageAccessFlagsMap.at(mask);
         }

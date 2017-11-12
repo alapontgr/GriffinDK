@@ -22,7 +22,7 @@ namespace Rendering
 				const u32 bindingSlot,
 				const Utilities::Name& rParamName,
 				const EShaderParameterType paramType,
-				const ShaderStageMask stages);
+				const ShaderStageMask& rStages);
 
     ParameterSlot get_parameter(const Utilities::Name& rParamName) const;
 

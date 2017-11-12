@@ -13,6 +13,7 @@
 #include "../Fence.h"
 #include "../Texture2D.h"
 #include "..\RenderConstants.h"
+#include "..\ParameterBuffer.h"
 
 namespace fdk
 {
@@ -690,7 +691,19 @@ namespace Rendering
 			vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rMaterial.m_pipeline);
 		}
 
-		void VK_RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
+    void VK_RenderInterface::bind_parameter_buffer(const Material& rMaterial, const ParameterBuffer& rParamBuffer, CommandBuffer& rCmdBuffer)
+    {
+      vkCmdBindDescriptorSets(
+        rCmdBuffer.m_commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        rMaterial.m_layout,
+        rParamBuffer.framerate(),
+        1,
+        &rParamBuffer.m_descriptorSet,
+        0, nullptr);
+    }
+
+    void VK_RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
 		{
 			auto cmdBuffer = rCmdBuffer.m_commandBuffer;
 			FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");

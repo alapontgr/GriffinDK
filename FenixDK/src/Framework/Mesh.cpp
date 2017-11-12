@@ -25,8 +25,8 @@ namespace Framework
     }
 
     Rendering::BufferDesc vertexDesc;
-    vertexDesc.m_currentUsage = Rendering::Vertex_Buffer;
-    vertexDesc.m_bufferUsage = Rendering::UsageFlags(
+    vertexDesc.m_bufferType = Rendering::Vertex_Buffer;
+    vertexDesc.m_bufferUsageFlags = Rendering::UsageFlags(
 				Rendering::Transfer_Dst |
 				Rendering::Vertex_Buffer);
     vertexDesc.m_memoryProperties = Rendering::MemoryProperties(Rendering::GPU_Local);
@@ -35,8 +35,8 @@ namespace Framework
     m_pVertexBuffer->init(vertexDesc, rAllocator, (Memory::mem_ptr_t)pVertices);
 
     Rendering::BufferDesc indexDesc;
-    indexDesc.m_currentUsage = Rendering::Index_Buffer;
-    indexDesc.m_bufferUsage = Rendering::UsageFlags(
+    indexDesc.m_bufferType = Rendering::Index_Buffer;
+    indexDesc.m_bufferUsageFlags = Rendering::UsageFlags(
       Rendering::Transfer_Dst |
       Rendering::Index_Buffer);
     indexDesc.m_memoryProperties = Rendering::MemoryProperties(Rendering::GPU_Local);

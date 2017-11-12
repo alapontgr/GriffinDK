@@ -36,8 +36,8 @@ namespace fdk
 
     struct BufferDesc
     {
-      EBufferUsage m_currentUsage         = InvalidUsage;
-      UsageFlags m_bufferUsage            = InvalidUsage;
+      EBufferUsage m_bufferType           = InvalidUsage;
+      UsageFlags m_bufferUsageFlags       = InvalidUsage;
       MemoryProperties m_memoryProperties = 0;
       Memory::mem_size_t m_size           = 0;
       Memory::mem_size_t m_alignment      = 1;

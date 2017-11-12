@@ -33,7 +33,7 @@ namespace Rendering
 
       void update_region(
         const BufferRange& rRange,
-        const Memory::mem_ptr_t pData, 
+        const void* pData, 
         CommandBuffer& rCmdBuffer);
 		};
 	}

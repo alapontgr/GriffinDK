@@ -45,7 +45,12 @@ namespace Rendering
     BaseT::bind_material(rMaterial, rCmdBuffer);
 	}
 
-	void RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
+  void RenderInterface::bind_parameter_buffer(const Material& rMaterial, const ParameterBuffer& rParamBuffer, CommandBuffer& rCmdBuffer)
+  {
+    BaseT::bind_parameter_buffer(rMaterial, rParamBuffer, rCmdBuffer);
+  }
+
+  void RenderInterface::set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer)
 	{
     BaseT::set_viewport(rViewport, rCmdBuffer);
 	}

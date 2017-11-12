@@ -21,6 +21,8 @@ namespace fdk
 
         VK_ParameterBuffer();
 
+        VkDescriptorSet m_descriptorSet;
+
       protected:
 
          void create();
@@ -40,8 +42,6 @@ namespace fdk
           const ParameterDefinition& rParam,
           VkWriteDescriptorSet* pParamWrite,
           Memory::MemAllocator& rTmpAllocator);
-
-        VkDescriptorSet m_descriptorSet;
       };
 
     }

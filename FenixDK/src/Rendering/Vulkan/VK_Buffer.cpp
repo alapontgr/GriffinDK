@@ -21,7 +21,9 @@ namespace Rendering
 				{Transfer_Dst, {VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT}},
 				{Transfer_Dst, {VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT}},
 				{Index_Buffer, {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_INDEX_READ_BIT}},
-				{Vertex_Buffer, {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT}}};
+				{Vertex_Buffer, {VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT}},
+        {Uniform_Buffer,{ VK_PIPELINE_STAGE_VERTEX_SHADER_BIT , VK_ACCESS_UNIFORM_READ_BIT }}
+  };
 
 		static inline StageAccessConfig get_access_and_stage(EBufferUsage bufferUsage)
 		{
@@ -41,7 +43,7 @@ namespace Rendering
 				const u32 size,
 				CommandBuffer& rCmdBuffer)
     {
-      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_currentUsage);
+      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_bufferType);
       auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
 
       VkBufferMemoryBarrier barrier;
@@ -84,10 +86,10 @@ namespace Rendering
 
     void VK_Buffer::update_region(
       const BufferRange& rRange,
-      Memory::mem_ptr_t pData, 
+      const void* pData,
       CommandBuffer& rCmdBuffer)
     {
-      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_currentUsage);
+      auto fromCurrentToTransfer = get_access_and_stage(m_desc.m_bufferType);
       auto fromTransferToCurrent = get_access_and_stage(EBufferUsage::Transfer_Dst);
 
       // Sync to transfer operations

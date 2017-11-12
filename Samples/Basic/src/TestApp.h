@@ -25,6 +25,11 @@
 
 using namespace fdk;
 
+struct TestCB
+{
+  v4 m_colour;
+};
+
 class TestApp : public fdk::Framework::App
 {
 public:
@@ -42,6 +47,10 @@ public:
   virtual void on_release() override;
 
 private:
+
+  void record_frame(Rendering::CommandBuffer& rCmdBuffer);
+
+  void update_parameters(Rendering::CommandBuffer& rCmdBuffer);
 
   void create_render_pass();
 
@@ -79,7 +88,7 @@ private:
   Memory::StackAllocator m_tmpStackAllocator; // Ring buffer for temporal allocations (no wrap)
 
   Rendering::FrameResourceFactory m_frameResourceFactory;
-  std::vector<VkCommandBuffer> m_cmdList;
 
+  TestCB m_testCBCPU;
   bool m_meshDirty;
 };

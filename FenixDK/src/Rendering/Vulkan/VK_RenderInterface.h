@@ -18,6 +18,7 @@ namespace Rendering
 	class Material;
 	class Texture2D;
 	class CommandBuffer;
+  class ParameterBuffer;
 	struct Viewport;
 	struct Scissor;
 	class Fence;
@@ -53,6 +54,8 @@ namespace Rendering
       static void use_mesh(Framework::Mesh& rMesh, CommandBuffer& rCmdBuffer);
 
       static void bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer);
+
+      static void bind_parameter_buffer(const Material& rMaterial, const ParameterBuffer& rParamBuffer, CommandBuffer& rCmdBuffer);
 
       static void set_viewport(const Viewport& rViewport, CommandBuffer& rCmdBuffer);
 

@@ -101,7 +101,7 @@ void RenderPass::start(CommandBuffer& rCmdBuffer, Framebuffer& rFramebuffer)
   // Begin render pass
 
   // TODO: Refactor that
-  VkClearValue clearColor = { 0.0f, 1.0f, 0.0f, 0.0f };
+  VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
   VkRenderPassBeginInfo passBeginInfo{};
   passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

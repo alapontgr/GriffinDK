@@ -26,7 +26,7 @@ namespace Rendering
 
     void copy_range_from(const Buffer& rFrom, const u32 fromOffset, const u32 offset, const u32 size, CommandBuffer& rCmdBuffer);
 
-    void update_region(const BufferRange& rRange, const Memory::mem_ptr_t pData, CommandBuffer& rCmdBuffer);
+    void update_region(const BufferRange& rRange, const void* pData, CommandBuffer& rCmdBuffer);
 
 		Memory::mem_ptr_t data_mutable();
 
@@ -39,20 +39,15 @@ namespace Rendering
 
     Memory::mem_size_t size() const { return m_desc.m_size; };
 
-    EBufferUsage type() const { m_desc.m_currentUsage; }
+    EBufferUsage type() const { m_desc.m_bufferType; }
 
-		UsageFlags usage() const { return m_desc.m_bufferUsage; }
+		UsageFlags usage() const { return m_desc.m_bufferUsageFlags; }
 
 		MemoryProperties mem_properties() const { return m_desc.m_memoryProperties; }
 
 	private:
 		Buffer& operator=(const Buffer&) = delete;
 		Buffer(const Buffer&) = delete;
-
-	protected:
-
-		Memory::MemBlock m_data;
-    BufferDesc m_desc;
 	};
 }
 }

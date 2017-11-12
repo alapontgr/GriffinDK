@@ -1,6 +1,7 @@
 #include "TestApp.h"
 #include "Rendering\RenderInterface.h"
 #include "Rendering\RenderConstants.h"
+#include "Framework\Time.h"
 
 struct VertexDesc // Temporary
 {
@@ -56,44 +57,72 @@ void TestApp::on_start()
 
 void TestApp::on_update()
 {
+  auto time = Framework::Time::total_time_secs();
+  m_testCBCPU.m_colour = v4(sin(time * 2.0f), cos(time * 2.0f), sin(time * 1.5f) * cos(time * 1.5f), 1.0f);
+  m_testCBCPU.m_colour = m_testCBCPU.m_colour * 0.5f + 0.5f;
 }
 
 void TestApp::on_render()
 {
+  // Begin the current frame
 	Rendering::RenderInterface::beginFrame();
 
+  auto time = Framework::Time::total_time_secs();
+
+  // Update the surface to use to draw
+  m_renderSurface.m_width = static_cast<u32>(width());
+  m_renderSurface.m_height = static_cast<u32>(height());
+  m_renderSurface.m_pColorTexture = Rendering::RenderInterface::get_screen();
+
+  // Sync CMD Buffer
 	m_frameResourceFactory.get_current_fence()->wait();
+	auto& rCmdBuffer = *m_frameResourceFactory.get_primary_command_buffer(m_mallocAllocator);
 
-	auto* pCmdBuffer = m_frameResourceFactory.get_primary_command_buffer(m_mallocAllocator);
-	pCmdBuffer->start_recording();
+  // Record the frame commands
+  record_frame(rCmdBuffer);
 
-	auto time = Framework::Time::total_time_secs();
-	//m_context.test_render(time);
+  // Submit the frame commands
+	submit_work(rCmdBuffer);
 
-	// Update the surface to use to draw
-	m_renderSurface.m_width = static_cast<u32>(width());
-	m_renderSurface.m_height = static_cast<u32>(height());
-	m_renderSurface.m_pColorTexture = Rendering::RenderInterface::get_screen();
-
-	m_cmdList.clear();
-	if (m_meshDirty)
-	{
-		m_meshDirty = false;
-		update_assets(*pCmdBuffer);
-	}
-	draw_geometry(*pCmdBuffer);
-
-	pCmdBuffer->end_recording();
-
-	submit_work(*pCmdBuffer);
-
+  // End the frame
 	Rendering::RenderInterface::endFrame();
 
+  // Flip frame resources to use the next frame
 	m_frameResourceFactory.flip();
 }
 
 void TestApp::on_release()
 {
+}
+
+void TestApp::record_frame(Rendering::CommandBuffer& rCmdBuffer)
+{
+  // Start recording in the CMD Buffer
+  rCmdBuffer.start_recording();
+
+  if (m_meshDirty)
+  {
+    m_meshDirty = false;
+    update_assets(rCmdBuffer);
+  }
+
+  // Update constant buffers and stuff
+  update_parameters(rCmdBuffer);
+
+  // Draw
+  draw_geometry(rCmdBuffer);
+
+  // End recording the frame
+  rCmdBuffer.end_recording();
+}
+
+void TestApp::update_parameters(Rendering::CommandBuffer& rCmdBuffer)
+{
+  auto chunk = m_testCB.buffer_chunk();
+  Rendering::BufferRange range;
+  range.m_offset = chunk.m_dataOffset;
+  range.m_size = chunk.m_dataSize;
+  chunk.m_pBuffer->update_region(range, &m_testCBCPU, rCmdBuffer);
 }
 
 void TestApp::create_render_pass()
@@ -143,15 +172,15 @@ void TestApp::init_constant_buffer()
 {
 	Rendering::BufferDesc desc;
 	desc.m_size = 1024 * 1024; // 1 MB
-	desc.m_currentUsage = Rendering::Uniform_Buffer;
+	desc.m_bufferType = Rendering::Uniform_Buffer;
 	desc.m_alignment = 16;
-	desc.m_bufferUsage = Rendering::EBufferUsage::Uniform_Buffer;
+	desc.m_bufferUsageFlags = Rendering::EBufferUsage::Uniform_Buffer | Rendering::EBufferUsage::Transfer_Dst;
 	desc.m_memoryProperties = Rendering::EMemoryProperties::GPU_Local;
 
 	m_pUniformBuffer = Rendering::Buffer::create(m_mallocAllocator);
 	m_pUniformBuffer->init(desc, m_mallocAllocator);
 
-  Rendering::RenderInterface::create_buffer(*m_pUniformBuffer);
+	Rendering::RenderInterface::create_buffer(*m_pUniformBuffer);
 
 	/* Uniform buffer defined in the shader
     layout(binding = 0) uniform UniformBufferObject
@@ -160,10 +189,10 @@ void TestApp::init_constant_buffer()
     } test_cb;
   */
 	Rendering::BufferChunk testCBChunk;
-  testCBChunk.m_pBuffer = m_pUniformBuffer;
+	testCBChunk.m_pBuffer = m_pUniformBuffer;
 	testCBChunk.m_dataOffset = 0;
-	testCBChunk.m_dataSize = 16;
-  m_testCB.initialize(testCBChunk);
+	testCBChunk.m_dataSize = sizeof(v4);
+	m_testCB.initialize(testCBChunk);
 }
 
 void TestApp::initialize_param_set()
@@ -192,9 +221,9 @@ void TestApp::create_mesh()
 	Rendering::BufferDesc desc;
 
 	desc.m_size = 1024 * 1024 * 16; // 16 MB
-	desc.m_currentUsage = Rendering::Transfer_Src;
+	desc.m_bufferType = Rendering::Transfer_Src;
 	desc.m_alignment = 16;
-	desc.m_bufferUsage = Rendering::EBufferUsage::Transfer_Src;
+	desc.m_bufferUsageFlags = Rendering::EBufferUsage::Transfer_Src;
 	desc.m_memoryProperties = Rendering::EMemoryProperties::CPU_Visible | Rendering::EMemoryProperties::CPU_GPU_Coherent;
 
 	m_pStagingBuffer = Rendering::Buffer::create(m_mallocAllocator);
@@ -258,6 +287,8 @@ void TestApp::draw_geometry(Rendering::CommandBuffer& rCmdBuffer)
 	Rendering::RenderInterface::set_viewport(viewport, rCmdBuffer);
 
 	Rendering::RenderInterface::bind_material(m_material, rCmdBuffer);
+  Rendering::RenderInterface::bind_parameter_buffer(m_material, m_parameterBuffer, rCmdBuffer);
+
 	Rendering::RenderInterface::use_mesh(m_mesh, rCmdBuffer);
 	Rendering::RenderInterface::draw_indexed(6, 1, 0, 0, rCmdBuffer);
 

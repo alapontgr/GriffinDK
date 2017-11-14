@@ -18,7 +18,7 @@ namespace fdk
         auto pOutData = rAllocator.allocate(totalSize, alignof(Memory::mem_t));
         memcpy(pOutData, pData, totalSize);
 
-        delete[](pData);
+        stbi_image_free(pData);
 
         rOutWidth = w;
         rOutHeight = h;

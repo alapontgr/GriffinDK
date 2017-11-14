@@ -10,7 +10,7 @@ struct VertexDesc // Temporary
 	//v4 colour;
 };
 
-static constexpr f32 kVertexCount = 8;
+static constexpr u32 kVertexCount = 8;
 static const VertexDesc g_vertices[] =
 		{
 				{v4(-0.5f, -0.5f, 0.5f, 1.0f)},   // 0
@@ -23,7 +23,7 @@ static const VertexDesc g_vertices[] =
         { v4(-0.5f, 0.5f, -0.5f, 1.0f) }, // 7
 };
 
-static constexpr f32 kIndexCount = 36;
+static constexpr u32 kIndexCount = 36;
 static const u16 g_indices[] = 
 {
   0U, 1U, 2U, 2U, 3U, 0U, // Front 

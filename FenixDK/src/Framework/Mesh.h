@@ -1,5 +1,5 @@
 #pragma once
-#include "Rendering\Buffer.h"
+#include "Rendering\BufferUtils.h"
 
 namespace fdk
 {
@@ -13,15 +13,17 @@ namespace Framework
     void init(
       const f32* pVertices, const u32 vertexCount, const u32 vertexSize,
       const u16* pIndices, const u32 indexCount, const u32 indexSize,
-      Memory::MemAllocator& rAllocator);
+      const Rendering::BufferChunk& rVertexData,
+      const Rendering::BufferChunk& rIndexData);
 
-		Rendering::Buffer* vertex_buffer() { return m_pVertexBuffer; }
+    Rendering::BufferChunk vertex_data() const { return m_vertexBufferData; }
 
-		Rendering::Buffer* index_buffer() { return m_pIndexBuffer; }
+    Rendering::BufferChunk index_data() const { return m_indexBufferData; }
 
 	private:
-		Rendering::Buffer* m_pVertexBuffer;
-		Rendering::Buffer* m_pIndexBuffer;
+
+    Rendering::BufferChunk m_vertexBufferData; // Range of a buffer where the vertex data of the mesh is
+    Rendering::BufferChunk m_indexBufferData; // Range of a buffer where the index data is for the mesh
 	};
 
 }

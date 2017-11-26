@@ -677,11 +677,12 @@ namespace Rendering
 			auto cmdBuffer = rCmdBuffer.m_commandBuffer;
 			FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
 
-			Buffer* pVertexBuffer = rMesh.vertex_buffer();
-			Buffer* pIndexBuffer = rMesh.index_buffer();
-			VkDeviceSize offset = 0;
-			vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &pVertexBuffer->m_pBuffer, &offset);
-			vkCmdBindIndexBuffer(cmdBuffer, pIndexBuffer->m_pBuffer, offset, VK_INDEX_TYPE_UINT16); // Force indices of 16 bits
+      auto vertexRegion = rMesh.vertex_data();
+			VkDeviceSize vOffset = vertexRegion.m_dataOffset;
+			vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexRegion.m_pBuffer->m_pBuffer, &vOffset);
+      auto indexRegion = rMesh.index_data();
+      VkDeviceSize iOffset = indexRegion.m_dataOffset;
+      vkCmdBindIndexBuffer(cmdBuffer, indexRegion.m_pBuffer->m_pBuffer, iOffset, VK_INDEX_TYPE_UINT16); // Force indices of 16 bits
 		}
 
 		void VK_RenderInterface::bind_material(Material& rMaterial, CommandBuffer& rCmdBuffer)

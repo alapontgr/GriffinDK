@@ -244,17 +244,17 @@ void TestApp::initialize_param_set()
 
 void TestApp::create_mesh()
 {
+  // Prepare staging buffer
 	Rendering::BufferDesc desc;
-
 	desc.m_size = 1024 * 1024 * 16; // 16 MB
 	desc.m_bufferType = Rendering::Transfer_Src;
 	desc.m_alignment = 16;
 	desc.m_bufferUsageFlags = Rendering::EBufferUsage::Transfer_Src;
 	desc.m_memoryProperties = Rendering::EMemoryProperties::CPU_Visible | Rendering::EMemoryProperties::CPU_GPU_Coherent;
-
 	m_pStagingBuffer = Rendering::Buffer::create(m_mallocAllocator);
 	m_pStagingBuffer->init(desc, m_mallocAllocator);
 
+  // Create mesh
 	m_mesh.init(reinterpret_cast<const f32*>(&g_vertices[0]),
 							kVertexCount, sizeof(VertexDesc),
 							g_indices, kIndexCount, sizeof(u16),

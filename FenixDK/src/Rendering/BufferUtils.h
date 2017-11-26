@@ -45,15 +45,15 @@ namespace fdk
 
     struct BufferRange 
     {
-      u32 m_offset;
-      u32 m_size;
+      u32 m_offset  = 0;
+      u32 m_size    = 0;
     };
 
     struct BufferChunk 
     {
-      Buffer* m_pBuffer;
-      u32 m_dataOffset;
-      u32 m_dataSize;
+      Buffer* m_pBuffer = nullptr;
+      u32 m_dataOffset  = 0;
+      u32 m_dataSize    = 0;
     };
   }
 }

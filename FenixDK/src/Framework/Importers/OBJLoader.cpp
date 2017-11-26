@@ -17,7 +17,11 @@ namespace fdk
       std::vector<tinyobj::material_t> g_materials;
       std::string g_error;
 
-      void load_obj(const char* filename)
+      void load_obj(
+        const char* filename, 
+        Rendering::Buffer& rVertexBuffer, 
+        Rendering::Buffer& rIndexBuffer, 
+        MeshList& rOutMeshList)
       {        
         auto result = tinyobj::LoadObj(
           &g_attrib, 

@@ -677,10 +677,10 @@ namespace Rendering
 			auto cmdBuffer = rCmdBuffer.m_commandBuffer;
 			FDASSERT(cmdBuffer != VK_NULL_HANDLE, "There is not a valid command buffer being used");
 
-      auto vertexRegion = rMesh.vertex_data();
+      auto vertexRegion = rMesh.vertex_chunk();
 			VkDeviceSize vOffset = vertexRegion.m_dataOffset;
 			vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexRegion.m_pBuffer->m_pBuffer, &vOffset);
-      auto indexRegion = rMesh.index_data();
+      auto indexRegion = rMesh.index_chunk();
       VkDeviceSize iOffset = indexRegion.m_dataOffset;
       vkCmdBindIndexBuffer(cmdBuffer, indexRegion.m_pBuffer->m_pBuffer, iOffset, VK_INDEX_TYPE_UINT16); // Force indices of 16 bits
 		}

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Memory\MemAllocator.h"
 
 namespace fdk
 {
@@ -15,7 +16,7 @@ namespace fdk
     {
       using MeshList = std::vector<Mesh>;
 
-      void load_obj(const char* filename, Rendering::Buffer& rVertexBuffer, Rendering::Buffer& rIndexBuffer, MeshList& rOutMeshList);
+      void load_obj(const char* filename, Memory::MemAllocator& rTmpAllocator, MeshList& rOutMeshList);
     }
   }
 }

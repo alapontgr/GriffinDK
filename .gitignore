@@ -21,3 +21,5 @@ Samples/UnitTests/build/
 Samples/UnitTests/obj/
 Samples/Basic/build/
 Samples/Basic/obj/
+TestPremake/build/
+TestPremake/bin/

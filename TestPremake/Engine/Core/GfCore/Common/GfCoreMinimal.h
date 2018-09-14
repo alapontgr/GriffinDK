@@ -1,20 +1,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/09
-//	File: 	GfCore.h
+//	Date: 	2018/09/13
+//	File: 	GfCoreMinimal.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFCORE_H__
-#define __GFCORE_H__
+#ifndef __GFCOREMINIMAL_H__
+#define __GFCOREMINIMAL_H__
 ////////////////////////////////////////////////////////////////////////////////
-// Includes
 
-#include "GfCore/Common/GfCoreMinimal.h"
+#include "GfCore/Common/GfTypes.h"
 
-#include "GfCore/Common/GfMaths.h"
+#include "GfCore/Common/GfConfig.h"
+
+#include GF_SOLVE_PLATFORM_HEADER(GfCore)
+
+#include "GfCore/Common/GfDebug.h"
+
+#include "GfCore/Common/GfTime.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif
+#endif // __GFCOREMINIMAL_H__

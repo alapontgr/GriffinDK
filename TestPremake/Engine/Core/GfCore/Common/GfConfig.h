@@ -11,6 +11,23 @@
 #define __GFCONFIG_H__
 ////////////////////////////////////////////////////////////////////////////////
 
+#define GF_IDENT(ARG) ARG
+#define GF_STRINGIFY_2(ARG) #ARG
+#define GF_STRINGIFY(ARG) GF_STRINGIFY_2(ARG)
+#define GF_CONCAT(A, B) A##B
+
+#define GF_SOLVE_PLATFORM_FILE(PLATFORM, FILE, EXT) GF_STRINGIFY(../GF_IDENT(PLATFORM)/GF_IDENT(FILE)_Platform.GF_IDENT(EXT))
+
+// Use this macro to include the platform "header" version of a Common file
+#define GF_SOLVE_PLATFORM_HEADER(FILE) GF_SOLVE_PLATFORM_FILE(_PLATFORM_DIR, FILE, h)
+// Use this macro to include the platform "inline file" version of a Common file
+#define GF_SOLVE_PLATFORM_INLINE(FILE) GF_SOLVE_PLATFORM_FILE(_PLATFORM_DIR, FILE, inl)
+
+// Force inline expression
+#define GF_FORCEINLINE __forceinline
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Used as enabled/disabled flags for macros
 #define GF_OFF  0
 #define GF_ON   1

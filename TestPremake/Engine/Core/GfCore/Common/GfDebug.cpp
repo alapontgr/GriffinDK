@@ -17,23 +17,23 @@
 
 static void GFPrintMsg(const char *fmt, ...)
 {
-  va_list args;
-  va_start(args, fmt);
-  int rc = vfprintf(stdout, fmt, args);
-  va_end(args);
+	va_list args;
+	va_start(args, fmt);
+	int rc = vfprintf(stdout, fmt, args);
+	va_end(args);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GFPrintError(const char* szFileName, u32 uiLine, const char *fmt, ...)
 {
-  va_list args;
-  fprintf(stderr, "////////////////////////////////////////////////////////////////////////////////\n");
-  fprintf(stderr, "// File: %s.\n// Line: %d \n", szFileName, uiLine);
-  va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
-  va_end(args);
-  fprintf(stderr, "////////////////////////////////////////////////////////////////////////////////\n");
+	va_list args;
+	fprintf(stderr, "////////////////////////////////////////////////////////////////////////////////\n");
+	fprintf(stderr, "// File: %s.\n// Line: %d \n", szFileName, uiLine);
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+	fprintf(stderr, "////////////////////////////////////////////////////////////////////////////////\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,3 @@
-project "GfMaths"
+project "GfEntry"
 	kind "StaticLib"
 	language "C++"

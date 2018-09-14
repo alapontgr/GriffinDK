@@ -44,7 +44,7 @@ typedef glm::mat4x4 m4;
 template <typename T>
 T GfClamp(T fVal, T fMin, T fMax)
 {
-  return fVal < fMin ? fMin : fVal > fMax ? fMax : fVal;
+	return fVal < fMin ? fMin : fVal > fMax ? fMax : fVal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ T GfClamp(T fVal, T fMin, T fMax)
 template <typename T>
 T GfLerp(T fFrom, T fTo, T fDelta)
 {
-  return fFrom + (fTo - fFrom) * fDelta;
+	return fFrom + (fTo - fFrom) * fDelta;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,8 +60,8 @@ T GfLerp(T fFrom, T fTo, T fDelta)
 template <typename T>
 T GfWrap(T fVal, T fMin, T fMax)
 {
-  T diff = fMax - fMin;
-  return fVal < fMin ? (fVal + diff) : fVal >= fMax ? fVal - diff : fVal;
+	T diff = fMax - fMin;
+	return fVal < fMin ? (fVal + diff) : fVal >= fMax ? fVal - diff : fVal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

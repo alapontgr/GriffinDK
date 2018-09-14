@@ -2,16 +2,18 @@
 -- Griffin Engine
 ----------------------------------------------------------
 
-config = {}
-config.EngineName = "GriffinEngine"
-config.Platforms = { "x64(Vulkan)", "x64(Dx12)" }
-config.EngineBasePath = "Engine"
-config.OutDir = "bin"
-config.VSFilesDir = "build"
-config.VSOBJFilesDir = config.VSFilesDir .. "/" .. "obj"
-config.OutPath = config.OutDir .. "/" .. "%{cfg.platform}" .. "/" .. "%{cfg.buildcfg}"
-config.ProjVSFilesPath = config.VSFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
-config.ProjVSOBJFilesPath = config.VSOBJFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
+griffin = {}
+griffin.EngineName = "GriffinEngine"
+griffin.Platforms = { "x64(Dx12)", "x64(Vulkan)" }
+griffin.EngineBasePath = "Engine"
+griffin.OutDir = "bin"
+griffin.VSFilesDir = "build"
+griffin.WorkingDir = "data"
+griffin.VSOBJFilesDir = griffin.VSFilesDir .. "/" .. "obj"
+griffin.OutPath = griffin.OutDir .. "/" .. "%{cfg.platform}" .. "/" .. "%{cfg.buildcfg}"
+griffin.ProjVSFilesPath = griffin.VSFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
+griffin.ProjVSOBJFilesPath = griffin.VSOBJFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
+griffin.WorkingDirPath = griffin.WorkingDir .. "/" .. "%{prj.platform}" .. "/"
 
 ----------------------------------------------------------
 -- Solution layout
@@ -43,7 +45,8 @@ groups["Core"] =
 	Projects = 
 	{
 		"GfCore",
-		"GfMaths"
+		"GfEntry",
+		"GfRender",
 	}
 
 }

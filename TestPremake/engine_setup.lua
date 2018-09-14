@@ -2,24 +2,27 @@
 ----------------------------------------------------------
 -- Create aux directories
 
-CreateIfNotExist(config.OutDir)
-CreateIfNotExist(config.VSFilesDir)
-CreateIfNotExist(config.VSOBJFilesDir)
+CreateIfNotExist(griffin.OutDir)
+CreateIfNotExist(griffin.VSFilesDir)
+CreateIfNotExist(griffin.VSOBJFilesDir)
+CreateIfNotExist(griffin.WorkingDir)
 
 ----------------------------------------------------------
 -- Setup the solution and configure the shared settings --
 ----------------------------------------------------------
 
-workspace (config.EngineName)
+workspace (griffin.EngineName)
 
    	configurations { "Debug", "DebugOpt", "Release", "ReleaseFinal" } 
-  	platforms { config.Platforms }
+  	platforms { griffin.Platforms }
 
-	targetdir(config.OutPath)
-	libdirs { config.OutPath }
+	targetdir(griffin.OutPath)
+	libdirs { griffin.OutPath }
    	location("Solutions/")
+   	debugdir( griffin.WorkingDirPath )
 
    	defines { "_PLATFORM_DIR=%{cfg.platform}" }
+   	flags { "FatalWarnings" }
 
 	filter { "configurations:Debug" }
 		defines { "_DEBUG" }
@@ -49,7 +52,7 @@ workspace (config.EngineName)
 
 -- Include the directories of the groups as additional include directory
 for GroupName, GroupConfig in pairs(groups) do
-	includedirs { config.EngineBasePath .. "/" .. GroupName}
+	includedirs { griffin.EngineBasePath .. "/" .. GroupName}
 end
 
 -- Create the projects
@@ -58,7 +61,7 @@ for GroupName, GroupConfig in pairs(groups) do
 	for k, p in pairs(GroupConfig.Projects) do
 		print(p)
 		local RelPath = GroupName .. "/" .. p
-		local AbsPath = config.EngineBasePath .. "/" .. RelPath
+		local AbsPath = griffin.EngineBasePath .. "/" .. RelPath
 		
 		include(AbsPath)
 
@@ -66,11 +69,11 @@ for GroupName, GroupConfig in pairs(groups) do
 		---------------------
 		-- The scope of the project is still active
 
-		location(config.ProjVSFilesPath .. "/" .. RelPath)
-		objdir(config.ProjVSFilesPath .. "/" .. RelPath .. "/obj/")
+		location(griffin.ProjVSFilesPath .. "/" .. RelPath)
+		objdir(griffin.ProjVSFilesPath .. "/" .. RelPath .. "/obj/")
 		files { AbsPath .. "/**.*"}
 
-		FilterPlatforms(AbsPath, config.Platforms)
+		FilterPlatforms(AbsPath, griffin.Platforms)
 
 		----------------------------------------------------------
 

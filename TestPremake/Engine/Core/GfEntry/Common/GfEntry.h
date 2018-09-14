@@ -1,38 +1,34 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/09
-//	File: 	GfTypes.h
+//	Date: 	2018/09/12
+//	File: 	GfEntry.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFTYPES_H__
-#define __GFTYPES_H__
+#ifndef __GFENTRY_H__
+#define __GFENTRY_H__
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include <cstdint>
+#include "GfCore/Common/GfCoreMinimal.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef uint32_t  Bool;
-
-typedef int8_t    s8;
-typedef int16_t   s16;
-typedef int32_t   s32;
-typedef int64_t   s64;
-
-typedef uint8_t   u8;
-typedef uint16_t  u16;
-typedef uint32_t  u32;
-typedef uint64_t  u64;
-
-typedef float     f32;
-typedef double    f64;
-
-#define GF_TRUE   1
-#define GF_FALSE  0
+#include GF_SOLVE_PLATFORM_HEADER(GfEntry)
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif
+
+struct GfEntryArgs : public GfEntryArgs_Platform
+{
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Entry point of an application
+extern s32 _GfEntry_(const GfEntryArgs& kEntryParams);
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFENTRY_H__

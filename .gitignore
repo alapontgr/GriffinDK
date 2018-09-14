@@ -1,4 +1,3 @@
-project/obj/
 *.sln
 *.vcxproj
 *.filters
@@ -9,17 +8,6 @@ project/obj/
 *.idb
 *.ilk
 *.pdb
-project/build/
 *.nvuser
-Core/obj/
-Core/build/
-FenixDK/obj/
-FenixDK/build/
-Tests/build/
-Tests/obj/
-Samples/UnitTests/build/
-Samples/UnitTests/obj/
-Samples/Basic/build/
-Samples/Basic/obj/
-TestPremake/build/
-TestPremake/bin/
+build/
+bin/

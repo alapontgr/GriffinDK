@@ -38,6 +38,10 @@ public:
 
 	void Shutdown();
 
+	HWND GetHwnd();
+
+	HINSTANCE GetInstance();
+
 private:
 
 	GfWindow& m_kBase;
@@ -45,6 +49,20 @@ private:
 	HWND		m_pHwnd;
 	HINSTANCE	m_pInstance;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE HWND GfWindow_Platform::GetHwnd() 
+{
+	return m_pHwnd;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE HINSTANCE GfWindow_Platform::GetInstance()
+{
+	return m_pInstance;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFWINDOW_PLATFORM_H__

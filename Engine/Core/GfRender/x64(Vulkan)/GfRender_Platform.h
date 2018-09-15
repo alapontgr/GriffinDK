@@ -1,22 +1,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfRender.h
+//	Date: 	2018/09/15
+//	File: 	GfRender_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFRENDER_H__
-#define __GFRENDER_H__
+#ifndef __GFRENDER_PLATFORM_H__
+#define __GFRENDER_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfCoreMinimal.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfRender)
+#include "vulkan/vulkan.h"
 
-#include "GfRender/Common/GfWindow.h"
+// Enable validation layers
+#if defined(_DEBUG) || defined (_DEBUGOPT)
 
-#include "GfRender/Common/GfRenderContext.h"
+#define GF_USE_VALIDATION_LAYERS GF_ON
+
+#else
+
+#define GF_USE_VALIDATION_LAYERS GF_OFF
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFRENDER_H__
+#endif // __GFRENDER_PLATFORM_H__

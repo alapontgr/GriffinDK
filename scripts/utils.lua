@@ -56,6 +56,9 @@ function SetupGraphicsSDK()
    -- Setup Vulkan SDK
    filter {"platforms:x64(Vulkan)"}
 
+   includedirs {
+        os.getenv("VK_SDK_PATH") .. "/Include",
+   }
    libdirs { 
       os.getenv("VK_SDK_PATH") .. "/Lib",
    }

@@ -47,9 +47,13 @@ public:
 
 	void Shutdown();
 
+	GfWindow_Platform* GetPlatform();
+
 	u32 GetWidth();
 
 	u32 GetHeight();
+
+	const char* GetWindowName();
 
 private:
 
@@ -60,6 +64,13 @@ private:
 	bool				m_bFullScreen;
 	bool				m_bVSync;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE GfWindow_Platform* GfWindow::GetPlatform() 
+{
+	return &m_kPlatform;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,6 +86,12 @@ GF_FORCEINLINE u32 GfWindow::GetHeight()
 	return m_uiWidth;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const char* GfWindow::GetWindowName() 
+{
+	return m_szAppName;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFWINDOW_H__

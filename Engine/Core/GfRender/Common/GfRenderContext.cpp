@@ -25,6 +25,7 @@ GfRenderContext::GfRenderContext()
 void GfRenderContext::Init(GfWindow* pWindow)
 {
 	m_pWindow = pWindow;
+	InitInternal();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

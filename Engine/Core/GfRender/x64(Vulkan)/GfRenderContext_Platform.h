@@ -23,11 +23,17 @@ public:
 
 	friend class GfRenderContext;
 
-	GfRenderContext_Platform(GfRenderContext& kBase);
+	GfRenderContext_Platform();
 
-	void Init();
+	VkInstance GetInstance();
+
+	VkPhysicalDevice GetPhysicalDevice();
+
+	VkDevice GetDevice();
 
 private:
+
+	void InitInternal();
 
 	bool CheckPhysicalDeviceProperties(
 		VkPhysicalDevice pDevice,
@@ -62,35 +68,52 @@ private:
 
 	void CreateSwapchain();
 
-	//
-
-	GfRenderContext& m_kBase;
-
 	// Main settings
-	VkInstance					m_pInstance;
-	VkPhysicalDevice			m_pPhysicalDevice;
-	VkDevice					m_pDevice;
+	VkInstance						m_pInstance;
+	VkPhysicalDevice				m_pPhysicalDevice;
+	VkDevice						m_pDevice;
 
 	// Used Families
-	u32							m_uiGraphicsFamilyIndex;
-	u32							m_uiPresentFamilyIndex;
+	u32								m_uiGraphicsFamilyIndex;
+	u32								m_uiPresentFamilyIndex;
 
 	// Queues
-	VkQueue						m_uiGraphicsQueue;
-	VkQueue						m_uiPresentQueue;
+	VkQueue							m_uiGraphicsQueue;
+	VkQueue							m_uiPresentQueue;
 
 	// Swap chain and surface
-	VkSurfaceKHR				m_pSurface;
-	VkSwapchainKHR				m_pSwapChain;
-	VkSurfaceFormatKHR			m_pSwapChainFormat;
-	std::vector<VkImage>		m_tSwapChainImages;
-	std::vector<VkImageView>	m_tSwapChainImageView;
+	VkSurfaceKHR					m_pSurface;
+	VkSwapchainKHR					m_pSwapChain;
+	VkSurfaceFormatKHR				m_pSwapChainFormat;
+	std::vector<VkImage>			m_tSwapChainImages;
+	std::vector<VkImageView>		m_tSwapChainImageView;
 
 	// Settings
 	VkSurfaceCapabilitiesKHR		m_pCapabilities;
 	std::vector<VkSurfaceFormatKHR> m_tSupportedFormats;
 	std::vector<VkPresentModeKHR>	m_tSupportedPresentModes;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkInstance GfRenderContext_Platform::GetInstance() 
+{
+	return m_pInstance;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkPhysicalDevice GfRenderContext_Platform::GetPhysicalDevice() 
+{
+	return m_pPhysicalDevice;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkDevice GfRenderContext_Platform::GetDevice() 
+{
+	return m_pDevice;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDERCONTEXT_PLATFORM_H__

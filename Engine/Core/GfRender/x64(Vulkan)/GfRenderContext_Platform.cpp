@@ -55,9 +55,8 @@ static const char* kDeviceExtensions[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
-	: m_kBase(kBase)
-	, m_pInstance(nullptr)
+GfRenderContext_Platform::GfRenderContext_Platform()
+	: m_pInstance(nullptr)
 	, m_pPhysicalDevice(nullptr)
 	, m_pDevice(nullptr)
 	, m_uiGraphicsFamilyIndex(0)
@@ -71,7 +70,7 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext_Platform::Init()
+void GfRenderContext_Platform::InitInternal()
 {
 	CreateInstance();
 	CreateSurface();
@@ -298,7 +297,7 @@ void GfRenderContext_Platform::CreateInstance()
 	VkApplicationInfo kAppInfo;
 	kAppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	kAppInfo.pNext = nullptr;
-	kAppInfo.pApplicationName = m_kBase.m_pWindow->GetWindowName();
+	kAppInfo.pApplicationName = ((GfRenderContext*)this)->m_pWindow->GetWindowName();
 	kAppInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
 	kAppInfo.pEngineName = GF_ENGINE_NAME;
 	kAppInfo.engineVersion = GF_ENGINE_VERSION;
@@ -323,7 +322,7 @@ void GfRenderContext_Platform::CreateInstance()
 
 void GfRenderContext_Platform::CreateSurface()
 {
-	GfWindow_Platform* pWindowPlat(m_kBase.m_pWindow->GetPlatform());
+	GfWindow_Platform* pWindowPlat(((GfRenderContext*)this)->m_pWindow->GetPlatform());
 
 	VkWin32SurfaceCreateInfoKHR kSurfaceInfo;
 	kSurfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -446,8 +445,8 @@ void GfRenderContext_Platform::CreateSwapchain()
 
 	// Images extend
 	VkExtent2D kExtend;
-	kExtend.width = m_kBase.m_pWindow->GetWidth();
-	kExtend.height = m_kBase.m_pWindow->GetHeight();
+	kExtend.width = ((GfRenderContext*)this)->m_pWindow->GetWidth();
+	kExtend.height = ((GfRenderContext*)this)->m_pWindow->GetHeight();
 
 	// Get the number of buffers to create in the swap chain
 	u32 bufferCount = GfClamp<u32>(m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount, GF_N_BUFFERING_COUNT);

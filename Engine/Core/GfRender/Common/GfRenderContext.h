@@ -20,7 +20,7 @@ class GfWindow;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfRenderContext
+class GfRenderContext : public GfRenderContext_Platform
 {
 public:
 

@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "vulkan/vulkan.h"
+#include "GfRender/Common/GfGraphicsSDK.h"
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,11 +25,18 @@ public:
 
 	GfRenderContext_Platform();
 
-	VkInstance GetInstance();
+	////////////////////////////////////////////////////////////////////////////////
 
-	VkPhysicalDevice GetPhysicalDevice();
+	// Main settings
+	VkInstance						m_pInstance;
+	VkPhysicalDevice				m_pPhysicalDevice;
+	VkDevice						m_pDevice;
 
-	VkDevice GetDevice();
+	// Used Families
+	u32								m_uiGraphicsFamilyIndex;
+	u32								m_uiPresentFamilyIndex;
+
+	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
@@ -68,15 +75,6 @@ private:
 
 	void CreateSwapchain();
 
-	// Main settings
-	VkInstance						m_pInstance;
-	VkPhysicalDevice				m_pPhysicalDevice;
-	VkDevice						m_pDevice;
-
-	// Used Families
-	u32								m_uiGraphicsFamilyIndex;
-	u32								m_uiPresentFamilyIndex;
-
 	// Queues
 	VkQueue							m_uiGraphicsQueue;
 	VkQueue							m_uiPresentQueue;
@@ -93,27 +91,6 @@ private:
 	std::vector<VkSurfaceFormatKHR> m_tSupportedFormats;
 	std::vector<VkPresentModeKHR>	m_tSupportedPresentModes;
 };
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkInstance GfRenderContext_Platform::GetInstance() 
-{
-	return m_pInstance;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkPhysicalDevice GfRenderContext_Platform::GetPhysicalDevice() 
-{
-	return m_pPhysicalDevice;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkDevice GfRenderContext_Platform::GetDevice() 
-{
-	return m_pDevice;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDERCONTEXT_PLATFORM_H__

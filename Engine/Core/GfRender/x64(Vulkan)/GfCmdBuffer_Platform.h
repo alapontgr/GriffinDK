@@ -1,24 +1,35 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfRender.h
+//	Date: 	2018/09/16
+//	File: 	GfCmdBuffer_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFRENDER_H__
-#define __GFRENDER_H__
+#ifndef __GFCMDBUFFER_PLATFORM_H__
+#define __GFCMDBUFFER_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
-
-#include "GfCore/Common/GfCoreMinimal.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfRender)
+// Includes
 
 #include "GfRender/Common/GfGraphicsSDK.h"
 
-#include "GfRender/Common/GfWindow.h"
+////////////////////////////////////////////////////////////////////////////////
 
-#include "GfRender/Common/GfRenderContext.h"
+class GfCmdBuffer_Platform
+{
+public:
+
+	friend class GfCmdBufferFactory_Platform;
+
+	GfCmdBuffer_Platform();
+
+	void InitPlatform(u32 uiCmdBufferType, VkCommandBuffer pCmdBuffer);
+
+private:
+
+	VkCommandBuffer m_pCmdBuffer;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFRENDER_H__
+#endif // __GFCMDBUFFER_PLATFORM_H__

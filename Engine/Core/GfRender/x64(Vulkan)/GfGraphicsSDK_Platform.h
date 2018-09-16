@@ -1,24 +1,18 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfRender.h
+//	Date: 	2018/09/16
+//	File: 	GfGraphicsSDK_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFRENDER_H__
-#define __GFRENDER_H__
+#ifndef __GFGRAPHICSSDK_PLATFORM_H__
+#define __GFGRAPHICSSDK_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
+// Includes
 
-#include "GfCore/Common/GfCoreMinimal.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfRender)
-
-#include "GfRender/Common/GfGraphicsSDK.h"
-
-#include "GfRender/Common/GfWindow.h"
-
-#include "GfRender/Common/GfRenderContext.h"
+#include "vulkan/vulkan.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFRENDER_H__
+#endif // __GFGRAPHICSSDK_PLATFORM_H__

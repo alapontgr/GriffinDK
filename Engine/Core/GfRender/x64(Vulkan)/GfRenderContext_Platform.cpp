@@ -55,8 +55,9 @@ static const char* kDeviceExtensions[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderContext_Platform::GfRenderContext_Platform()
-	: m_pInstance(nullptr)
+GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
+	: m_kBase(kBase)
+	, m_pInstance(nullptr)
 	, m_pPhysicalDevice(nullptr)
 	, m_pDevice(nullptr)
 	, m_uiGraphicsFamilyIndex(0)
@@ -66,6 +67,20 @@ GfRenderContext_Platform::GfRenderContext_Platform()
 	, m_pSurface(0)
 	, m_pSwapChain(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VkImageView GfRenderContext_Platform::GetCurrentBackBuffer() const
+{
+	return m_tSwapChainImageView[m_kBase.m_uiCurrentFrameIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VkFormat GfRenderContext_Platform::GetSwapchainFormat() const
+{
+	return m_kSwapChainFormat.format;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -445,13 +460,13 @@ void GfRenderContext_Platform::CreateSwapchain()
 
 	// Images extend
 	VkExtent2D kExtend;
-	kExtend.width = ((GfRenderContext*)this)->m_pWindow->GetWidth();
-	kExtend.height = ((GfRenderContext*)this)->m_pWindow->GetHeight();
+	kExtend.width = m_kBase.m_pWindow->GetWidth();
+	kExtend.height = m_kBase.m_pWindow->GetHeight();
 
 	// Get the number of buffers to create in the swap chain
 	u32 bufferCount = GfClamp<u32>(m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount, GF_N_BUFFERING_COUNT);
 	// Select a image format to use in the swap chain
-	m_pSwapChainFormat = SelectSwapchainFormat();
+	m_kSwapChainFormat = SelectSwapchainFormat();
 	// Get the transform to apply to the swap chain (Useful in mobiles when using
 	// Landscape or portrait)
 	VkSurfaceTransformFlagBitsKHR transform = SelectSwapchainTransform();
@@ -467,8 +482,8 @@ void GfRenderContext_Platform::CreateSwapchain()
 	swapChainInfo.flags = 0;
 	swapChainInfo.surface = m_pSurface;
 	swapChainInfo.minImageCount = bufferCount;
-	swapChainInfo.imageFormat = m_pSwapChainFormat.format;
-	swapChainInfo.imageColorSpace = m_pSwapChainFormat.colorSpace;
+	swapChainInfo.imageFormat = m_kSwapChainFormat.format;
+	swapChainInfo.imageColorSpace = m_kSwapChainFormat.colorSpace;
 	swapChainInfo.imageExtent = kExtend;
 	swapChainInfo.imageArrayLayers = 1;
 	swapChainInfo.imageUsage = usageFlags;

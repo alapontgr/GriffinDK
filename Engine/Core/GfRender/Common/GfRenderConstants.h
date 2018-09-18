@@ -1,26 +1,26 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfRender.h
+//	Date: 	2018/09/18
+//	File: 	GfRenderConstants.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFRENDER_H__
-#define __GFRENDER_H__
+#ifndef __GFRENDERCONSTANTS_H__
+#define __GFRENDERCONSTANTS_H__
 ////////////////////////////////////////////////////////////////////////////////
+// Include 
 
 #include "GfCore/Common/GfCoreMinimal.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfRender)
 
-#include "Gfrender/Common/GfRenderConstants.h"
+class GfRenderConstants 
+{
+public:
 
-#include "GfRender/Common/GfGraphicsSDK.h"
-
-#include "GfRender/Common/GfWindow.h"
-
-#include "GfRender/Common/GfRenderContext.h"
+	// This constant defines the number of buffered buffers used by the application.
+	static constexpr u32 ms_uiNBufferingCount = 2;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFRENDER_H__
+#endif // __GFRENDERCONSTANTS_H__

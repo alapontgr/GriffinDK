@@ -57,6 +57,7 @@ T GfLerp(T fFrom, T fTo, T fDelta)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Return a value within {fMin, fMax-1}
 template <typename T>
 T GfWrap(T fVal, T fMin, T fMax)
 {

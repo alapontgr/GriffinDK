@@ -10,19 +10,40 @@
 // Includes
 
 #include "GfRender/Common/GfCmdBuffer.h"
+#include "GfRender/Common/GfRenderContext.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+#define GF_INFINITE_TIMEOUT 1000000000
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GfCmdBuffer_Platform::GfCmdBuffer_Platform()
-	: m_pCmdBuffer(nullptr)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::InitPlatform(u32 uiCmdBufferType, VkCommandBuffer pCmdBuffer)
+void GfCmdBuffer_Platform::InitPlatform (
+	VkCommandBuffer* pCmdBuffers,
+	VkFence* pFences)
 {
-	m_pCmdBuffer = pCmdBuffer;
+	for (u32 i=0; i<GfRenderConstants::ms_uiNBufferingCount; ++i)
+	{
+		m_pEntries[i].m_pCmdBuffer = pCmdBuffers[i];
+		m_pEntries[i].m_pFence = pFences[i];
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::WaitForReadyPlatform(const GfRenderContext& kCtx)
+{
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+	VkResult eResult = vkWaitForFences(kCtx.m_pDevice, 1, &kCurrEntry.m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
+	GF_ASSERT(eResult == VK_SUCCESS, "Waited to long for fences");
+	eResult = vkResetFences(kCtx.m_pDevice, 1, &kCurrEntry.m_pFence);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to reset the fences");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

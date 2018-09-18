@@ -13,6 +13,19 @@
 // Includes
 
 #include "GfRender/Common/GfGraphicsSDK.h"
+#include "GfRender/Common/GfRenderConstants.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfRenderContext;
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct GfCmdBufferSlot_Platform
+{
+	VkCommandBuffer m_pCmdBuffer	= nullptr;
+	VkFence			m_pFence		= 0;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,11 +37,16 @@ public:
 
 	GfCmdBuffer_Platform();
 
-	void InitPlatform(u32 uiCmdBufferType, VkCommandBuffer pCmdBuffer);
+	void InitPlatform(
+		VkCommandBuffer* pCmdBuffers,
+		VkFence* pFences);
+
+	void WaitForReadyPlatform(const GfRenderContext& kCtx);
 
 private:
 
-	VkCommandBuffer m_pCmdBuffer;
+	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
+	GfCmdBufferSlot_Platform m_pEntries[GfRenderConstants::ms_uiNBufferingCount];
 };
 
 ////////////////////////////////////////////////////////////////////////////////

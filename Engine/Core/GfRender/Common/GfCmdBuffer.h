@@ -19,6 +19,7 @@
 
 class GfRenderContext;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace GfCmdBufferType 
@@ -47,9 +48,14 @@ public:
 
 	void StopRecording();
 
+	// Sync point to avoid start recording while the command buffer is still being processed
+	void WaitForReady(const GfRenderContext& kCtx);
+
 	////////////////////////////////////////////////////////////////////////////////
 
+	void BeginRenderPass(const GfRenderContext& kCtx);
 
+	void EndRenderPass(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -57,6 +63,13 @@ private:
 
 	GfCmdBufferType::Type	m_eType;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
+{
+	WaitForReadyPlatform(kCtx);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCMDBUFFER_H__

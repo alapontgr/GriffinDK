@@ -32,11 +32,29 @@ public:
 
 	void Shutdown();
 
+	u32 GetCurrentFrameIdx() const;
+
+	void BeginFrame();
+
+	void EndFrame();
+
 private:
+
+	void Flip();
 
 	GfRenderContext_Platform	m_kPlatform;
 	GfWindow*					m_pWindow;
+
+	// Used as a cursor for the multi buffering of the resources of the engine
+	u32							m_uiCurrentFrameIdx;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfRenderContext::GetCurrentFrameIdx() const
+{
+	return m_uiCurrentFrameIdx;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDERCONTEXT_H__

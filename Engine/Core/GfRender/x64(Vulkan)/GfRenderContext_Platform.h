@@ -23,9 +23,14 @@ public:
 
 	friend class GfRenderContext;
 
-	GfRenderContext_Platform();
+	GfRenderContext_Platform(GfRenderContext& kBase);
 
 	////////////////////////////////////////////////////////////////////////////////
+
+	// Used as the final target of the frame
+	VkImageView GetCurrentBackBuffer() const;
+
+	VkFormat GetSwapchainFormat() const;
 
 	// Main settings
 	VkInstance						m_pInstance;
@@ -75,6 +80,10 @@ private:
 
 	void CreateSwapchain();
 
+	////////////////////////////////////////////////////////////////////////////////
+
+	GfRenderContext&				m_kBase;
+
 	// Queues
 	VkQueue							m_uiGraphicsQueue;
 	VkQueue							m_uiPresentQueue;
@@ -82,7 +91,7 @@ private:
 	// Swap chain and surface
 	VkSurfaceKHR					m_pSurface;
 	VkSwapchainKHR					m_pSwapChain;
-	VkSurfaceFormatKHR				m_pSwapChainFormat;
+	VkSurfaceFormatKHR				m_kSwapChainFormat;
 	std::vector<VkImage>			m_tSwapChainImages;
 	std::vector<VkImageView>		m_tSwapChainImageView;
 

@@ -1,63 +1,49 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/15
-//	File: 	GFRENDERCONTEXT.cpp
+//	Date: 	2018/09/17
+//	File: 	GfRenderPass.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfRenderContext.h"
-#include "GfRender/Common/GfRenderConstants.h"
-#include "GfCore/Common/GfMaths.h"
+#include "GfRender/Common/GfRenderPass.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderContext::GfRenderContext()
-	: GfRenderContext_Platform(*this)
-	, m_kPlatform(*this)
-	, m_pWindow(nullptr)
-	, m_uiCurrentFrameIdx(0)
+GfRenderPass::GfRenderPass()
 {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::Init(GfWindow* pWindow)
-{
-	m_pWindow = pWindow;
-	InitInternal();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderContext::Shutdown()
+void GfRenderPass::AddInputSlot()
 {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::BeginFrame()
+void GfRenderPass::AddOutputSlot()
 {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::EndFrame()
+void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor /*= v4(0.0f)*/)
 {
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::Flip()
+void GfRenderPass::Compile(const GfRenderContext& kCtx)
 {
-	m_uiCurrentFrameIdx = GfWrap(m_uiCurrentFrameIdx + 1, 0u, GfRenderConstants::ms_uiNBufferingCount);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

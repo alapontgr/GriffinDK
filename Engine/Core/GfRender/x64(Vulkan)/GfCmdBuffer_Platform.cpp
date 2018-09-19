@@ -47,4 +47,33 @@ void GfCmdBuffer_Platform::WaitForReadyPlatform(const GfRenderContext& kCtx)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::SubmitPlatform(
+	const GfRenderContext& kCtx,
+	GfRencerContextFamilies::Type eQueueType,
+	Bool bLast)
+{
+	// TODO: Continue here
+#ifdef DEAD
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+	const GfFrameSyncing& kSyncPrimitives(kCtx.GetFrameSyncPrimitives());
+	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	VkSubmitInfo kInfo{};
+	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	kInfo.pNext = nullptr;
+	kInfo.waitSemaphoreCount = 1;
+	kInfo.pWaitSemaphores = &frame.imageAvailable;
+	kInfo.pWaitDstStageMask = &uiFlags;
+	kInfo.commandBufferCount = 1;
+	kInfo.signalSemaphoreCount = 1;
+	kInfo.pSignalSemaphores = &frame.finishedRendering;
+	kInfo.pCommandBuffers = &kCurrEntry.m_pCmdBuffer;
+
+	VkResult eResult = vkQueueSubmit(m_presentQueue, 1, &kInfo,
+		frame.cmdBufferReady);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
+#endif // DEAD
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // EOF

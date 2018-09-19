@@ -21,7 +21,11 @@ GfRenderContext::GfRenderContext()
 	, m_pWindow(nullptr)
 	, m_uiCurrentFrameIdx(0)
 {
-
+	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	{
+		// Give an invalid value as the default value
+		m_pAvailableFamilies[i] = 0xffffffff;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

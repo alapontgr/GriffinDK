@@ -14,6 +14,23 @@
 
 #include "GfCore/Common/GfCoreMinimal.h"
 
+////////////////////////////////////////////////////////////////////////////////
+
+namespace GfRencerContextFamilies
+{
+	enum Type : u32
+	{
+		Present = 0,
+		Transfer,
+		Graphics,
+		Compute,
+		AsyncCompute,
+		Count
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfRenderConstants 
 {
 public:

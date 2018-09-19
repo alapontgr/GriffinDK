@@ -13,7 +13,16 @@
 // Includes
 
 #include "GfRender/Common/GfGraphicsSDK.h"
+#include "GfRender/Common/GfRenderConstants.h"
 #include <vector>
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct GfFrameSyncing 
+{
+	VkSemaphore m_pFinishedRendering;
+	VkSemaphore	m_pImageReady;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,16 +39,16 @@ public:
 	// Used as the final target of the frame
 	VkImageView GetCurrentBackBuffer() const;
 
+	const GfFrameSyncing& GetFrameSyncPrimitives() const;
+
+	VkQueue GetQueue(GfRencerContextFamilies::Type eType);
+
 	VkFormat GetSwapchainFormat() const;
 
 	// Main settings
 	VkInstance						m_pInstance;
 	VkPhysicalDevice				m_pPhysicalDevice;
 	VkDevice						m_pDevice;
-
-	// Used Families
-	u32								m_uiGraphicsFamilyIndex;
-	u32								m_uiPresentFamilyIndex;
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -80,13 +89,14 @@ private:
 
 	void CreateSwapchain();
 
+	void CreateSyncPrimitives();
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	GfRenderContext&				m_kBase;
 
 	// Queues
-	VkQueue							m_uiGraphicsQueue;
-	VkQueue							m_uiPresentQueue;
+	VkQueue							m_pQueues[GfRencerContextFamilies::Count];
 
 	// Swap chain and surface
 	VkSurfaceKHR					m_pSurface;
@@ -99,7 +109,18 @@ private:
 	VkSurfaceCapabilitiesKHR		m_pCapabilities;
 	std::vector<VkSurfaceFormatKHR> m_tSupportedFormats;
 	std::vector<VkPresentModeKHR>	m_tSupportedPresentModes;
+
+	// Sync
+	GfFrameSyncing					m_pFrameSyncEntries[GfRenderConstants::ms_uiNBufferingCount];
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRencerContextFamilies::Type eType)
+{
+	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
+	return m_pQueues[eType];
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDERCONTEXT_PLATFORM_H__

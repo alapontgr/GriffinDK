@@ -38,12 +38,17 @@ public:
 
 	void EndFrame();
 
+	u32 GetFamilyIdx(GfRencerContextFamilies::Type eType) const;
+
 private:
 
 	void Flip();
 
 	GfRenderContext_Platform	m_kPlatform;
 	GfWindow*					m_pWindow;
+
+	// Used Families
+	u32							m_pAvailableFamilies[GfRencerContextFamilies::Count];
 
 	// Used as a cursor for the multi buffering of the resources of the engine
 	u32							m_uiCurrentFrameIdx;
@@ -54,6 +59,14 @@ private:
 GF_FORCEINLINE u32 GfRenderContext::GetCurrentFrameIdx() const
 {
 	return m_uiCurrentFrameIdx;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRencerContextFamilies::Type eType) const
+{
+	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
+	return m_pAvailableFamilies[eType];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -51,6 +51,11 @@ public:
 	// Sync point to avoid start recording while the command buffer is still being processed
 	void WaitForReady(const GfRenderContext& kCtx);
 
+	void Submit(
+		const GfRenderContext& kCtx,
+		GfRencerContextFamilies::Type eQueueType,
+		Bool bLast);
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	void BeginRenderPass(const GfRenderContext& kCtx);
@@ -69,6 +74,16 @@ private:
 GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
 {
 	WaitForReadyPlatform(kCtx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::Submit(
+	const GfRenderContext& kCtx,
+	GfRencerContextFamilies::Type eQueueType,
+	Bool bLast)
+{
+	SubmitPlatform(kCtx, eQueueType, bLast);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -43,6 +43,11 @@ public:
 
 	void WaitForReadyPlatform(const GfRenderContext& kCtx);
 
+	void SubmitPlatform(
+		const GfRenderContext& kCtx, 
+		GfRencerContextFamilies::Type eQueueType, 
+		Bool bLast);
+
 private:
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution

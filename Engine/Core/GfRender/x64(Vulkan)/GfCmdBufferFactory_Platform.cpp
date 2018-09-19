@@ -21,14 +21,14 @@ GfCmdBufferFactory_Platform::GfCmdBufferFactory_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory_Platform::InitPlatform(const GfRenderContext& kCtx)
+void GfCmdBufferFactory_Platform::InitPlatform(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
 {
 	VkCommandPoolCreateInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	kInfo.pNext = nullptr;
 	kInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
 		VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-	kInfo.queueFamilyIndex = kCtx.m_uiPresentFamilyIndex;
+	kInfo.queueFamilyIndex = kCtx.GetFamilyIdx(eQueueType);
 	VkResult eResult = vkCreateCommandPool(kCtx.m_pDevice, &kInfo, nullptr, &m_pPool);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create command pool");
 }

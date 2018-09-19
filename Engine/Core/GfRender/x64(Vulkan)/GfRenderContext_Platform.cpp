@@ -60,13 +60,13 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 	, m_pInstance(nullptr)
 	, m_pPhysicalDevice(nullptr)
 	, m_pDevice(nullptr)
-	, m_uiGraphicsFamilyIndex(0)
-	, m_uiPresentFamilyIndex(0)
-	, m_uiGraphicsQueue(0)
-	, m_uiPresentQueue(0)
 	, m_pSurface(0)
 	, m_pSwapChain(0)
 {
+	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	{
+		m_pQueues[i] = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +74,13 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 VkImageView GfRenderContext_Platform::GetCurrentBackBuffer() const
 {
 	return m_tSwapChainImageView[m_kBase.m_uiCurrentFrameIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const GfFrameSyncing& GfRenderContext_Platform::GetFrameSyncPrimitives() const
+{
+	return m_pFrameSyncEntries[m_kBase.m_uiCurrentFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,14 +99,15 @@ void GfRenderContext_Platform::InitInternal()
 	CreateDevice();
 	RetrieveQueues();
 	CreateSwapchain();
+	CreateSyncPrimitives();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 	VkPhysicalDevice pDevice,
-	u32& uiOutSelectedFamilyIndex,
-	u32& uiOutSwapChainFamilyIndex)
+	u32& uiOutGraphicsFamilyIndex,
+	u32& uiOutPresentFamilyIndex)
 {
 	VkPhysicalDeviceProperties kDeviceProperties;
 	vkGetPhysicalDeviceProperties(pDevice, &kDeviceProperties);
@@ -134,14 +142,14 @@ bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 			if (kProp.queueCount > 0 &&
 				kProp.queueFlags & VK_QUEUE_GRAPHICS_BIT) // Can queue graphic commands
 			{
-				if (m_uiGraphicsFamilyIndex == UINT32_MAX) // Not assigned yet
+				if (uiOutGraphicsFamilyIndex == UINT32_MAX) // Not assigned yet
 				{
-					m_uiGraphicsFamilyIndex = i;
+					uiOutGraphicsFamilyIndex = i;
 				}
 
 				if (tSwapChainSupport[i]) {
-					m_uiGraphicsFamilyIndex = i;
-					m_uiPresentFamilyIndex = i;
+					uiOutGraphicsFamilyIndex = i;
+					uiOutPresentFamilyIndex = i;
 					return true;
 				}
 			}
@@ -151,12 +159,13 @@ bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 		for (u32 i = 0; i < uiFamilyQueuesCount; i++)
 		{
 			if (tSwapChainSupport[i]) {
-				m_uiPresentFamilyIndex = i;
+				uiOutPresentFamilyIndex = i;
 				break;
 			}
 		}
-		if (m_uiPresentFamilyIndex == UINT32_MAX ||
-			m_uiPresentFamilyIndex == UINT32_MAX) {
+		if (uiOutPresentFamilyIndex == UINT32_MAX ||
+			uiOutPresentFamilyIndex == UINT32_MAX) 
+		{
 			return false;
 		}
 	}
@@ -363,11 +372,15 @@ void GfRenderContext_Platform::CreateDevice()
 		eResult = vkEnumeratePhysicalDevices(m_pInstance, &uiDeviceCount, &devices[0]);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to get physical devices");
 
-		m_uiGraphicsFamilyIndex = UINT32_MAX;
-		m_uiPresentFamilyIndex = UINT32_MAX;
+		u32 uiPresentFamilyIdx(UINT32_MAX);
+		u32 uiGraphicsFamilyIdx(UINT32_MAX);
+		u32 uiTransferFamilyIdx(UINT32_MAX);
+		u32 uiComputeFamilyIdx(UINT32_MAX);
+		u32 uiAsyncComputeFamilyIdx(UINT32_MAX);
+
 		for (u32 i = 0; i < uiDeviceCount; i++)
 		{
-			if (CheckPhysicalDeviceProperties(devices[i], m_uiGraphicsFamilyIndex, m_uiPresentFamilyIndex)) {
+			if (CheckPhysicalDeviceProperties(devices[i], uiGraphicsFamilyIdx, uiPresentFamilyIdx)) {
 				// This device supports graphics and using swap chains
 				m_pPhysicalDevice = devices[i];
 			}
@@ -387,18 +400,27 @@ void GfRenderContext_Platform::CreateDevice()
 		kQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		kQueueInfo.pNext = nullptr;
 		kQueueInfo.flags = 0;
-		kQueueInfo.queueFamilyIndex = m_uiGraphicsFamilyIndex;
+		kQueueInfo.queueFamilyIndex = uiGraphicsFamilyIdx;
 		kQueueInfo.queueCount = s_uiPrioritiesCount;
 		kQueueInfo.pQueuePriorities = pQueuePriorities;
 
 		std::vector<VkDeviceQueueCreateInfo> tQueueInfoList;
 		tQueueInfoList.push_back(kQueueInfo);
 
-		if (m_uiGraphicsFamilyIndex != m_uiPresentFamilyIndex) {
+		if (m_kBase.GetFamilyIdx(GfRencerContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRencerContextFamilies::Present)) {
 			// Almost the same configuration apart of the family index to use
-			kQueueInfo.queueFamilyIndex = m_uiPresentFamilyIndex;
+			kQueueInfo.queueFamilyIndex = uiPresentFamilyIdx;
 			tQueueInfoList.push_back(kQueueInfo);
 		}
+
+		// Assign the families indices
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Present] = uiPresentFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Graphics] = uiGraphicsFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Transfer] = uiGraphicsFamilyIdx;
+		// It'll be the graphics queue
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Compute] = uiComputeFamilyIdx;
+		// Temporarily async compute will fallback to the compute queue. In the end it will probably be the graphics queue
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
 
 		// Features to be enabled, by default it is all disabled
 		VkPhysicalDeviceFeatures kFeatures{};
@@ -424,8 +446,10 @@ void GfRenderContext_Platform::CreateDevice()
 void GfRenderContext_Platform::RetrieveQueues()
 {
 	// Get access to the queues we will use
-	vkGetDeviceQueue(m_pDevice, m_uiGraphicsFamilyIndex, 0, &m_uiGraphicsQueue);
-	vkGetDeviceQueue(m_pDevice, m_uiPresentFamilyIndex, 0, &m_uiPresentQueue);
+	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	{
+		vkGetDeviceQueue(m_pDevice, m_kBase.GetFamilyIdx((GfRencerContextFamilies::Type)i), 0, &m_pQueues[i]);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,6 +526,27 @@ void GfRenderContext_Platform::CreateSwapchain()
 		vkDestroySwapchainKHR(m_pDevice, oldSwapChain, nullptr);
 	}
 	CheckSwapchainImages();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderContext_Platform::CreateSyncPrimitives()
+{
+	// Semaphore config
+	VkSemaphoreCreateInfo kSemaphoreInfo{};
+	kSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	kSemaphoreInfo.pNext = nullptr;
+	kSemaphoreInfo.flags = 0;
+
+	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i) 
+	{
+		VkResult eResult = vkCreateSemaphore(m_pDevice, &kSemaphoreInfo, nullptr,
+			&m_pFrameSyncEntries[i].m_pFinishedRendering);
+		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create semaphore");
+		eResult = vkCreateSemaphore(m_pDevice, &kSemaphoreInfo, nullptr,
+			&m_pFrameSyncEntries[i].m_pImageReady);
+		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create semaphore");
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

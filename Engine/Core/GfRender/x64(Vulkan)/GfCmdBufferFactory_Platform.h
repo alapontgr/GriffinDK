@@ -13,6 +13,7 @@
 // Includes
 
 #include "GfRender/Common/GfGraphicsSDK.h"
+#include "GfRender/Common/GfRenderConstants.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +28,7 @@ public:
 
 	GfCmdBufferFactory_Platform();
 
-	void InitPlatform(const GfRenderContext& kCtx);
+	void InitPlatform(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType);
 
 	void CreateCmdBufferPlatform(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer);
 

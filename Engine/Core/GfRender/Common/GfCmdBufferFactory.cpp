@@ -19,9 +19,9 @@ GfCmdBufferFactory::GfCmdBufferFactory()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory::Init(const GfRenderContext& kCtx)
+void GfCmdBufferFactory::Init(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
 {
-	InitPlatform(kCtx);
+	InitPlatform(kCtx, eQueueType);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

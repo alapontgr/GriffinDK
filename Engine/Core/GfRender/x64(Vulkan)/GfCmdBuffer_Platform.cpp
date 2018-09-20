@@ -11,6 +11,8 @@
 
 #include "GfRender/Common/GfCmdBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include "GfRender/Common/GfRenderPass.h"
+#include "GfRender/Common/GfWindow.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -53,8 +55,6 @@ void GfCmdBuffer_Platform::SubmitPlatform(
 	GfRencerContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	// TODO: Continue here
-#ifdef DEAD
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	const GfFrameSyncing& kSyncPrimitives(kCtx.GetFrameSyncPrimitives());
 	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -62,17 +62,52 @@ void GfCmdBuffer_Platform::SubmitPlatform(
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	kInfo.pNext = nullptr;
 	kInfo.waitSemaphoreCount = 1;
-	kInfo.pWaitSemaphores = &frame.imageAvailable;
-	kInfo.pWaitDstStageMask = &uiFlags;
+	if (bLast) 
+	{
+		kInfo.pWaitSemaphores = &kSyncPrimitives.m_pImageReady;
+		kInfo.pWaitDstStageMask = &uiFlags;
+		kInfo.pSignalSemaphores = &kSyncPrimitives.m_pFinishedRendering;
+	}
 	kInfo.commandBufferCount = 1;
 	kInfo.signalSemaphoreCount = 1;
-	kInfo.pSignalSemaphores = &frame.finishedRendering;
 	kInfo.pCommandBuffers = &kCurrEntry.m_pCmdBuffer;
 
-	VkResult eResult = vkQueueSubmit(m_presentQueue, 1, &kInfo,
-		frame.cmdBufferReady);
+	VkResult eResult = vkQueueSubmit(kCtx.GetQueue(eQueueType), 1, &kInfo,
+		kCurrEntry.m_pFence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
-#endif // DEAD
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::BeginRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+{
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+	GfWindow* pWindow(kCtx.GetWindow());
+	// Begin render pass
+
+	// TODO: Refactor this
+	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	VkRenderPassBeginInfo passBeginInfo{};
+	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passBeginInfo.pNext = nullptr;
+	passBeginInfo.renderPass = kRenderPass.m_pRenderPass;
+	passBeginInfo.framebuffer = kRenderPass.m_pFramebuffer;
+	passBeginInfo.renderArea.extent.width = pWindow->GetWidth();
+	passBeginInfo.renderArea.extent.height = pWindow->GetHeight();
+	passBeginInfo.renderArea.offset.x = 0;
+	passBeginInfo.renderArea.offset.y = 0;
+	passBeginInfo.clearValueCount = 1;
+	passBeginInfo.pClearValues = &clearColor;
+	vkCmdBeginRenderPass(kCurrEntry.m_pCmdBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::EndRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+{
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+	vkCmdEndRenderPass(kCurrEntry.m_pCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

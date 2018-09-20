@@ -27,4 +27,18 @@ void GfCmdBuffer::Init(GfCmdBufferType::Type eType)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer::BeginRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+{
+	BeginRenderPassPlatform(kCtx, kRenderPass);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer::EndRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+{
+	EndRenderPassPlatform(kCtx, kRenderPass);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // EOF

@@ -43,6 +43,13 @@ void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearCo
 
 void GfRenderPass::Compile(const GfRenderContext& kCtx)
 {
+	CompilePlatform(kCtx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderPass::Resize(const GfRenderContext& kCtx)
+{
 
 }
 

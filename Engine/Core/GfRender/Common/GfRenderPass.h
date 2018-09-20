@@ -43,6 +43,8 @@ public:
 
 	void Compile(const GfRenderContext& kCtx);
 
+	void Resize(const GfRenderContext& kCtx);
+
 private:
 };
 

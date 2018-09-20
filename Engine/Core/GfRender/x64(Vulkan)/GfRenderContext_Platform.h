@@ -37,11 +37,13 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Used as the final target of the frame
-	VkImageView GetCurrentBackBuffer() const;
+	VkImageView GetCurrentBackBufferView() const;
+
+	VkImage GetCurrentBackBuffer() const;
 
 	const GfFrameSyncing& GetFrameSyncPrimitives() const;
 
-	VkQueue GetQueue(GfRencerContextFamilies::Type eType);
+	VkQueue GetQueue(GfRencerContextFamilies::Type eType) const;
 
 	VkFormat GetSwapchainFormat() const;
 
@@ -55,6 +57,12 @@ public:
 private:
 
 	void InitInternal();
+
+	void BeginFramePlatform();
+
+	void EndFramePlatform();
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	bool CheckPhysicalDeviceProperties(
 		VkPhysicalDevice pDevice,
@@ -104,6 +112,7 @@ private:
 	VkSurfaceFormatKHR				m_kSwapChainFormat;
 	std::vector<VkImage>			m_tSwapChainImages;
 	std::vector<VkImageView>		m_tSwapChainImageView;
+	u32								m_uiCurrentImageIdx;
 
 	// Settings
 	VkSurfaceCapabilitiesKHR		m_pCapabilities;
@@ -116,7 +125,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRencerContextFamilies::Type eType)
+GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRencerContextFamilies::Type eType) const
 {
 	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
 	return m_pQueues[eType];

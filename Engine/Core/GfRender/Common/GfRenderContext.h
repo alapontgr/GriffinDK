@@ -40,9 +40,13 @@ public:
 
 	u32 GetFamilyIdx(GfRencerContextFamilies::Type eType) const;
 
+	GfWindow* GetWindow() const;
+
 private:
 
 	void Flip();
+
+	void OnResize();
 
 	GfRenderContext_Platform	m_kPlatform;
 	GfWindow*					m_pWindow;
@@ -67,6 +71,13 @@ GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRencerContextFamilies::Type e
 {
 	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
 	return m_pAvailableFamilies[eType];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE GfWindow* GfRenderContext::GetWindow() const
+{
+	return m_pWindow;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

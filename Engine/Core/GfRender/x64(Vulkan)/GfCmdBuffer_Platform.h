@@ -18,6 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfRenderPass;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +48,12 @@ public:
 		const GfRenderContext& kCtx, 
 		GfRencerContextFamilies::Type eQueueType, 
 		Bool bLast);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void BeginRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
+
+	void EndRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
 private:
 

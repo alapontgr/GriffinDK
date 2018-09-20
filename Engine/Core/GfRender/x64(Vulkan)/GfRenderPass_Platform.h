@@ -28,12 +28,13 @@ public:
 
 	GfRenderPass_Platform();
 
+	VkFramebuffer	m_pFramebuffer;
+	VkRenderPass	m_pRenderPass;
+
 private:
 
 	void CompilePlatform(const GfRenderContext& kCtx);
 
-	VkFramebuffer	m_pFramebuffer;
-	VkRenderPass	m_pRenderPass;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

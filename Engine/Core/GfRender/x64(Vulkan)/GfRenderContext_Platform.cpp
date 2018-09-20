@@ -71,9 +71,16 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkImageView GfRenderContext_Platform::GetCurrentBackBuffer() const
+VkImageView GfRenderContext_Platform::GetCurrentBackBufferView() const
 {
-	return m_tSwapChainImageView[m_kBase.m_uiCurrentFrameIdx];
+	return m_tSwapChainImageView[m_uiCurrentImageIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+VkImage GfRenderContext_Platform::GetCurrentBackBuffer() const
+{
+	return m_tSwapChainImages[m_uiCurrentImageIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +107,54 @@ void GfRenderContext_Platform::InitInternal()
 	RetrieveQueues();
 	CreateSwapchain();
 	CreateSyncPrimitives();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderContext_Platform::BeginFramePlatform()
+{
+	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
+	VkResult eResult = vkAcquireNextImageKHR(m_pDevice, m_pSwapChain, UINT64_MAX,
+		kSyncPrimitives.m_pImageReady, VK_NULL_HANDLE,
+		&m_uiCurrentImageIdx);
+	switch (eResult)
+	{
+	case VK_SUCCESS:
+	case VK_SUBOPTIMAL_KHR:
+		break;
+	case VK_ERROR_OUT_OF_DATE_KHR:
+		m_kBase.OnResize();
+		break;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderContext_Platform::EndFramePlatform()
+{
+	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
+
+	VkPresentInfoKHR kInfo;
+	kInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	kInfo.pNext = nullptr;
+	kInfo.waitSemaphoreCount = 1;
+	kInfo.pWaitSemaphores = &kSyncPrimitives.m_pFinishedRendering;
+	kInfo.swapchainCount = 1;
+	kInfo.pSwapchains = &m_pSwapChain;
+	kInfo.pImageIndices = &m_uiCurrentImageIdx;
+	kInfo.pResults = nullptr;
+	auto result = vkQueuePresentKHR(GetQueue(GfRencerContextFamilies::Present), &kInfo);
+	switch (result)
+	{
+	case VK_SUCCESS:
+		break;
+	case VK_ERROR_OUT_OF_DATE_KHR:
+	case VK_SUBOPTIMAL_KHR:
+		m_kBase.OnResize();
+		break;
+	default:
+		break;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

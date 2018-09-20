@@ -19,7 +19,6 @@
 
 class GfRenderContext;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace GfCmdBufferType 
@@ -58,9 +57,9 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void BeginRenderPass(const GfRenderContext& kCtx);
+	void BeginRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
-	void EndRenderPass(const GfRenderContext& kCtx);
+	void EndRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
 	////////////////////////////////////////////////////////////////////////////////
 

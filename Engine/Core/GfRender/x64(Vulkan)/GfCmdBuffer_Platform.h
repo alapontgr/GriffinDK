@@ -35,8 +35,11 @@ class GfCmdBuffer_Platform
 public:
 
 	friend class GfCmdBufferFactory_Platform;
+	friend class GfCmdBuffer;
 
 	GfCmdBuffer_Platform();
+
+private:
 
 	void InitPlatform(
 		VkCommandBuffer* pCmdBuffers,
@@ -55,7 +58,9 @@ public:
 
 	void EndRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
-private:
+	void BeginRecordingPlatform(const GfRenderContext& kCtx);
+
+	void EndRecordingPlatform(const GfRenderContext& kCtx);
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
 	GfCmdBufferSlot_Platform m_pEntries[GfRenderConstants::ms_uiNBufferingCount];

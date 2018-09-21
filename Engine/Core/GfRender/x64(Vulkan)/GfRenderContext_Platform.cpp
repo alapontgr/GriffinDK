@@ -401,7 +401,7 @@ void GfRenderContext_Platform::CreateInstance()
 
 void GfRenderContext_Platform::CreateSurface()
 {
-	GfWindow_Platform* pWindowPlat(((GfRenderContext*)this)->m_pWindow->GetPlatform());
+	GfWindow_Platform* pWindowPlat(((GfRenderContext*)this)->m_pWindow);
 
 	VkWin32SurfaceCreateInfoKHR kSurfaceInfo;
 	kSurfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

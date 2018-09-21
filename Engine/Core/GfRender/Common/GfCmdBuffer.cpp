@@ -28,6 +28,20 @@ void GfCmdBuffer::Init(GfCmdBufferType::Type eType)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
+{
+	BeginRecordingPlatform(kCtx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
+{
+	EndRecordingPlatform(kCtx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfCmdBuffer::BeginRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
 {
 	BeginRenderPassPlatform(kCtx, kRenderPass);

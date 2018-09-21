@@ -22,5 +22,11 @@
 
 #include "GfRender/Common/GfRenderContext.h"
 
+#include "GfRender/Common/GfRenderPass.h"
+
+#include "GfRender/Common/GfCmdBuffer.h"
+
+#include "GfRender/Common/GfCmdBufferFactory.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDER_H__

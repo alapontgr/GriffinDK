@@ -34,7 +34,7 @@ public:
 
 	u32 GetCurrentFrameIdx() const;
 
-	void BeginFrame();
+	Bool BeginFrame();
 
 	void EndFrame();
 

@@ -32,7 +32,7 @@ struct GfWindowInitParams : public GfWindowInitParams_Platform
 ////////////////////////////////////////////////////////////////////////////////
 
 struct GfEntryArgs;
-class GfWindow
+class GfWindow : public GfWindow_Platform
 {
 public:
 
@@ -47,8 +47,6 @@ public:
 
 	void Shutdown();
 
-	GfWindow_Platform* GetPlatform();
-
 	u32 GetWidth();
 
 	u32 GetHeight();
@@ -57,20 +55,12 @@ public:
 
 private:
 
-	GfWindow_Platform	m_kPlatform;
 	const char*			m_szAppName; // Static string
 	u32					m_uiWidth;
 	u32					m_uiHeight;
 	bool				m_bFullScreen;
 	bool				m_bVSync;
 };
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE GfWindow_Platform* GfWindow::GetPlatform() 
-{
-	return &m_kPlatform;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -21,6 +21,11 @@ workspace (griffin.EngineName)
    	location("Solutions/")
    	debugdir( griffin.WorkingDirPath )
 
+   	-- TODO: Refactor this to depend on the platform that is chosen
+   	architecture "x86_64"
+   	entrypoint  ("WinMainCRTStartup")
+   	---------------------------------------------------------------
+
    	defines { "_PLATFORM_DIR=%{cfg.platform}" }
    	flags { "FatalWarnings" }
 

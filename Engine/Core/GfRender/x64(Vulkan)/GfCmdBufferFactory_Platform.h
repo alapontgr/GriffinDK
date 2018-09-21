@@ -26,13 +26,15 @@ class GfCmdBufferFactory_Platform
 {
 public:
 
+	friend class GfCmdBufferFactory;
+
 	GfCmdBufferFactory_Platform();
+
+private:
 
 	void InitPlatform(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType);
 
 	void CreateCmdBufferPlatform(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer);
-
-private:
 
 	VkCommandPool m_pPool;
 };

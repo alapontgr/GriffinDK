@@ -63,7 +63,7 @@ GfWindow_Platform::GfWindow_Platform(GfWindow& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::Init(GfWindowInitParams& kInitParams)
+void GfWindow_Platform::InitPlatform(GfWindowInitParams& kInitParams)
 {
 	// this struct holds information for the window class
 	WNDCLASSEX kWc;
@@ -131,7 +131,7 @@ void GfWindow_Platform::Init(GfWindowInitParams& kInitParams)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool GfWindow_Platform::Tick()
+Bool GfWindow_Platform::TickPlatform()
 {
 	MSG msg;
 	// Check to see if any messages are waiting in the queue
@@ -148,7 +148,7 @@ Bool GfWindow_Platform::Tick()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::Shutdown()
+void GfWindow_Platform::ShutdownPlatform()
 {
 	CloseWindow(m_pHwnd);
 	m_pHwnd = nullptr;

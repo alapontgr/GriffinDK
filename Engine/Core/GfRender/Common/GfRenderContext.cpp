@@ -10,6 +10,7 @@
 // Includes
 
 #include "GfRender/Common/GfRenderContext.h"
+#include "GfRender/Common/GfWindow.h"
 #include "GfRender/Common/GfRenderConstants.h"
 #include "GfCore/Common/GfMaths.h"
 
@@ -45,9 +46,11 @@ void GfRenderContext::Shutdown()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::BeginFrame()
+Bool GfRenderContext::BeginFrame()
 {
+	Bool bResult(m_pWindow->Tick());
 	m_kPlatform.BeginFramePlatform();
+	return bResult;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

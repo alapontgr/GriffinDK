@@ -43,9 +43,9 @@ public:
 
 	void Init(GfCmdBufferType::Type eType);
 
-	void StartRecording();
+	void BeginRecording(const GfRenderContext& kCtx);
 
-	void StopRecording();
+	void EndRecording(const GfRenderContext& kCtx);
 
 	// Sync point to avoid start recording while the command buffer is still being processed
 	void WaitForReady(const GfRenderContext& kCtx);

@@ -1,5 +1,11 @@
 project "QuickTesting"
-	kind "ConsoleApp"
+	kind "WindowedApp"
 	language "C++"
 
-	links {"GfCore"}
+	links {
+		"GfCore",
+		"GfEntry",
+		"GfRender",
+	}
+
+	SetupGraphicsSDK();

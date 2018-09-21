@@ -32,20 +32,19 @@ public:
 
 	GfWindow_Platform(GfWindow& kBase);
 
-	void Init(GfWindowInitParams& kInitParams);
-
-	Bool Tick();
-
-	void Shutdown();
-
 	HWND GetHwnd();
 
 	HINSTANCE GetInstance();
 
 private:
 
-	GfWindow& m_kBase;
+	void InitPlatform(GfWindowInitParams& kInitParams);
 
+	Bool TickPlatform();
+
+	void ShutdownPlatform();
+
+	GfWindow&	m_kBase;
 	HWND		m_pHwnd;
 	HINSTANCE	m_pInstance;
 };

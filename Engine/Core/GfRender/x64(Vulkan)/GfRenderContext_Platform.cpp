@@ -11,6 +11,7 @@
 
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfWindow.h"
+#include GF_SOLVE_PLATFORM_HEADER(GfRender)
 #include "GfCore/Common/GfMaths.h"
 
 #include <vector>
@@ -23,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // The extensions to use
-static u32 g_uiExtensionCount(2); 
+static u32 g_uiInstanceExtensionCount(2); 
 static const char* g_pInstanceExtensions[] = 
 {
 	// Surface extension to be able to draw into the screen
@@ -34,6 +35,7 @@ static const char* g_pInstanceExtensions[] =
 	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 };
 
+// Validation layers
 #if GF_USE_VALIDATION_LAYERS
 static constexpr u32 g_uiLayerCount = 1;
 #else
@@ -44,7 +46,9 @@ static const char* g_pLayerNames[] =
 	"VK_LAYER_LUNARG_standard_validation" 
 };
 
-static const char* kDeviceExtensions[] = 
+// Device extensions
+static constexpr u32 g_uiDeviceExtensionCount(1);
+static const char* g_pDeviceExtensions[] = 
 {
 	// Check that the device supports using swap chains
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME 
@@ -264,7 +268,7 @@ void GfRenderContext_Platform::CheckInstanceAvalExtensions()
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to get the extension properties");
 
 		// Check if all the required extensions are supported
-		for (u32 i = 0; i < g_uiExtensionCount; i++)
+		for (u32 i = 0; i < g_uiInstanceExtensionCount; i++)
 		{
 			auto it = std::find_if(tProperties.begin(), tProperties.end(),
 				[&](const VkExtensionProperties& prop) {
@@ -389,7 +393,7 @@ void GfRenderContext_Platform::CreateInstance()
 	kInfo.pApplicationInfo = &kAppInfo;
 	kInfo.enabledLayerCount = g_uiLayerCount;
 	kInfo.ppEnabledLayerNames = g_pLayerNames;
-	kInfo.enabledExtensionCount = g_uiExtensionCount;
+	kInfo.enabledExtensionCount = g_uiInstanceExtensionCount;
 	kInfo.ppEnabledExtensionNames = &g_pInstanceExtensions[0];
 
 	// Create Vulkan instance
@@ -410,7 +414,7 @@ void GfRenderContext_Platform::CreateSurface()
 	kSurfaceInfo.hinstance = pWindowPlat->GetInstance();
 	kSurfaceInfo.hwnd = pWindowPlat->GetHwnd();
 	VkResult eResult = vkCreateWin32SurfaceKHR(m_pInstance, &kSurfaceInfo, nullptr, &m_pSurface);
-	GF_ASSERT(eResult, "Failed to create Win32 Surface");
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create Win32 Surface");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -433,13 +437,25 @@ void GfRenderContext_Platform::CreateDevice()
 		u32 uiComputeFamilyIdx(UINT32_MAX);
 		u32 uiAsyncComputeFamilyIdx(UINT32_MAX);
 
+		// Search for valid family indices for the different queues
 		for (u32 i = 0; i < uiDeviceCount; i++)
 		{
-			if (CheckPhysicalDeviceProperties(devices[i], uiGraphicsFamilyIdx, uiPresentFamilyIdx)) {
+			if (CheckPhysicalDeviceProperties(devices[i], uiGraphicsFamilyIdx, uiPresentFamilyIdx))
+			{
 				// This device supports graphics and using swap chains
 				m_pPhysicalDevice = devices[i];
+				break;
 			}
 		}
+
+		// Assign the families indices
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Present] = uiPresentFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Graphics] = uiGraphicsFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Transfer] = uiGraphicsFamilyIdx;
+		// It'll be the graphics queue
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Compute] = uiComputeFamilyIdx;
+		// Temporarily async compute will fallback to the compute queue. In the end it will probably be the graphics queue
+		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
 
 		// Check extensions
 #if defined(_DEBUG) || defined (_DEBUGOPT)
@@ -468,15 +484,6 @@ void GfRenderContext_Platform::CreateDevice()
 			tQueueInfoList.push_back(kQueueInfo);
 		}
 
-		// Assign the families indices
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Present] = uiPresentFamilyIdx;
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Graphics] = uiGraphicsFamilyIdx;
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Transfer] = uiGraphicsFamilyIdx;
-		// It'll be the graphics queue
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Compute] = uiComputeFamilyIdx;
-		// Temporarily async compute will fallback to the compute queue. In the end it will probably be the graphics queue
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
-
 		// Features to be enabled, by default it is all disabled
 		VkPhysicalDeviceFeatures kFeatures{};
 
@@ -488,11 +495,11 @@ void GfRenderContext_Platform::CreateDevice()
 		kDeviceInfo.pQueueCreateInfos = &tQueueInfoList[0];
 		kDeviceInfo.enabledLayerCount = 0;
 		kDeviceInfo.ppEnabledLayerNames = nullptr;
-		kDeviceInfo.enabledExtensionCount = g_uiExtensionCount;
-		kDeviceInfo.ppEnabledExtensionNames = &kDeviceExtensions[0];
+		kDeviceInfo.enabledExtensionCount = g_uiDeviceExtensionCount;
+		kDeviceInfo.ppEnabledExtensionNames = &g_pDeviceExtensions[0];
 		kDeviceInfo.pEnabledFeatures = &kFeatures;
 		eResult = vkCreateDevice(m_pPhysicalDevice, &kDeviceInfo, nullptr, &m_pDevice);
-		GF_ASSERT(eResult, "Failed to create logical device");
+		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create logical device");
 	}
 }
 
@@ -503,7 +510,11 @@ void GfRenderContext_Platform::RetrieveQueues()
 	// Get access to the queues we will use
 	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
 	{
-		vkGetDeviceQueue(m_pDevice, m_kBase.GetFamilyIdx((GfRencerContextFamilies::Type)i), 0, &m_pQueues[i]);
+		u32 uiFamilyIdx(m_kBase.GetFamilyIdx((GfRencerContextFamilies::Type)i));
+		if (uiFamilyIdx != GfRencerContextFamilies::InvalidIdx) 
+		{
+			vkGetDeviceQueue(m_pDevice, uiFamilyIdx, 0, &m_pQueues[i]);	
+		}
 	}
 }
 
@@ -535,7 +546,7 @@ void GfRenderContext_Platform::CreateSwapchain()
 	eResult = vkGetPhysicalDeviceSurfacePresentModesKHR(
 		m_pPhysicalDevice, m_pSurface, &presentModeCount,
 		&m_tSupportedPresentModes[0]);
-	GF_ASSERT(eResult == VK_SUBOPTIMAL_KHR, "Failed to get the supported present modes");
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to get the supported present modes");
 
 	// Images extend
 	VkExtent2D kExtend;

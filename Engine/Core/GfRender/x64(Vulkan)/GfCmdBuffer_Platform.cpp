@@ -114,14 +114,33 @@ void GfCmdBuffer_Platform::EndRenderPassPlatform(const GfRenderContext& kCtx, co
 
 void GfCmdBuffer_Platform::BeginRecordingPlatform(const GfRenderContext& kCtx)
 {
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 
+	VkCommandBufferBeginInfo kInfo;
+	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	kInfo.pNext = nullptr;
+	kInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	kInfo.pInheritanceInfo = nullptr;
+
+	VkImageSubresourceRange range;
+	range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	range.baseMipLevel = 0;
+	range.levelCount = 1;
+	range.baseArrayLayer = 0;
+	range.layerCount = 1;
+
+	// begin command buffer
+	VkResult eResult = vkBeginCommandBuffer(kCurrEntry.m_pCmdBuffer, &kInfo);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to begin cmd buffer");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::EndRecordingPlatform(const GfRenderContext& kCtx)
 {
-
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+	VkResult eResult = vkEndCommandBuffer(kCurrEntry.m_pCmdBuffer);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

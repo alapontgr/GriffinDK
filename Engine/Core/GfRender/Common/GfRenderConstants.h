@@ -25,7 +25,8 @@ namespace GfRencerContextFamilies
 		Graphics,
 		Compute,
 		AsyncCompute,
-		Count
+		Count,
+		InvalidIdx = 0xffffffff
 	};
 }
 

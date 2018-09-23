@@ -73,7 +73,7 @@ GF_FORCEINLINE u32 GfWindow::GetWidth()
 
 GF_FORCEINLINE u32 GfWindow::GetHeight()
 {
-	return m_uiWidth;
+	return m_uiHeight;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

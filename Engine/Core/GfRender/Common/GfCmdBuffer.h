@@ -61,6 +61,8 @@ public:
 
 	void EndRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
+	void ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor);
+
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -83,6 +85,13 @@ GF_FORCEINLINE void GfCmdBuffer::Submit(
 	Bool bLast)
 {
 	SubmitPlatform(kCtx, eQueueType, bLast);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor)
+{
+	ClearCurrentTargetPlatform(kCtx, vClearColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

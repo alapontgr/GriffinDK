@@ -37,11 +37,14 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		// Begin the Command buffer
 		kCmdBuffer.BeginRecording(kContext);
 
+		// Temporary: Clear manually instead of using a RenderPass
+		kCmdBuffer.ClearCurrentTarget(kContext, v4(1.0f, 0.0f, 1.0f, 1.0f));
+
 		// Begin render pass
-		kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
+		//kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
 
 		// End render pass
-		kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
+		//kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
 
 		// End the command buffer
 		kCmdBuffer.EndRecording(kContext);

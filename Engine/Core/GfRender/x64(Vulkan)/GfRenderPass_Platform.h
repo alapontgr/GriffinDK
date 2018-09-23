@@ -35,6 +35,8 @@ private:
 
 	void CompilePlatform(const GfRenderContext& kCtx);
 
+	void RecreateFramebuffer(const GfRenderContext& kCtx);
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////

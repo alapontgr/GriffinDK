@@ -66,6 +66,7 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 	, m_pDevice(nullptr)
 	, m_pSurface(0)
 	, m_pSwapChain(0)
+	, m_uiCurrentImageIdx(0)
 {
 	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
 	{
@@ -294,11 +295,40 @@ void GfRenderContext_Platform::CheckSwapchainImages()
 	VkResult eResult = vkGetSwapchainImagesKHR(m_pDevice, m_pSwapChain, &uiImageCount, nullptr);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to enumerate the images of a swap chain");
 
+	// Get the Images
 	{
 		m_tSwapChainImages.resize(uiImageCount);
 		eResult = vkGetSwapchainImagesKHR(m_pDevice, m_pSwapChain, &uiImageCount,
 			&m_tSwapChainImages[0]);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to get the images of the swap chain");
+	}
+
+	// Create the Image views for the back buffer
+	{
+		m_tSwapChainImageView.resize(uiImageCount);
+
+		for (u32 i = 0; i < uiImageCount; i++)
+		{
+			VkImageViewCreateInfo kImageViewInfo{};
+			kImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			kImageViewInfo.pNext = nullptr;
+			kImageViewInfo.flags = 0;
+			kImageViewInfo.image = m_tSwapChainImages[i];
+			kImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			kImageViewInfo.format = m_kSwapChainFormat.format;
+			kImageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			kImageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			kImageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			kImageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			kImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			kImageViewInfo.subresourceRange.baseMipLevel = 0;
+			kImageViewInfo.subresourceRange.levelCount = 1;
+			kImageViewInfo.subresourceRange.baseArrayLayer = 0;
+			kImageViewInfo.subresourceRange.layerCount = 1;
+
+			VkResult eResult = vkCreateImageView(m_pDevice, &kImageViewInfo, nullptr, &m_tSwapChainImageView[i]);
+			GF_ASSERT(eResult == VK_SUCCESS, "Failed to create image view");
+		}
 	}
 }
 
@@ -411,7 +441,7 @@ void GfRenderContext_Platform::CreateSurface()
 	kSurfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	kSurfaceInfo.pNext = nullptr;
 	kSurfaceInfo.flags = 0;
-	kSurfaceInfo.hinstance = pWindowPlat->GetInstance();
+	kSurfaceInfo.hinstance = GetModuleHandle(NULL); //pWindowPlat->GetInstance();
 	kSurfaceInfo.hwnd = pWindowPlat->GetHwnd();
 	VkResult eResult = vkCreateWin32SurfaceKHR(m_pInstance, &kSurfaceInfo, nullptr, &m_pSurface);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create Win32 Surface");
@@ -554,7 +584,7 @@ void GfRenderContext_Platform::CreateSwapchain()
 	kExtend.height = m_kBase.m_pWindow->GetHeight();
 
 	// Get the number of buffers to create in the swap chain
-	u32 bufferCount = GfClamp<u32>(m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount, GF_N_BUFFERING_COUNT);
+	u32 bufferCount = GfClamp<u32>(GfRenderConstants::ms_uiNBufferingCount, m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount);
 	// Select a image format to use in the swap chain
 	m_kSwapChainFormat = SelectSwapchainFormat();
 	// Get the transform to apply to the swap chain (Useful in mobiles when using

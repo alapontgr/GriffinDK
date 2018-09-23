@@ -61,15 +61,15 @@ void GfCmdBuffer_Platform::SubmitPlatform(
 	VkSubmitInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	kInfo.pNext = nullptr;
-	kInfo.waitSemaphoreCount = 1;
-	if (bLast) 
+	if (true || bLast) 
 	{
+		kInfo.waitSemaphoreCount = 1;
 		kInfo.pWaitSemaphores = &kSyncPrimitives.m_pImageReady;
 		kInfo.pWaitDstStageMask = &uiFlags;
+		kInfo.signalSemaphoreCount = 1;
 		kInfo.pSignalSemaphores = &kSyncPrimitives.m_pFinishedRendering;
 	}
 	kInfo.commandBufferCount = 1;
-	kInfo.signalSemaphoreCount = 1;
 	kInfo.pCommandBuffers = &kCurrEntry.m_pCmdBuffer;
 
 	VkResult eResult = vkQueueSubmit(kCtx.GetQueue(eQueueType), 1, &kInfo,
@@ -86,7 +86,7 @@ void GfCmdBuffer_Platform::BeginRenderPassPlatform(const GfRenderContext& kCtx, 
 	// Begin render pass
 
 	// TODO: Refactor this
-	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	VkClearValue clearColor = { 1.0f, 0.0f, 0.0f, 0.0f };
 
 	VkRenderPassBeginInfo passBeginInfo{};
 	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -141,6 +141,75 @@ void GfCmdBuffer_Platform::EndRecordingPlatform(const GfRenderContext& kCtx)
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	VkResult eResult = vkEndCommandBuffer(kCurrEntry.m_pCmdBuffer);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::ClearCurrentTargetPlatform(const GfRenderContext& kCtx, const v4& vClearColor)
+{
+	// TODO: Refactor this to get rid of the barriers. This is just a temporal fix and I'll use the RenderPasses in the future
+
+	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
+
+	VkImageSubresourceRange kImageRange = {};
+	kImageRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	kImageRange.levelCount = 1;
+	kImageRange.layerCount = 1;
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	VkImageMemoryBarrier kBarrierPresentToClear = 
+	{
+		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
+		nullptr,                                    // const void                            *pNext
+		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          srcAccessMask
+		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          dstAccessMask
+		VK_IMAGE_LAYOUT_UNDEFINED,                  // VkImageLayout                          oldLayout
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          newLayout
+		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
+		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
+		kImageRange                     // VkImageSubresourceRange                subresourceRange
+	};
+
+	VkImageMemoryBarrier kBarrierClearToPresent = 
+	{
+		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
+		nullptr,                                    // const void                            *pNext
+		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          srcAccessMask
+		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          dstAccessMask
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          oldLayout
+		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // VkImageLayout                          newLayout
+		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
+		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
+		kImageRange                     // VkImageSubresourceRange                subresourceRange
+	};
+
+
+	////////////////////////////////////////////////////////////////////////////////
+
+		vkCmdPipelineBarrier(
+			kCurrEntry.m_pCmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT, 
+			VK_PIPELINE_STAGE_TRANSFER_BIT, 
+			0, 0, nullptr, 0, nullptr, 1, &kBarrierPresentToClear);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	VkClearColorValue clearColor{ vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w };
+	VkClearValue clearValue = {};
+	clearValue.color = clearColor;
+
+	vkCmdClearColorImage(kCurrEntry.m_pCmdBuffer, kCtx.GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	vkCmdPipelineBarrier(kCurrEntry.m_pCmdBuffer, 
+		VK_PIPELINE_STAGE_TRANSFER_BIT, 
+		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &kBarrierClearToPresent);
+
+	////////////////////////////////////////////////////////////////////////////////
 }
 
 ////////////////////////////////////////////////////////////////////////////////

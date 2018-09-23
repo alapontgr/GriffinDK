@@ -12,6 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
+#include "GfCore/Common/GfMaths.h"
 #include "GfRender/Common/GfGraphicsSDK.h"
 #include "GfRender/Common/GfRenderConstants.h"
 
@@ -61,6 +62,8 @@ private:
 	void BeginRecordingPlatform(const GfRenderContext& kCtx);
 
 	void EndRecordingPlatform(const GfRenderContext& kCtx);
+
+	void ClearCurrentTargetPlatform(const GfRenderContext& kCtx, const v4& vClearColor);
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
 	GfCmdBufferSlot_Platform m_pEntries[GfRenderConstants::ms_uiNBufferingCount];

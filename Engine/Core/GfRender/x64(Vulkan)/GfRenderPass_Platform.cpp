@@ -11,10 +11,13 @@
 
 #include "GfRender/Common/GfRenderPass.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include "GfRender/Common/GfWindow.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GfRenderPass_Platform::GfRenderPass_Platform()
+	: m_pRenderPass(nullptr)
+	, m_pFramebuffer(nullptr)
 {
 
 }
@@ -88,6 +91,38 @@ void GfRenderPass_Platform::CompilePlatform(const GfRenderContext& kCtx)
 	VkResult eResult = vkCreateRenderPass(kCtx.m_pDevice, &kRenderPassInfo, nullptr,
 		&m_pRenderPass);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create render pass");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderPass_Platform::RecreateFramebuffer(const GfRenderContext& kCtx)
+{
+	// Destroy the old one
+	if (m_pFramebuffer)
+	{
+		vkDestroyFramebuffer(kCtx.m_pDevice, m_pFramebuffer, nullptr);
+		m_pFramebuffer = VK_NULL_HANDLE;
+	}
+
+	// TODO: Refactor this to use the attachments defined as output target parameters
+
+	GfWindow* pWindow(kCtx.GetWindow());
+	VkFramebufferCreateInfo framebufferInfo{};
+	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	framebufferInfo.pNext = nullptr;
+	framebufferInfo.flags = 0;
+	framebufferInfo.renderPass = m_pRenderPass;
+	framebufferInfo.width = pWindow->GetWidth();
+	framebufferInfo.height = pWindow->GetHeight();
+	framebufferInfo.layers = 1;
+	// REVISE
+	VkImageView pOutView(kCtx.GetCurrentBackBufferView());
+	framebufferInfo.attachmentCount = 1;
+	framebufferInfo.pAttachments = &pOutView;
+	//
+
+	VkResult eResult = vkCreateFramebuffer(kCtx.m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffer);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

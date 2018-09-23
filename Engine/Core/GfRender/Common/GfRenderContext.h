@@ -48,7 +48,6 @@ private:
 
 	void OnResize();
 
-	GfRenderContext_Platform	m_kPlatform;
 	GfWindow*					m_pWindow;
 
 	// Used Families

@@ -92,7 +92,7 @@ void GfCmdBuffer_Platform::BeginRenderPassPlatform(const GfRenderContext& kCtx, 
 	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passBeginInfo.pNext = nullptr;
 	passBeginInfo.renderPass = kRenderPass.m_pRenderPass;
-	passBeginInfo.framebuffer = kRenderPass.m_pFramebuffer;
+	passBeginInfo.framebuffer = kRenderPass.m_pFramebuffers[kCtx.GetCurrentFrameIdx()];
 	passBeginInfo.renderArea.extent.width = pWindow->GetWidth();
 	passBeginInfo.renderArea.extent.height = pWindow->GetHeight();
 	passBeginInfo.renderArea.offset.x = 0;

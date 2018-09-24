@@ -17,9 +17,11 @@
 
 GfRenderPass_Platform::GfRenderPass_Platform()
 	: m_pRenderPass(nullptr)
-	, m_pFramebuffer(nullptr)
 {
-
+	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
+	{
+		m_pFramebuffers[i] = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,14 +100,18 @@ void GfRenderPass_Platform::CompilePlatform(const GfRenderContext& kCtx)
 void GfRenderPass_Platform::RecreateFramebuffer(const GfRenderContext& kCtx)
 {
 	// Destroy the old one
-	if (m_pFramebuffer)
+	if (m_pFramebuffers)
 	{
-		vkDestroyFramebuffer(kCtx.m_pDevice, m_pFramebuffer, nullptr);
-		m_pFramebuffer = VK_NULL_HANDLE;
+		for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
+		{
+			vkDestroyFramebuffer(kCtx.m_pDevice, m_pFramebuffers[i], nullptr);
+			m_pFramebuffers[i] = VK_NULL_HANDLE;
+		}
 	}
 
 	// TODO: Refactor this to use the attachments defined as output target parameters
 
+	// REVISE
 	GfWindow* pWindow(kCtx.GetWindow());
 	VkFramebufferCreateInfo framebufferInfo{};
 	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -115,14 +121,17 @@ void GfRenderPass_Platform::RecreateFramebuffer(const GfRenderContext& kCtx)
 	framebufferInfo.width = pWindow->GetWidth();
 	framebufferInfo.height = pWindow->GetHeight();
 	framebufferInfo.layers = 1;
-	// REVISE
-	VkImageView pOutView(kCtx.GetCurrentBackBufferView());
-	framebufferInfo.attachmentCount = 1;
-	framebufferInfo.pAttachments = &pOutView;
-	//
 
-	VkResult eResult = vkCreateFramebuffer(kCtx.m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffer);
-	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
+	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
+	{
+		VkImageView pOutView(kCtx.GetBackBufferView(i));
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = &pOutView;
+		VkResult eResult = vkCreateFramebuffer(kCtx.m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);
+		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
+		//
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

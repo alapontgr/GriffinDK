@@ -39,6 +39,8 @@ public:
 	// Used as the final target of the frame
 	VkImageView GetCurrentBackBufferView() const;
 
+	VkImageView GetBackBufferView(u32 uiFrameIdx) const;
+
 	VkImage GetCurrentBackBuffer() const;
 
 	const GfFrameSyncing& GetFrameSyncPrimitives() const;
@@ -129,6 +131,13 @@ GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRencerContextFamilie
 {
 	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
 	return m_pQueues[eType];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkImageView GfRenderContext_Platform::GetBackBufferView(u32 uiFrameIdx) const
+{
+	return m_tSwapChainImageView[uiFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

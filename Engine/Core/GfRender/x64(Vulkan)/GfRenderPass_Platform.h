@@ -13,6 +13,7 @@
 // Includes
 
 #include "GfRender/Common/GfGraphicsSDK.h"
+#include "GfRender/Common/GfRenderConstants.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +29,7 @@ public:
 
 	GfRenderPass_Platform();
 
-	VkFramebuffer	m_pFramebuffer;
+	VkFramebuffer	m_pFramebuffers[GfRenderConstants::ms_uiNBufferingCount];
 	VkRenderPass	m_pRenderPass;
 
 private:
@@ -36,7 +37,6 @@ private:
 	void CompilePlatform(const GfRenderContext& kCtx);
 
 	void RecreateFramebuffer(const GfRenderContext& kCtx);
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////

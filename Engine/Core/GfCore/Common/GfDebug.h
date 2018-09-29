@@ -53,7 +53,8 @@ void GFPrintError(const char* szFileName, u32 uiLine, const char *fmt, ...);
 
 #endif
 
-#define  GF_ASSERT_ALWAYS(EXPR, MSG) assert(EXPR && MSG)
+// Causes the application to assert every time this macro is reached
+#define  GF_ASSERT_ALWAYS(MSG) assert(0 && MSG)
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

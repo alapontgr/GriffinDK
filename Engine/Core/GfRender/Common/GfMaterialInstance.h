@@ -1,0 +1,36 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
+//	Date: 	2018/09/26
+//	File: 	GfMaterialInstance.h
+//
+//	Copyright (c) 2018 (See README.md)
+//
+////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFMATERIALINSTANCE_H__
+#define __GFMATERIALINSTANCE_H__
+////////////////////////////////////////////////////////////////////////////////
+
+#include "GfCore/Common/GfCoreMinimal.h"
+#include GF_SOLVE_PLATFORM_HEADER(GfMaterialInstance)
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfMaterialinstance : public GfMaterialInstance_Platform
+{
+public:
+
+	friend class GfMaterialInstance_Platform;
+
+	GfMaterialinstance();
+
+	void Create(const GfRenderContext& kCtx);
+
+	void Destroy(const GfRenderContext& kCtx);
+
+private:
+	
+};
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFMATERIALINSTANCE_H__

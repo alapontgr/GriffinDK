@@ -11,6 +11,19 @@
 
 #include "GfRender/Common/GfBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include <unordered_map>
+
+////////////////////////////////////////////////////////////////////////////////
+// Utils
+
+// Used to obtain the StageFlags and AccessFlags to be used by a PipelineBarrier to perform the transition to a specific EBufferUsage
+static const std::unordered_map<EBufferUsage::Type, GfStageAccessConfig> g_tVulkanStageAccessFlagsMap {
+	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT } },
+	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT } },
+	{ EBufferUsage::Index_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_INDEX_READ_BIT } },
+	{ EBufferUsage::Vertex_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT } },
+	{ EBufferUsage::Uniform_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_SHADER_BIT , VK_ACCESS_UNIFORM_READ_BIT } }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -28,6 +41,13 @@ u32 FindMemTypeIdx(const u32 uiTypeFilter, VkMemoryPropertyFlags uiMemProperties
 	}
 	GF_ASSERT_ALWAYS("Failed to find a type of memory with the given filter and properties");
 	return 0xffffffff;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfStageAccessConfig GfBuffer_Platform::GetTransitionSettingsForType(u32 uiType)
+{
+	return g_tVulkanStageAccessFlagsMap.at((EBufferUsage::Type)uiType);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +117,13 @@ void GfBuffer_Platform::DestroyPlatform(const GfRenderContext& kCtxt)
 		m_pBuffer = nullptr;
 		m_pMemory = nullptr;
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfStageAccessConfig GfBuffer_Platform::GetTransitionSettings() const
+{
+	return g_tVulkanStageAccessFlagsMap.at(m_kBase.m_kDesc.m_eBufferType);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

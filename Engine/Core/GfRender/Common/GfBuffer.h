@@ -69,24 +69,7 @@ public:
 		GfBufferMemType					m_mMemoryProperties	= EBufferMemProperties::GPU_Local;
 		GfBufferUsage					m_mBufferUsage		= EBufferUsage::InvalidUsage;
 		EBufferUsage::Type				m_eBufferType		= EBufferUsage::InvalidUsage;
-		GfRencerContextFamilies::Type	m_eTargetFamily		= GfRencerContextFamilies::Graphics;
-	};
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	struct GfRange
-	{
-		u32 m_uiOffset	= 0;
-		u32 m_uiSize	= 0;
-	};
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	struct GfChunk
-	{
-		GfBuffer*	m_pBuffer		= nullptr;
-		u32			m_uiDataOffset	= 0;
-		u32			m_uiDataSize	= 0;
+		// GfRencerContextFamilies::Type	m_eTargetFamily		= GfRencerContextFamilies::Graphics;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////

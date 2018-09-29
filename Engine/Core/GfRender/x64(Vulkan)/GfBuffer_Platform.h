@@ -20,11 +20,21 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfStageAccessConfig
+{
+	VkPipelineStageFlagBits m_eStage;
+	VkAccessFlagBits		m_eAccess;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfBuffer_Platform
 {
 public:
 
 	friend class GfBuffer;
+
+	static GfStageAccessConfig GetTransitionSettingsForType(u32 uiType);
 
 	GfBuffer_Platform(GfBuffer& kBase);
 
@@ -35,6 +45,8 @@ public:
 	VkBuffer GetHandle() const;
 
 	VkDeviceMemory GetMemory() const;
+
+	GfStageAccessConfig GetTransitionSettings() const;
 
 private:
 

@@ -24,6 +24,8 @@
 
 #include "GfRender/Common/GfRenderPass.h"
 
+#include "GfRender/Common/GfBuffer.h"
+
 #include "GfRender/Common/GfCmdBuffer.h"
 
 #include "GfRender/Common/GfCmdBufferFactory.h"

@@ -20,6 +20,7 @@
 
 class GfRenderContext;
 class GfRenderPass;
+class GfBuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,6 +55,7 @@ private:
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////
+	// Render pass commands
 
 	void BeginRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
@@ -64,6 +66,15 @@ private:
 	void EndRecordingPlatform(const GfRenderContext& kCtx);
 
 	void ClearCurrentTargetPlatform(const GfRenderContext& kCtx, const v4& vClearColor);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Buffer commands
+
+	void CopyBufferRangePlatform(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+
+	void UpdateBufferRangePlatform(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
 	GfCmdBufferSlot_Platform m_pEntries[GfRenderConstants::ms_uiNBufferingCount];

@@ -47,6 +47,7 @@ groups["Core"] =
 		"GfCore",
 		"GfEntry",
 		"GfRender",
+		"GfFile",
 	}
 
 }

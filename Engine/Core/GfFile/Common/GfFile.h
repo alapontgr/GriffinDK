@@ -23,6 +23,7 @@ namespace EFileAccessMode
 	{
 		Read = 0,
 		Write,
+		Invalid = 0xffffffff,
 	};
 }
 
@@ -39,7 +40,8 @@ public:
 
 private:
 
-	size_t m_ulFileSize;
+	size_t					m_ulFileSize;
+	EFileAccessMode::Type	m_eType;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

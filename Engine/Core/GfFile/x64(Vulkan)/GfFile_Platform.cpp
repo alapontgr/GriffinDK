@@ -35,6 +35,7 @@ const DWORD g_pCreationDisposition[] =
 bool GfFile::OpenFile(const char* szFilename, EFileAccessMode::Type eAccesType, GfFileHandle& kOutFileHandle)
 {
 	kOutFileHandle.m_kBase.m_ulFileSize = 0;
+	kOutFileHandle.m_eType = eAccesType;
 	kOutFileHandle.m_pHandle = CreateFileA(
 		szFilename,
 		g_pAccesModes[eAccesType],
@@ -83,7 +84,19 @@ size_t GfFile::GetFileSize(GfFileHandle& kHandle)
 
 u32 GfFile::ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffer)
 {
-	// TODO
+	if (kHandle.m_eType == EFileAccessMode::Read) 
+	{
+		DWORD uiOutRead(0);
+		if (!ReadFile(kHandle.m_pHandle,
+			pOutBuffer,
+			uiToRead,
+			&uiOutRead,
+			NULL)) 
+		{
+			GF_PRINT("Attempt to read file data failed with error: %d", GetLastError());
+		}
+		return uiOutRead;
+	}
 	return 0;
 }
 
@@ -91,7 +104,20 @@ u32 GfFile::ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffe
 
 u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, void* pBuffer)
 {
-	// TODO
+	if (kHandle.m_eType == EFileAccessMode::Write) 
+	{
+		DWORD uiOutWrite(0);
+		if (!WriteFile(
+			kHandle.m_pHandle,
+			pBuffer,
+			uiToWrite,
+			&uiOutWrite,
+			NULL)) 
+		{
+			GF_PRINT("Attempt to read file data failed with error: %d", GetLastError());
+		}
+		return uiOutWrite;
+	}
 	return 0;
 }
 

@@ -17,6 +17,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace EFileAccessMode 
+{
+	enum Type : u32 
+	{
+		Read = 0,
+		Write,
+	};
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +33,7 @@ class GfFileHandle : public GfFileHandle_Platform
 public:
 
 	friend class GfFileHandle_Platform;
+	friend class GfFile;
 
 	GfFileHandle();
 
@@ -39,9 +48,11 @@ class GfFile : public GfFile_Platform
 {
 public:
 
-	static GfFileHandle OpenFile(const char* szFilename);
+	static bool OpenFile(const char* szFilename, EFileAccessMode::Type eAccesType, GfFileHandle& kOutFileHandle);
 
-	static void CloseFile(const GfFileHandle& kHandle);
+	static void CloseFile(GfFileHandle& kHandle);
+
+	static size_t GetFileSize(GfFileHandle& kHandle);
 
 	static u32 ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffer);
 

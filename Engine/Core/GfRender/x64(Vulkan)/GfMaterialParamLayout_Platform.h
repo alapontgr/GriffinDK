@@ -7,8 +7,8 @@
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMATERIALPARAMETERBLOCK_PLATFORM_H__
-#define __GFMATERIALPARAMETERBLOCK_PLATFORM_H__
+#ifndef __GFMATERIALPARAMLAYOUT_PLATFORM_H__
+#define __GFMATERIALPARAMLAYOUT_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
@@ -16,19 +16,18 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialParameterBlock_Platform 
+class GfMaterialParamLayout_Platform 
 {
 public:
 
-	friend class GfMaterialParameterBlock;
+	friend class GfMaterialParamLayout;
 
-	GfMaterialParameterBlock_Platform(GfMaterialParameterBlock& kBase);
+	GfMaterialParamLayout_Platform(GfMaterialParamLayout& kBase);
 
 private:
 
-	GfMaterialParameterBlock&	m_kBase;
-	VkDescriptorSet				m_pParameterSet;
-	VkDescriptorSetLayout		m_pSetLayout[EMaterialParamRate::Count];
+	GfMaterialParamLayout&	m_kBase;
+	VkDescriptorSetLayout	m_pSetLayout[EMaterialParamRate::Count];
 };
 
 ////////////////////////////////////////////////////////////////////////////////

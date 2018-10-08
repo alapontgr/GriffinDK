@@ -2,22 +2,26 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/10/07
-//	File: 	GfMaterialParameterBlock.cpp
+//	File: 	GfMaterialParameterBlock_Platform.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfMaterialParameterBlock.h"
+#include "GfRender/Common/GfMaterialParamLayout.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfMaterialParameterBlock::GfMaterialParameterBlock()
-	: GfMaterialParameterBlock_Platform(*this)
+GfMaterialParamLayout_Platform::GfMaterialParamLayout_Platform(GfMaterialParamLayout& kBase)
+	: m_kBase(kBase)
 {
-
+	for (u32 i = 0; i < EMaterialParamRate::Count; ++i) 
+	{
+		m_pSetLayout[i] = nullptr;
+	}
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // EOF

@@ -23,14 +23,14 @@ GfMaterialinstance::GfMaterialinstance()
 
 void GfMaterialinstance::Create(const GfRenderContext& kCtx)
 {
-	CreatePlatform(kCtx);
+	CreateRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfMaterialinstance::Destroy(const GfRenderContext& kCtx)
 {
-	DestroyPlatform(kCtx);
+	DestroyRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

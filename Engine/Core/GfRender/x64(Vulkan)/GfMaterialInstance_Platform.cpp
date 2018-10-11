@@ -23,16 +23,16 @@ GfMaterialInstance_Platform::GfMaterialInstance_Platform(GfMaterialinstance& kBa
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::DestroyPlatform(const GfRenderContext& kCtx)
+void GfMaterialInstance_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
-
+	GF_ASSERT_ALWAYS("To Implement");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::CreatePlatform(const GfRenderContext& kCtx)
+void GfMaterialInstance_Platform::CreateRHI(const GfRenderContext& kCtx)
 {
-	DestroyPlatform(kCtx);
+	DestroyRHI(kCtx);
 	CreateLayout(kCtx);
 	CreatePipeline(kCtx);
 }

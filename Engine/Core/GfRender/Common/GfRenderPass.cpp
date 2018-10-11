@@ -22,36 +22,36 @@ GfRenderPass::GfRenderPass()
 
 void GfRenderPass::AddInputSlot()
 {
-
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass::AddOutputSlot()
 {
-
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor /*= v4(0.0f)*/)
 {
-
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass::Compile(const GfRenderContext& kCtx)
 {
-	CompilePlatform(kCtx);
-	RecreateFramebuffer(kCtx);
+	CompileRHI(kCtx);
+	RecreateFramebufferRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass::Resize(const GfRenderContext& kCtx)
 {
-
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

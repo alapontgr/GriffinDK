@@ -21,7 +21,7 @@ GfCmdBufferFactory_Platform::GfCmdBufferFactory_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory_Platform::InitPlatform(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
+void GfCmdBufferFactory_Platform::InitRHI(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
 {
 	VkCommandPoolCreateInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -35,7 +35,7 @@ void GfCmdBufferFactory_Platform::InitPlatform(const GfRenderContext& kCtx, GfRe
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory_Platform::CreateCmdBufferPlatform(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer)
+void GfCmdBufferFactory_Platform::CreateCmdBufferRHI(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer)
 {
 	VkCommandBuffer pCmdBuffers [GfRenderConstants::ms_uiNBufferingCount];
 	VkFence			pFences		[GfRenderConstants::ms_uiNBufferingCount];
@@ -65,7 +65,7 @@ void GfCmdBufferFactory_Platform::CreateCmdBufferPlatform(const GfRenderContext&
 
 	// Set the values to the Cmd-Buffer
 	kOuCmdBuffer.Init((GfCmdBufferType::Type)uiType);
-	kOuCmdBuffer.InitPlatform(pCmdBuffers, pFences);
+	kOuCmdBuffer.InitRHI(pCmdBuffers, pFences);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

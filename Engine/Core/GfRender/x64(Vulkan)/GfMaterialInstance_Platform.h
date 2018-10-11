@@ -28,11 +28,13 @@ public:
 
 	GfMaterialInstance_Platform(GfMaterialinstance& kBase);
 
+protected:
+
+	void DestroyRHI(const GfRenderContext& kCtx);
+
+	void CreateRHI(const GfRenderContext& kCtx);
+
 private:
-
-	void DestroyPlatform(const GfRenderContext& kCtx);
-
-	void CreatePlatform(const GfRenderContext& kCtx);
 
 	void CreateLayout(const GfRenderContext& kCtx);
 

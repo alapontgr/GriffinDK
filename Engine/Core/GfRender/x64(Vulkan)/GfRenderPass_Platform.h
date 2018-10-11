@@ -27,16 +27,22 @@ public:
 
 	friend class GfRenderPass;
 
-	GfRenderPass_Platform();
+	GfRenderPass_Platform(GfRenderPass& kBase);
 
-	VkFramebuffer	m_pFramebuffers[GfRenderConstants::ms_uiNBufferingCount];
-	VkRenderPass	m_pRenderPass;
+protected:
+
+	void CompileRHI(const GfRenderContext& kCtx);
 
 private:
 
-	void CompilePlatform(const GfRenderContext& kCtx);
+	void RecreateFramebufferRHI(const GfRenderContext& kCtx);
 
-	void RecreateFramebuffer(const GfRenderContext& kCtx);
+	GfRenderPass& m_kBase;
+
+public:
+	// TODO: Revise this encapsulation
+	VkFramebuffer	m_pFramebuffers[GfRenderConstants::ms_uiNBufferingCount];
+	VkRenderPass	m_pRenderPass;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

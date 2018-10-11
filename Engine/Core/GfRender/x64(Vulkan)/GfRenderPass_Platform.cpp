@@ -15,8 +15,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderPass_Platform::GfRenderPass_Platform()
-	: m_pRenderPass(nullptr)
+GfRenderPass_Platform::GfRenderPass_Platform(GfRenderPass& kBase)
+	: m_kBase(kBase)
+	, m_pRenderPass(nullptr)
 {
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
 	{
@@ -26,7 +27,7 @@ GfRenderPass_Platform::GfRenderPass_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::CompilePlatform(const GfRenderContext& kCtx)
+void GfRenderPass_Platform::CompileRHI(const GfRenderContext& kCtx)
 {
 	// Description of the whole render pass
 	VkAttachmentDescription kAttachmentsDesc{};
@@ -97,7 +98,7 @@ void GfRenderPass_Platform::CompilePlatform(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::RecreateFramebuffer(const GfRenderContext& kCtx)
+void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
 {
 	// Destroy the old one
 	if (m_pFramebuffers)

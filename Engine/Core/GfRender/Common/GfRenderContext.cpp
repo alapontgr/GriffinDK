@@ -33,14 +33,14 @@ GfRenderContext::GfRenderContext()
 void GfRenderContext::Init(GfWindow* pWindow)
 {
 	m_pWindow = pWindow;
-	InitInternal();
+	InitRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderContext::Shutdown()
 {
-
+	GF_ASSERT_ALWAYS("To Implement");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ void GfRenderContext::Shutdown()
 Bool GfRenderContext::BeginFrame()
 {
 	Bool bResult(m_pWindow->Tick());
-	BeginFramePlatform();
+	BeginFrameRHI();
 	return bResult;
 }
 
@@ -56,7 +56,7 @@ Bool GfRenderContext::BeginFrame()
 
 void GfRenderContext::EndFrame()
 {
-	EndFramePlatform();
+	EndFrameRHI();
 	Flip();
 }
 

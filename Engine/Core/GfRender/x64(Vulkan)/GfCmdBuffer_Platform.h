@@ -43,13 +43,13 @@ public:
 
 private:
 
-	void InitPlatform(
+	void InitRHI(
 		VkCommandBuffer* pCmdBuffers,
 		VkFence* pFences);
 
-	void WaitForReadyPlatform(const GfRenderContext& kCtx);
+	void WaitForReadyRHI(const GfRenderContext& kCtx);
 
-	void SubmitPlatform(
+	void SubmitRHI(
 		const GfRenderContext& kCtx, 
 		GfRencerContextFamilies::Type eQueueType, 
 		Bool bLast);
@@ -57,22 +57,22 @@ private:
 	////////////////////////////////////////////////////////////////////////////////
 	// Render pass commands
 
-	void BeginRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
+	void BeginRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
-	void EndRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
+	void EndRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
-	void BeginRecordingPlatform(const GfRenderContext& kCtx);
+	void BeginRecordingRHI(const GfRenderContext& kCtx);
 
-	void EndRecordingPlatform(const GfRenderContext& kCtx);
+	void EndRecordingRHI(const GfRenderContext& kCtx);
 
-	void ClearCurrentTargetPlatform(const GfRenderContext& kCtx, const v4& vClearColor);
+	void ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
-	void CopyBufferRangePlatform(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+	void CopyBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
-	void UpdateBufferRangePlatform(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+	void UpdateBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
 

@@ -32,9 +32,9 @@ public:
 
 private:
 
-	void InitPlatform(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType);
+	void InitRHI(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType);
 
-	void CreateCmdBufferPlatform(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer);
+	void CreateCmdBufferRHI(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer);
 
 	VkCommandPool m_pPool;
 };

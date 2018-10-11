@@ -104,7 +104,7 @@ VkFormat GfRenderContext_Platform::GetSwapchainFormat() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext_Platform::InitInternal()
+void GfRenderContext_Platform::InitRHI()
 {
 	CreateInstance();
 	CreateSurface();
@@ -116,7 +116,7 @@ void GfRenderContext_Platform::InitInternal()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext_Platform::BeginFramePlatform()
+void GfRenderContext_Platform::BeginFrameRHI()
 {
 	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
 	VkResult eResult = vkAcquireNextImageKHR(m_pDevice, m_pSwapChain, UINT64_MAX,
@@ -135,7 +135,7 @@ void GfRenderContext_Platform::BeginFramePlatform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext_Platform::EndFramePlatform()
+void GfRenderContext_Platform::EndFrameRHI()
 {
 	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
 

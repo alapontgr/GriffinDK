@@ -27,7 +27,7 @@ GfCmdBuffer_Platform::GfCmdBuffer_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::InitPlatform (
+void GfCmdBuffer_Platform::InitRHI (
 	VkCommandBuffer* pCmdBuffers,
 	VkFence* pFences)
 {
@@ -40,7 +40,7 @@ void GfCmdBuffer_Platform::InitPlatform (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::WaitForReadyPlatform(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 {
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	VkResult eResult = vkWaitForFences(kCtx.m_pDevice, 1, &kCurrEntry.m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
@@ -51,7 +51,7 @@ void GfCmdBuffer_Platform::WaitForReadyPlatform(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::SubmitPlatform(
+void GfCmdBuffer_Platform::SubmitRHI(
 	const GfRenderContext& kCtx,
 	GfRencerContextFamilies::Type eQueueType,
 	Bool bLast)
@@ -81,7 +81,7 @@ void GfCmdBuffer_Platform::SubmitPlatform(
 ////////////////////////////////////////////////////////////////////////////////
 // Render pass commands
 
-void GfCmdBuffer_Platform::BeginRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+void GfCmdBuffer_Platform::BeginRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
 {
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	GfWindow* pWindow(kCtx.GetWindow());
@@ -106,7 +106,7 @@ void GfCmdBuffer_Platform::BeginRenderPassPlatform(const GfRenderContext& kCtx, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::EndRenderPassPlatform(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
+void GfCmdBuffer_Platform::EndRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
 {
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	vkCmdEndRenderPass(kCurrEntry.m_pCmdBuffer);
@@ -114,7 +114,7 @@ void GfCmdBuffer_Platform::EndRenderPassPlatform(const GfRenderContext& kCtx, co
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::BeginRecordingPlatform(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 {
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 
@@ -138,7 +138,7 @@ void GfCmdBuffer_Platform::BeginRecordingPlatform(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::EndRecordingPlatform(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 {
 	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	VkResult eResult = vkEndCommandBuffer(kCurrEntry.m_pCmdBuffer);
@@ -147,7 +147,7 @@ void GfCmdBuffer_Platform::EndRecordingPlatform(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::ClearCurrentTargetPlatform(const GfRenderContext& kCtx, const v4& vClearColor)
+void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor)
 {
 	// TODO: Refactor this to get rid of the barriers. This is just a temporal fix and I'll use the RenderPasses in the future
 
@@ -216,7 +216,7 @@ void GfCmdBuffer_Platform::ClearCurrentTargetPlatform(const GfRenderContext& kCt
 ////////////////////////////////////////////////////////////////////////////////
 // Buffer commands
 
-void GfCmdBuffer_Platform::CopyBufferRangePlatform(
+void GfCmdBuffer_Platform::CopyBufferRangeRHI(
 	const GfRenderContext& kCtx, 
 	const GfBuffer& kFrom, 
 	const GfBuffer& kTo, 
@@ -269,7 +269,7 @@ void GfCmdBuffer_Platform::CopyBufferRangePlatform(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::UpdateBufferRangePlatform(
+void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 	const GfRenderContext& kCtx, 
 	const GfBuffer& kBuffer, 
 	u32 uiOffset, u32 uiSize, void* pData)

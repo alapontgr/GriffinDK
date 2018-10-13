@@ -21,8 +21,16 @@ namespace EParamaterSlotType
 {
 	enum Type : u32
 	{
-		ConstantBuffer = 0,
-		// TODO
+		Sampler = 0,
+		CombinedImageSampler,
+		SampledImage,
+		StorageImage,
+		UniformTexelBuffer,
+		StorageTexelBuffer,
+		UniformBuffer,
+		StorageBuffer,
+		UniformBufferDynamic,
+		StorageBufferDynamic,
 
 		////////////////////////////////////////////////////////////////////////////////
 		Count,

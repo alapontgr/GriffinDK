@@ -36,8 +36,19 @@ public:
 
 	GfMatUniformFactory();
 
+	void SetMaxAllocationsPerParamType(EParamaterSlotType::Type eType, u32 uiMaxAllocations);
+
+	void SetMaxAllocatedParamSets(u32 uiMaxSets);
+
+	void Create(const GfRenderContext& kCtxt);
+
+	void Destroy(const GfRenderContext& kCtxt);
+
 private:
 
+	u32 GetUsedTypeCount() const;
+
+	u32 m_uiMaxAllocatedSets;
 	u32 m_pCountPerUniformType[EParamaterSlotType::Count];
 };
 
@@ -53,7 +64,7 @@ public:
 
 	void DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot);
 
-	static u8 ms_uiInvalidValue;
+	bool Validate() const;
 
 private:
 
@@ -64,17 +75,17 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialParamGroup : public GfMaterialParamGroup_Platform
+class GfMaterialParamSet : public GfMaterialParamSet_Platform
 {
 public: 
 
-	friend class GfMaterialParamGroup_Platform;
+	friend class GfMaterialParamSet_Platform;
 
-	GfMaterialParamGroup();
+	GfMaterialParamSet();
 
 	void BindLayout(const GfMatParamLayout* pParamLayout, EMaterialParamRate::Type eRate);
 
-	void Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
+	bool Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 

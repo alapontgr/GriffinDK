@@ -12,13 +12,11 @@
 #include "GfRender/Common/GfMatParamLayout.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-
-u8 GfMatParamLayout::ms_uiInvalidValue = 0xff;
-
-////////////////////////////////////////////////////////////////////////////////
+// GfMatUniformFactory
 
 GfMatUniformFactory::GfMatUniformFactory()
-	: GfMatUniformFactory_Platform(*this)
+	: m_uiMaxAllocatedSets(0)
+	, GfMatUniformFactory_Platform(*this)
 {
 	for (u32 i = 0; i < EParamaterSlotType::Count; ++i) 
 	{
@@ -27,6 +25,50 @@ GfMatUniformFactory::GfMatUniformFactory()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfMatUniformFactory::SetMaxAllocationsPerParamType(EParamaterSlotType::Type eType, u32 uiMaxAllocations)
+{
+	m_pCountPerUniformType[eType] = uiMaxAllocations;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMatUniformFactory::SetMaxAllocatedParamSets(u32 uiMaxSets)
+{
+	m_uiMaxAllocatedSets = uiMaxSets;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMatUniformFactory::Create(const GfRenderContext& kCtxt)
+{
+	CreateRHI(kCtxt);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMatUniformFactory::Destroy(const GfRenderContext& kCtxt)
+{
+	DestroyRHI(kCtxt);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+u32 GfMatUniformFactory::GetUsedTypeCount() const
+{
+	u32 uiUsed(0);
+	for (u32 i=0; i<EParamaterSlotType::Count; ++i) 
+	{
+		if (m_pCountPerUniformType[i] > 0) 
+		{
+			uiUsed++;
+		}
+	}
+	return uiUsed;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// GfMatParamLayout
 
 GfMatParamLayout::GfMatParamLayout()
 	: GfMatParamLayout_Platform(*this)
@@ -38,7 +80,29 @@ GfMatParamLayout::GfMatParamLayout()
 
 void GfMatParamLayout::DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot)
 {
+	GfMaterialParameterSlot kSlot;
+	kSlot.m_eType = eType;
+	kSlot.m_AccesStages = mAccessMask;
+	kSlot.m_uiBindSlot = uiBindSlot;
+	m_tParameters.push_back(kSlot);
+}
 
+////////////////////////////////////////////////////////////////////////////////
+
+bool GfMatParamLayout::Validate() const
+{
+	// Check for parameters of the same type sharing slots
+	for (const GfMaterialParameterSlot& kSlotA : m_tParameters)
+	{
+		for (const GfMaterialParameterSlot& kSlotB : m_tParameters)
+		{
+			if (kSlotA.m_eType == kSlotB.m_eType && kSlotA.m_uiBindSlot == kSlotB.m_uiBindSlot) 
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,9 +124,10 @@ void GfMatParamLayout::SortParameters()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// GfMaterialParamSet
 
-GfMaterialParamGroup::GfMaterialParamGroup()
-	: GfMaterialParamGroup_Platform(*this)
+GfMaterialParamSet::GfMaterialParamSet()
+	: GfMaterialParamSet_Platform(*this)
 {
 	for (u32 i=0; i<EMaterialParamRate::Count; ++i) 
 	{
@@ -72,22 +137,21 @@ GfMaterialParamGroup::GfMaterialParamGroup()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamGroup::BindLayout(const GfMatParamLayout* pParamLayout, EMaterialParamRate::Type eRate)
+void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout, EMaterialParamRate::Type eRate)
 {
 	m_pPerRateLayouts[eRate] = pParamLayout;
-	// TODO: Signal creation
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamGroup::Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
+bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
-	CreateRHI(kCtxt, kFactory);
+	return CreateRHI(kCtxt, kFactory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamGroup::Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
+void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
 	DestroyRHI(kCtxt, kFactory);
 }

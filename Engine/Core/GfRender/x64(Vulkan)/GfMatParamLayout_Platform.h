@@ -28,6 +28,8 @@ public:
 
 	GfMatUniformFactory_Platform(GfMatUniformFactory& kBase);
 
+	VkDescriptorPool GetPool() const;
+
 protected:
 
 	void CreateRHI(const GfRenderContext& kCtxt);
@@ -52,33 +54,44 @@ public:
 
 	VkDescriptorSetLayout GetLayout() const;
 
+	void CreateRHI(const GfRenderContext& kCtxt);
+
+	void DestroyRHI(const GfRenderContext& kCtxt);
+
 private:
 
-	GfMatParamLayout&	m_kBase;
+	GfMatParamLayout&		m_kBase;
 	VkDescriptorSetLayout	m_pSetLayout;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialParamGroup_Platform
+class GfMaterialParamSet_Platform
 {
 public:
 
-	friend class GfMaterialParamGroup;
+	friend class GfMaterialParamSet;
 
-	GfMaterialParamGroup_Platform(GfMaterialParamGroup& kBase);
+	GfMaterialParamSet_Platform(GfMaterialParamSet& kBase);
 
 protected:
 
-	void CreateRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
+	bool CreateRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 	void DestroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 private:
 
-	GfMaterialParamGroup& m_kBase;
-	VkDescriptorSet m_pParamatersGroup;
+	GfMaterialParamSet& m_kBase;
+	VkDescriptorSet		m_pParamatersSet;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkDescriptorPool GfMatUniformFactory_Platform::GetPool() const
+{
+	return m_pPool;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

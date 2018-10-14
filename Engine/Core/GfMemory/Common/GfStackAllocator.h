@@ -13,14 +13,15 @@
 // Includes
 
 #include "GfCore/Common/GfCoreMinimal.h"
+#include "GfMemory/Common/GfMemoryShared.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct GfDataChunk
 {
-	u64				m_ulAllocatedSize;
 	void*			m_pData;
 	GfDataChunk*	m_pNext;
+	u32				m_uiAvalSize;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,7 @@ struct GfDataChunk
 struct GfDataMarker
 {
 	GfDataChunk*	m_pChunk;		// Current back chunk at the point of creation
-	u64				m_ulUsedSize;	// Size used by the chunk at the point of creation
+	u32				m_uiUsedSize;	// Size used by the chunk at the point of creation
 	u32				m_uiMarkerIdx;
 };
 
@@ -45,6 +46,9 @@ public:
 	void* Alloc(u32 uiSize, u32 uiAlign = 16);
 
 	void FreeChunks();
+
+	// Size for each chunk of data
+	static constexpr u32 ms_uiChunkSize = 64 * 1024;
 
 private:
 	
@@ -91,15 +95,16 @@ GF_FORCEINLINE GfStackAllocator::GfStackAllocator()
 
 GF_FORCEINLINE void* GfStackAllocator::Alloc(u32 uiSize, u32 uiAlign /*= 16*/)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
-	return nullptr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfStackAllocator::FreeChunks()
-{
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	GF_ASSERT(uiSize <= ms_uiChunkSize, "Size is bigger than the size of an actual chunk");
+	// Check for a valid chunk or if there is enough data in the chunk for the requested size plus the alignment
+	if (!m_pBack || !Fits(uiSize + uiAlign)) 
+	{
+		AllocateNewChunk();
+	}
+	u8* pData = GfAlign((u8*)m_pBack->m_pData, uiAlign);
+	m_pBack->m_pData = ((u8*)m_pBack->m_pData + uiSize);
+	m_pBack->m_uiAvalSize -= uiSize;
+	return pData;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +113,7 @@ GF_FORCEINLINE GfDataMarker GfStackAllocator::PushMemMarker()
 {
 	GfDataMarker kMarker;
 	kMarker.m_pChunk = m_pBack;
-	kMarker.m_ulUsedSize = m_pBack->m_ulAllocatedSize;
+	kMarker.m_uiUsedSize = m_pBack->m_uiAvalSize;
 	kMarker.m_uiMarkerIdx = m_uiActiveMemMarkers++;
 	return kMarker;
 }
@@ -119,6 +124,7 @@ GF_FORCEINLINE void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarke
 {
 	m_uiActiveMemMarkers--;
 	GF_ASSERT(kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers, "Data markers must be freed in the inverse order as they were pushed");
+	
 	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
@@ -126,15 +132,7 @@ GF_FORCEINLINE void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarke
 
 GF_FORCEINLINE bool GfStackAllocator::Fits(u32 uiSize)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
-	return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfStackAllocator::AllocateNewChunk()
-{
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	return m_pBack->m_uiAvalSize >= uiSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

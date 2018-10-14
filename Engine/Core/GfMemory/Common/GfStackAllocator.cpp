@@ -2,30 +2,29 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/10/14
-//	File: 	GfMemoryShared.h
+//	File: 	GfStackAllocator.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMEMORYSHARED_H__
-#define __GFMEMORYSHARED_H__
+// Includes
+
+#include "GfMemory/Common/GfStackAllocator.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-GF_FORCEINLINE T* GfAlign(T* pBase, u32 uiAlign = 16)
+void GfStackAllocator::AllocateNewChunk()
 {
-	u64 ulBase((u64)pBase);
-	u64 ulOffset = ulBase & (uiAlign - 1);
-	return reinterpret_cast<T*>(ulBase + (ulOffset != 0 ? (uiAlign - ulOffset) : 0));
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-inline bool GfIsAligned(const T* pData, u32 uiAlign = 16)
+void GfStackAllocator::FreeChunks()
 {
-	return (reinterpret_cast<u64>(pData) & (uiAlign - 1)) == 0;
+	GF_ASSERT(m_uiActiveMemMarkers == 0, "Trying to free the chunks before the markes have been freed");
+	GF_ASSERT_ALWAYS("Implement me!!!");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMEMORYSHARED_H__
+// EOF

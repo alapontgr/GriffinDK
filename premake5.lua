@@ -45,6 +45,7 @@ groups["Core"] =
 	Projects = 
 	{
 		"GfCore",
+		"GfMemory",
 		"GfEntry",
 		"GfRender",
 		"GfFile",

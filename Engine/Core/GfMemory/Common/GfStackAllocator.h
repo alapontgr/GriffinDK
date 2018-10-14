@@ -21,7 +21,7 @@ struct GfDataChunk
 {
 	void*			m_pData;
 	GfDataChunk*	m_pNext;
-	u32				m_uiAvalSize;
+	size_t			m_uiAvalSize;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ struct GfDataChunk
 struct GfDataMarker
 {
 	GfDataChunk*	m_pChunk;		// Current back chunk at the point of creation
-	u32				m_uiUsedSize;	// Size used by the chunk at the point of creation
+	size_t			m_uiUsedSize;	// Size used by the chunk at the point of creation
 	u32				m_uiMarkerIdx;
 };
 
@@ -43,12 +43,12 @@ public:
 
 	GfStackAllocator();
 
-	void* Alloc(u32 uiSize, u32 uiAlign = 16);
+	void* Alloc(size_t uiSize, size_t uiAlign = 16);
 
 	void FreeChunks();
 
 	// Size for each chunk of data
-	static constexpr u32 ms_uiChunkSize = 64 * 1024;
+	static constexpr size_t ms_uiChunkSize = 64 * 1024;
 
 private:
 	
@@ -56,7 +56,7 @@ private:
 
 	void FreeUntilMarker(const GfDataMarker& kMarker);
 
-	bool Fits(u32 uiSize);
+	bool Fits(size_t uiSize);
 
 	void AllocateNewChunk();
 
@@ -93,7 +93,7 @@ GF_FORCEINLINE GfStackAllocator::GfStackAllocator()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void* GfStackAllocator::Alloc(u32 uiSize, u32 uiAlign /*= 16*/)
+void* GfStackAllocator::Alloc(size_t uiSize, size_t uiAlign /*= 16*/)
 {
 	GF_ASSERT(uiSize <= ms_uiChunkSize, "Size is bigger than the size of an actual chunk");
 	// Check for a valid chunk or if there is enough data in the chunk for the requested size plus the alignment
@@ -130,7 +130,7 @@ GF_FORCEINLINE void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarke
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfStackAllocator::Fits(u32 uiSize)
+bool GfStackAllocator::Fits(size_t uiSize)
 {
 	return m_pBack->m_uiAvalSize >= uiSize;
 }

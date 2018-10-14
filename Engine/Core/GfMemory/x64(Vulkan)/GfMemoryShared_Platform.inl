@@ -2,16 +2,26 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/10/14
-//	File: 	GfMemory.h
+//	File: 	GfMemoryShared.inl
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMEMORY_H__
-#define __GFMEMORY_H__
+#ifndef __GFMEMORYSHARED_INL__
+#define __GFMEMORYSHARED_INL__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfMemory/Common/GfMemoryShared.h"
+void* GfMemory::Alloc(size_t uiSize, size_t uiAlign)
+{
+	return _aligned_malloc(uiSize, uiAlign);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMEMORY_H__
+
+void GfMemory::Free(void* pAddr)
+{
+	_aligned_free(pAddr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFMEMORYSHARED_H__

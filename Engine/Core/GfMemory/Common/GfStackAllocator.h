@@ -17,7 +17,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfDataChunk
+struct GF_ALIGNAS(16) GfDataChunk
 {
 	void*			m_pData;
 	GfDataChunk*	m_pNext;
@@ -29,7 +29,7 @@ struct GfDataChunk
 struct GfDataMarker
 {
 	GfDataChunk*	m_pChunk;		// Current back chunk at the point of creation
-	size_t			m_uiUsedSize;	// Size used by the chunk at the point of creation
+	size_t			m_uiAvalSize;	// Size used by the chunk at the point of creation
 	u32				m_uiMarkerIdx;
 };
 
@@ -113,7 +113,7 @@ GF_FORCEINLINE GfDataMarker GfStackAllocator::PushMemMarker()
 {
 	GfDataMarker kMarker;
 	kMarker.m_pChunk = m_pBack;
-	kMarker.m_uiUsedSize = m_pBack->m_uiAvalSize;
+	kMarker.m_uiAvalSize = m_pBack->m_uiAvalSize;
 	kMarker.m_uiMarkerIdx = m_uiActiveMemMarkers++;
 	return kMarker;
 }
@@ -124,8 +124,21 @@ GF_FORCEINLINE void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarke
 {
 	m_uiActiveMemMarkers--;
 	GF_ASSERT(kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers, "Data markers must be freed in the inverse order as they were pushed");
-	
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	if (kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers)
+	{
+		kMarker.m_pChunk->m_uiAvalSize = kMarker.m_uiAvalSize;
+		kMarker.m_pChunk->m_pData = (reinterpret_cast<u8*>(kMarker.m_pChunk + 1) + (ms_uiChunkSize - kMarker.m_uiAvalSize));
+
+		// Reset the chunks allocated after the marker's one
+		GfDataChunk* pDataChunk(reinterpret_cast<GfDataChunk*>(kMarker.m_pChunk->m_pNext));
+		while (pDataChunk)
+		{
+			// Reset the chunk
+			pDataChunk->m_uiAvalSize = (ms_uiChunkSize - sizeof(GfDataChunk));
+			pDataChunk->m_pData = (pDataChunk + 1);
+			pDataChunk = pDataChunk->m_pNext;
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

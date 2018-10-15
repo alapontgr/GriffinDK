@@ -26,6 +26,9 @@
 // Force inline expression
 #define GF_FORCEINLINE __forceinline
 
+// Align ass
+#define GF_ALIGNAS(ALIGN) alignas(ALIGN)
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Used as enabled/disabled flags for macros

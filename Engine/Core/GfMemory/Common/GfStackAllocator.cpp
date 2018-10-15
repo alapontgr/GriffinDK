@@ -15,19 +15,31 @@
 
 void GfStackAllocator::AllocateNewChunk()
 {
-	void* pChunk(GfMemory::Alloc(ms_uiChunkSize));
-	GfDataChunk* pDataChunk(reinterpret_cast<GfDataChunk*>(pChunk));
-	if (m_pHead) 
+	GfDataChunk* pDataChunk(nullptr);
+	// If already initialized
+	if (m_pBack)
 	{
-		m_pBack->m_pNext = pDataChunk;
+		pDataChunk = m_pBack->m_pNext;
+		if (!pDataChunk) 
+		{
+			// If needed allocate a new blob/chunk of memory
+			void* pChunk(GfMemory::Alloc(ms_uiChunkSize, alignof(GfDataChunk)));
+			pDataChunk = reinterpret_cast<GfDataChunk*>(pChunk);
+			pDataChunk->m_pNext = nullptr;
+			m_pBack->m_pNext = pDataChunk;
+		}
 		m_pBack = pDataChunk;
 	}
 	else 
-	{		
+	{
+		// Initialization
+		void* pChunk(GfMemory::Alloc(ms_uiChunkSize, alignof(GfDataChunk)));
+		pDataChunk = reinterpret_cast<GfDataChunk*>(pChunk);
+		pDataChunk->m_pNext = nullptr;
 		m_pHead = pDataChunk;
 		m_pBack = m_pHead;
 	}
-	pDataChunk->m_pNext = nullptr;
+	// Reset the chunk just in case
 	pDataChunk->m_pData = (pDataChunk + 1);
 	pDataChunk->m_uiAvalSize = (ms_uiChunkSize - sizeof(GfDataChunk));
 }

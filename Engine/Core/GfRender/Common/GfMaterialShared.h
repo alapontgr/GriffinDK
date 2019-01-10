@@ -61,15 +61,19 @@ namespace EMaterialParamRate
 {
 	enum Type : u32 
 	{
-		PerFrame = 0,	// Common to all the objects of a frame
-		PerRenderPass,	// Resources local to a RenderPass
-		PerMaterial,	// Shared within all the instances of the same material
-		PerInstance,	// Local configuration of each instance
+		PerFrame = 0,			// Common to all the objects of a frame
+		PerRenderPass,			// Resources local to a RenderPass
+		PerMaterial,			// Shared within all the instances of the same material
+		PerInstance,			// Local configuration of each instance
 		////////////////////////////////////////////////////////////////////////////////
 		Count,
+		////////////////////////////////////////////////////////////////////////////////
+		MaxBoundLayouts = 8,	// Maximum number of currently bound layouts in a material
+
 		Invalid = 0xffffffff
 	};
 }
+static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundLayouts, "Invalid count of rates");
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIALSHARED_H__

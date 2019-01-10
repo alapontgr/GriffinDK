@@ -128,22 +128,14 @@ bool GfMaterialParamSet_Platform::CreateRHI(const GfRenderContext& kCtxt, GfMatU
 		return false;
 	}
 
-	VkDescriptorSetLayout pLayouts[EMaterialParamRate::Count];
-	u32 uiCursor(0);
-	for (u32 i = 0; i < EMaterialParamRate::Count; ++i) 
-	{
-		if (m_kBase.m_kBase.m_pPerRateLayouts[i]) 
-		{
-			pLayouts[uiCursor++] = m_kBase.m_kBase.m_pPerRateLayouts[i]->GetLayout();
-		}
-	}
-
 	VkDescriptorSetAllocateInfo kDescSetAllocInfo{};
 	kDescSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	kDescSetAllocInfo.pNext = nullptr;
 	kDescSetAllocInfo.descriptorPool = kFactory.GetPool();
-	kDescSetAllocInfo.descriptorSetCount = uiCursor;
-	kDescSetAllocInfo.pSetLayouts = pLayouts;
+	kDescSetAllocInfo.descriptorSetCount = 1;
+
+	VkDescriptorSetLayout pSetLayout(m_kBase.m_pSetLayout->GetLayout());
+	kDescSetAllocInfo.pSetLayouts = &pSetLayout;
 	VkResult eResult = vkAllocateDescriptorSets(kCtxt.m_pDevice, &kDescSetAllocInfo, &m_pParamatersSet);
 	return eResult == VK_SUCCESS;
 }

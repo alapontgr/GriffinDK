@@ -128,18 +128,15 @@ void GfMatParamLayout::SortParameters()
 
 GfMaterialParamSet::GfMaterialParamSet()
 	: GfMaterialParamSet_Platform(*this)
+	, m_pSetLayout(nullptr)
 {
-	for (u32 i=0; i<EMaterialParamRate::Count; ++i) 
-	{
-		m_pPerRateLayouts[i] = nullptr;
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout, EMaterialParamRate::Type eRate)
+void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
 {
-	m_pPerRateLayouts[eRate] = pParamLayout;
+	m_pSetLayout = pParamLayout;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -70,6 +70,8 @@ private:
 
 	void SortParameters();
 
+protected:
+
 	GfVector<GfMaterialParameterSlot> m_tParameters;
 };
 
@@ -83,15 +85,15 @@ public:
 
 	GfMaterialParamSet();
 
-	void BindLayout(const GfMatParamLayout* pParamLayout, EMaterialParamRate::Type eRate);
+	void BindLayout(const GfMatParamLayout* pParamLayout);
 
 	bool Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 private:
-		
-	const GfMatParamLayout* m_pPerRateLayouts[EMaterialParamRate::Count];
+
+	const GfMatParamLayout* m_pSetLayout;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

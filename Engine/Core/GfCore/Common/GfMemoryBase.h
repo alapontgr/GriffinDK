@@ -2,18 +2,13 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/10/14
-//	File: 	GfMemoryShared.h
+//	File: 	GfMemoryBase.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMEMORYSHARED_H__
-#define __GFMEMORYSHARED_H__
-////////////////////////////////////////////////////////////////////////////////
-// Includes
-
-#include "GfCore/Common/GfCoreMinimal.h"
-
+#ifndef __GFMEMORYBASE_H__
+#define __GFMEMORYBASE_H__
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -34,18 +29,31 @@ inline bool GfIsAligned(const T* pData, u32 uiAlign = 16)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMemory 
+class GfDefaultAllocator
 {
 public:
 
 	static void* Alloc(size_t uiSize, size_t uiAlign = 16);
 
 	static void Free(void* pAddr);
+
+	template<typename T, typename... Args>
+	static T* New(Args... args);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include GF_SOLVE_PLATFORM_INLINE(GfMemoryShared)
+template<typename T, typename... Args>
+T* GfDefaultAllocator::New(Args... args)
+{
+	void* pMem(GfDefaultAllocator::Alloc(sizeof(T), alignof(T));
+	GF_ASSERT(pMem, "Failed to allocate memory");
+	return new (pMem) T(args);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMEMORYSHARED_H__
+
+#include GF_SOLVE_PLATFORM_INLINE(GfMemoryBase)
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFMEMORY_H__

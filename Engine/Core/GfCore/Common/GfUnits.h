@@ -1,17 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/10/14
-//	File: 	GfMemory.h
+//	Date: 	2019/01/13
+//	File: 	GfUnits.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMEMORY_H__
-#define __GFMEMORY_H__
+#ifndef __GFUNITS_H__
+#define __GFUNITS_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfMemory/Common/GfMemoryShared.h"
+#define GF_KB(BYTES) (BYTES * 1024)
+
+#define GF_MB(BYTES) (GF_KB(BYTES) * 1024)
+
+#define GF_GB(BYTES) (GF_MB(BYTES) * 1024)
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMEMORY_H__
+#endif // __GFUNITS_H__

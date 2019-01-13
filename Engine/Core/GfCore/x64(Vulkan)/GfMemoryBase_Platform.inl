@@ -11,14 +11,14 @@
 #define __GFMEMORYSHARED_INL__
 ////////////////////////////////////////////////////////////////////////////////
 
-void* GfMemory::Alloc(size_t uiSize, size_t uiAlign)
+void* GfDefaultAllocator::Alloc(size_t uiSize, size_t uiAlign)
 {
 	return _aligned_malloc(uiSize, uiAlign);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMemory::Free(void* pAddr)
+void GfDefaultAllocator::Free(void* pAddr)
 {
 	_aligned_free(pAddr);
 }

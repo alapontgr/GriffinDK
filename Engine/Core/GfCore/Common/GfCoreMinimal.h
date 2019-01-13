@@ -13,6 +13,8 @@
 
 #include "GfCore/Common/GfTypes.h"
 
+#include "GfCore/Common/GfUnits.h"
+
 #include "GfCore/Common/GfConfig.h"
 
 #include GF_SOLVE_PLATFORM_HEADER(GfCore)
@@ -20,6 +22,8 @@
 #include "GfCore/Common/GfDebug.h"
 
 #include "GfCore/Common/GfTime.h"
+
+#include "GfCore/Common/GfMemoryBase.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

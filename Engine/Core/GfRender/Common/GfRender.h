@@ -16,6 +16,8 @@
 
 #include "Gfrender/Common/GfRenderConstants.h"
 
+#include "GfRender/Common/GfRenderCommon.h"
+
 #include "GfRender/Common/GfGraphicsSDK.h"
 
 #include "GfRender/Common/GfWindow.h"

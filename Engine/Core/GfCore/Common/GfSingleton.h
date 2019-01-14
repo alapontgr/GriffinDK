@@ -17,7 +17,7 @@ class GfPerThreadSingleton
 public:
 
 	// Singleton access. Allow custom creation of the singleton instance
-	T* Get();
+	static T* Get();
 
 private:
 
@@ -36,7 +36,7 @@ class GfSingleton
 public:
 
 	// Singleton access. Allow custom creation of the singleton instance
-	T* Get(T* pUserInstance = nullptr);
+	static T* Get(T* pUserInstance = nullptr);
 
 private:
 
@@ -50,14 +50,14 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
-GfPerThreadSingleton::GfPerThreadSingleton() 
+GfPerThreadSingleton<T, AllocT>::GfPerThreadSingleton() 
 	: m_pInstance(nullptr)
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
-T* GfPerThreadSingleton::Get() 
+T* GfPerThreadSingleton<T, AllocT>::Get()
 {
 	if (!ms_pInstance) 
 	{
@@ -70,14 +70,14 @@ T* GfPerThreadSingleton::Get()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
-GfSingleton::GfSingleton()
+GfSingleton<T, AllocT>::GfSingleton()
 	: m_pInstance(nullptr)
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
-T* GfSingleton::Get(T* pUserInstance)
+T* GfSingleton<T, AllocT>::Get(T* pUserInstance)
 {
 	if (!ms_pInstance)
 	{

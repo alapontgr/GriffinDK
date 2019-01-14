@@ -11,6 +11,7 @@
 
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include "GfRender/Common/GfRenderCommon.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +101,12 @@ GfMatParamLayout_Platform::GfMatParamLayout_Platform(GfMatParamLayout& kBase)
 
 void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	u32 uiElementCount(static_cast<u32>(m_kBase.m_tParameters.size()));
+	if (uiElementCount > 0) 
+	{
+
+		VkDescriptorSetLayoutBinding* pBindings(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayoutBinding>(uiElementCount));
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

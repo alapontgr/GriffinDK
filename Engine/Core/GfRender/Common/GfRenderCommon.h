@@ -1,0 +1,20 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
+//	Date: 	2019/01/14
+//	File: 	GfRenderCommon.h
+//
+//	Copyright (c) 2018 (See README.md)
+//
+////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFRENDERCOMMON_H__
+#define __GFRENDERCOMMON_H__
+////////////////////////////////////////////////////////////////////////////////
+
+#include "GfMemory/Common/GfStackAllocator.h"
+
+// Multi-threaded stack allocator. Each thread holds an instance of a Stack allocator for temporal memory management
+using GfFrameMTStackAlloc = GfPerThreadStackAllocator<GfDefaultAllocator, GF_KB(64)>;
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFRENDERCOMMON_H__

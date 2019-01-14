@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-GfStackAllocator::GfStackAllocator()
+GfStackAllocator<AllocT, CHUNKSIZE>::GfStackAllocator()
 	: m_pHead(nullptr)
 	, m_pBack(nullptr)
 	, m_uiActiveMemMarkers(0)
@@ -22,7 +22,7 @@ GfStackAllocator::GfStackAllocator()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-void* GfStackAllocator::Alloc(size_t uiSize, size_t uiAlign /*= 16*/)
+void* GfStackAllocator<AllocT, CHUNKSIZE>::AllocRaw(size_t uiSize, size_t uiAlign /*= 16*/)
 {
 	GF_ASSERT(uiSize <= CHUNKSIZE, "Size is bigger than the size of an actual chunk");
 	// Check for a valid chunk or if there is enough data in the chunk for the requested size plus the alignment
@@ -39,7 +39,7 @@ void* GfStackAllocator::Alloc(size_t uiSize, size_t uiAlign /*= 16*/)
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarker)
+void GfStackAllocator<AllocT, CHUNKSIZE>::FreeUntilMarker(const GfDataMarker& kMarker)
 {
 	m_uiActiveMemMarkers--;
 	GF_ASSERT(kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers, "Data markers must be freed in the inverse order as they were pushed");
@@ -63,7 +63,7 @@ void GfStackAllocator::FreeUntilMarker(const GfDataMarker& kMarker)
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-bool GfStackAllocator::Fits(size_t uiSize)
+bool GfStackAllocator<AllocT, CHUNKSIZE>::Fits(size_t uiSize)
 {
 	return m_pBack->m_uiAvalSize >= uiSize;
 }
@@ -71,7 +71,7 @@ bool GfStackAllocator::Fits(size_t uiSize)
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-void GfStackAllocator::AllocateNewChunk()
+void GfStackAllocator<AllocT, CHUNKSIZE>::AllocateNewChunk()
 {
 	GfDataChunk* pDataChunk(nullptr);
 	// If already initialized
@@ -106,7 +106,7 @@ void GfStackAllocator::AllocateNewChunk()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-void GfStackAllocator::FreeChunks()
+void GfStackAllocator<AllocT, CHUNKSIZE>::FreeChunks()
 {
 	GF_ASSERT(m_uiActiveMemMarkers == 0, "Trying to free the chunks before the markes have been freed");
 	GfDataChunk* pChunk(m_pHead);
@@ -121,7 +121,7 @@ void GfStackAllocator::FreeChunks()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-void GfStackAllocator::Reset()
+void GfStackAllocator<AllocT, CHUNKSIZE>::Reset()
 {
 	m_uiActiveMemMarkers = 0;
 	GfDataChunk* pChunk(m_pHead);
@@ -137,7 +137,7 @@ void GfStackAllocator::Reset()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
-GfDataMarker GfStackAllocator::PushMemMarker()
+GfDataMarker GfStackAllocator<AllocT, CHUNKSIZE>::PushMemMarker()
 {
 	GfDataMarker kMarker;
 	kMarker.m_pChunk = m_pBack;
@@ -148,8 +148,8 @@ GfDataMarker GfStackAllocator::PushMemMarker()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename StackAllocT = GfStackAllocator<GfDefaultAllocator, GF_KB(64)>>
-GfScopedStackMemMarker::GfScopedStackMemMarker(GfStackAllocator* pAllocator)
+template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
+GfStackAllocator<AllocT, CHUNKSIZE>::GfScopedStackMemMarker::GfScopedStackMemMarker(GfStackAllocator* pAllocator)
 {
 	GF_ASSERT(pAllocator, "Invalid allocator");
 	m_kMarker = pAllocator->PushMemMarker();
@@ -158,8 +158,8 @@ GfScopedStackMemMarker::GfScopedStackMemMarker(GfStackAllocator* pAllocator)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename StackAllocT = GfStackAllocator<GfDefaultAllocator, GF_KB(64)>>
-GfScopedStackMemMarker::~GfScopedStackMemMarker()
+template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
+GfStackAllocator<AllocT, CHUNKSIZE>::GfScopedStackMemMarker::~GfScopedStackMemMarker()
 {
 	m_pAllocator->FreeUntilMarker(m_kMarker);
 }

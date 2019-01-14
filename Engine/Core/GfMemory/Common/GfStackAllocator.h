@@ -13,6 +13,7 @@
 // Includes
 
 #include "GfCore/Common/GfCoreMinimal.h"
+#include "GfCore/Common/GfSingleton.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,14 +42,37 @@ public:
 
 	friend class GfScopedStackMemMarker;
 
+	class GfScopedStackMemMarker
+	{
+	public:
+
+		GfScopedStackMemMarker(GfStackAllocator* pAllocator);
+
+		~GfScopedStackMemMarker();
+
+	private:
+
+		GfStackAllocator*	m_pAllocator;
+		GfDataMarker		m_kMarker;
+		u32					m_uiMarkerIdx;
+	};
+
+	////////////////////////////////////////////////////////////////////////////////
+
 	GfStackAllocator();
 
-	void* Alloc(size_t uiSize, size_t uiAlign = 16);
+	void* AllocRaw(size_t uiSize, size_t uiAlign = 16);
 
 	void FreeChunks();
 
 	// Use this to reset the allocator without deallocating the memory
 	void Reset();
+
+	template <typename T>
+	T* Alloc(u32 uiElementCount = 1)
+	{
+		return static_cast<T*>(AllocRaw(uiElementCount * sizeof(T), alignof(T)));
+	}
 
 private:
 	
@@ -67,29 +91,13 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename StackAllocT = GfStackAllocator<GfDefaultAllocator, GF_KB(64)>>
-class GfScopedStackMemMarker 
+// Singleton StackAllocator with a separate instance per thread
+template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
+class GfPerThreadStackAllocator 
+	: public GfPerThreadSingleton<GfPerThreadStackAllocator<AllocT, CHUNKSIZE>>
+	, public GfStackAllocator<AllocT, CHUNKSIZE>
 {
 public:
-
-	GfScopedStackMemMarker(StackAllocT* pAllocator);
-
-	~GfScopedStackMemMarker();
-
-private:
-
-	StackAllocT*	m_pAllocator;
-	GfDataMarker	m_kMarker;
-	u32				m_uiMarkerIdx;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Singleton StackAllocator with a separate instance per thread
-template <typename StackAllocT = GfStackAllocator<GfDefaultAllocator, GF_KB(64)>>
-class GfPerThreadStackAllocator : public GfPerThreadSingleton<GfPerThreadStackAllocator<StackAllocT>> 
-{
-private:
 
 	GfPerThreadStackAllocator();
 };

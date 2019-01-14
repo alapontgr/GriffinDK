@@ -92,11 +92,13 @@ void GfMatParamLayout::DefineParameter(EParamaterSlotType::Type eType, GfShaderA
 bool GfMatParamLayout::Validate() const
 {
 	// Check for parameters of the same type sharing slots
-	for (const GfMaterialParameterSlot& kSlotA : m_tParameters)
-	{
-		for (const GfMaterialParameterSlot& kSlotB : m_tParameters)
+	for (size_t i = 0; i < m_tParameters.size(); ++i)
+	{	
+		const GfMaterialParameterSlot& kSlotA(m_tParameters[i]);
+		for (size_t j = i+1; j < m_tParameters.size(); ++j)
 		{
-			if (kSlotA.m_eType == kSlotB.m_eType && kSlotA.m_uiBindSlot == kSlotB.m_uiBindSlot) 
+			const GfMaterialParameterSlot& kSlotB(m_tParameters[j]);
+			if (kSlotA.m_eType == kSlotB.m_eType && kSlotA.m_uiBindSlot >= kSlotB.m_uiBindSlot)
 			{
 				return false;
 			}

@@ -11,8 +11,8 @@
 #define __GFMEMORYBASE_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-GF_FORCEINLINE T* GfAlign(T* pBase, u32 uiAlign = 16)
+template <typename T, typename AlignT>
+GF_FORCEINLINE T* GfAlign(T* pBase, AlignT uiAlign = 16)
 {
 	u64 ulBase((u64)pBase);
 	u64 ulOffset = ulBase & (uiAlign - 1);
@@ -46,7 +46,7 @@ public:
 template<typename T, typename... Args>
 T* GfDefaultAllocator::New(Args... args)
 {
-	void* pMem(GfDefaultAllocator::Alloc(sizeof(T), alignof(T));
+	void* pMem(GfDefaultAllocator::Alloc(sizeof(T), alignof(T)));
 	GF_ASSERT(pMem, "Failed to allocate memory");
 	return new (pMem) T(args);
 }

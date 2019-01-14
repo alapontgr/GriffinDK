@@ -104,6 +104,7 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 	u32 uiElementCount(static_cast<u32>(m_kBase.m_tParameters.size()));
 	if (uiElementCount > 0) 
 	{
+		GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
 		VkDescriptorSetLayoutBinding* pBindings(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayoutBinding>(uiElementCount));
 	}

@@ -40,8 +40,6 @@ class GfStackAllocator
 {
 public:
 
-	friend class GfScopedStackMemMarker;
-
 	class GfScopedStackMemMarker
 	{
 	public:
@@ -98,6 +96,9 @@ class GfPerThreadStackAllocator
 	, public GfStackAllocator<AllocT, CHUNKSIZE>
 {
 public:
+
+	// Not necessary but it's cleaner
+	typedef GfStackAllocator<AllocT, CHUNKSIZE>::GfScopedStackMemMarker GfMemScope;
 
 	GfPerThreadStackAllocator();
 };

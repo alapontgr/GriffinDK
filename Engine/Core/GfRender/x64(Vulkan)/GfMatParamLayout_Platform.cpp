@@ -31,10 +31,37 @@ static const VkDescriptorType g_pDescriptorTypeConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const VkShaderStageFlags g_pShaderStageFlagsConverter[] = 
+{
+	VK_SHADER_STAGE_VERTEX_BIT,
+	VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+	VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+	VK_SHADER_STAGE_GEOMETRY_BIT,
+	VK_SHADER_STAGE_FRAGMENT_BIT,
+	VK_SHADER_STAGE_COMPUTE_BIT,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Direct map for the moment
 static inline VkDescriptorType ConvertParamaterType(EParamaterSlotType::Type eType) 
 {
 	return g_pDescriptorTypeConverter[eType];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages) 
+{
+	VkShaderStageFlags uiResult(0);
+	for (u32 i = 0; i < EShaderStageFlags::COUNT; ++i) 
+	{
+		if ((kStages & (1<<i)) != 0)
+		{
+			uiResult |= g_pShaderStageFlagsConverter[i];
+		}
+	}
+	return uiResult;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +134,24 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
 		VkDescriptorSetLayoutBinding* pBindings(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayoutBinding>(uiElementCount));
+		VkDescriptorSetLayoutBinding* pPivot(pBindings);
+		for (const GfMaterialParameterSlot& kSlot : m_kBase.m_tParameters) 
+		{
+			pBindings->binding = kSlot.m_uiBindSlot;
+			pBindings->descriptorType = ConvertParamaterType(kSlot.m_eType);
+			pBindings->descriptorCount = 1; // TODO: Add support for arrays
+			pBindings->stageFlags = ConvertShaderStageFlags(kSlot.m_AccesStages);
+			pBindings->pImmutableSamplers = nullptr; // TODO: Add support for immutable samplers
+			pBindings++;
+		}
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = uiElementCount;
+		layoutInfo.pBindings = pBindings;
+
+		VkResult siResult = vkCreateDescriptorSetLayout(kCtxt.m_pDevice, &layoutInfo, nullptr, &m_pSetLayout);
+		GF_ASSERT(siResult == VK_SUCCESS, "Failed to create the descriptor set layout");
 	}
 }
 
@@ -114,7 +159,11 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 
 void GfMatParamLayout_Platform::DestroyRHI(const GfRenderContext& kCtxt)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	if (m_pSetLayout) 
+	{
+		vkDestroyDescriptorSetLayout(kCtxt.m_pDevice, m_pSetLayout, nullptr);
+		m_pSetLayout = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

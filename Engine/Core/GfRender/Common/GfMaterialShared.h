@@ -51,6 +51,8 @@ namespace EShaderStageFlags
 		Compute = 1 << 5,
 		// All the stages within the graphics pipeline
 		AllGraphics = Vertex | TesellationControl | TesellationEval | Geometry | Fragment,
+		////////////////////////////////////////////////////////////////////////////////
+		COUNT = 6 // IMPORTANT: Update if the table changes
 	};
 }
 using GfShaderAccessMask = GfBitMask<u32>;

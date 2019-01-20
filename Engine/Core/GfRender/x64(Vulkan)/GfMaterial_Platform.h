@@ -2,13 +2,13 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/09/26
-//	File: 	GfMaterialInstance_Platform.h
+//	File: 	GfMaterial_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMATERIALINSTANCE_PLATFORM_H__
-#define __GFMATERIALINSTANCE_PLATFORM_H__
+#ifndef __GFMATERIAL_PLATFORM_H__
+#define __GFMATERIAL_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
@@ -20,13 +20,13 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialInstance_Platform 
+class GfMaterialTemplate_Platform 
 {
 public:
 
-	friend class GfMaterialinstance;
+	friend class GfMaterialTemplate;
 
-	GfMaterialInstance_Platform(GfMaterialinstance& kBase);
+	GfMaterialTemplate_Platform(GfMaterialTemplate& kBase);
 
 protected:
 
@@ -40,10 +40,10 @@ private:
 
 	void CreatePipeline(const GfRenderContext& kCtx);
 
-	GfMaterialinstance&		m_kBase;
+	GfMaterialTemplate&		m_kBase;
 	VkPipelineLayout		m_pLayout;
 	VkPipeline				m_pPipeline;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMATERIALINSTANCE_PLATFORM_H__
+#endif // __GFMATERIAL_PLATFORM_H__

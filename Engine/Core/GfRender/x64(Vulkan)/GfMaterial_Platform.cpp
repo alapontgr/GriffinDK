@@ -2,18 +2,18 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2018/09/26
-//	File: 	GfMaterialInstance_Platform.cpp
+//	File: 	GfMaterial_Platform.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfMaterialInstance.h"
+#include "GfRender/Common/GfMaterial.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfMaterialInstance_Platform::GfMaterialInstance_Platform(GfMaterialinstance& kBase)
+GfMaterialTemplate_Platform::GfMaterialTemplate_Platform(GfMaterialTemplate& kBase)
 	: m_kBase(kBase)
 	, m_pLayout(nullptr)
 	, m_pPipeline(nullptr)
@@ -23,14 +23,14 @@ GfMaterialInstance_Platform::GfMaterialInstance_Platform(GfMaterialinstance& kBa
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::DestroyRHI(const GfRenderContext& kCtx)
+void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
 	GF_ASSERT_ALWAYS("To Implement");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::CreateRHI(const GfRenderContext& kCtx)
+void GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
 {
 	DestroyRHI(kCtx);
 	CreateLayout(kCtx);
@@ -39,7 +39,7 @@ void GfMaterialInstance_Platform::CreateRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::CreateLayout(const GfRenderContext& kCtx)
+void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
 #ifdef DEAD
 
@@ -73,7 +73,7 @@ void GfMaterialInstance_Platform::CreateLayout(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialInstance_Platform::CreatePipeline(const GfRenderContext& kCtx)
+void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 {
 #ifdef DEAD
 

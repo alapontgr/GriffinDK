@@ -135,6 +135,64 @@ namespace EFrontFace
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace EMultiSampleCount 
+{
+	enum Type : u8 
+	{
+		Samples_1 = 0,
+		Samples_2,
+		Samples_4,
+		Samples_8,
+		Samples_16,
+		Samples_32,
+		Samples_64,
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace EBlendFactor 
+{
+	enum Type : u8 
+	{
+		Zero = 0,
+		One,
+		Src_Color,
+		One_Minus_Src_Color,
+		Dst_Color,
+		One_Minus_Dst_Color,
+		Src_Alpha,
+		One_Minus_Src_Alpha,
+		Dst_Alpha,
+		One_Minus_Dst_Alpha,
+		Const_Color,
+		One_Minus_Const_Color,
+		Const_Alpha,
+		One_Minus_Const_Alpha,
+		Src_Alpha_Saturate,
+		Src1_Color,
+		One_Minus_Src1_Color,
+		Src1_Alpha,
+		One_Minus_Src1_Alpha,
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace EBlendOp 
+{
+	enum Type : u8 
+	{
+		Add = 0,
+		Subtract,
+		Reverse_Subtract,
+		Min,
+		Max,
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct GfRasterState 
 {
 	f32                 m_fDepthBiasConstFactor			= 0.0f;
@@ -152,7 +210,26 @@ struct GfRasterState
 ////////////////////////////////////////////////////////////////////////////////
 
 // TODO: MultiSampling config
-// TODO: BlendState
+
+struct GfMultiSamplingState 
+{
+	EMultiSampleCount::Type m_uiSampleCount = EMultiSampleCount::Samples_1;
+	bool					m_bEnabled		= false;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct GfBlendState 
+{
+	bool				m_bEnabled				= false;
+	EBlendFactor::Type	m_eSrcColorBlendFactor;
+	EBlendFactor::Type	m_eDstColorBlendFactor;
+	EBlendOp::Type		m_eColorBlendOp;
+	EBlendFactor::Type	m_eSrcAlphaBlendFactor;
+	EBlendFactor::Type	m_eDstAlphaBlendFactor;
+	EBlendOp::Type		m_eAlphaBlendOp;
+};
+
 // TODO: Vertex description
 
 ////////////////////////////////////////////////////////////////////////////////

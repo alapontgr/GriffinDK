@@ -39,13 +39,16 @@ public:
 
 private:
 
-	GfMatParamLayout* m_pLayouts[EMaterialParamRate::MaxBoundSets];
-
 	// Primitive topology
-	EPrimitiveTopology::Type m_eTopology;
-	
+	EPrimitiveTopology::Type	m_eTopology;
 	// Raster state
-	GfRasterState m_kRasterState;
+	GfRasterState				m_kRasterState;
+	// MultiSampling state
+	GfMultiSamplingState		m_kMSState;
+	// Blend state
+	GfBlendState				m_kBlendState;
+	// Description of parameter layouts
+	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
 };
 
 ////////////////////////////////////////////////////////////////////////////////

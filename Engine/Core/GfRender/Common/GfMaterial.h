@@ -47,17 +47,28 @@ public:
 
 	GfVertexDeclaration GetVertexFormat() const { return m_kVertexFormat; }
 
-	void SetTopology(EPrimitiveTopology::Type val) { m_eTopology = val; }
+	void SetTopology(EPrimitiveTopology::Type val);
 
-	void SetRasterState(const GfRasterState& kVal) { m_kRasterState = kVal; }
+	void SetRasterState(const GfRasterState& kVal);
 
-	void SetMSState(const GfMultiSamplingState& kVal) { m_kMSState = kVal; }
+	void SetMSState(const GfMultiSamplingState& kVal);
 
-	void SetBlendState(const GfBlendState& kVal) { m_kBlendState = kVal; }
+	void SetBlendState(const GfBlendState& kVal);
 	
-	void SetVertexFormat(const GfVertexDeclaration& kVal) { m_kVertexFormat = kVal; }
+	void SetVertexFormat(const GfVertexDeclaration& kVal);
 
 private:
+
+	enum EFlags : u32
+	{
+		Topology_Initialised		= 1 << 0,
+		RasterState_Initialised		= 1 << 1,
+		MSState_Initialised			= 1 << 2,
+		BlendState_Initialised		= 1 << 3,
+		VertexFormat_Initialised	= 1 << 4,
+	};
+
+	u32 GetBoundLayoutCount() const;
 
 	// Primitive topology
 	EPrimitiveTopology::Type	m_eTopology;
@@ -71,6 +82,8 @@ private:
 	GfVertexDeclaration			m_kVertexFormat;
 	// Description of parameter layouts
 	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
+	// Flags
+	GfBitMask<u32>				m_uiFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +101,46 @@ private:
 	GfMaterialTemplate* m_pTemplate;
 	GfMaterialParamSet* m_pBoundSets[EMaterialParamRate::MaxBoundSets];
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetTopology(EPrimitiveTopology::Type val)
+{
+	m_uiFlags |= EFlags::Topology_Initialised;
+	m_eTopology = val;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetRasterState(const GfRasterState& kVal)
+{
+	m_uiFlags |= EFlags::RasterState_Initialised;
+	m_kRasterState = kVal;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetMSState(const GfMultiSamplingState& kVal)
+{
+	m_uiFlags |= EFlags::MSState_Initialised;
+	m_kMSState = kVal;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetBlendState(const GfBlendState& kVal)
+{
+	m_uiFlags |= EFlags::BlendState_Initialised;
+	m_kBlendState = kVal;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetVertexFormat(const GfVertexDeclaration& kVal)
+{
+	m_uiFlags |= EFlags::VertexFormat_Initialised;
+	m_kVertexFormat = kVal;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIAL_H__

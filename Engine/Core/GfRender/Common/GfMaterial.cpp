@@ -16,6 +16,7 @@
 
 GfMaterialTemplate::GfMaterialTemplate()
 	: GfMaterialTemplate_Platform(*this)
+	, m_uiFlags(0)
 {
 	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
 	{
@@ -35,6 +36,21 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 {
 	DestroyRHI(kCtx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+u32 GfMaterialTemplate::GetBoundLayoutCount() const
+{
+	u32 uiCount(0);
+	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
+	{
+		if (m_pLayouts[i]) 
+		{
+			uiCount++;
+		}
+	}
+	return uiCount;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

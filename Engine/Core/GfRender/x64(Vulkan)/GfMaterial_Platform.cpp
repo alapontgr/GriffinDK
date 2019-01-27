@@ -13,6 +13,34 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static inline void ConvertRasterState(const GfRasterState& kRasterState, VkPipelineRasterizationStateCreateInfo& kOut) 
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline void ConvertMSState(const GfMultiSamplingState& kMSState, VkPipelineMultisampleStateCreateInfo& kOut) 
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline void ConvertBlendState(const GfBlendState& kBlendState, VkPipelineColorBlendAttachmentState& kOut)
+{
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline void ConvertTopology(const EPrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
+{
+	
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfMaterialTemplate_Platform::GfMaterialTemplate_Platform(GfMaterialTemplate& kBase)
 	: m_kBase(kBase)
 	, m_pLayout(nullptr)
@@ -25,7 +53,16 @@ GfMaterialTemplate_Platform::GfMaterialTemplate_Platform(GfMaterialTemplate& kBa
 
 void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
-	GF_ASSERT_ALWAYS("To Implement");
+	if (m_pPipeline)
+	{
+		vkDestroyPipeline(kCtx.m_pDevice, m_pPipeline);
+		m_pPipeline = nullptr;
+	}
+	if (m_pLayout) 
+	{
+		vkDestroyPipelineLayout(kCtx.m_pDevice, m_pLayout);
+		m_pLayout = nullptr;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,17 +78,18 @@ void GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
-#ifdef DEAD
+	u32 uiLayoutCount(m_kBase.GetBoundLayoutCount());
+	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
+	VkDescriptorSetLayout* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount()));
 
-	VkDescriptorSetLayout layoutArray[EParameterSetFramerateType::Framerate_Count];
-
-	u32 count = 0;
-	for (u32 i = 0; i < EParameterSetFramerateType::Framerate_Count; ++i)
+	VkDescriptorSetLayout* pCursor(pLayouts);
+	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i) 
 	{
-		if (m_pParameterSetLayout->m_setLayout[i] != VK_NULL_HANDLE)
+		GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
+		if (pLayout) 
 		{
-			layoutArray[count] = m_pParameterSetLayout->m_setLayout[i];
-			count++;
+			*pCursor = pLayout->GetLayout();
+			pCursor++;
 		}
 	}
 
@@ -61,14 +99,12 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 	layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layoutInfo.pNext = nullptr;
 	layoutInfo.flags = 0;
-	layoutInfo.setLayoutCount = count;
-	layoutInfo.pSetLayouts = layoutArray;
+	layoutInfo.setLayoutCount = uiLayoutCount;
+	layoutInfo.pSetLayouts = pLayouts;
 	layoutInfo.pushConstantRangeCount = 0;
 	layoutInfo.pPushConstantRanges = nullptr;
-	auto result = vkCreatePipelineLayout(pDevice, &layoutInfo, nullptr, &m_layout);
-	VK_CHECK(result, "Failed to create Pipeline Layout");
-	return kNoError;
-#endif // DEAD
+	VkResult siResult = vkCreatePipelineLayout(kCtx.m_pDevice, &layoutInfo, nullptr, &m_pLayout);
+	GF_ASSERT(siResult, "Failed to create Pipeline Layout");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

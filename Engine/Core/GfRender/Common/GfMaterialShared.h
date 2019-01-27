@@ -232,8 +232,6 @@ struct GfRasterState
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO: MultiSampling config
-
 struct GfMultiSamplingState 
 {
 	EMultiSampleCount::Type m_uiSampleCount = EMultiSampleCount::Samples_1;

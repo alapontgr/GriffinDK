@@ -193,6 +193,29 @@ namespace EBlendOp
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace EVertexAttribute 
+{
+	enum Type : u16
+	{
+		Float = 0,	// R32
+		Float2,		// R32G32
+		Float3,		// R32G32B32
+		Float4,		// R32G32B32A32
+
+		SInt,		// R32
+		SInt2,		// R32G32
+		SInt3,		// R32G32B32
+		SInt4,		// R32G32B32A32
+
+		UInt,		// R32
+		UInt2,		// R32G32
+		UInt3,		// R32G32B32
+		UInt4		// R32G32B32A32
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct GfRasterState 
 {
 	f32                 m_fDepthBiasConstFactor			= 0.0f;
@@ -230,7 +253,30 @@ struct GfBlendState
 	EBlendOp::Type		m_eAlphaBlendOp;
 };
 
-// TODO: Vertex description
+////////////////////////////////////////////////////////////////////////////////
+
+class GfVertexDeclaration 
+{
+public:
+
+	struct GfVertexAttrib 
+	{
+		EVertexAttribute::Type	m_eType;	// Type of the attribute
+		u16						m_uiOffset;	// Offset within the struct where this attrib is
+	};
+
+	GfVertexDeclaration();
+
+	void Init(GfVertexAttrib* pAttributes, u16 uiAttribCount, u16 uiStride);
+
+	static constexpr u32 ms_uiVertexMaxAttribCount = 6;
+
+private:
+
+	GfVertexAttrib m_pAttribs[ms_uiVertexMaxAttribCount];
+	u16 m_uiAttribCount;
+	u16 m_uiVertexStride;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIALSHARED_H__

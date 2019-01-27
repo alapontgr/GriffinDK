@@ -37,6 +37,26 @@ public:
 
 	void AssignLayout(u32 uiSlot, GfMatParamLayout* pLayout);
 
+	EPrimitiveTopology::Type GetTopology() const { return m_eTopology; }
+
+	GfRasterState GetRasterState() const { return m_kRasterState; }
+
+	GfMultiSamplingState GetMSState() const { return m_kMSState; }
+
+	GfBlendState GetBlendState() const { return m_kBlendState; }
+
+	GfVertexDeclaration GetVertexFormat() const { return m_kVertexFormat; }
+
+	void SetTopology(EPrimitiveTopology::Type val) { m_eTopology = val; }
+
+	void SetRasterState(const GfRasterState& kVal) { m_kRasterState = kVal; }
+
+	void SetMSState(const GfMultiSamplingState& kVal) { m_kMSState = kVal; }
+
+	void SetBlendState(const GfBlendState& kVal) { m_kBlendState = kVal; }
+	
+	void SetVertexFormat(const GfVertexDeclaration& kVal) { m_kVertexFormat = kVal; }
+
 private:
 
 	// Primitive topology
@@ -47,6 +67,8 @@ private:
 	GfMultiSamplingState		m_kMSState;
 	// Blend state
 	GfBlendState				m_kBlendState;
+	// Vertex declaration
+	GfVertexDeclaration			m_kVertexFormat;
 	// Description of parameter layouts
 	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
 };

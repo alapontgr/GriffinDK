@@ -10,6 +10,8 @@
 // Includes
 
 #include "GfRender/Common/GfMaterial.h"
+#include "GfRender/Common/GfMatParamLayout.h"
+#include "GfRender/Common/GfRenderContext.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -55,12 +57,12 @@ void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
 	if (m_pPipeline)
 	{
-		vkDestroyPipeline(kCtx.m_pDevice, m_pPipeline);
+		vkDestroyPipeline(kCtx.m_pDevice, m_pPipeline, nullptr);
 		m_pPipeline = nullptr;
 	}
 	if (m_pLayout) 
 	{
-		vkDestroyPipelineLayout(kCtx.m_pDevice, m_pLayout);
+		vkDestroyPipelineLayout(kCtx.m_pDevice, m_pLayout, nullptr);
 		m_pLayout = nullptr;
 	}
 }
@@ -80,7 +82,7 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
 	u32 uiLayoutCount(m_kBase.GetBoundLayoutCount());
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
-	VkDescriptorSetLayout* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount()));
+	VkDescriptorSetLayout* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount));
 
 	VkDescriptorSetLayout* pCursor(pLayouts);
 	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i) 
@@ -93,8 +95,6 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 		}
 	}
 
-	// Create an empty layout without descriptors (No parameters)
-	// TODO Add parameters
 	VkPipelineLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layoutInfo.pNext = nullptr;
@@ -111,6 +111,11 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 {
+	// Define Input Binding Desc
+
+	VkVertexInputBindingDescription kVertexBindingDesc{};
+	kVertexBindingDesc.binding = 0; // TODO: Add support for multiple vertex buffers
+	
 #ifdef DEAD
 
 	// Load shader modules

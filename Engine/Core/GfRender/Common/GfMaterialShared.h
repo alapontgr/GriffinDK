@@ -216,6 +216,17 @@ namespace EVertexAttribute
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace EVertexInputRate 
+{
+	enum Type : u32 
+	{
+		PerVertex = 0,
+		PerInstance
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct GfRasterState 
 {
 	f32                 m_fDepthBiasConstFactor			= 0.0f;
@@ -265,16 +276,29 @@ public:
 
 	GfVertexDeclaration();
 
-	void Init(GfVertexAttrib* pAttributes, u16 uiAttribCount, u16 uiStride);
+	void Init(GfVertexAttrib* pAttributes, u16 uiAttribCount, u16 uiStride, EVertexInputRate::Type eRate);
+
+	GfVertexAttrib GetAttrib(u32 uiSlot) const;
+
+	EVertexInputRate::Type GetRate() const { return m_eRate; }
+
+	u16 GetAttribCount() const { return m_uiAttribCount; }
+
+	u16 GetStride() const { return m_uiVertexStride; }
 
 	static constexpr u32 ms_uiVertexMaxAttribCount = 6;
 
 private:
 
-	GfVertexAttrib m_pAttribs[ms_uiVertexMaxAttribCount];
-	u16 m_uiAttribCount;
-	u16 m_uiVertexStride;
+	GfVertexAttrib			m_pAttribs[ms_uiVertexMaxAttribCount];
+	EVertexInputRate::Type	m_eRate;
+	u16						m_uiAttribCount;
+	u16						m_uiVertexStride;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+#include GF_SOLVE_PLATFORM_INLINE(GfMaterialShared)
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIALSHARED_H__

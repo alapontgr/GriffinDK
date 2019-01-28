@@ -14,57 +14,6 @@
 #include "GfRender/Common/GfRenderCommon.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static const VkDescriptorType g_pDescriptorTypeConverter[] = 
-{
-	VK_DESCRIPTOR_TYPE_SAMPLER,
-	VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-	VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-	VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-	VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,
-	VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,
-	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-static const VkShaderStageFlags g_pShaderStageFlagsConverter[] = 
-{
-	VK_SHADER_STAGE_VERTEX_BIT,
-	VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-	VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-	VK_SHADER_STAGE_GEOMETRY_BIT,
-	VK_SHADER_STAGE_FRAGMENT_BIT,
-	VK_SHADER_STAGE_COMPUTE_BIT,
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Direct map for the moment
-static inline VkDescriptorType ConvertParamaterType(EParamaterSlotType::Type eType) 
-{
-	return g_pDescriptorTypeConverter[eType];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages) 
-{
-	VkShaderStageFlags uiResult(0);
-	for (u32 i = 0; i < EShaderStageFlags::COUNT; ++i) 
-	{
-		if ((kStages & (1<<i)) != 0)
-		{
-			uiResult |= g_pShaderStageFlagsConverter[i];
-		}
-	}
-	return uiResult;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory_Platform
 
 GfMatUniformFactory_Platform::GfMatUniformFactory_Platform(GfMatUniformFactory& kBase)
@@ -87,7 +36,7 @@ void GfMatUniformFactory_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		if (m_kBase.m_pCountPerUniformType[i] > 0) 
 		{
 			pPivot->descriptorCount = m_kBase.m_pCountPerUniformType[i];
-			pPivot->type = ConvertParamaterType((EParamaterSlotType::Type)i);
+			pPivot->type = ConvertDescriptorType((EParamaterSlotType::Type)i);
 			pPivot++;
 		}
 	}
@@ -138,7 +87,7 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		for (const GfMaterialParameterSlot& kSlot : m_kBase.m_tParameters) 
 		{
 			pBindings->binding = kSlot.m_uiBindSlot;
-			pBindings->descriptorType = ConvertParamaterType(kSlot.m_eType);
+			pBindings->descriptorType = ConvertDescriptorType(kSlot.m_eType);
 			pBindings->descriptorCount = 1; // TODO: Add support for arrays
 			pBindings->stageFlags = ConvertShaderStageFlags(kSlot.m_AccesStages);
 			pBindings->pImmutableSamplers = nullptr; // TODO: Add support for immutable samplers

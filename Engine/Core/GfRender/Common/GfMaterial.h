@@ -12,6 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GfCore/Common/GfCoreMinimal.h"
+#include "GfRender/Common/GfRenderCommon.h"
 #include "GfRender/Common/GfMaterialShared.h"
 
 #include GF_SOLVE_PLATFORM_HEADER(GfMaterial)

@@ -87,6 +87,83 @@ static const VkFrontFace g_pFrontFaceConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const VkSampleCountFlagBits  g_pSampleCountConverter[] = 
+{
+	VK_SAMPLE_COUNT_1_BIT,
+	VK_SAMPLE_COUNT_2_BIT,
+	VK_SAMPLE_COUNT_4_BIT,
+	VK_SAMPLE_COUNT_8_BIT,
+	VK_SAMPLE_COUNT_16_BIT,
+	VK_SAMPLE_COUNT_32_BIT,
+	VK_SAMPLE_COUNT_64_BIT,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkBlendFactor g_pBlendFactorConverter[] = 
+{
+	VK_BLEND_FACTOR_ZERO,
+	VK_BLEND_FACTOR_ONE,
+	VK_BLEND_FACTOR_SRC_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+	VK_BLEND_FACTOR_DST_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+	VK_BLEND_FACTOR_SRC_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+	VK_BLEND_FACTOR_DST_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+	VK_BLEND_FACTOR_CONSTANT_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR,
+	VK_BLEND_FACTOR_CONSTANT_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA,
+	VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+	VK_BLEND_FACTOR_SRC1_COLOR,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+	VK_BLEND_FACTOR_SRC1_ALPHA,
+	VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkBlendOp g_pBlendOpConverter[] = 
+{
+	VK_BLEND_OP_ADD,
+	VK_BLEND_OP_SUBTRACT,
+	VK_BLEND_OP_REVERSE_SUBTRACT,
+	VK_BLEND_OP_MIN,
+	VK_BLEND_OP_MAX,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkFormat g_pFormatConverter[] = 
+{
+	VK_FORMAT_R32_SFLOAT,
+	VK_FORMAT_R32G32_SFLOAT,
+	VK_FORMAT_R32G32B32_SFLOAT,
+	VK_FORMAT_R32G32B32A32_SFLOAT,
+
+	VK_FORMAT_R32_SINT,
+	VK_FORMAT_R32G32_SINT,
+	VK_FORMAT_R32G32B32_SINT,
+	VK_FORMAT_R32G32B32A32_SINT,
+
+	VK_FORMAT_R32_UINT,
+	VK_FORMAT_R32G32_UINT,
+	VK_FORMAT_R32G32B32_UINT,
+	VK_FORMAT_R32G32B32A32_UINT,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkVertexInputRate g_pInputRate[] = 
+{
+	VK_VERTEX_INPUT_RATE_VERTEX,
+	VK_VERTEX_INPUT_RATE_INSTANCE,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Direct map for the moment
 static inline VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
 {
@@ -134,6 +211,41 @@ static inline VkCullModeFlagBits ConvertCullMode(ECullMode::Type eCullMode)
 static inline VkFrontFace ConvertFrontFace(EFrontFace::Type eFrontFace) 
 {
 	return g_pFrontFaceConverter[eFrontFace];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkSampleCountFlagBits ConvertSampleCount(EMultiSampleCount::Type eSampleCount) 
+{
+	return g_pSampleCountConverter[eSampleCount];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkBlendFactor ConvertBlendFactor(EBlendFactor::Type eBlendFactor) 
+{
+	return g_pBlendFactorConverter[eBlendFactor];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkBlendOp ConvertBlendOp(EBlendOp::Type eBlendOp) 
+{
+	return g_pBlendOpConverter[eBlendOp];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkFormat ConvertAttributeFormat(EAttributeFormat::Type eFormat) 
+{
+	return g_pFormatConverter[eFormat];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkVertexInputRate ConvertInputRate(EVertexInputRate::Type eInputRate) 
+{
+	return g_pInputRate[eInputRate];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -193,7 +193,7 @@ namespace EBlendOp
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace EVertexAttribute 
+namespace EAttributeFormat 
 {
 	enum Type : u16
 	{
@@ -270,7 +270,7 @@ public:
 
 	struct GfVertexAttrib 
 	{
-		EVertexAttribute::Type	m_eType;	// Type of the attribute
+		EAttributeFormat::Type	m_eType;	// Type of the attribute
 		u16						m_uiOffset;	// Offset within the struct where this attrib is
 	};
 

@@ -24,14 +24,6 @@ class GfBuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfCmdBufferSlot_Platform
-{
-	VkCommandBuffer m_pCmdBuffer	= nullptr;
-	VkFence			m_pFence		= 0;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
 class GfCmdBuffer_Platform
 {
 public:
@@ -43,9 +35,7 @@ public:
 
 private:
 
-	void InitRHI(
-		VkCommandBuffer* pCmdBuffers,
-		VkFence* pFences);
+	void InitRHI(VkCommandBuffer pCmdBuffer, VkFence pFence);
 
 	void WaitForReadyRHI(const GfRenderContext& kCtx);
 
@@ -77,7 +67,8 @@ private:
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
-	GfCmdBufferSlot_Platform m_pEntries[GfRenderConstants::ms_uiNBufferingCount];
+	VkCommandBuffer m_pCmdBuffer;
+	VkFence			m_pFence;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

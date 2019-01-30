@@ -37,8 +37,8 @@ void GfCmdBufferFactory_Platform::InitRHI(const GfRenderContext& kCtx, GfRencerC
 
 void GfCmdBufferFactory_Platform::CreateCmdBufferRHI(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer)
 {
-	VkCommandBuffer pCmdBuffers [GfRenderConstants::ms_uiNBufferingCount];
-	VkFence			pFences		[GfRenderConstants::ms_uiNBufferingCount];
+	VkCommandBuffer pCmdBuffer;
+	VkFence			pFence;
 
 	bool bIsPrimary = (uiType == GfCmdBufferType::Primary);
 	VkCommandBufferAllocateInfo kinfo;
@@ -46,9 +46,9 @@ void GfCmdBufferFactory_Platform::CreateCmdBufferRHI(const GfRenderContext& kCtx
 	kinfo.pNext = nullptr;
 	kinfo.commandPool = m_pPool;
 	kinfo.level = bIsPrimary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-	kinfo.commandBufferCount = 2;
+	kinfo.commandBufferCount = 1;
 
-	VkResult eResult = vkAllocateCommandBuffers(kCtx.m_pDevice, &kinfo, pCmdBuffers);
+	VkResult eResult = vkAllocateCommandBuffers(kCtx.m_pDevice, &kinfo, &pCmdBuffer);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to allocate command buffers");
 
 	// Create the fences for the command buffers
@@ -57,15 +57,12 @@ void GfCmdBufferFactory_Platform::CreateCmdBufferRHI(const GfRenderContext& kCtx
 	kFenceInfo.pNext = nullptr;
 	kFenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Signaled by default
 
-	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i) 
-	{
-		eResult = vkCreateFence(kCtx.m_pDevice, &kFenceInfo, nullptr, &pFences[i]);
-		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create a fence");
-	}
+	eResult = vkCreateFence(kCtx.m_pDevice, &kFenceInfo, nullptr, &pFence);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create a fence");
 
 	// Set the values to the Cmd-Buffer
 	kOuCmdBuffer.Init((GfCmdBufferType::Type)uiType);
-	kOuCmdBuffer.InitRHI(pCmdBuffers, pFences);
+	kOuCmdBuffer.InitRHI(pCmdBuffer, pFence);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

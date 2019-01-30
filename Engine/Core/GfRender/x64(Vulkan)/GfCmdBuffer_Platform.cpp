@@ -22,30 +22,27 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfCmdBuffer_Platform::GfCmdBuffer_Platform()
+	: m_pCmdBuffer(nullptr)
+	, m_pFence(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::InitRHI (
-	VkCommandBuffer* pCmdBuffers,
-	VkFence* pFences)
+void GfCmdBuffer_Platform::InitRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
 {
-	for (u32 i=0; i<GfRenderConstants::ms_uiNBufferingCount; ++i)
-	{
-		m_pEntries[i].m_pCmdBuffer = pCmdBuffers[i];
-		m_pEntries[i].m_pFence = pFences[i];
-	}
+	GF_ASSERT(!pCmdBuffer && !m_pFence, "CMDBuffer already initialised");
+	m_pCmdBuffer = pCmdBuffer;
+	m_pFence = pFence;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-	VkResult eResult = vkWaitForFences(kCtx.m_pDevice, 1, &kCurrEntry.m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
+	VkResult eResult = vkWaitForFences(kCtx.m_pDevice, 1, &m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
 	GF_ASSERT(eResult == VK_SUCCESS, "Waited to long for fences");
-	eResult = vkResetFences(kCtx.m_pDevice, 1, &kCurrEntry.m_pFence);
+	eResult = vkResetFences(kCtx.m_pDevice, 1, &m_pFence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to reset the fences");
 }
 
@@ -56,7 +53,6 @@ void GfCmdBuffer_Platform::SubmitRHI(
 	GfRencerContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	const GfFrameSyncing& kSyncPrimitives(kCtx.GetFrameSyncPrimitives());
 	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	VkSubmitInfo kInfo{};
@@ -71,10 +67,9 @@ void GfCmdBuffer_Platform::SubmitRHI(
 		kInfo.pSignalSemaphores = &kSyncPrimitives.m_pFinishedRendering;
 	}
 	kInfo.commandBufferCount = 1;
-	kInfo.pCommandBuffers = &kCurrEntry.m_pCmdBuffer;
+	kInfo.pCommandBuffers = &m_pCmdBuffer;
 
-	VkResult eResult = vkQueueSubmit(kCtx.GetQueue(eQueueType), 1, &kInfo,
-		kCurrEntry.m_pFence);
+	VkResult eResult = vkQueueSubmit(kCtx.GetQueue(eQueueType), 1, &kInfo, m_pFence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
 }
 
@@ -83,7 +78,6 @@ void GfCmdBuffer_Platform::SubmitRHI(
 
 void GfCmdBuffer_Platform::BeginRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 	GfWindow* pWindow(kCtx.GetWindow());
 	// Begin render pass
 
@@ -101,23 +95,20 @@ void GfCmdBuffer_Platform::BeginRenderPassRHI(const GfRenderContext& kCtx, const
 	passBeginInfo.renderArea.offset.y = 0;
 	passBeginInfo.clearValueCount = 1;
 	passBeginInfo.pClearValues = &clearColor;
-	vkCmdBeginRenderPass(kCurrEntry.m_pCmdBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(m_pCmdBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::EndRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-	vkCmdEndRenderPass(kCurrEntry.m_pCmdBuffer);
+	vkCmdEndRenderPass(m_pCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-
 	VkCommandBufferBeginInfo kInfo;
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	kInfo.pNext = nullptr;
@@ -132,7 +123,7 @@ void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 	range.layerCount = 1;
 
 	// begin command buffer
-	VkResult eResult = vkBeginCommandBuffer(kCurrEntry.m_pCmdBuffer, &kInfo);
+	VkResult eResult = vkBeginCommandBuffer(m_pCmdBuffer, &kInfo);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to begin cmd buffer");
 }
 
@@ -140,8 +131,7 @@ void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 
 void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-	VkResult eResult = vkEndCommandBuffer(kCurrEntry.m_pCmdBuffer);
+	VkResult eResult = vkEndCommandBuffer(m_pCmdBuffer);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
 }
 
@@ -150,8 +140,6 @@ void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor)
 {
 	// TODO: Refactor this to get rid of the barriers. This is just a temporal fix and I'll use the RenderPasses in the future
-
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
 
 	VkImageSubresourceRange kImageRange = {};
 	kImageRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -192,7 +180,7 @@ void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, co
 	////////////////////////////////////////////////////////////////////////////////
 
 		vkCmdPipelineBarrier(
-			kCurrEntry.m_pCmdBuffer,
+			m_pCmdBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT, 
 			VK_PIPELINE_STAGE_TRANSFER_BIT, 
 			0, 0, nullptr, 0, nullptr, 1, &kBarrierPresentToClear);
@@ -203,11 +191,11 @@ void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, co
 	VkClearValue clearValue = {};
 	clearValue.color = clearColor;
 
-	vkCmdClearColorImage(kCurrEntry.m_pCmdBuffer, kCtx.GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
+	vkCmdClearColorImage(m_pCmdBuffer, kCtx.GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	vkCmdPipelineBarrier(kCurrEntry.m_pCmdBuffer, 
+	vkCmdPipelineBarrier(m_pCmdBuffer, 
 		VK_PIPELINE_STAGE_TRANSFER_BIT, 
 		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &kBarrierClearToPresent);
 
@@ -222,8 +210,6 @@ void GfCmdBuffer_Platform::CopyBufferRangeRHI(
 	const GfBuffer& kTo, 
 	u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-
 	GfStageAccessConfig kCurrToTransferSettings = kTo.GetTransitionSettings();
 	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
 
@@ -240,7 +226,7 @@ void GfCmdBuffer_Platform::CopyBufferRangeRHI(
 	kBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
-		kCurrEntry.m_pCmdBuffer,
+		m_pCmdBuffer,
 		kCurrToTransferSettings.m_eStage,
 		kTransferToCurrSettings.m_eStage,
 		0,
@@ -252,13 +238,13 @@ void GfCmdBuffer_Platform::CopyBufferRangeRHI(
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCurrEntry.m_pCmdBuffer, kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
+	vkCmdCopyBuffer(m_pCmdBuffer, kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
 
 	// Go back to the original state
 	kBarrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
 	kBarrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
 	vkCmdPipelineBarrier(
-		kCurrEntry.m_pCmdBuffer,
+		m_pCmdBuffer,
 		kTransferToCurrSettings.m_eStage,
 		kCurrToTransferSettings.m_eStage,
 		0,
@@ -274,8 +260,6 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 	const GfBuffer& kBuffer, 
 	u32 uiOffset, u32 uiSize, void* pData)
 {
-	GfCmdBufferSlot_Platform& kCurrEntry(m_pEntries[kCtx.GetCurrentFrameIdx()]);
-
 	GfStageAccessConfig kCurrToTransferSettings = kBuffer.GetTransitionSettings();
 	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
 
@@ -292,7 +276,7 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
-		kCurrEntry.m_pCmdBuffer,
+		m_pCmdBuffer,
 		kCurrToTransferSettings.m_eStage,
 		kTransferToCurrSettings.m_eStage,
 		0,
@@ -301,13 +285,13 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 		0, nullptr);
 
 	// Update data
-	vkCmdUpdateBuffer(kCurrEntry.m_pCmdBuffer, kBuffer.GetHandle(), uiOffset, uiSize, pData);
+	vkCmdUpdateBuffer(m_pCmdBuffer, kBuffer.GetHandle(), uiOffset, uiSize, pData);
 
 	// Sync back
 	barrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
 	barrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
 	vkCmdPipelineBarrier(
-		kCurrEntry.m_pCmdBuffer,
+		m_pCmdBuffer,
 		kTransferToCurrSettings.m_eStage,
 		kCurrToTransferSettings.m_eStage,
 		0,

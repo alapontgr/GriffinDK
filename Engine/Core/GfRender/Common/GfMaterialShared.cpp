@@ -19,7 +19,7 @@ GfVertexDeclaration::GfVertexDeclaration()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfVertexDeclaration::Init(GfVertexAttrib* pAttributes, u16 uiAttribCount, u16 uiStride, EVertexInputRate::Type eRate)
+void GfVertexDeclaration::Init(GfVertexAttrib* pAttributes, u32 uiAttribCount, u32 uiStride, EVertexInputRate::Type eRate)
 {
 	GF_ASSERT(m_uiAttribCount == 0, "Already initialised");
 	GF_ASSERT(uiAttribCount <= ms_uiVertexMaxAttribCount, "Trying to assign too many attributes");

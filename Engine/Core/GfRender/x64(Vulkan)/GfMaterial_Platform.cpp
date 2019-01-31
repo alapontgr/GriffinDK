@@ -17,14 +17,35 @@
 
 static inline void ConvertRasterState(const GfRasterState& kRasterState, VkPipelineRasterizationStateCreateInfo& kOut) 
 {
-
+	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	kOut.pNext = nullptr;
+	kOut.flags = 0;
+	kOut.depthBiasConstantFactor = kRasterState.m_fDepthBiasConstFactor;
+	kOut.depthBiasClamp = kRasterState.m_fDepthBiasClamp;
+	kOut.depthBiasSlopeFactor = kRasterState.m_fDepthBiasSlopeFactor;
+	kOut.lineWidth = kRasterState.m_fLineWidth;
+	kOut.polygonMode = ConvertPolygonMode(kRasterState.m_ePolygonMode);
+	kOut.cullMode = ConvertCullMode(kRasterState.m_eCullMode);
+	kOut.frontFace = ConvertFrontFace(kRasterState.m_eFrontFace);
+	kOut.depthClampEnable = kRasterState.m_bDepthClampEnabled ? VK_TRUE : VK_FALSE;
+	kOut.rasterizerDiscardEnable = kRasterState.m_bRasterizerDiscardEnabled ? VK_TRUE : VK_FALSE;
+	kOut.depthBiasEnable = kRasterState.m_bDepthBiasEnabled ? VK_TRUE : VK_FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 static inline void ConvertMSState(const GfMultiSamplingState& kMSState, VkPipelineMultisampleStateCreateInfo& kOut) 
 {
-
+	VkPipelineMultisampleStateCreateInfo multiSamplingInfo{};
+	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	kOut.pNext = nullptr;
+	kOut.flags = 0;
+	kOut.rasterizationSamples = ConvertSampleCount(kMSState.m_uiSampleCount);
+	kOut.sampleShadingEnable = kMSState.m_bEnabled ? VK_TRUE : VK_FALSE;
+	kOut.minSampleShading = 1.0f;
+	kOut.pSampleMask = nullptr;
+	kOut.alphaToCoverageEnable = VK_FALSE;
+	kOut.alphaToOneEnable = VK_FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +59,33 @@ static inline void ConvertBlendState(const GfBlendState& kBlendState, VkPipeline
 
 static inline void ConvertTopology(const EPrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
 {
-	
+	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	kOut.pNext = nullptr;
+	kOut.flags = 0;
+	kOut.topology = ConvertTopology(eTopology);
+	kOut.primitiveRestartEnable = VK_FALSE; // TODO
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 uiBinding,
+	VkVertexInputBindingDescription& kOutVertexDesc,
+	VkVertexInputAttributeDescription* pOutVertexAttributes)
+{
+	// IMPORTANT: pOutVertexAttributes must be a valid array of "kVertex.GetAttribCount()" elements 
+	kOutVertexDesc.binding = uiBinding;
+	kOutVertexDesc.stride = kVertex.GetStride();
+	kOutVertexDesc.inputRate = ConvertInputRate(kVertex.GetRate());
+
+	u32 uiAttribCount(kVertex.GetAttribCount());
+	for (u32 i = 0; i < uiAttribCount; ++i) 
+	{
+		GfVertexAttrib kAttrib(kVertex.GetAttrib(i));
+		pOutVertexAttributes[i].binding = uiBinding;
+		pOutVertexAttributes[i].format = ConvertAttributeFormat(kAttrib.m_eType);
+		pOutVertexAttributes[i].location = i;
+		pOutVertexAttributes[i].offset = static_cast<u32>(kAttrib.m_uiOffset);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

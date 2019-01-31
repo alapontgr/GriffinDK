@@ -41,6 +41,7 @@ void* GfStackAllocator<AllocT, CHUNKSIZE>::AllocRaw(size_t uiSize, size_t uiAlig
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
 void GfStackAllocator<AllocT, CHUNKSIZE>::FreeUntilMarker(const GfDataMarker& kMarker)
 {
+	// IMPORTANT: Markers must always be released in the inverse order of creation
 	m_uiActiveMemMarkers--;
 	GF_ASSERT(kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers, "Data markers must be freed in the inverse order as they were pushed");
 	if (kMarker.m_uiMarkerIdx == m_uiActiveMemMarkers)

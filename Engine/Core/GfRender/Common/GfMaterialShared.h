@@ -19,7 +19,7 @@
 
 namespace EParamaterSlotType
 {
-	enum Type : u32
+	enum Type : u8
 	{
 		Sampler = 0,
 		CombinedImageSampler,
@@ -61,7 +61,7 @@ using GfShaderAccessMask = GfBitMask<u32>;
 
 namespace EMaterialParamRate 
 {
-	enum Type : u32 
+	enum Type : u8 
 	{
 		PerFrame = 0,			// Common to all the objects of a frame
 		PerRenderPass,			// Resources local to a RenderPass
@@ -81,7 +81,7 @@ static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundSets, "In
 
 namespace EPrimitiveTopology 
 {
-	enum Type : u32 
+	enum Type : u8 
 	{
 		PointList = 0,
 		LineList,
@@ -195,7 +195,7 @@ namespace EBlendOp
 
 namespace EAttributeFormat 
 {
-	enum Type : u16
+	enum Type : u8
 	{
 		Float = 0,	// R32
 		Float2,		// R32G32
@@ -218,7 +218,7 @@ namespace EAttributeFormat
 
 namespace EVertexInputRate 
 {
-	enum Type : u32 
+	enum Type : u8 
 	{
 		PerVertex = 0,
 		PerInstance
@@ -229,10 +229,10 @@ namespace EVertexInputRate
 
 struct GfRasterState 
 {
-	f32                 m_fDepthBiasConstFactor			= 0.0f;
-	f32                 m_fDepthBiasClamp				= 0.0f;
-	f32                 m_fDepthBiasSlopeFactor			= 0.0f;
-	f32                 m_fLineWidth					= 1.0f;
+	f32					m_fDepthBiasConstFactor			= 0.0f;
+	f32					m_fDepthBiasClamp				= 0.0f;
+	f32					m_fDepthBiasSlopeFactor			= 0.0f;
+	f32					m_fLineWidth					= 1.0f;
 	EPolygonMode::Type	m_ePolygonMode					= EPolygonMode::Fill;
 	ECullMode::Type		m_eCullMode						= ECullMode::Back;
 	EFrontFace::Type	m_eFrontFace					= EFrontFace::Clockwise;
@@ -270,30 +270,30 @@ public:
 
 	struct GfVertexAttrib 
 	{
-		EAttributeFormat::Type	m_eType;	// Type of the attribute
 		u16						m_uiOffset;	// Offset within the struct where this attrib is
+		EAttributeFormat::Type	m_eType;	// Type of the attribute
 	};
 
 	GfVertexDeclaration();
 
-	void Init(GfVertexAttrib* pAttributes, u16 uiAttribCount, u16 uiStride, EVertexInputRate::Type eRate);
+	void Init(GfVertexAttrib* pAttributes, u32 uiAttribCount, u32 uiStride, EVertexInputRate::Type eRate);
 
 	GfVertexAttrib GetAttrib(u32 uiSlot) const;
 
 	EVertexInputRate::Type GetRate() const { return m_eRate; }
 
-	u16 GetAttribCount() const { return m_uiAttribCount; }
+	u32 GetAttribCount() const { return m_uiAttribCount; }
 
-	u16 GetStride() const { return m_uiVertexStride; }
+	u32 GetStride() const { return m_uiVertexStride; }
 
 	static constexpr u32 ms_uiVertexMaxAttribCount = 6;
 
 private:
 
 	GfVertexAttrib			m_pAttribs[ms_uiVertexMaxAttribCount];
+	u32						m_uiAttribCount;
+	u32						m_uiVertexStride;
 	EVertexInputRate::Type	m_eRate;
-	u16						m_uiAttribCount;
-	u16						m_uiVertexStride;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

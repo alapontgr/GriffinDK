@@ -12,6 +12,7 @@
 #include "GfRender/Common/GfMaterial.h"
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include "Gfrender/Common/GfRenderPass.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +37,6 @@ static inline void ConvertRasterState(const GfRasterState& kRasterState, VkPipel
 
 static inline void ConvertMSState(const GfMultiSamplingState& kMSState, VkPipelineMultisampleStateCreateInfo& kOut) 
 {
-	VkPipelineMultisampleStateCreateInfo multiSamplingInfo{};
 	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	kOut.pNext = nullptr;
 	kOut.flags = 0;
@@ -50,14 +50,38 @@ static inline void ConvertMSState(const GfMultiSamplingState& kMSState, VkPipeli
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void ConvertBlendState(const GfBlendState& kBlendState, VkPipelineColorBlendAttachmentState& kOut)
+static inline void ConvertBlendState(const GfBlendState& kBlendState,
+	VkPipelineColorBlendAttachmentState& kBlendAttachment, VkPipelineColorBlendStateCreateInfo& kOut)
 {
+	kBlendAttachment.blendEnable = kBlendState.m_bEnabled ? VK_TRUE : VK_FALSE;
+	kBlendAttachment.srcColorBlendFactor = ConvertBlendFactor(kBlendState.m_eSrcColorBlendFactor);
+	kBlendAttachment.dstColorBlendFactor = ConvertBlendFactor(kBlendState.m_eDstColorBlendFactor);
+	kBlendAttachment.colorBlendOp = ConvertBlendOp(kBlendState.m_eColorBlendOp);
+	kBlendAttachment.srcAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_eSrcAlphaBlendFactor);
+	kBlendAttachment.dstAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_eDstAlphaBlendFactor);
+	kBlendAttachment.alphaBlendOp = ConvertBlendOp(kBlendState.m_eAlphaBlendOp);;
+	kBlendAttachment.colorWriteMask =
+		VK_COLOR_COMPONENT_R_BIT |
+		VK_COLOR_COMPONENT_G_BIT |
+		VK_COLOR_COMPONENT_B_BIT |
+		VK_COLOR_COMPONENT_A_BIT;
 
+	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	kOut.pNext = nullptr;
+	kOut.flags = 0;
+	kOut.logicOpEnable = kBlendState.m_bLogicOpEnabled ? VK_TRUE : VK_FALSE;
+	kOut.logicOp = ConvertBlendLogicOp(kBlendState.m_eBlendLogicOp);
+	kOut.attachmentCount = 1;
+	kOut.pAttachments = &kBlendAttachment;
+	kOut.blendConstants[0] = kBlendState.m_vBlendConstants.x;
+	kOut.blendConstants[1] = kBlendState.m_vBlendConstants.y;
+	kOut.blendConstants[2] = kBlendState.m_vBlendConstants.z;
+	kOut.blendConstants[3] = kBlendState.m_vBlendConstants.w;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void ConvertTopology(const EPrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
+static inline void ConvertInputAssembler(const EPrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
 {
 	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	kOut.pNext = nullptr;
@@ -68,7 +92,7 @@ static inline void ConvertTopology(const EPrimitiveTopology::Type eTopology, VkP
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 uiBinding,
+static inline void ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 uiBinding,
 	VkVertexInputBindingDescription& kOutVertexDesc,
 	VkVertexInputAttributeDescription* pOutVertexAttributes)
 {
@@ -80,7 +104,7 @@ static inline ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 uiBindi
 	u32 uiAttribCount(kVertex.GetAttribCount());
 	for (u32 i = 0; i < uiAttribCount; ++i) 
 	{
-		GfVertexAttrib kAttrib(kVertex.GetAttrib(i));
+		GfVertexDeclaration::GfVertexAttrib kAttrib(kVertex.GetAttrib(i));
 		pOutVertexAttributes[i].binding = uiBinding;
 		pOutVertexAttributes[i].format = ConvertAttributeFormat(kAttrib.m_eType);
 		pOutVertexAttributes[i].location = i;
@@ -158,70 +182,30 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 {
-	// Define Input Binding Desc
+	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
-	VkVertexInputBindingDescription kVertexBindingDesc{};
-	kVertexBindingDesc.binding = 0; // TODO: Add support for multiple vertex buffers
-	
-#ifdef DEAD
-
-	// Load shader modules
-	VkShaderModule vsMmodule = create_shader_module(RenderInterface::s_device, m_desc.m_vsPath.c_str());
-	VkShaderModule psMmodule = create_shader_module(RenderInterface::s_device, m_desc.m_psPath.c_str());
-
-	// Define stages
-	static constexpr u32 kStageCount = 2;
-	static VkPipelineShaderStageCreateInfo kStageInfo[kStageCount];
-	define_stage_info(VK_SHADER_STAGE_VERTEX_BIT, vsMmodule, "main", &kStageInfo[0]);
-	define_stage_info(VK_SHADER_STAGE_FRAGMENT_BIT, psMmodule, "main", &kStageInfo[1]);
+	// TODO: Define Shader modules
 
 	// Parse input assembler format
-	std::vector<VkVertexInputBindingDescription> vertexBindingDescriptions(1);
-	vertexBindingDescriptions[0].binding = 0;
-	vertexBindingDescriptions[0].stride = sizeof(VertexDesc);
-	vertexBindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-	std::vector<VkVertexInputAttributeDescription> vertexAttributeDescriptions(1); // One for each parameter in the input layout
-	vertexAttributeDescriptions[0].location = 0;
-	vertexAttributeDescriptions[0].binding = vertexBindingDescriptions[0].binding;
-	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	vertexAttributeDescriptions[0].offset = 0;
-	//vertexAttributeDescriptions[1].location = 1;
-	//vertexAttributeDescriptions[1].binding = vertexBindingDescriptions[0].binding;
-	//vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	//vertexAttributeDescriptions[1].offset = offsetof(struct VertexDesc, colour);
-
-	VkPipelineVertexInputStateCreateInfo vertexShaderInfo{};
-	vertexShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexShaderInfo.pNext = nullptr;
-	vertexShaderInfo.flags = 0;
-	vertexShaderInfo.vertexBindingDescriptionCount = static_cast<u32>(vertexBindingDescriptions.size());
-	vertexShaderInfo.pVertexBindingDescriptions = &vertexBindingDescriptions[0];
-	vertexShaderInfo.vertexAttributeDescriptionCount = static_cast<u32>(vertexAttributeDescriptions.size());
-	vertexShaderInfo.pVertexAttributeDescriptions = &vertexAttributeDescriptions[0];
+	VkVertexInputBindingDescription kVertexBindingDesc{};
+	u32 uiAttribCount(m_kBase.m_kVertexFormat.GetAttribCount());
+	VkVertexInputAttributeDescription* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(uiAttribCount));
+	ConvertInputVertex(m_kBase.m_kVertexFormat, 0, kVertexBindingDesc, pLayouts);
+	
+	VkPipelineVertexInputStateCreateInfo kVertexShaderInfo{};
+	kVertexShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	kVertexShaderInfo.pNext = nullptr;
+	kVertexShaderInfo.flags = 0;
+	kVertexShaderInfo.vertexBindingDescriptionCount = 1; // TODO: Add support for several vertex bindings
+	kVertexShaderInfo.pVertexBindingDescriptions = &kVertexBindingDesc;
+	kVertexShaderInfo.vertexAttributeDescriptionCount = uiAttribCount;
+	kVertexShaderInfo.pVertexAttributeDescriptions = pLayouts;
 
 	// Define topology to feed the shaders
-	VkPipelineInputAssemblyStateCreateInfo assemblerInfo;
-	assemblerInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	assemblerInfo.pNext = nullptr;
-	assemblerInfo.flags = 0;
-	assemblerInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-	assemblerInfo.primitiveRestartEnable = VK_FALSE;
+	VkPipelineInputAssemblyStateCreateInfo kAssemblerInfo{};
+	ConvertInputAssembler(m_kBase.m_eTopology, kAssemblerInfo);
 
 	// Define default viewport and scissors
-	VkViewport viewport;
-	viewport.x = 0.0f; // Left
-	viewport.y = 0.0f; // Top
-	viewport.width = 512.0f;
-	viewport.height = 512.0f;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	VkRect2D scissors;
-	scissors.offset.x = 0;
-	scissors.offset.y = 0;
-	scissors.extent.width = 512;
-	scissors.extent.height = 512;
-
 	VkPipelineViewportStateCreateInfo viewportStateInfo;
 	viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewportStateInfo.pNext = nullptr;
@@ -230,106 +214,59 @@ void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	viewportStateInfo.pViewports = nullptr; //&viewport;
 	viewportStateInfo.scissorCount = 1;
 	viewportStateInfo.pScissors = nullptr; //&scissors;
-
-										   // Configure rasterizer
-	VkPipelineRasterizationStateCreateInfo rasterInfo{};
-	rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterInfo.pNext = nullptr;
-	rasterInfo.flags = 0;
-	rasterInfo.depthClampEnable = VK_FALSE;
-	rasterInfo.rasterizerDiscardEnable = VK_FALSE;
-	//If we want to use different modes we have to enable the corresponding feature
-	rasterInfo.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-	rasterInfo.depthBiasEnable = VK_FALSE;
-	rasterInfo.depthBiasConstantFactor = 0.0f;
-	rasterInfo.depthBiasClamp = 0.0f;
-	rasterInfo.depthBiasSlopeFactor = 0.0f;
-	rasterInfo.lineWidth = 1.0f;
-
-	// Configure multi sampling state
-	VkPipelineMultisampleStateCreateInfo multiSamplingInfo{};
-	multiSamplingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multiSamplingInfo.pNext = nullptr;
-	multiSamplingInfo.flags = 0;
-	multiSamplingInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-	multiSamplingInfo.sampleShadingEnable = VK_FALSE;
-	multiSamplingInfo.minSampleShading = 1.0f;
-	multiSamplingInfo.pSampleMask = nullptr;
-	multiSamplingInfo.alphaToCoverageEnable = VK_FALSE;
-	multiSamplingInfo.alphaToOneEnable = VK_FALSE;
-
-	// Configure the Blend state
-	VkPipelineColorBlendAttachmentState colorBlendState{};
-	colorBlendState.blendEnable = VK_FALSE;
-	colorBlendState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendState.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-	colorBlendState.colorBlendOp = VK_BLEND_OP_ADD;
-	colorBlendState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-	colorBlendState.alphaBlendOp = VK_BLEND_OP_ADD;
-	colorBlendState.colorWriteMask =
-		VK_COLOR_COMPONENT_R_BIT |
-		VK_COLOR_COMPONENT_G_BIT |
-		VK_COLOR_COMPONENT_B_BIT |
-		VK_COLOR_COMPONENT_A_BIT;
-
-	VkPipelineColorBlendStateCreateInfo colorBlendInfo{};
-	colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlendInfo.pNext = nullptr;
-	colorBlendInfo.flags = 0;
-	colorBlendInfo.logicOpEnable = VK_FALSE;
-	colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
-	colorBlendInfo.attachmentCount = 1;
-	colorBlendInfo.pAttachments = &colorBlendState;
-	colorBlendInfo.blendConstants[0] = 0.0f;
-	colorBlendInfo.blendConstants[1] = 0.0f;
-	colorBlendInfo.blendConstants[2] = 0.0f;
-	colorBlendInfo.blendConstants[3] = 0.0f;
+ 
+ 	// Configure rasterizer
+ 	VkPipelineRasterizationStateCreateInfo kRasterInfo{};
+ 	ConvertRasterState(m_kBase.m_kRasterState, kRasterInfo);
+ 
+ 	// Configure multi sampling state
+ 	VkPipelineMultisampleStateCreateInfo kMultiSamplingInfo{};
+ 	ConvertMSState(m_kBase.m_kMSState, kMultiSamplingInfo);
+ 
+ 	// Convert BlendState
+	VkPipelineColorBlendAttachmentState kBlendAttachment{};
+	VkPipelineColorBlendStateCreateInfo kBlendCreateInfo{};
+	ConvertBlendState(m_kBase.m_kBlendState, kBlendAttachment, kBlendCreateInfo);
 
 	// Define dynamic properties
-	std::vector<VkDynamicState> dynamicStates{
+	VkDynamicState pDynamicStates[] = 
+	{
 		VK_DYNAMIC_STATE_VIEWPORT,
-		VK_DYNAMIC_STATE_SCISSOR };
-	VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
-	dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamicStateInfo.pNext = nullptr;
-	dynamicStateInfo.flags = 0;
-	dynamicStateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
-	dynamicStateInfo.pDynamicStates = &dynamicStates[0];
+		VK_DYNAMIC_STATE_SCISSOR 
+	};
+	VkPipelineDynamicStateCreateInfo kDynStateInfo{};
+	kDynStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	kDynStateInfo.pNext = nullptr;
+	kDynStateInfo.flags = 0;
+	kDynStateInfo.dynamicStateCount = (sizeof(pDynamicStates) / sizeof(pDynamicStates[0]));
+	kDynStateInfo.pDynamicStates = pDynamicStates;
+		
+	// Create the graphics pipeline
+	VkGraphicsPipelineCreateInfo kPipelineInfo{};
+	kPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	kPipelineInfo.pNext = nullptr;
+	kPipelineInfo.flags = 0;
+	// TODO: Deal with stage definition
+	// 	kPipelineInfo.stageCount = static_cast<u32>(kStageCount);
+	// 	kPipelineInfo.pStages = kStageInfo;
+	kPipelineInfo.pVertexInputState = &kVertexShaderInfo;
+	kPipelineInfo.pInputAssemblyState = &kAssemblerInfo;
+	kPipelineInfo.pTessellationState = nullptr;
+	kPipelineInfo.pViewportState = &viewportStateInfo;
+	kPipelineInfo.pRasterizationState = &kRasterInfo;
+	kPipelineInfo.pMultisampleState = &kMultiSamplingInfo;
+	kPipelineInfo.pDepthStencilState = nullptr;
+	kPipelineInfo.pColorBlendState = &kBlendCreateInfo;
+	kPipelineInfo.pDynamicState = &kDynStateInfo;
+	kPipelineInfo.layout = m_pLayout;
+	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->GetRenderPass();
+	kPipelineInfo.subpass = 0;
+	kPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	kPipelineInfo.basePipelineIndex = -1;
 
-	create_layout(RenderInterface::s_device);
+	VkResult siResult = vkCreateGraphicsPipelines(kCtx.m_pDevice, VK_NULL_HANDLE, 1, &kPipelineInfo, nullptr, &m_pPipeline);
+	GF_ASSERT(siResult == VK_SUCCESS, "Failed to create Graphics Pipeline");
 
-	// Create the graphic pipeline
-	VkGraphicsPipelineCreateInfo pipelineInfo{};
-	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineInfo.pNext = nullptr;
-	pipelineInfo.flags = 0;
-	pipelineInfo.stageCount = static_cast<u32>(kStageCount);
-	pipelineInfo.pStages = kStageInfo;
-	pipelineInfo.pVertexInputState = &vertexShaderInfo;
-	pipelineInfo.pInputAssemblyState = &assemblerInfo;
-	pipelineInfo.pTessellationState = nullptr;
-	pipelineInfo.pViewportState = &viewportStateInfo;
-	pipelineInfo.pRasterizationState = &rasterInfo;
-	pipelineInfo.pMultisampleState = &multiSamplingInfo;
-	pipelineInfo.pDepthStencilState = nullptr;
-	pipelineInfo.pColorBlendState = &colorBlendInfo;
-	pipelineInfo.pDynamicState = &dynamicStateInfo;
-	pipelineInfo.layout = m_layout;
-	pipelineInfo.renderPass = m_desc.m_pRenderPass->handle();
-	pipelineInfo.subpass = 0;
-	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-	pipelineInfo.basePipelineIndex = -1;
-
-	auto result = vkCreateGraphicsPipelines(RenderInterface::s_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline);
-	VK_CHECK(result, "Failed to create Graphics Pipeline");
-
-	// Destroy modules now that are not needed
-	destroy_shader_module(RenderInterface::s_device, vsMmodule);
-	destroy_shader_module(RenderInterface::s_device, psMmodule);
-#endif // DEAD
 }
 
 ////////////////////////////////////////////////////////////////////////////////

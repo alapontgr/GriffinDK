@@ -72,7 +72,7 @@ namespace EMaterialParamRate
 		////////////////////////////////////////////////////////////////////////////////
 		MaxBoundSets = 8,		// Maximum number of currently bound descriptor sets in a material instance
 
-		Invalid = 0xffffffff
+		Invalid = 0xff
 	};
 }
 static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundSets, "Invalid count of rates");
@@ -227,6 +227,34 @@ namespace EVertexInputRate
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
+	See https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkLogicOp.html
+*/
+namespace EBlendLogicOp 
+{
+	enum Type : u8 
+	{
+		Clear,			
+		And,			
+		AndReversed,	
+		Copy,			
+		AndInverted,	
+		NoOp,
+		Xor,
+		Or,
+		Nor,
+		Equivalent,
+		Invert,
+		OrReverse,
+		CopyInverted,
+		OrInverted,
+		Nand,
+		Set,
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct GfRasterState 
 {
 	f32					m_fDepthBiasConstFactor			= 0.0f;
@@ -253,13 +281,16 @@ struct GfMultiSamplingState
 
 struct GfBlendState 
 {
+	v4					m_vBlendConstants		= v4(0.0f);
+	EBlendFactor::Type	m_eSrcColorBlendFactor	= EBlendFactor::Src_Alpha;
+	EBlendFactor::Type	m_eDstColorBlendFactor	= EBlendFactor::One_Minus_Src_Alpha;
+	EBlendOp::Type		m_eColorBlendOp			= EBlendOp::Add;
+	EBlendFactor::Type	m_eSrcAlphaBlendFactor	= EBlendFactor::One;
+	EBlendFactor::Type	m_eDstAlphaBlendFactor	= EBlendFactor::One;
+	EBlendOp::Type		m_eAlphaBlendOp			= EBlendOp::Add;
+	EBlendLogicOp::Type m_eBlendLogicOp			= EBlendLogicOp::Copy;
 	bool				m_bEnabled				= false;
-	EBlendFactor::Type	m_eSrcColorBlendFactor;
-	EBlendFactor::Type	m_eDstColorBlendFactor;
-	EBlendOp::Type		m_eColorBlendOp;
-	EBlendFactor::Type	m_eSrcAlphaBlendFactor;
-	EBlendFactor::Type	m_eDstAlphaBlendFactor;
-	EBlendOp::Type		m_eAlphaBlendOp;
+	bool				m_bLogicOpEnabled		= false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -29,6 +29,8 @@ public:
 
 	GfRenderPass_Platform(GfRenderPass& kBase);
 
+	VkRenderPass GetRenderPass() const { return m_pRenderPass; }
+
 protected:
 
 	void CompileRHI(const GfRenderContext& kCtx);

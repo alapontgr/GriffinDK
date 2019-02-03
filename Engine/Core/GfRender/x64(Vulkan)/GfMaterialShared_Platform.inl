@@ -164,6 +164,28 @@ static const VkVertexInputRate g_pInputRate[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const VkLogicOp g_pLogicOpConverter[] = 
+{
+	VK_LOGIC_OP_CLEAR,
+	VK_LOGIC_OP_AND,
+	VK_LOGIC_OP_AND_REVERSE,
+	VK_LOGIC_OP_COPY,
+	VK_LOGIC_OP_AND_INVERTED,
+	VK_LOGIC_OP_NO_OP,
+	VK_LOGIC_OP_XOR,
+	VK_LOGIC_OP_OR,
+	VK_LOGIC_OP_NOR,
+	VK_LOGIC_OP_EQUIVALENT,
+	VK_LOGIC_OP_INVERT,
+	VK_LOGIC_OP_OR_REVERSE,
+	VK_LOGIC_OP_COPY_INVERTED,
+	VK_LOGIC_OP_OR_INVERTED,
+	VK_LOGIC_OP_NAND,
+	VK_LOGIC_OP_SET,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Direct map for the moment
 static inline VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
 {
@@ -246,6 +268,13 @@ static inline VkFormat ConvertAttributeFormat(EAttributeFormat::Type eFormat)
 static inline VkVertexInputRate ConvertInputRate(EVertexInputRate::Type eInputRate) 
 {
 	return g_pInputRate[eInputRate];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp) 
+{
+	return g_pLogicOpConverter[eLogicOp];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

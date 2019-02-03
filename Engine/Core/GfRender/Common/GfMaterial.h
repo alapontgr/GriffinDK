@@ -21,6 +21,7 @@
 
 class GfMaterialParamSet;
 class GfMatParamLayout;
+class GfRenderPass;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,6 +49,8 @@ public:
 
 	GfVertexDeclaration GetVertexFormat() const { return m_kVertexFormat; }
 
+	const GfRenderPass* GetMaterialPass() const { return m_pMaterialPass; }
+
 	void SetTopology(EPrimitiveTopology::Type val);
 
 	void SetRasterState(const GfRasterState& kVal);
@@ -57,6 +60,8 @@ public:
 	void SetBlendState(const GfBlendState& kVal);
 	
 	void SetVertexFormat(const GfVertexDeclaration& kVal);
+	
+	void SetMaterialPass(const GfRenderPass* val);
 
 private:
 
@@ -67,6 +72,7 @@ private:
 		MSState_Initialised			= 1 << 2,
 		BlendState_Initialised		= 1 << 3,
 		VertexFormat_Initialised	= 1 << 4,
+		MaterialPass_Initialised	= 1 << 5,
 	};
 
 	u32 GetBoundLayoutCount() const;
@@ -81,6 +87,8 @@ private:
 	GfBlendState				m_kBlendState;
 	// Vertex declaration
 	GfVertexDeclaration			m_kVertexFormat;
+	// Material pass
+	const GfRenderPass*			m_pMaterialPass;
 	// Description of parameter layouts
 	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
 	// Flags
@@ -142,6 +150,16 @@ GF_FORCEINLINE void GfMaterialTemplate::SetVertexFormat(const GfVertexDeclaratio
 	m_uiFlags |= EFlags::VertexFormat_Initialised;
 	m_kVertexFormat = kVal;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::SetMaterialPass(const GfRenderPass* val)
+{
+	m_uiFlags |= EFlags::MaterialPass_Initialised;
+	m_pMaterialPass = val;
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIAL_H__

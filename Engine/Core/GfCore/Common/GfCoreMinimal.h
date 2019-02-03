@@ -13,6 +13,8 @@
 
 #include "GfCore/Common/GfTypes.h"
 
+#include "GfCore/Common/GfMaths.h"
+
 #include "GfCore/Common/GfUnits.h"
 
 #include "GfCore/Common/GfConfig.h"

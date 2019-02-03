@@ -7,6 +7,8 @@ CreateIfNotExist(griffin.VSFilesDir)
 CreateIfNotExist(griffin.VSOBJFilesDir)
 CreateIfNotExist(griffin.WorkingDir)
 
+
+
 ----------------------------------------------------------
 -- Setup the solution and configure the shared settings --
 ----------------------------------------------------------
@@ -57,16 +59,16 @@ workspace (griffin.EngineName)
 
 -- Include the directories of the groups as additional include directory
 for GroupName, GroupConfig in pairs(groups) do
-	includedirs { griffin.EngineBasePath .. "/" .. GroupName}
+	includedirs { GroupConfig.Path .. "/" .. GroupName}
 end
 
 -- Create the projects
 for GroupName, GroupConfig in pairs(groups) do
 	group(GroupName)
 	for k, p in pairs(GroupConfig.Projects) do
-		print(p)
+		--print(p)
 		local RelPath = GroupName .. "/" .. p
-		local AbsPath = griffin.EngineBasePath .. "/" .. RelPath
+		local AbsPath = GroupConfig.Path .. "/" .. RelPath
 		
 		include(AbsPath)
 

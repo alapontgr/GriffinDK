@@ -34,6 +34,7 @@ groups = {}
 
 groups["External"] = 
 {
+	Path = griffin.EngineBasePath,
 	Projects = 
 	{
 		"glm"
@@ -42,6 +43,7 @@ groups["External"] =
 
 groups["Core"] = 
 {
+	Path = griffin.EngineBasePath,
 	Projects = 
 	{
 		"GfCore",
@@ -53,8 +55,9 @@ groups["Core"] =
 
 }
 
-groups["Testing"] = 
+groups["Workspace"] = 
 {
+	Path = "", -- Empty path (will use Workspace)
 	Projects = 
 	{
 		"QuickTesting"

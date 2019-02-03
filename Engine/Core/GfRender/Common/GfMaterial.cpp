@@ -16,6 +16,7 @@
 
 GfMaterialTemplate::GfMaterialTemplate()
 	: GfMaterialTemplate_Platform(*this)
+	, m_pMaterialPass(nullptr)
 	, m_uiFlags(0)
 {
 	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
@@ -28,7 +29,21 @@ GfMaterialTemplate::GfMaterialTemplate()
 
 void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 {
-	CreateRHI(kCtx);
+	// If the material's gpu resource was already created, destroy it
+	if (m_uiFlags.IsEnable(EFlags::GPUresource_Initialised))
+	{
+		Destroy(kCtx);
+	}
+	// Try to create the GPU resource
+	if (CreateRHI(kCtx)) 
+	{
+		m_uiFlags |= EFlags::GPUresource_Initialised;
+	}
+	else 
+	{
+		// If we fail in the creation process, destroy all the gpu resources that may have been created
+		Destroy(kCtx);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +51,19 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 {
 	DestroyRHI(kCtx);
+	m_uiFlags &= ~EFlags::GPUresource_Initialised;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialTemplate::SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize)
+{
+	if (szEntry && pSrc) 
+	{
+		m_pShaderStages[eStage].m_pSourceData = pSrc;
+		m_pShaderStages[eStage].m_szEntryPoint = szEntry;
+		m_pShaderStages[eStage].m_uiSrcDataSize = uiSrcDataSize;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

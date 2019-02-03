@@ -31,15 +31,20 @@ public:
 
 protected:
 
+	struct GfShaderDesc_Platform
+	{
+		VkShaderModule m_pModule = VK_NULL_HANDLE;
+	};
+
 	void DestroyRHI(const GfRenderContext& kCtx);
 
-	void CreateRHI(const GfRenderContext& kCtx);
+	bool CreateRHI(const GfRenderContext& kCtx);
 
 private:
 
-	void CreateLayout(const GfRenderContext& kCtx);
+	bool CreateLayout(const GfRenderContext& kCtx);
 
-	void CreatePipeline(const GfRenderContext& kCtx);
+	bool CreatePipeline(const GfRenderContext& kCtx);
 
 	GfMaterialTemplate&		m_kBase;
 	VkPipelineLayout		m_pLayout;

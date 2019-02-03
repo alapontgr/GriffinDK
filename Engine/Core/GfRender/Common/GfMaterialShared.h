@@ -39,20 +39,35 @@ namespace EParamaterSlotType
 
 ////////////////////////////////////////////////////////////////////////////////
 
+namespace EShaderStage 
+{
+	enum Type : u32 
+	{
+		Vertex = 0,
+		TesellationControl,
+		TesellationEval,
+		Geometry,
+		Fragment,
+		Compute,
+		////////////////////////
+		COUNT
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 namespace EShaderStageFlags
 {
-	enum Type : u32
+	enum FlagBit : u32
 	{
-		Vertex = 1 << 0,
-		TesellationControl = 1 << 1,
-		TesellationEval = 1 << 2,
-		Geometry = 1 << 3,
-		Fragment = 1 << 4,
-		Compute = 1 << 5,
+		Vertex				= 1 << EShaderStage::Vertex,
+		TesellationControl	= 1 << EShaderStage::TesellationControl,
+		TesellationEval		= 1 << EShaderStage::TesellationEval,
+		Geometry			= 1 << EShaderStage::Geometry,
+		Fragment			= 1 << EShaderStage::Fragment,
+		Compute				= 1 << EShaderStage::Compute,
 		// All the stages within the graphics pipeline
 		AllGraphics = Vertex | TesellationControl | TesellationEval | Geometry | Fragment,
-		////////////////////////////////////////////////////////////////////////////////
-		COUNT = 6 // IMPORTANT: Update if the table changes
 	};
 }
 using GfShaderAccessMask = GfBitMask<u32>;

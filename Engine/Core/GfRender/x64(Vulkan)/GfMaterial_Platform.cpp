@@ -136,24 +136,38 @@ void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 		vkDestroyPipelineLayout(kCtx.m_pDevice, m_pLayout, nullptr);
 		m_pLayout = nullptr;
 	}
+	for (u32 i=0; i<EShaderStage::COUNT; ++i) 
+	{
+		if (m_kBase.m_pShaderStages[i].m_pModule) 
+		{
+			vkDestroyShaderModule(kCtx.m_pDevice, m_kBase.m_pShaderStages[i].m_pModule, nullptr);
+			m_kBase.m_pShaderStages[i].m_pModule = VK_NULL_HANDLE;
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
+bool GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
 {
-	DestroyRHI(kCtx);
-	CreateLayout(kCtx);
-	CreatePipeline(kCtx);
+	if (CreateLayout(kCtx) && CreatePipeline(kCtx))
+	{
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
+bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
 	u32 uiLayoutCount(m_kBase.GetBoundLayoutCount());
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 	VkDescriptorSetLayout* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount));
+	if (!pLayouts) 
+	{
+		return false;
+	}
 
 	VkDescriptorSetLayout* pCursor(pLayouts);
 	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i) 
@@ -175,21 +189,67 @@ void GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 	layoutInfo.pushConstantRangeCount = 0;
 	layoutInfo.pPushConstantRanges = nullptr;
 	VkResult siResult = vkCreatePipelineLayout(kCtx.m_pDevice, &layoutInfo, nullptr, &m_pLayout);
-	GF_ASSERT(siResult, "Failed to create Pipeline Layout");
+	if (siResult != VK_SUCCESS) 
+	{
+		return false;
+	}
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
+bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 {
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
-	// TODO: Define Shader modules
+	// Define Shader modules
+	VkPipelineShaderStageCreateInfo* pStages(GfFrameMTStackAlloc::Get()->Alloc<VkPipelineShaderStageCreateInfo>(EShaderStage::COUNT));
+	if (!pStages) {return false; }
+
+	u32 uiStageCount(0);
+	for (u32 i=0; i<EShaderStage::COUNT; ++i) 
+	{
+		GfMaterialTemplate::GfShaderDesc& kStage(m_kBase.m_pShaderStages[i]);
+		if (kStage.m_pSourceData && kStage.m_szEntryPoint)
+		{
+			if (!GfIsAligned(kStage.m_pSourceData, alignof(u32)))
+			{
+				return false;	
+			}
+			// Init Shader modules
+			VkShaderModuleCreateInfo kModuleInfo;
+			kModuleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			kModuleInfo.pNext = nullptr;
+			kModuleInfo.flags = 0;
+			kModuleInfo.codeSize = kStage.m_uiSrcDataSize;
+			kModuleInfo.pCode = reinterpret_cast<const u32*>(kStage.m_pSourceData);
+
+			VkResult siResult = vkCreateShaderModule(kCtx.m_pDevice, &kModuleInfo, nullptr, &kStage.m_pModule);
+			if (siResult != VK_SUCCESS) 
+			{
+				return false;
+			}
+
+			// Assign the shader module to the stage
+ 			pStages[uiStageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+ 			pStages[uiStageCount].pNext = nullptr;
+ 			pStages[uiStageCount].flags = 0;
+ 			pStages[uiStageCount].stage = ConvertShaderStage((EShaderStage::Type)i);
+ 			pStages[uiStageCount].module = kStage.m_pModule;
+ 			pStages[uiStageCount].pName = kStage.m_szEntryPoint;
+ 			pStages[uiStageCount].pSpecializationInfo = nullptr;
+ 			uiStageCount++;
+		}
+	}
 
 	// Parse input assembler format
 	VkVertexInputBindingDescription kVertexBindingDesc{};
 	u32 uiAttribCount(m_kBase.m_kVertexFormat.GetAttribCount());
 	VkVertexInputAttributeDescription* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(uiAttribCount));
+	if (!pLayouts) 
+	{
+		return false;
+	}
 	ConvertInputVertex(m_kBase.m_kVertexFormat, 0, kVertexBindingDesc, pLayouts);
 	
 	VkPipelineVertexInputStateCreateInfo kVertexShaderInfo{};
@@ -206,14 +266,14 @@ void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	ConvertInputAssembler(m_kBase.m_eTopology, kAssemblerInfo);
 
 	// Define default viewport and scissors
-	VkPipelineViewportStateCreateInfo viewportStateInfo;
-	viewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportStateInfo.pNext = nullptr;
-	viewportStateInfo.flags = 0;
-	viewportStateInfo.viewportCount = 1;
-	viewportStateInfo.pViewports = nullptr; //&viewport;
-	viewportStateInfo.scissorCount = 1;
-	viewportStateInfo.pScissors = nullptr; //&scissors;
+	VkPipelineViewportStateCreateInfo kViewportStateInfo;
+	kViewportStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	kViewportStateInfo.pNext = nullptr;
+	kViewportStateInfo.flags = 0;
+	kViewportStateInfo.viewportCount = 1;
+	kViewportStateInfo.pViewports = nullptr; //&viewport;
+	kViewportStateInfo.scissorCount = 1;
+	kViewportStateInfo.pScissors = nullptr; //&scissors;
  
  	// Configure rasterizer
  	VkPipelineRasterizationStateCreateInfo kRasterInfo{};
@@ -246,27 +306,42 @@ void GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	kPipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	kPipelineInfo.pNext = nullptr;
 	kPipelineInfo.flags = 0;
-	// TODO: Deal with stage definition
-	// 	kPipelineInfo.stageCount = static_cast<u32>(kStageCount);
-	// 	kPipelineInfo.pStages = kStageInfo;
+	// Shader stages
+	kPipelineInfo.stageCount = uiStageCount;
+	kPipelineInfo.pStages = pStages;
+	// Input assembler
 	kPipelineInfo.pVertexInputState = &kVertexShaderInfo;
+	// Topology
 	kPipelineInfo.pInputAssemblyState = &kAssemblerInfo;
-	kPipelineInfo.pTessellationState = nullptr;
-	kPipelineInfo.pViewportState = &viewportStateInfo;
+	// Tessellation
+	kPipelineInfo.pTessellationState = nullptr; // TODO: Add Tessellation support
+	// Viewport and Scissors are set as dynamic
+	kPipelineInfo.pViewportState = &kViewportStateInfo;
+	// Raster state
 	kPipelineInfo.pRasterizationState = &kRasterInfo;
+	// MS State
 	kPipelineInfo.pMultisampleState = &kMultiSamplingInfo;
-	kPipelineInfo.pDepthStencilState = nullptr;
+	// Depth Stencil
+	kPipelineInfo.pDepthStencilState = nullptr; // TODO: Add support for Depth/Stencil
+	// Blend state
 	kPipelineInfo.pColorBlendState = &kBlendCreateInfo;
+	// Dynamic state
 	kPipelineInfo.pDynamicState = &kDynStateInfo;
+
 	kPipelineInfo.layout = m_pLayout;
 	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->GetRenderPass();
 	kPipelineInfo.subpass = 0;
+
+	// TODO: Add material specialization (uber-shaders)
 	kPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	kPipelineInfo.basePipelineIndex = -1;
 
 	VkResult siResult = vkCreateGraphicsPipelines(kCtx.m_pDevice, VK_NULL_HANDLE, 1, &kPipelineInfo, nullptr, &m_pPipeline);
-	GF_ASSERT(siResult == VK_SUCCESS, "Failed to create Graphics Pipeline");
-
+	if (siResult != VK_SUCCESS) 
+	{
+		return false;
+	}
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

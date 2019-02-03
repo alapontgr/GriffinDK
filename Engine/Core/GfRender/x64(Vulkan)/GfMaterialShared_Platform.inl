@@ -31,7 +31,7 @@ static const VkDescriptorType g_pDescriptorTypeConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static const VkShaderStageFlags g_pShaderStageFlagsConverter[] =
+static const VkShaderStageFlagBits g_pShaderStageFlagsConverter[] =
 {
 	VK_SHADER_STAGE_VERTEX_BIT,
 	VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
@@ -197,7 +197,7 @@ static inline VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eT
 static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages)
 {
 	VkShaderStageFlags uiResult(0);
-	for (u32 i = 0; i < EShaderStageFlags::COUNT; ++i)
+	for (u32 i = 0; i < EShaderStage::COUNT; ++i)
 	{
 		if ((kStages & (1 << i)) != 0)
 		{
@@ -205,6 +205,13 @@ static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kSta
 		}
 	}
 	return uiResult;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static inline VkShaderStageFlagBits ConvertShaderStage(EShaderStage::Type eStage) 
+{
+	return g_pShaderStageFlagsConverter[eStage];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

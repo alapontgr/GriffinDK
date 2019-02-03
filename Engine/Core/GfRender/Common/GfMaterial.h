@@ -51,6 +51,8 @@ public:
 
 	const GfRenderPass* GetMaterialPass() const { return m_pMaterialPass; }
 
+	bool IsFullyInitialised() const { return (m_uiFlags&EFlags::FullyInitialised) == EFlags::FullyInitialised; }
+
 	void SetTopology(EPrimitiveTopology::Type val);
 
 	void SetRasterState(const GfRasterState& kVal);
@@ -63,6 +65,8 @@ public:
 	
 	void SetMaterialPass(const GfRenderPass* val);
 
+	void SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize);
+
 private:
 
 	enum EFlags : u32
@@ -73,24 +77,43 @@ private:
 		BlendState_Initialised		= 1 << 3,
 		VertexFormat_Initialised	= 1 << 4,
 		MaterialPass_Initialised	= 1 << 5,
+		GPUresource_Initialised		= 1 << 6,
+		FullyInitialised			= ((1<<7)-1)
+	};
+
+	struct GfShaderDesc : public GfMaterialTemplate_Platform::GfShaderDesc_Platform
+	{
+		const char* m_pSourceData = nullptr;
+		const char* m_szEntryPoint = nullptr;
+		u32			m_uiSrcDataSize = 0;
 	};
 
 	u32 GetBoundLayoutCount() const;
 
 	// Primitive topology
 	EPrimitiveTopology::Type	m_eTopology;
+	
 	// Raster state
 	GfRasterState				m_kRasterState;
+	
 	// MultiSampling state
 	GfMultiSamplingState		m_kMSState;
+	
 	// Blend state
 	GfBlendState				m_kBlendState;
+	
 	// Vertex declaration
 	GfVertexDeclaration			m_kVertexFormat;
+	
 	// Material pass
 	const GfRenderPass*			m_pMaterialPass;
+	
 	// Description of parameter layouts
 	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
+	
+	// Stages
+	GfShaderDesc				m_pShaderStages[EShaderStage::COUNT];
+
 	// Flags
 	GfBitMask<u32>				m_uiFlags;
 };

@@ -14,6 +14,8 @@
 #include "GfRender/Common/GfRenderPass.h"
 #include "GfRender/Common/GfWindow.h"
 #include "GfRender/Common/GfBuffer.h"
+#include "GfRender/Common/GfMaterial.h"
+#include "GfRender/Common/GfMatParamLayout.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +300,18 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 		0, nullptr,
 		1, &barrier,
 		0, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::BindParameterSetRHI(
+	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
+	u32 uiBindPoint, bool bIsGraphics)
+{
+	VkPipelineBindPoint uiBindType(bIsGraphics ? VK_PIPELINE_BIND_POINT_GRAPHICS : VK_PIPELINE_BIND_POINT_COMPUTE);
+	VkDescriptorSet pDescriptorSet(kparamSet.GetDescriptorSet());
+	vkCmdBindDescriptorSets(m_pCmdBuffer, uiBindType,
+		kMaterial.GetLayout(), uiBindPoint, 1, &pDescriptorSet, 0, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

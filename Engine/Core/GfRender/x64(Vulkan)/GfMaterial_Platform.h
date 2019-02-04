@@ -29,6 +29,10 @@ public:
 
 	GfMaterialTemplate_Platform(GfMaterialTemplate& kBase);
 
+	VkPipelineLayout GetLayout() const { return m_pLayout; }
+
+	VkPipeline GetPipeline() const { return m_pPipeline; }
+
 protected:
 
 	struct GfShaderDesc_Platform

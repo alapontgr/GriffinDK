@@ -68,6 +68,13 @@ public:
 	void UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
+	// Material related commands
+
+	// Bind a parameter set to a slot
+	void BindParameterSet(const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
+		u32 uiBindPoint = 0, bool bIsGraphics = true);
+
+	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
@@ -138,6 +145,15 @@ GF_FORCEINLINE void GfCmdBuffer::CopyBufferRange(const GfRenderContext& kCtx, co
 GF_FORCEINLINE void GfCmdBuffer::UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
 {
 	UpdateBufferRangeRHI(kCtx, kBuffer, uiOffset, uiSize, pData);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::BindParameterSet(
+	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
+	u32 uiBindPoint, bool bIsGraphics)
+{
+	BindParameterSetRHI(kMaterial, kparamSet, uiBindPoint, bIsGraphics);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

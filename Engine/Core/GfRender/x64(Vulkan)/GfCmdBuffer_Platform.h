@@ -21,6 +21,8 @@
 class GfRenderContext;
 class GfRenderPass;
 class GfBuffer;
+class GfMaterialTemplate;
+class GfMaterialParamSet;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +65,12 @@ private:
 	void CopyBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
 	void UpdateBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void BindParameterSetRHI(const GfMaterialTemplate& kMaterial, 
+		const GfMaterialParamSet& kparamSet, 
+		u32 uiBindPoint, bool bIsGraphics);
 
 	////////////////////////////////////////////////////////////////////////////////
 

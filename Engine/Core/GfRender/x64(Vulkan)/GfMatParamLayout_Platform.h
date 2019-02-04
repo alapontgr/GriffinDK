@@ -74,6 +74,8 @@ public:
 
 	GfMaterialParamSet_Platform(GfMaterialParamSet& kBase);
 
+	VkDescriptorSet GetDescriptorSet() const { return m_pParamatersSet; }
+
 protected:
 
 	bool CreateRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);

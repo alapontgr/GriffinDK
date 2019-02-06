@@ -1,29 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfCoreMinimal.h
+//	Date: 	2019/02/05
+//	File: 	GfMemory.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFCOREMINIMAL_H__
-#define __GFCOREMINIMAL_H__
+#ifndef __GFMEMORY_H__
+#define __GFMEMORY_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfTypes.h"
+#include "GfMemory/Common/GfMemoryBase.h"
 
-#include "GfCore/Common/GfMaths.h"
-
-#include "GfCore/Common/GfUnits.h"
-
-#include "GfCore/Common/GfConfig.h"
-
-#include GF_SOLVE_PLATFORM_HEADER(GfCore)
-
-#include "GfCore/Common/GfDebug.h"
-
-#include "GfCore/Common/GfTime.h"
+#include "GfMemory/Common/GfRAII.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFCOREMINIMAL_H__
+#endif // __GFMEMORY_H__

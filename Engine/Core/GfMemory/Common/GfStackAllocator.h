@@ -14,6 +14,7 @@
 
 #include "GfCore/Common/GfCoreMinimal.h"
 #include "GfCore/Common/GfSingleton.h"
+#include "GfMemory/Common/GfMemoryBase.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -82,6 +82,8 @@ protected:
 
 	void DestroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
+	void UpdateRHI(const GfRenderContext& kCtxt);
+
 private:
 
 	GfMaterialParamSet& m_kBase;

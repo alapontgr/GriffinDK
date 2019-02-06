@@ -19,6 +19,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfGraphicsResource;
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct GfMaterialParameterSlot
 {
 	EParamaterSlotType::Type	m_eType;
@@ -66,6 +70,8 @@ public:
 
 	bool Validate() const;
 
+	u32 GetParameterCount() const; 
+
 private:
 
 	void SortParameters();
@@ -85,15 +91,31 @@ public:
 
 	GfMaterialParamSet();
 
-	void BindLayout(const GfMatParamLayout* pParamLayout);
-
 	bool Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
+	void Update(const GfRenderContext& kCtxt);
+
+	void BindLayout(const GfMatParamLayout* pParamLayout);
+
+	void BindResource(u32 uiSlot, const GfGraphicsResource* pResource);
+
 private:
 
+	enum EFlags : u32 
+	{
+		LayoutAssigned			= 1<<0,
+		GPUResourceInitialised	= 1<<1,
+		GPUDirty				= 1<<2,
+		GPUUpdatePending		= 1<<3,
+	};
+
 	const GfMatParamLayout* m_pSetLayout;
+
+	GfVector<const GfGraphicsResource*> m_tBoundParamaters;
+
+	GfBitMask<u32> m_uiFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

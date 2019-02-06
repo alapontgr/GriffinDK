@@ -33,6 +33,8 @@ public:
 
 	void Toggle(const FlagT uiValue);
 
+	// With other mask
+
 	GfBitMask& operator&=(const GfBitMask& uiOther);
 
 	GfBitMask& operator|=(const GfBitMask& uiOther);
@@ -48,6 +50,22 @@ public:
 	bool operator== (const GfBitMask& uiOther);
 
 	bool operator!= (const GfBitMask& uiOther);
+
+	// With native type
+
+	GfBitMask& operator&=(const FlagT uiValue);
+
+	GfBitMask& operator|=(const FlagT uiValue);
+
+	FlagT operator&(const FlagT uiValue) const;
+
+	FlagT operator|(const FlagT uiValue) const;
+
+	FlagT operator^(const FlagT uiValue) const;
+
+	bool operator== (const FlagT uiValue);
+
+	bool operator!= (const FlagT uiValue);
 
 private:
 	FlagT m_uiFlags;
@@ -97,7 +115,7 @@ void GfBitMask<FlagT, uiDefault>::Set(const FlagT uiValue)
 template <typename FlagT, FlagT uiDefault /*= 0*/>
 bool GfBitMask<FlagT, uiDefault>::IsEnable(const FlagT uiValue) const
 {
-	return (m_uiFlags & uiValue) > 0;
+	return (m_uiFlags & uiValue) == uiValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +127,30 @@ void GfBitMask<FlagT, uiDefault>::Toggle(const FlagT uiValue)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+GfBitMask<FlagT, uiDefault>::GfBitMask(FlagT uiFlags /*= uiDefault*/) : m_uiFlags{ uiFlags }
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+void GfBitMask<FlagT, uiDefault>::Reset()
+{
+	m_uiFlags = uiDefault;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+void GfBitMask<FlagT, uiDefault>::Clear()
+{
+	m_uiFlags = 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Interaction with other mask
 
 template <typename FlagT, FlagT uiDefault /*= 0*/>
 GfBitMask<FlagT, uiDefault>& GfBitMask<FlagT, uiDefault>::operator&=(const GfBitMask& uiOther)
@@ -175,26 +217,62 @@ bool GfBitMask<FlagT, uiDefault>::operator!=(const GfBitMask& uiOther)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Interaction with native type
 
 template <typename FlagT, FlagT uiDefault /*= 0*/>
-GfBitMask<FlagT, uiDefault>::GfBitMask(FlagT uiFlags /*= uiDefault*/) : m_uiFlags{ uiFlags }
+GfBitMask<FlagT, uiDefault>& GfBitMask<FlagT, uiDefault>::operator&=(const FlagT uiValue)
 {
+	m_uiFlags &= uiValue;
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename FlagT, FlagT uiDefault /*= 0*/>
-void GfBitMask<FlagT, uiDefault>::Reset()
+GfBitMask<FlagT, uiDefault>& GfBitMask<FlagT, uiDefault>::operator|=(const FlagT uiValue)
 {
-	m_uiFlags = uiDefault;
+	m_uiFlags |= uiValue;
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename FlagT, FlagT uiDefault /*= 0*/>
-void GfBitMask<FlagT, uiDefault>::Clear()
+FlagT GfBitMask<FlagT, uiDefault>::operator&(const FlagT uiValue) const
 {
-	m_uiFlags = 0;
+	return (m_uiFlags & uiValue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+FlagT GfBitMask<FlagT, uiDefault>::operator|(const FlagT uiValue) const
+{
+	return (m_uiFlags | uiValue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+FlagT GfBitMask<FlagT, uiDefault>::operator^(const FlagT uiValue) const
+{
+	return (m_uiFlags ^ uiValue);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+bool GfBitMask<FlagT, uiDefault>::operator==(const FlagT uiValue)
+{
+	return m_uiFlags == uiValue;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+bool GfBitMask<FlagT, uiDefault>::operator!=(const FlagT uiValue)
+{
+	return m_uiFlags != uiValue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,29 +1,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfCoreMinimal.h
+//	Date: 	2019/02/05
+//	File: 	GfRAII.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFCOREMINIMAL_H__
-#define __GFCOREMINIMAL_H__
+#ifndef __GFRAII_H__
+#define __GFRAII_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfTypes.h"
-
-#include "GfCore/Common/GfMaths.h"
-
-#include "GfCore/Common/GfUnits.h"
-
-#include "GfCore/Common/GfConfig.h"
-
-#include GF_SOLVE_PLATFORM_HEADER(GfCore)
-
-#include "GfCore/Common/GfDebug.h"
-
-#include "GfCore/Common/GfTime.h"
+#include <memory>
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFCOREMINIMAL_H__
+
+template <typename T>
+using SlUniquePtr = std::unique_ptr<T>;
+
+template <typename T>
+using SlSharedPtr = std::shared_ptr<T>;
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFRAII_H__

@@ -1,29 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/13
-//	File: 	GfCoreMinimal.h
+//	Date: 	2019/02/06
+//	File: 	GfGraphicResources_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFCOREMINIMAL_H__
-#define __GFCOREMINIMAL_H__
+#ifndef __GFGRAPHICRESOURCES_PLATFORM_H__
+#define __GFGRAPHICRESOURCES_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfTypes.h"
 
-#include "GfCore/Common/GfMaths.h"
-
-#include "GfCore/Common/GfUnits.h"
-
-#include "GfCore/Common/GfConfig.h"
-
-#include GF_SOLVE_PLATFORM_HEADER(GfCore)
-
-#include "GfCore/Common/GfDebug.h"
-
-#include "GfCore/Common/GfTime.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFCOREMINIMAL_H__
+#endif // __GFGRAPHICRESOURCES_PLATFORM_H__

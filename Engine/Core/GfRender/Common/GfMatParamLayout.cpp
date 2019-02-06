@@ -15,8 +15,8 @@
 // GfMatUniformFactory
 
 GfMatUniformFactory::GfMatUniformFactory()
-	: m_uiMaxAllocatedSets(0)
-	, GfMatUniformFactory_Platform(*this)
+	: GfMatUniformFactory_Platform(*this)
+	, m_uiMaxAllocatedSets(0)
 {
 	for (u32 i = 0; i < EParamaterSlotType::Count; ++i) 
 	{
@@ -109,6 +109,13 @@ bool GfMatParamLayout::Validate() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+u32 GfMatParamLayout::GetParameterCount() const
+{
+	return static_cast<u32>(m_tParameters.size());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfMatParamLayout::SortParameters()
 {
 	if (m_tParameters.size() > 0) 
@@ -136,16 +143,17 @@ GfMaterialParamSet::GfMaterialParamSet()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
-{
-	m_pSetLayout = pParamLayout;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
-	return CreateRHI(kCtxt, kFactory);
+	if (m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised))
+	{
+		if (CreateRHI(kCtxt, kFactory)) 
+		{
+			m_uiFlags |= EFlags::GPUResourceInitialised;
+			return true;
+		}
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +161,43 @@ bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactor
 void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
 	DestroyRHI(kCtxt, kFactory);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
+{
+	UpdateRHI(kCtxt);
+	m_uiFlags.Toggle(EFlags::GPUUpdatePending | EFlags::GPUDirty);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
+{
+	GF_ASSERT(m_pSetLayout, "TEMPORARY: Do some protection to avoid re-initialization");
+	m_pSetLayout = pParamLayout;
+	m_uiFlags |= EFlags::LayoutAssigned;
+	
+	u32 uiParamCount(m_pSetLayout->GetParameterCount());
+	m_tBoundParamaters.clear();
+	m_tBoundParamaters.resize(uiParamCount);
+	
+	// Clear the state of the Parameter Set (No parameters bound at this point)
+	for (u32 i=0; i<uiParamCount; ++i)
+	{
+		m_tBoundParamaters[i] = nullptr;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialParamSet::BindResource(u32 uiSlot, const GfGraphicsResource* pResource)
+{
+	GF_ASSERT_ALWAYS("Implement me!!!");
+	m_uiFlags.IsEnable(EFlags::GPUDirty);
+	// TODO: Queue the Parameter Set somewhere to be updated
 }
 
 ////////////////////////////////////////////////////////////////////////////////

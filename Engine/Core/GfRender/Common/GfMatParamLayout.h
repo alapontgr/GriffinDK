@@ -71,10 +71,8 @@ public:
 	bool Validate() const;
 
 	u32 GetParameterCount() const; 
-
-private:
-
-	void SortParameters();
+	
+	GfMaterialParameterSlot GetAttrib(u32 uiSlot) const;
 
 protected:
 
@@ -95,7 +93,7 @@ public:
 
 	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
-	void Update(const GfRenderContext& kCtxt);
+	bool Update(const GfRenderContext& kCtxt);
 
 	void BindLayout(const GfMatParamLayout* pParamLayout);
 
@@ -111,11 +109,13 @@ private:
 		GPUUpdatePending		= 1<<3,
 	};
 
-	const GfMatParamLayout* m_pSetLayout;
+	static constexpr u32 ms_uiMaxResources = 32;
 
+
+	const GfMatParamLayout*				m_pSetLayout;
 	GfVector<const GfGraphicsResource*> m_tBoundParamaters;
-
-	GfBitMask<u32> m_uiFlags;
+	GfBitMask<u32>						m_uiFlags;
+	GfBitMask<u32>						m_uiDirtyResources;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

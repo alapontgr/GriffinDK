@@ -12,6 +12,7 @@
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfRenderCommon.h"
+#include "GfRender/Common/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory_Platform
@@ -160,7 +161,47 @@ void GfMaterialParamSet_Platform::DestroyRHI(const GfRenderContext& kCtxt, GfMat
 
 void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 {
+	u32 uiParamCount(m_kBase.m_pSetLayout->GetParameterCount());
+	for (u32 i=0; i<uiParamCount; ++i) 
+	{
+		if (m_kBase.m_uiDirtyResources & (1 << i)) 
+		{
+			// TODO: Handle all the resource types
+			const GfGraphicsResource* pParam(m_kBase.m_tBoundParamaters[i]);
+			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 
+			switch (pParam->GetResourceType())
+			{
+			case EParamaterSlotType::UniformBuffer:
+			{
+				const GfConstantBuffer* pCBuffer((const GfConstantBuffer*)pParam);
+				const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
+
+				VkDescriptorBufferInfo kDescBuffInfo{};
+				kDescBuffInfo.buffer = kRange.m_pBuffer->GetHandle();
+				kDescBuffInfo.offset = kRange.m_uiOffset;
+				kDescBuffInfo.range = kRange.m_uiSize;
+
+				VkWriteDescriptorSet kWriteDescSet{};
+				kWriteDescSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				kWriteDescSet.pNext = nullptr;
+				kWriteDescSet.dstSet = m_pParamatersSet;
+				kWriteDescSet.dstBinding = kSlot.m_uiBindSlot; 
+				kWriteDescSet.dstArrayElement = 0;
+				kWriteDescSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				kWriteDescSet.descriptorCount = 1;
+				kWriteDescSet.pBufferInfo = &kDescBuffInfo;
+				kWriteDescSet.pImageInfo = nullptr;
+				kWriteDescSet.pTexelBufferView = nullptr;
+
+				vkUpdateDescriptorSets(kCtxt.m_pDevice, 1, &kWriteDescSet, 0, nullptr);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

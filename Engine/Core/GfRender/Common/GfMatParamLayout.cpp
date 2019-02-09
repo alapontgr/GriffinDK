@@ -116,20 +116,9 @@ u32 GfMatParamLayout::GetParameterCount() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatParamLayout::SortParameters()
+GfMaterialParameterSlot GfMatParamLayout::GetAttrib(u32 uiSlot) const
 {
-	if (m_tParameters.size() > 0) 
-	{
-		std::sort(m_tParameters.begin(), m_tParameters.end(), [&](const GfMaterialParameterSlot& kA, const GfMaterialParameterSlot& kB)
-		{
-			// Sort per type first and per bind slot after
-			if (kA.m_eType != kB.m_eType)
-			{
-				return kA.m_eType <= kB.m_eType;
-			}
-			return kA.m_uiBindSlot <= kB.m_uiBindSlot;
-		});
-	}
+	return m_tParameters[uiSlot];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -165,11 +154,17 @@ void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFacto
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
+bool GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
 {
-	UpdateRHI(kCtxt);
-	m_uiFlags.Toggle(EFlags::GPUUpdatePending | EFlags::GPUDirty);
-
+	// Check that there are some resources pending to be updated
+	if (m_uiFlags.IsEnable(EFlags::GPUUpdatePending | EFlags::GPUResourceInitialised)) 
+	{
+		UpdateRHI(kCtxt);
+		m_uiFlags &= ~(EFlags::GPUUpdatePending | EFlags::GPUDirty);
+		m_uiDirtyResources = 0;
+		return true;
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +173,7 @@ void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
 {
 	GF_ASSERT(m_pSetLayout, "TEMPORARY: Do some protection to avoid re-initialization");
 	m_pSetLayout = pParamLayout;
-	m_uiFlags |= EFlags::LayoutAssigned;
+	m_uiFlags |= (EFlags::LayoutAssigned | EFlags::GPUDirty);
 	
 	u32 uiParamCount(m_pSetLayout->GetParameterCount());
 	m_tBoundParamaters.clear();
@@ -195,9 +190,15 @@ void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
 
 void GfMaterialParamSet::BindResource(u32 uiSlot, const GfGraphicsResource* pResource)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
-	m_uiFlags.IsEnable(EFlags::GPUDirty);
-	// TODO: Queue the Parameter Set somewhere to be updated
+	if (pResource && m_uiFlags.IsEnable(EFlags::LayoutAssigned))
+	{
+		GF_ASSERT(uiSlot < ms_uiMaxResources, "Trying to bind to an invalid slot");
+
+		// Mark the GPU's resource as dirty
+		m_uiFlags |= EFlags::GPUUpdatePending;
+		m_tBoundParamaters[uiSlot] = pResource;
+		m_uiDirtyResources |= (1 << uiSlot);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

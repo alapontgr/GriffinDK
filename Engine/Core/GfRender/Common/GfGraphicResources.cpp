@@ -1,4 +1,3 @@
-#ifdef DEAD
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
@@ -37,13 +36,11 @@ GfConstantBuffer::GfConstantBuffer()
 
 void GfConstantBuffer::BindBuffer(const GfBuffer::GfRange& kRange)
 {
-	if (m_uiFlags.IsEnable(EFlags.BufferBound)) 
+	if (!m_uiFlags.IsEnable(EFlags::BufferBound)) 
 	{
-		GF_ASSERT_ALWAYS("Implement me!!!");
+		m_kBufferRange = kRange;
+		m_uiFlags |= (EFlags::BufferBound | EFlags::GPUDirty);
 	}
-	m_kBufferRange = kRange;
-	m_uiFlags |= (EFlags::BufferBound | EFlags::GPUDirty);
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,4 +52,3 @@ void GfConstantBuffer::Init(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 // EOF
-#endif // DEAD

@@ -1,4 +1,3 @@
-#ifdef DEAD
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
@@ -14,7 +13,6 @@
 
 #include "GfRender/Common/GfMaterialShared.h"
 #include "GfRender/Common/GfBuffer.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfGraphicResources)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +28,7 @@ public:
 
 protected:
 
-	enum class EFlags : u32 
+	enum EFlags : u16 
 	{
 		BufferBound = 1<<0,
 		GPUDirty	= 1<<1,
@@ -55,6 +53,8 @@ public:
 
 	u32 GetSize() const { return m_kBufferRange.m_uiSize; }
 
+	const GfBuffer::GfRange GetBufferRange() const { return m_kBufferRange; }
+
 private:
 
 	GfBuffer::GfRange m_kBufferRange;
@@ -62,4 +62,3 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFGRAPHICRESOURCES_H__
-#endif // DEAD

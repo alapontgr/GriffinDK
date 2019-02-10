@@ -57,7 +57,8 @@ groups["Core"] =
 
 groups["Workspace"] = 
 {
-	Path = "", -- Empty path (will use Workspace)
+	--Path = griffin.EngineBasePath,
+	Path = "./",
 	Projects = 
 	{
 		"QuickTesting"

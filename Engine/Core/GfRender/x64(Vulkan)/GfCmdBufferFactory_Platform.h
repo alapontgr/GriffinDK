@@ -32,7 +32,7 @@ public:
 
 private:
 
-	void InitRHI(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType);
+	void InitRHI(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType);
 
 	void CreateCmdBufferRHI(const GfRenderContext& kCtx, u32 uiType, GfCmdBuffer& kOuCmdBuffer);
 

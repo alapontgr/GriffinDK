@@ -38,7 +38,7 @@ public:
 
 	void EndFrame();
 
-	u32 GetFamilyIdx(GfRencerContextFamilies::Type eType) const;
+	u32 GetFamilyIdx(GfRenderContextFamilies::Type eType) const;
 
 	GfWindow* GetWindow() const;
 
@@ -51,7 +51,7 @@ private:
 	GfWindow*					m_pWindow;
 
 	// Used Families
-	u32							m_pAvailableFamilies[GfRencerContextFamilies::Count];
+	u32							m_pAvailableFamilies[GfRenderContextFamilies::Count];
 
 	// Used as a cursor for the multi buffering of the resources of the engine
 	u32							m_uiCurrentFrameIdx;
@@ -66,9 +66,9 @@ GF_FORCEINLINE u32 GfRenderContext::GetCurrentFrameIdx() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRencerContextFamilies::Type eType) const
+GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRenderContextFamilies::Type eType) const
 {
-	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
+	GF_ASSERT(eType >= 0 && eType < GfRenderContextFamilies::Count, "Invalid family");
 	return m_pAvailableFamilies[eType];
 }
 

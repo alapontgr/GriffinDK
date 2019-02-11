@@ -43,7 +43,7 @@ private:
 
 	void SubmitRHI(
 		const GfRenderContext& kCtx, 
-		GfRencerContextFamilies::Type eQueueType, 
+		GfRenderContextFamilies::Type eQueueType, 
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////

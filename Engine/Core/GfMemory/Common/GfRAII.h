@@ -16,10 +16,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-using SlUniquePtr = std::unique_ptr<T>;
+using GfUniquePtr = std::unique_ptr<T>;
 
 template <typename T>
-using SlSharedPtr = std::shared_ptr<T>;
+using GfSharedPtr = std::shared_ptr<T>;
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRAII_H__

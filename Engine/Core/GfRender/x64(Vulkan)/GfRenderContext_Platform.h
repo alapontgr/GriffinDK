@@ -45,7 +45,7 @@ public:
 
 	const GfFrameSyncing& GetFrameSyncPrimitives() const;
 
-	VkQueue GetQueue(GfRencerContextFamilies::Type eType) const;
+	VkQueue GetQueue(GfRenderContextFamilies::Type eType) const;
 
 	VkFormat GetSwapchainFormat() const;
 
@@ -108,7 +108,7 @@ private:
 	GfRenderContext&				m_kBase;
 
 	// Queues
-	VkQueue							m_pQueues[GfRencerContextFamilies::Count];
+	VkQueue							m_pQueues[GfRenderContextFamilies::Count];
 
 	// Swap chain and surface
 	VkSurfaceKHR					m_pSurface;
@@ -129,9 +129,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRencerContextFamilies::Type eType) const
+GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRenderContextFamilies::Type eType) const
 {
-	GF_ASSERT(eType >= 0 && eType < GfRencerContextFamilies::Count, "Invalid family");
+	GF_ASSERT(eType >= 0 && eType < GfRenderContextFamilies::Count, "Invalid family");
 	return m_pQueues[eType];
 }
 

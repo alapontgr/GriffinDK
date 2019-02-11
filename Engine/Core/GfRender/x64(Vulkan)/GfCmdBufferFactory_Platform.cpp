@@ -21,7 +21,7 @@ GfCmdBufferFactory_Platform::GfCmdBufferFactory_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory_Platform::InitRHI(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
+void GfCmdBufferFactory_Platform::InitRHI(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType)
 {
 	VkCommandPoolCreateInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

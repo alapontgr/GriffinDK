@@ -48,7 +48,7 @@ public:
 
 	void Submit(
 		const GfRenderContext& kCtx,
-		GfRencerContextFamilies::Type eQueueType,
+		GfRenderContextFamilies::Type eQueueType,
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
 
 GF_FORCEINLINE void GfCmdBuffer::Submit(
 	const GfRenderContext& kCtx,
-	GfRencerContextFamilies::Type eQueueType,
+	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
 	SubmitRHI(kCtx, eQueueType, bLast);

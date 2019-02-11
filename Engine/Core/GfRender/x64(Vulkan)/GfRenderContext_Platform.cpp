@@ -68,7 +68,7 @@ GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
 	, m_pSwapChain(0)
 	, m_uiCurrentImageIdx(0)
 {
-	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
 		m_pQueues[i] = nullptr;
 	}
@@ -148,7 +148,7 @@ void GfRenderContext_Platform::EndFrameRHI()
 	kInfo.pSwapchains = &m_pSwapChain;
 	kInfo.pImageIndices = &m_uiCurrentImageIdx;
 	kInfo.pResults = nullptr;
-	auto result = vkQueuePresentKHR(GetQueue(GfRencerContextFamilies::Present), &kInfo);
+	auto result = vkQueuePresentKHR(GetQueue(GfRenderContextFamilies::Present), &kInfo);
 	switch (result)
 	{
 	case VK_SUCCESS:
@@ -479,13 +479,13 @@ void GfRenderContext_Platform::CreateDevice()
 		}
 
 		// Assign the families indices
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Present] = uiPresentFamilyIdx;
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Graphics] = uiGraphicsFamilyIdx;
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Transfer] = uiGraphicsFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Present] = uiPresentFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Graphics] = uiGraphicsFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Transfer] = uiGraphicsFamilyIdx;
 		// It'll be the graphics queue
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::Compute] = uiComputeFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Compute] = uiComputeFamilyIdx;
 		// Temporarily async compute will fallback to the compute queue. In the end it will probably be the graphics queue
-		m_kBase.m_pAvailableFamilies[GfRencerContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
+		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
 
 		// Check extensions
 #if defined(_DEBUG) || defined (_DEBUGOPT)
@@ -508,7 +508,7 @@ void GfRenderContext_Platform::CreateDevice()
 		std::vector<VkDeviceQueueCreateInfo> tQueueInfoList;
 		tQueueInfoList.push_back(kQueueInfo);
 
-		if (m_kBase.GetFamilyIdx(GfRencerContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRencerContextFamilies::Present)) {
+		if (m_kBase.GetFamilyIdx(GfRenderContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRenderContextFamilies::Present)) {
 			// Almost the same configuration apart of the family index to use
 			kQueueInfo.queueFamilyIndex = uiPresentFamilyIdx;
 			tQueueInfoList.push_back(kQueueInfo);
@@ -538,10 +538,10 @@ void GfRenderContext_Platform::CreateDevice()
 void GfRenderContext_Platform::RetrieveQueues()
 {
 	// Get access to the queues we will use
-	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
-		u32 uiFamilyIdx(m_kBase.GetFamilyIdx((GfRencerContextFamilies::Type)i));
-		if (uiFamilyIdx != GfRencerContextFamilies::InvalidIdx) 
+		u32 uiFamilyIdx(m_kBase.GetFamilyIdx((GfRenderContextFamilies::Type)i));
+		if (uiFamilyIdx != GfRenderContextFamilies::InvalidIdx) 
 		{
 			vkGetDeviceQueue(m_pDevice, uiFamilyIdx, 0, &m_pQueues[i]);	
 		}

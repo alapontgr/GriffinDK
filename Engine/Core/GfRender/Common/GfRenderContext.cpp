@@ -21,10 +21,10 @@ GfRenderContext::GfRenderContext()
 	, m_pWindow(nullptr)
 	, m_uiCurrentFrameIdx(0)
 {
-	for (u32 i=0; i<GfRencerContextFamilies::Count; ++i) 
+	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
 		// Give an invalid value as the default value
-		m_pAvailableFamilies[i] = GfRencerContextFamilies::InvalidIdx;
+		m_pAvailableFamilies[i] = GfRenderContextFamilies::InvalidIdx;
 	}
 }
 

@@ -38,6 +38,8 @@ public:
 
 	GfFileHandle();
 
+	size_t GetFileSize() const { return m_ulFileSize; }
+
 private:
 
 	size_t					m_ulFileSize;

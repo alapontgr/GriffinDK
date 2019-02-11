@@ -4,6 +4,7 @@ project "QuickTesting"
 
 	links {
 		"GfCore.lib",
+		"GfFile.lib",
 		"GfEntry.lib",
 		"GfRender.lib",
 	}

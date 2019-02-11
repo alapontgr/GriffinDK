@@ -52,7 +52,7 @@ void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 
 void GfCmdBuffer_Platform::SubmitRHI(
 	const GfRenderContext& kCtx,
-	GfRencerContextFamilies::Type eQueueType,
+	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
 	const GfFrameSyncing& kSyncPrimitives(kCtx.GetFrameSyncPrimitives());
@@ -158,8 +158,8 @@ void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, co
 		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          dstAccessMask
 		VK_IMAGE_LAYOUT_UNDEFINED,                  // VkImageLayout                          oldLayout
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
 		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
 		kImageRange                     // VkImageSubresourceRange                subresourceRange
 	};
@@ -172,8 +172,8 @@ void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, co
 		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          dstAccessMask
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          oldLayout
 		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRencerContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
+		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
 		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
 		kImageRange                     // VkImageSubresourceRange                subresourceRange
 	};

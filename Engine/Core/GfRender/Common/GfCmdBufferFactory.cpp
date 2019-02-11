@@ -19,7 +19,7 @@ GfCmdBufferFactory::GfCmdBufferFactory()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory::Init(const GfRenderContext& kCtx, GfRencerContextFamilies::Type eQueueType)
+void GfCmdBufferFactory::Init(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType)
 {
 	InitRHI(kCtx, eQueueType);
 }

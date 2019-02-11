@@ -1,6 +1,23 @@
 #include "GfCore/Common/GfCore.h"
+#include "GfMemory/Common/GfRAII.h"
 #include "GfEntry/Common/GfEntry.h"
 #include "GfRender/Common/GfRender.h"
+#include "GfFile/Common/GfFile.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize) 
+{
+	GfFileHandle kFile;
+	GfFile::OpenFile(szFilepath, EFileAccessMode::Read, kFile);
+	GfFile::GetFileSize(kFile);
+	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
+	GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
+	u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
+	GfFile::CloseFile(kFile);
+	GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
+	return pSrc;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,9 +41,16 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 	GfRenderPass kRenderPass;
 	kRenderPass.Compile(kContext);
 
+	// Create material
+	u32 uiVertexSize, uiFragmentSize;
+	GfUniquePtr<char[]> pVertexSrc(LoadFileSrc("Shaders/bin/dummy.vert.spv", uiVertexSize));
+	GfUniquePtr<char[]> pFragSrc(LoadFileSrc("Shaders/bin/dummy.frag.spv", uiFragmentSize));
+	
+	// TODO: Continue with material creation
+
 	GfCmdBuffer kCmdBuffer;
 	GfCmdBufferFactory kCmdBufferFactory;
-	kCmdBufferFactory.Init(kContext, GfRencerContextFamilies::Graphics);
+	kCmdBufferFactory.Init(kContext, GfRenderContextFamilies::Graphics);
 	kCmdBufferFactory.CreateCmdBuffer(kContext, GfCmdBufferType::Primary, kCmdBuffer);
 
 	while (kContext.BeginFrame())
@@ -47,7 +71,7 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		kCmdBuffer.EndRecording(kContext);
 
 		// Submit command buffer
-		kCmdBuffer.Submit(kContext, GfRencerContextFamilies::Present, GF_TRUE);
+		kCmdBuffer.Submit(kContext, GfRenderContextFamilies::Present, GF_TRUE);
 
 		kContext.EndFrame();
 	}

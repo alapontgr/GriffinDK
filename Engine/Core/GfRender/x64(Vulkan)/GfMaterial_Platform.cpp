@@ -96,7 +96,7 @@ static inline void ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 ui
 	VkVertexInputBindingDescription& kOutVertexDesc,
 	VkVertexInputAttributeDescription* pOutVertexAttributes)
 {
-	// IMPORTANT: pOutVertexAttributes must be a valid array of "kVertex.GetAttribCount()" elements 
+	// IMPORTANT: pOutVertexAttributes must be a valid array of "kVertex.GetAttribCount()" elements. nullptr in case of 0 
 	kOutVertexDesc.binding = uiBinding;
 	kOutVertexDesc.stride = kVertex.GetStride();
 	kOutVertexDesc.inputRate = ConvertInputRate(kVertex.GetRate());
@@ -245,11 +245,13 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	// Parse input assembler format
 	VkVertexInputBindingDescription kVertexBindingDesc{};
 	u32 uiAttribCount(m_kBase.m_kVertexFormat.GetAttribCount());
-	VkVertexInputAttributeDescription* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(uiAttribCount));
-	if (!pLayouts) 
+
+	VkVertexInputAttributeDescription* pLayouts(nullptr);
+	if (uiAttribCount) 
 	{
-		return false;
+		pLayouts = GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(uiAttribCount);
 	}
+
 	ConvertInputVertex(m_kBase.m_kVertexFormat, 0, kVertexBindingDesc, pLayouts);
 	
 	VkPipelineVertexInputStateCreateInfo kVertexShaderInfo{};

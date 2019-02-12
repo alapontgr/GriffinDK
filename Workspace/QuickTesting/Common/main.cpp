@@ -1,6 +1,8 @@
 #include "GfCore/Common/GfCore.h"
 #include "GfMemory/Common/GfRAII.h"
 #include "GfEntry/Common/GfEntry.h"
+#include "GfRender/Common/GfMaterial.h"
+#include "GfCore/Common/GfSingleton.h"
 #include "GfRender/Common/GfRender.h"
 #include "GfFile/Common/GfFile.h"
 
@@ -46,8 +48,22 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 	GfUniquePtr<char[]> pVertexSrc(LoadFileSrc("Shaders/bin/dummy.vert.spv", uiVertexSize));
 	GfUniquePtr<char[]> pFragSrc(LoadFileSrc("Shaders/bin/dummy.frag.spv", uiFragmentSize));
 	
-	// TODO: Continue with material creation
+	// Define vertex format
+	GfVertexDeclaration kVertexFormat;
+	kVertexFormat.Init(nullptr, 0, 0, EVertexInputRate::PerVertex);
 
+	// Define material
+	GfMaterialTemplate kMaterialT;
+	kMaterialT.SetTopology(EPrimitiveTopology::TriList);
+	kMaterialT.SetRasterState(GfRasterState());		// Use default RasterState
+	kMaterialT.SetMSState(GfMultiSamplingState());	// Default MSState (disabled)
+	kMaterialT.SetBlendState(GfBlendState());		// Default BlendState (disabled)
+	kMaterialT.SetVertexFormat(kVertexFormat);
+	kMaterialT.SetMaterialPass(&kRenderPass);
+	kMaterialT.SetShaderData(EShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
+	kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
+	kMaterialT.Create(kContext);
+	
 	GfCmdBuffer kCmdBuffer;
 	GfCmdBufferFactory kCmdBufferFactory;
 	kCmdBufferFactory.Init(kContext, GfRenderContextFamilies::Graphics);

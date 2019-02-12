@@ -19,13 +19,11 @@ public:
 	// Singleton access. Allow custom creation of the singleton instance
 	static T* Get();
 
-private:
+protected:
 
 	GfPerThreadSingleton();
 	GfPerThreadSingleton(const GfPerThreadSingleton&);
 	GfPerThreadSingleton& operator=(const GfPerThreadSingleton&);
-
-	static thread_local T* ms_pInstance;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +36,7 @@ public:
 	// Singleton access. Allow custom creation of the singleton instance
 	static T* Get(T* pUserInstance = nullptr);
 
-private:
+protected:
 
 	GfSingleton();
 	GfSingleton(const GfSingleton&);
@@ -50,21 +48,15 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
-GfPerThreadSingleton<T, AllocT>::GfPerThreadSingleton() 
-	: m_pInstance(nullptr)
-{}
+GfPerThreadSingleton<T, AllocT>::GfPerThreadSingleton() {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename AllocT = GfDefaultAllocator>
 T* GfPerThreadSingleton<T, AllocT>::Get()
 {
-	if (!ms_pInstance) 
-	{
-		// TODO: Replace this with a proper allocator. Fallback to block allocator in the future
-		ms_pInstance = new T();
-	}
-	return ms_pInstance;
+	thread_local static T ms_kInstance;
+	return &ms_kInstance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

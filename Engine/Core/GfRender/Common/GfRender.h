@@ -32,5 +32,11 @@
 
 #include "GfRender/Common/GfCmdBufferFactory.h"
 
+#include "GfRender/Common/GfMaterialShared.h"
+
+#include "GfRender/Common/GfMatParamLayout.h"
+
+#include "GfRender/Common/GfMaterial.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDER_H__

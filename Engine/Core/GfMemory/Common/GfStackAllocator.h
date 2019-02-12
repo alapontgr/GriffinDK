@@ -101,7 +101,9 @@ public:
 	// Not necessary but it's cleaner
 	typedef GfStackAllocator<AllocT, CHUNKSIZE>::GfScopedStackMemMarker GfMemScope;
 
-	GfPerThreadStackAllocator();
+	friend class GfPerThreadSingleton<GfPerThreadStackAllocator<AllocT, CHUNKSIZE>>;
+
+	GfPerThreadStackAllocator() {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////

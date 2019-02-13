@@ -140,6 +140,10 @@ void GfStackAllocator<AllocT, CHUNKSIZE>::Reset()
 template <typename AllocT = GfDefaultAllocator, u32 CHUNKSIZE = GF_KB(64)>
 GfDataMarker GfStackAllocator<AllocT, CHUNKSIZE>::PushMemMarker()
 {
+	if (!m_pBack) 
+	{
+		AllocateNewChunk();
+	}
 	GfDataMarker kMarker;
 	kMarker.m_pChunk = m_pBack;
 	kMarker.m_uiAvalSize = m_pBack->m_uiAvalSize;

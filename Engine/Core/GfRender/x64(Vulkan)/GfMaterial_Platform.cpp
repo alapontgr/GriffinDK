@@ -163,20 +163,20 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
 	u32 uiLayoutCount(m_kBase.GetBoundLayoutCount());
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
-	VkDescriptorSetLayout* pLayouts(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount));
-	if (!pLayouts) 
+	VkDescriptorSetLayout* pLayouts(nullptr);
+	if (uiLayoutCount)
 	{
-		return false;
-	}
-
-	VkDescriptorSetLayout* pCursor(pLayouts);
-	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i) 
-	{
-		GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
-		if (pLayout) 
+		pLayouts = GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount);
+		
+		VkDescriptorSetLayout* pCursor(pLayouts);
+		for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
 		{
-			*pCursor = pLayout->GetLayout();
-			pCursor++;
+			GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
+			if (pLayout)
+			{
+				*pCursor = pLayout->GetLayout();
+				pCursor++;
+			}
 		}
 	}
 

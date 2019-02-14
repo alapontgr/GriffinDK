@@ -64,13 +64,27 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 	kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
 	kMaterialT.Create(kContext);
 	
-	GfCmdBuffer kCmdBuffer;
 	GfCmdBufferFactory kCmdBufferFactory;
 	kCmdBufferFactory.Init(kContext, GfRenderContextFamilies::Graphics);
-	kCmdBufferFactory.CreateCmdBuffer(kContext, GfCmdBufferType::Primary, kCmdBuffer);
+	GfCmdBuffer pCmdBuffes[GfRenderConstants::ms_uiNBufferingCount];
+	for (u32 i=0;i<GfRenderConstants::ms_uiNBufferingCount;++i)
+	{
+		kCmdBufferFactory.CreateCmdBuffer(kContext, GfCmdBufferType::Primary, pCmdBuffes[i]);
+	}
+
+	// Init Viewport and Scissor state
+	GfViewport kViewport{};
+	kViewport.m_fWidth = (f32)kWindow.GetWidth();
+	kViewport.m_fHeight = (f32)kWindow.GetHeight();
+	GfScissor kScissor{};
+	kScissor.m_siWidth = (s32)kViewport.m_fWidth;
+	kScissor.m_siHeight = (s32)kViewport.m_fHeight;
 
 	while (kContext.BeginFrame())
 	{
+		u32 uiCurrFrameIdx(kContext.GetCurrentFrameIdx());
+		GfCmdBuffer& kCmdBuffer(pCmdBuffes[uiCurrFrameIdx]);
+
 		// Wait for the command buffer to be ready
 		kCmdBuffer.WaitForReady(kContext);
 
@@ -80,8 +94,18 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		// Begin render pass
 		kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
 
+		// Set Viewport and Scissor
+		kCmdBuffer.SetViewport(kViewport);
+		kCmdBuffer.SetScissor(kScissor);
+
+		// Add commands
+		kCmdBuffer.BindMaterial(kMaterialT);
+
+		// Draw
+		//kCmdBuffer.DrawIndexed(3, 1);
+
 		// End render pass
-		kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
+		kCmdBuffer.EndRenderPass(kContext, kRenderPass);
 
 		// End the command buffer
 		kCmdBuffer.EndRecording(kContext);

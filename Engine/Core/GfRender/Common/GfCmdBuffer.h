@@ -60,6 +60,10 @@ public:
 
 	void ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor);
 
+	void SetViewport(const GfViewport& kViewport);
+
+	void SetScissor(const GfScissor& kScissor);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
@@ -70,9 +74,25 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// Material related commands
 
+	void BindMaterial(const GfMaterialTemplate& kMaterial);
+
 	// Bind a parameter set to a slot
 	void BindParameterSet(const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 		u32 uiBindPoint = 0, bool bIsGraphics = true);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Draw commands
+
+	void DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
+
+	/*
+	void vkCmdDraw(
+	VkCommandBuffer                             commandBuffer,
+	uint32_t                                    vertexCount,
+	uint32_t                                    instanceCount,
+	uint32_t                                    firstVertex,
+	uint32_t                                    firstInstance);
+	*/
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +123,20 @@ GF_FORCEINLINE void GfCmdBuffer::Submit(
 GF_FORCEINLINE void GfCmdBuffer::ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor)
 {
 	ClearCurrentTargetRHI(kCtx, vClearColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::SetViewport(const GfViewport& kViewport)
+{
+	SetViewportRHI(kViewport);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::SetScissor(const GfScissor& kScissor)
+{
+	SetScissorRHI(kScissor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,12 +183,27 @@ GF_FORCEINLINE void GfCmdBuffer::UpdateBufferRange(const GfRenderContext& kCtx, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GF_FORCEINLINE void GfCmdBuffer::BindMaterial(const GfMaterialTemplate& kMaterial)
+{
+	BindMaterialRHI(kMaterial);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GF_FORCEINLINE void GfCmdBuffer::BindParameterSet(
 	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 	u32 uiBindPoint, bool bIsGraphics)
 {
 	BindParameterSetRHI(kMaterial, kparamSet, uiBindPoint, bIsGraphics);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+{
+	DrawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCMDBUFFER_H__

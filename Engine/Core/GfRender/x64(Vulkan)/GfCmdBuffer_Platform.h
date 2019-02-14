@@ -23,6 +23,8 @@ class GfRenderPass;
 class GfBuffer;
 class GfMaterialTemplate;
 class GfMaterialParamSet;
+struct GfViewport;
+struct GfScissor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +61,10 @@ private:
 
 	void ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor);
 
+	void SetViewportRHI(const GfViewport& kViewport);
+
+	void SetScissorRHI(const GfScissor& kScissor);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
@@ -68,9 +74,16 @@ private:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	void BindMaterialRHI(const GfMaterialTemplate& kMaterial);
+
 	void BindParameterSetRHI(const GfMaterialTemplate& kMaterial, 
 		const GfMaterialParamSet& kparamSet, 
 		u32 uiBindPoint, bool bIsGraphics);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Draw cmds
+
+	void DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
 
 	////////////////////////////////////////////////////////////////////////////////
 

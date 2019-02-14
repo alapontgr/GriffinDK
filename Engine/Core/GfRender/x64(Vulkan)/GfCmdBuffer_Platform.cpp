@@ -33,7 +33,7 @@ GfCmdBuffer_Platform::GfCmdBuffer_Platform()
 
 void GfCmdBuffer_Platform::InitRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
 {
-	GF_ASSERT(!pCmdBuffer && !m_pFence, "CMDBuffer already initialised");
+	GF_ASSERT(!m_pCmdBuffer && !m_pFence, "CMDBuffer already initialised");
 	m_pCmdBuffer = pCmdBuffer;
 	m_pFence = pFence;
 }
@@ -204,6 +204,32 @@ void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, co
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::SetViewportRHI(const GfViewport& kViewport)
+{
+	VkViewport kRHIViewport{};
+	kRHIViewport.x = kViewport.m_fOffsetX;
+	kRHIViewport.y = kViewport.m_fOffsetY;
+	kRHIViewport.width = kViewport.m_fWidth;
+	kRHIViewport.height = kViewport.m_fHeight;
+	kRHIViewport.minDepth = kViewport.m_fMinDepth;
+	kRHIViewport.maxDepth = kViewport.m_fMaxDepth;
+	vkCmdSetViewport(m_pCmdBuffer, 0, 1, &kRHIViewport);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::SetScissorRHI(const GfScissor& kScissor)
+{
+	VkRect2D kRHIScissor{};
+	kRHIScissor.offset.x = kScissor.m_siOffsetX;
+	kRHIScissor.offset.y = kScissor.m_siOffsetY;
+	kRHIScissor.extent.width = kScissor.m_siWidth;
+	kRHIScissor.extent.height = kScissor.m_siHeight;
+	vkCmdSetScissor(m_pCmdBuffer, 0, 1, &kRHIScissor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Buffer commands
 
 void GfCmdBuffer_Platform::CopyBufferRangeRHI(
@@ -304,6 +330,14 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfCmdBuffer_Platform::BindMaterialRHI(const GfMaterialTemplate& kMaterial)
+{
+	// TODO: Add support for Compute material
+	vkCmdBindPipeline(m_pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, kMaterial.GetPipeline());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfCmdBuffer_Platform::BindParameterSetRHI(
 	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 	u32 uiBindPoint, bool bIsGraphics)
@@ -312,6 +346,13 @@ void GfCmdBuffer_Platform::BindParameterSetRHI(
 	VkDescriptorSet pDescriptorSet(kparamSet.GetDescriptorSet());
 	vkCmdBindDescriptorSets(m_pCmdBuffer, uiBindType,
 		kMaterial.GetLayout(), uiBindPoint, 1, &pDescriptorSet, 0, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+{
+	vkCmdDrawIndexed(m_pCmdBuffer, uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

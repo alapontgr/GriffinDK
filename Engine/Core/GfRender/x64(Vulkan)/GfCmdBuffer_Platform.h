@@ -85,6 +85,8 @@ private:
 
 	void DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
 
+	void DrawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution

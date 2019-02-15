@@ -102,7 +102,7 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		kCmdBuffer.BindMaterial(kMaterialT);
 
 		// Draw
-		//kCmdBuffer.DrawIndexed(3, 1);
+		kCmdBuffer.Draw(3, 1);
 
 		// End render pass
 		kCmdBuffer.EndRenderPass(kContext, kRenderPass);

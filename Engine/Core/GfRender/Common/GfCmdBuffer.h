@@ -83,16 +83,9 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// Draw commands
 
-	void DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
+	void DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 
-	/*
-	void vkCmdDraw(
-	VkCommandBuffer                             commandBuffer,
-	uint32_t                                    vertexCount,
-	uint32_t                                    instanceCount,
-	uint32_t                                    firstVertex,
-	uint32_t                                    firstInstance);
-	*/
+	void Draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -204,6 +197,12 @@ GF_FORCEINLINE void GfCmdBuffer::DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount
 	DrawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::Draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+{
+	DrawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCMDBUFFER_H__

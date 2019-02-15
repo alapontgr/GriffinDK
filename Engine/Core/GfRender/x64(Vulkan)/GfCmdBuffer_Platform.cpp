@@ -356,4 +356,11 @@ void GfCmdBuffer_Platform::DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::DrawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+{
+	vkCmdDraw(m_pCmdBuffer, uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // EOF

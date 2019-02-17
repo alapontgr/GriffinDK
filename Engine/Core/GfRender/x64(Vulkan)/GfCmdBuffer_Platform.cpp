@@ -13,7 +13,7 @@
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfRenderPass.h"
 #include "GfRender/Common/GfWindow.h"
-#include "GfRender/Common/GfBuffer.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
 #include "GfRender/Common/GfMaterial.h"
 #include "GfRender/Common/GfMatParamLayout.h"
 

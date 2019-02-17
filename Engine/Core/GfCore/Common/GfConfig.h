@@ -18,10 +18,23 @@
 
 #define GF_SOLVE_PLATFORM_FILE(PLATFORM, FILE, EXT) GF_STRINGIFY(../GF_IDENT(PLATFORM)/GF_IDENT(FILE)_Platform.GF_IDENT(EXT))
 
+#define GF_SOLVE_PLATFORM_FILE_EXT(MODULE, FILE, PLATFORM, EXT) GF_STRINGIFY(GF_IDENT(MODULE)/GF_IDENT(PLATFORM)/GF_IDENT(FILE)_Platform.GF_IDENT(EXT))
+
+////////////////////////////////////////////////////////////////////////////////
+// Use the two macros below for files placed directly on the root of the module
+
 // Use this macro to include the platform "header" version of a Common file
 #define GF_SOLVE_PLATFORM_HEADER(FILE) GF_SOLVE_PLATFORM_FILE(_PLATFORM_DIR, FILE, h)
 // Use this macro to include the platform "inline file" version of a Common file
 #define GF_SOLVE_PLATFORM_INLINE(FILE) GF_SOLVE_PLATFORM_FILE(_PLATFORM_DIR, FILE, inl)
+
+////////////////////////////////////////////////////////////////////////////////
+// Use the two macros below for files that have a relative path within a module
+
+// Use this macro to include the platform "header" version of a Common file with a non trivial relative path
+#define GF_SOLVE_PLATFORM_HEADER_EXT(MODULE, FILE) GF_SOLVE_PLATFORM_FILE_EXT(MODULE, FILE, _PLATFORM_DIR, h)
+// Use this macro to include the platform "inline file" version of a Common file with a non trivial relative path
+#define GF_SOLVE_PLATFORM_INLINE_EXT(MODULE, FILE) GF_SOLVE_PLATFORM_FILE_EXT(MODULE, FILE, _PLATFORM_DIR, inl)
 
 // Force inline expression
 #define GF_FORCEINLINE __forceinline

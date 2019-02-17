@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfBuffer.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
 #include <unordered_map>
 

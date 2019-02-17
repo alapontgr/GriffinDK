@@ -14,7 +14,7 @@
 
 #include "GfCore/Common/GfCoreMinimal.h"
 #include "GfCore/Common/GfBitMask.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfBuffer)
+#include GF_SOLVE_PLATFORM_HEADER_EXT(GfRender, GraphicResources/GfBuffer)
 #include "GfRender/Common/GfRenderConstants.h"
 
 ////////////////////////////////////////////////////////////////////////////////

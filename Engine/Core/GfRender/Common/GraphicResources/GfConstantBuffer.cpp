@@ -1,29 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2019/02/06
-//	File: 	GfGraphicResources.cpp
+//	Date: 	2019/02/17
+//	File: 	GfConstantBuffer.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfGraphicResources.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-GfGraphicsResource::GfGraphicsResource()
-	: m_eType(EParamaterSlotType::Invalid)
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GfGraphicsResource::GfGraphicsResource(EParamaterSlotType::Type eType)
-	: m_eType(eType)
-{
-}
+#include "GfRender/Common/GraphicResources/GfConstantBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +22,7 @@ GfConstantBuffer::GfConstantBuffer()
 
 void GfConstantBuffer::BindBuffer(const GfBuffer::GfRange& kRange)
 {
-	if (!m_uiFlags.IsEnable(EFlags::BufferBound)) 
+	if (!m_uiFlags.IsEnable(EFlags::BufferBound))
 	{
 		m_kBufferRange = kRange;
 		m_uiFlags |= (EFlags::BufferBound | EFlags::GPUDirty);

@@ -12,7 +12,7 @@
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfRenderCommon.h"
-#include "GfRender/Common/GfGraphicResources.h"
+#include "GfRender/Common/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory_Platform

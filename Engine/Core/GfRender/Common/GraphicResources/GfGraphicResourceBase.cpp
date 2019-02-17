@@ -1,41 +1,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2018/09/29
-//	File: 	GfBuffer.cpp
+//	Date: 	2019/02/06
+//	File: 	GfGraphicResourceBase.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GfBuffer.h"
+#include "GfRender/Common/GraphicResources/GfGraphicResourceBase.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfBuffer::GfBuffer()
-	: GfBuffer_Platform(*this)
+GfGraphicsResource::GfGraphicsResource()
+	: m_eType(EParamaterSlotType::Invalid)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer::Init(const GfRenderContext& kCtxt, const GfBufferDesc& kDesc)
+GfGraphicsResource::GfGraphicsResource(EParamaterSlotType::Type eType)
+	: m_eType(eType)
 {
-	Destroy(kCtxt);
-	m_kDesc = kDesc;
-	return InitPlatform(kCtxt);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfBuffer::Destroy(const GfRenderContext& kCtxt)
-{
-	if (m_kDesc.m_ulSize > 0) 
-	{
-		DestroyPlatform(kCtxt);
-		m_kDesc = GfBufferDesc();
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

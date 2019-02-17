@@ -9,17 +9,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
+#define VMA_IMPLEMENTATION
+#include "vma/vk_mem_alloc.h"
+
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfWindow.h"
 #include GF_SOLVE_PLATFORM_HEADER(GfRender)
+
 #include "GfCore/Common/GfMaths.h"
+#include "GfCore/Common/GfStl.h"
 
-#include <vector>
 #include <algorithm>
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define GF_N_BUFFERING_COUNT 2
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -112,6 +112,7 @@ void GfRenderContext_Platform::InitRHI()
 	RetrieveQueues();
 	CreateSwapchain();
 	CreateSyncPrimitives();
+	CreateVulkanAllocator();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,8 +191,8 @@ bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 	vkGetPhysicalDeviceQueueFamilyProperties(pDevice, &uiFamilyQueuesCount, nullptr);
 	GF_ASSERT(uiFamilyQueuesCount != 0, "Incorrect count of families found");
 	{
-		std::vector<VkBool32> tSwapChainSupport(uiFamilyQueuesCount);
-		std::vector<VkQueueFamilyProperties> tFamilies(uiFamilyQueuesCount);
+		GfVector<VkBool32> tSwapChainSupport(uiFamilyQueuesCount);
+		GfVector<VkQueueFamilyProperties> tFamilies(uiFamilyQueuesCount);
 		vkGetPhysicalDeviceQueueFamilyProperties(pDevice, &uiFamilyQueuesCount, &tFamilies[0]);
 		for (u32 i = 0; i < uiFamilyQueuesCount; i++)
 		{
@@ -239,7 +240,7 @@ void GfRenderContext_Platform::CheckValidationLayerSupport()
 	u32 uiLayerCount;
 	vkEnumerateInstanceLayerProperties(&uiLayerCount, nullptr);
 
-	std::vector<VkLayerProperties> tAvailableLayers(uiLayerCount);
+	GfVector<VkLayerProperties> tAvailableLayers(uiLayerCount);
 	vkEnumerateInstanceLayerProperties(&uiLayerCount, tAvailableLayers.data());
 	for (const char* szLayerName : g_pLayerNames)
 	{
@@ -263,7 +264,7 @@ void GfRenderContext_Platform::CheckInstanceAvalExtensions()
 	VkResult eResult = vkEnumerateInstanceExtensionProperties(nullptr, &uiExtensionCount, nullptr);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to enumerate the extensions of the instance");
 	{
-		std::vector<VkExtensionProperties> tProperties(uiExtensionCount);
+		GfVector<VkExtensionProperties> tProperties(uiExtensionCount);
 		eResult = vkEnumerateInstanceExtensionProperties(nullptr, &uiExtensionCount,
 			&tProperties[0]);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to get the extension properties");
@@ -457,7 +458,7 @@ void GfRenderContext_Platform::CreateDevice()
 	GF_ASSERT(uiDeviceCount != 0, "Incorrect number of physical devices");
 
 	{
-		std::vector<VkPhysicalDevice> devices(uiDeviceCount);
+		GfVector<VkPhysicalDevice> devices(uiDeviceCount);
 		eResult = vkEnumeratePhysicalDevices(m_pInstance, &uiDeviceCount, &devices[0]);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to get physical devices");
 
@@ -505,7 +506,7 @@ void GfRenderContext_Platform::CreateDevice()
 		kQueueInfo.queueCount = s_uiPrioritiesCount;
 		kQueueInfo.pQueuePriorities = pQueuePriorities;
 
-		std::vector<VkDeviceQueueCreateInfo> tQueueInfoList;
+		GfVector<VkDeviceQueueCreateInfo> tQueueInfoList;
 		tQueueInfoList.push_back(kQueueInfo);
 
 		if (m_kBase.GetFamilyIdx(GfRenderContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRenderContextFamilies::Present)) {
@@ -643,6 +644,16 @@ void GfRenderContext_Platform::CreateSyncPrimitives()
 			&m_pFrameSyncEntries[i].m_pImageReady);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create semaphore");
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderContext_Platform::CreateVulkanAllocator()
+{
+	VmaAllocatorCreateInfo kAllocatorInfo = {};
+	kAllocatorInfo.physicalDevice = m_pPhysicalDevice;
+	kAllocatorInfo.device = m_pDevice;
+	vmaCreateAllocator(&kAllocatorInfo, &m_kAllocator);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

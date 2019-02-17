@@ -13,6 +13,7 @@
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfWindow.h"
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
 GfRenderPass_Platform::GfRenderPass_Platform(GfRenderPass& kBase)

@@ -14,7 +14,10 @@
 
 #include "GfRender/Common/GfGraphicsSDK.h"
 #include "GfRender/Common/GfRenderConstants.h"
-#include <vector>
+
+#include "GfCore/Common/GfStl.h"
+
+#include "vma/vk_mem_alloc.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +106,8 @@ private:
 
 	void CreateSyncPrimitives();
 
+	void CreateVulkanAllocator();
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	GfRenderContext&				m_kBase;
@@ -114,17 +119,19 @@ private:
 	VkSurfaceKHR					m_pSurface;
 	VkSwapchainKHR					m_pSwapChain;
 	VkSurfaceFormatKHR				m_kSwapChainFormat;
-	std::vector<VkImage>			m_tSwapChainImages;
-	std::vector<VkImageView>		m_tSwapChainImageView;
+	GfVector<VkImage>				m_tSwapChainImages;
+	GfVector<VkImageView>			m_tSwapChainImageView;
 	u32								m_uiCurrentImageIdx;
 
 	// Settings
 	VkSurfaceCapabilitiesKHR		m_pCapabilities;
-	std::vector<VkSurfaceFormatKHR> m_tSupportedFormats;
-	std::vector<VkPresentModeKHR>	m_tSupportedPresentModes;
+	GfVector<VkSurfaceFormatKHR>	m_tSupportedFormats;
+	GfVector<VkPresentModeKHR>		m_tSupportedPresentModes;
 
 	// Sync
 	GfFrameSyncing					m_pFrameSyncEntries[GfRenderConstants::ms_uiNBufferingCount];
+
+	VmaAllocator					m_kAllocator;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

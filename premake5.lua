@@ -37,7 +37,8 @@ groups["External"] =
 	Path = griffin.EngineBasePath,
 	Projects = 
 	{
-		"glm"
+		"glm",
+		"vma",
 	}
 }
 

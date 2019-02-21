@@ -1,27 +1,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2019/02/06
-//	File: 	GfGraphicResourceBase.cpp
+//	Date: 	2019/02/18
+//	File: 	GfTexture2D_Platform.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GraphicResources/GfGraphicResourceBase.h"
+#include "GfRender/Common/GraphicResources/GfTexture2D.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfGraphicsResourceBase::GfGraphicsResourceBase()
-	: m_eType(EParamaterSlotType::Invalid)
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GfGraphicsResourceBase::GfGraphicsResourceBase(EParamaterSlotType::Type eType)
-	: m_eType(eType)
+GfTexture2D_Platform::GfTexture2D_Platform(GfTexture2D& kBase)
+	: m_kbase(kBase)
+	, m_pImage(nullptr)
+	, m_pImageView(nullptr)
 {
 }
 

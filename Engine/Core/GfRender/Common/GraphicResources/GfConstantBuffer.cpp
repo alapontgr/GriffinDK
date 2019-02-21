@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfConstantBuffer::GfConstantBuffer()
-	: GfGraphicsResource(EParamaterSlotType::UniformBuffer)
+	: GfGraphicsResourceBase(GetType())
 {
 }
 

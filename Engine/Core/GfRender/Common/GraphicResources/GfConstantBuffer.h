@@ -16,9 +16,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfConstantBuffer : public GfGraphicsResource
+class GfConstantBuffer : public GfGraphicsResourceBase
 {
 public:
+
+	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::UniformBuffer; }
 
 	GfConstantBuffer();
 

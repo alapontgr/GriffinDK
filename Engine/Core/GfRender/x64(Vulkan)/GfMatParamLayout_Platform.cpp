@@ -167,7 +167,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 		if (m_kBase.m_uiDirtyResources & (1 << i)) 
 		{
 			// TODO: Handle all the resource types
-			const GfGraphicsResource* pParam(m_kBase.m_tBoundParamaters[i]);
+			const GfGraphicsResourceBase* pParam(m_kBase.m_tBoundParamaters[i]);
 			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 
 			switch (pParam->GetResourceType())

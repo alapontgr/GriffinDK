@@ -22,12 +22,12 @@ namespace EParamaterSlotType
 	enum Type : u8
 	{
 		Sampler = 0,
-		CombinedImageSampler,
-		SampledImage,
+		CombinedImageSampler,	// Texture 2D
+		SampledImage,			// Texture 2D
 		StorageImage,
 		UniformTexelBuffer,
 		StorageTexelBuffer,
-		UniformBuffer,
+		UniformBuffer,			// Constant Buffer
 		StorageBuffer,
 		UniformBufferDynamic,
 		StorageBufferDynamic,

@@ -188,7 +188,7 @@ void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindResource(u32 uiSlot, const GfGraphicsResource* pResource)
+void GfMaterialParamSet::BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource)
 {
 	if (pResource && m_uiFlags.IsEnable(EFlags::LayoutAssigned))
 	{

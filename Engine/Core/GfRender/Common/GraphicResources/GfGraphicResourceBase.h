@@ -15,13 +15,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfGraphicsResource 
+class GfGraphicsResourceBase 
 {
 public:
 
-	GfGraphicsResource();
+	GfGraphicsResourceBase();
 
-	GfGraphicsResource(EParamaterSlotType::Type eType);
+	GfGraphicsResourceBase(EParamaterSlotType::Type eType);
 
 	EParamaterSlotType::Type GetResourceType() const { return m_eType; }
 

@@ -19,7 +19,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfGraphicsResource;
+class GfGraphicsResourceBase;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +97,7 @@ public:
 
 	void BindLayout(const GfMatParamLayout* pParamLayout);
 
-	void BindResource(u32 uiSlot, const GfGraphicsResource* pResource);
+	void BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource);
 
 private:
 
@@ -113,7 +113,7 @@ private:
 
 
 	const GfMatParamLayout*				m_pSetLayout;
-	GfVector<const GfGraphicsResource*> m_tBoundParamaters;
+	GfVector<const GfGraphicsResourceBase*> m_tBoundParamaters;
 	GfBitMask<u32>						m_uiFlags;
 	GfBitMask<u32>						m_uiDirtyResources;
 };

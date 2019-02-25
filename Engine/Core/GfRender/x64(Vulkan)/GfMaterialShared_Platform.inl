@@ -187,14 +187,14 @@ static const VkLogicOp g_pLogicOpConverter[] =
 ////////////////////////////////////////////////////////////////////////////////
 
 // Direct map for the moment
-static inline VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
+static GF_FORCEINLINE VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
 {
 	return g_pDescriptorTypeConverter[eType];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages)
+static GF_FORCEINLINE VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages)
 {
 	VkShaderStageFlags uiResult(0);
 	for (u32 i = 0; i < EShaderStage::COUNT; ++i)
@@ -209,77 +209,77 @@ static inline VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kSta
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkShaderStageFlagBits ConvertShaderStage(EShaderStage::Type eStage) 
+static GF_FORCEINLINE VkShaderStageFlagBits ConvertShaderStage(EShaderStage::Type eStage) 
 {
 	return g_pShaderStageFlagsConverter[eStage];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkPrimitiveTopology ConvertTopology(EPrimitiveTopology::Type eTopology) 
+static GF_FORCEINLINE VkPrimitiveTopology ConvertTopology(EPrimitiveTopology::Type eTopology) 
 {
 	return g_pTopologyConverter[eTopology];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkPolygonMode ConvertPolygonMode(EPolygonMode::Type ePolygonMode) 
+static GF_FORCEINLINE VkPolygonMode ConvertPolygonMode(EPolygonMode::Type ePolygonMode) 
 {
 	return g_pPolygonModeConverter[ePolygonMode];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkCullModeFlagBits ConvertCullMode(ECullMode::Type eCullMode) 
+static GF_FORCEINLINE VkCullModeFlagBits ConvertCullMode(ECullMode::Type eCullMode) 
 {
 	return g_pCullModeConverter[eCullMode];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkFrontFace ConvertFrontFace(EFrontFace::Type eFrontFace) 
+static GF_FORCEINLINE VkFrontFace ConvertFrontFace(EFrontFace::Type eFrontFace) 
 {
 	return g_pFrontFaceConverter[eFrontFace];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkSampleCountFlagBits ConvertSampleCount(EMultiSampleCount::Type eSampleCount) 
+static GF_FORCEINLINE VkSampleCountFlagBits ConvertSampleCount(EMultiSampleCount::Type eSampleCount) 
 {
 	return g_pSampleCountConverter[eSampleCount];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkBlendFactor ConvertBlendFactor(EBlendFactor::Type eBlendFactor) 
+static GF_FORCEINLINE VkBlendFactor ConvertBlendFactor(EBlendFactor::Type eBlendFactor) 
 {
 	return g_pBlendFactorConverter[eBlendFactor];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkBlendOp ConvertBlendOp(EBlendOp::Type eBlendOp) 
+static GF_FORCEINLINE VkBlendOp ConvertBlendOp(EBlendOp::Type eBlendOp) 
 {
 	return g_pBlendOpConverter[eBlendOp];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkFormat ConvertAttributeFormat(EAttributeFormat::Type eFormat) 
+static GF_FORCEINLINE VkFormat ConvertAttributeFormat(EAttributeFormat::Type eFormat) 
 {
 	return g_pFormatConverter[eFormat];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkVertexInputRate ConvertInputRate(EVertexInputRate::Type eInputRate) 
+static GF_FORCEINLINE VkVertexInputRate ConvertInputRate(EVertexInputRate::Type eInputRate) 
 {
 	return g_pInputRate[eInputRate];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp) 
+static GF_FORCEINLINE VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp) 
 {
 	return g_pLogicOpConverter[eLogicOp];
 }

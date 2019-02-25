@@ -213,10 +213,10 @@ namespace EAttributeFormat
 {
 	enum Type : u8
 	{
-		Float = 0,	// R32
-		Float2,		// R32G32
-		Float3,		// R32G32B32
-		Float4,		// R32G32B32A32
+		SFloat = 0,	// R32
+		SFloat2,	// R32G32
+		SFloat3,	// R32G32B32
+		SFloat4,	// R32G32B32A32
 
 		SInt,		// R32
 		SInt2,		// R32G32

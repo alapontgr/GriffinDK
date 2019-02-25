@@ -17,6 +17,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfRenderContext;
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfTexture2D : public GfTexture2D_Platform, public GfGraphicsResourceBase
 {
 public:
@@ -25,10 +29,22 @@ public:
 
 	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::SampledImage; }
 
+	void Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
+		ETextureFormat::Type eFormat,
+		const ETextureUsageBits::GfMask& uiUsage,
+		bool bTiling = true);
+
+	void Create(const GfRenderContext& kCtx);
+
 	GfTexture2D();
 
 private:
 
+	GfBitMask<u16>				m_uiFlags;
+	ETextureUsageBits::GfMask	m_uiUsage;
+	u32							m_uiMips;
+	u32							m_uiWidth;
+	u32							m_uiheight;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

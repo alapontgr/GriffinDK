@@ -30,7 +30,10 @@ void GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, ETextureFormat::Ty
 
 void GfTexture2D::Create(const GfRenderContext& kCtx)
 {
-
+	if (!CreateRHI(kCtx)) 
+	{
+		DestroyRHI(kCtx);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

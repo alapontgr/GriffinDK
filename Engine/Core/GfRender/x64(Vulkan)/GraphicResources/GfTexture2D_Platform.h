@@ -13,6 +13,13 @@
 
 #include "GfRender/Common/GfGraphicsSDK.h"
 
+#include "vma/vk_mem_alloc.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfRenderContext;
+class GfTexture2D;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfTexture2D_Platform 
@@ -23,12 +30,24 @@ public:
 
 	GfTexture2D_Platform(GfTexture2D& kBase);
 
+	bool CreateRHI(const GfRenderContext& kCtx);
+
+	void DestroyRHI(const GfRenderContext& kCtx);
+
 private:
 
-	GfTexture2D& m_kbase;
+	bool CreateImageRHI(const GfRenderContext &kCtx);
 
-	VkImage m_pImage;
+	bool CreateImageViewRHI(const GfRenderContext &kCtx);
+
+	GfTexture2D& m_kBase;
+
+	VkImage		m_pImage;
 	VkImageView m_pImageView;
+
+	// Vma Resources
+	VmaAllocation		m_pAlloc;
+	VmaAllocationInfo	m_kAllocInfo;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

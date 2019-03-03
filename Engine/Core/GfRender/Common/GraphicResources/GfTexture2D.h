@@ -27,6 +27,12 @@ public:
 
 	friend class GfTexture2D_Platform;
 
+	enum EFlags : u16 
+	{
+		Mappable = (1<<0),
+
+	};
+
 	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::SampledImage; }
 
 	void Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
@@ -42,9 +48,11 @@ private:
 
 	GfBitMask<u16>				m_uiFlags;
 	ETextureUsageBits::GfMask	m_uiUsage;
+	ETextureFormat::Type		m_eFormat;
 	u32							m_uiMips;
 	u32							m_uiWidth;
 	u32							m_uiheight;
+	bool						m_bUseTiling;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

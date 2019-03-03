@@ -48,7 +48,7 @@ bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
 	kTextureInfo.mipLevels = m_kBase.m_uiMips;
 	kTextureInfo.arrayLayers = 1; // TODO: Add support for arrays
 	kTextureInfo.samples = VK_SAMPLE_COUNT_1_BIT; // TODO: Add support for MS
-	kTextureInfo.tiling = m_kBase.m_bUseTiling ? VK_IMAGE_TILING_OPTIMAL : VK_IMAGE_TILING_LINEAR;
+	kTextureInfo.tiling = m_kBase.IsTilable() ? VK_IMAGE_TILING_OPTIMAL : VK_IMAGE_TILING_LINEAR;
 	kTextureInfo.usage = ConvertTextureUsageMask(m_kBase.m_uiUsage);
 	kTextureInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // TODO: Add support for concurrent usage
 	kTextureInfo.queueFamilyIndexCount = 0;
@@ -64,11 +64,11 @@ bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
 	// Use vmaAllocateMemoryForImage
 	VmaAllocationCreateInfo kAllocInfo{};
 	kAllocInfo.flags = VMA_ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT;
-	kAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY; // TODO: Add support for mappable textures
+	kAllocInfo.usage = m_kBase.IsMappable() ? VMA_MEMORY_USAGE_CPU_TO_GPU : VMA_MEMORY_USAGE_GPU_ONLY;
 	kAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT; // Is this needed?
 	kAllocInfo.preferredFlags = 0;
 	kAllocInfo.memoryTypeBits = 0;
-	kAllocInfo.pool = VK_NULL_HANDLE;
+	kAllocInfo.pool = VK_NULL_HANDLE; // TODO: Use pool for textures
 	kAllocInfo.pUserData = nullptr;
 
 	if (vmaAllocateMemoryForImage(kCtx.m_kAllocator, m_pImage, &kAllocInfo, &m_pAlloc, &m_kAllocInfo) != VK_SUCCESS)
@@ -93,7 +93,20 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 	kImageViewInfo.image = m_pImage;
 	kImageViewInfo.format = ConvertTextureFormat(m_kBase.m_eFormat);
 	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
-	kImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; // TODO: May need to be different for depth/stencil
+	VkImageAspectFlags uiAspect(0);
+	if (m_kBase.IsDepthBuffer()) 
+	{
+		uiAspect |= VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	if (m_kBase.IsStencilBuffer())
+	{
+		uiAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+	if (!uiAspect) 
+	{
+		uiAspect = VK_IMAGE_ASPECT_COLOR_BIT;
+	}
+	kImageViewInfo.subresourceRange.aspectMask = uiAspect;
 	kImageViewInfo.subresourceRange.baseMipLevel = 0;	// TODO: Any cases where we may want to limit the mips?
 	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiMips;
 	kImageViewInfo.subresourceRange.baseArrayLayer = 0; // TODO: Support for arrays of texture-arrays

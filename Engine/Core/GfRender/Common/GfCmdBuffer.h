@@ -71,6 +71,9 @@ public:
 
 	void UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
+	// Command used to update all the memory (all mip levels) of a Texture2D
+	void CopyBufferToTexture2D(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Material related commands
 

@@ -30,21 +30,41 @@ public:
 	enum EFlags : u16 
 	{
 		Mappable = (1<<0),
-
+		Tilable	 = (1<<1),
 	};
 
 	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::SampledImage; }
 
-	void Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
+	GfTexture2D();
+
+	bool Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
 		ETextureFormat::Type eFormat,
 		const ETextureUsageBits::GfMask& uiUsage,
-		bool bTiling = true);
+		u16 uiFlags);
 
 	void Create(const GfRenderContext& kCtx);
 
-	GfTexture2D();
+	void Destroy(const GfRenderContext& kCtx);
+
+	bool IsInitialised() const;
+
+	bool IsMappable() const;
+
+	bool IsDepthBuffer() const;
+
+	bool IsStencilBuffer() const;
+
+	bool IsTilable() const;
 
 private:
+
+	enum EPrivateFlags : u16 
+	{
+		// Continue from public flags
+		DepthBuffer		= (1<<2),
+		StencilBuffer	= (1<<3),
+		Initialised		= (1<<4),
+	};
 
 	GfBitMask<u16>				m_uiFlags;
 	ETextureUsageBits::GfMask	m_uiUsage;
@@ -52,8 +72,42 @@ private:
 	u32							m_uiMips;
 	u32							m_uiWidth;
 	u32							m_uiheight;
-	bool						m_bUseTiling;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexture2D::IsInitialised() const
+{
+	return (m_uiFlags & EPrivateFlags::Initialised) != 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexture2D::IsMappable() const
+{
+	return (m_uiFlags & EFlags::Mappable) != 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexture2D::IsDepthBuffer() const
+{
+	return (m_uiFlags & EPrivateFlags::DepthBuffer) != 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexture2D::IsStencilBuffer() const
+{
+	return (m_uiFlags & EPrivateFlags::StencilBuffer) != 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexture2D::IsTilable() const
+{
+	return (m_uiFlags & EFlags::Tilable) != 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFTEXTURE2D_H__

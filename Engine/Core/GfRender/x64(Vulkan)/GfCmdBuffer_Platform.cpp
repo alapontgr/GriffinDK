@@ -13,9 +13,10 @@
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfRenderPass.h"
 #include "GfRender/Common/GfWindow.h"
-#include "GfRender/Common/GraphicResources/GfBuffer.h"
 #include "GfRender/Common/GfMaterial.h"
 #include "GfRender/Common/GfMatParamLayout.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
+#include "GfRender/Common/GraphicResources/GfTexture2D.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -326,6 +327,18 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 		0, nullptr,
 		1, &barrier,
 		0, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer_Platform::CopyBufferToTexture2DRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo)
+{
+	GF_ASSERT_ALWAYS("IMPLEMENT ME!!!");
+	// Transit image layout to transfer
+
+	// Copy buffer to image
+
+	// Transit image layout to ready to be read by shaders
 }
 
 ////////////////////////////////////////////////////////////////////////////////

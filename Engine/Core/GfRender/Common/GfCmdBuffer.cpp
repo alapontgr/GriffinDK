@@ -27,11 +27,4 @@ void GfCmdBuffer::Init(GfCmdBufferType::Type eType)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer::CopyBufferToTexture2D(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo)
-{
-	CopyBufferToTexture2DRHI(kCtx, kFrom, uiBufferOffset, kTo);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // EOF

@@ -41,9 +41,9 @@ void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearCo
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass::Compile(const GfRenderContext& kCtx)
+void GfRenderPass::Create(const GfRenderContext& kCtx)
 {
-	CompileRHI(kCtx);
+	CreateRHI(kCtx);
 	RecreateFramebufferRHI(kCtx);
 }
 

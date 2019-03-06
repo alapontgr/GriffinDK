@@ -56,6 +56,19 @@ public:
 
 	bool IsTilable() const;
 
+	u32 GetWidth() const;
+
+	u32 GetHeight() const;
+
+	u32 GetMipMapCount() const;
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	void LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 private:
 
 	enum EPrivateFlags : u16 
@@ -107,6 +120,34 @@ GF_FORCEINLINE bool GfTexture2D::IsStencilBuffer() const
 GF_FORCEINLINE bool GfTexture2D::IsTilable() const
 {
 	return (m_uiFlags & EFlags::Tilable) != 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexture2D::GetWidth() const
+{
+	return m_uiWidth;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexture2D::GetHeight() const
+{
+	return m_uiheight;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexture2D::GetMipMapCount() const
+{
+	return m_uiMips;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfTexture2D::LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
+{
+	LoadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

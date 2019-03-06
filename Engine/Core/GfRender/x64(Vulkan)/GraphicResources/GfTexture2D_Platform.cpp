@@ -10,7 +10,9 @@
 // Includes
 
 #include "GfRender/Common/GraphicResources/GfTexture2D.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
+#include "GfRender/Common/GfCmdBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -93,20 +95,20 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 	kImageViewInfo.image = m_pImage;
 	kImageViewInfo.format = ConvertTextureFormat(m_kBase.m_eFormat);
 	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
-	VkImageAspectFlags uiAspect(0);
+	m_uiAspectMask = 0;
 	if (m_kBase.IsDepthBuffer()) 
 	{
-		uiAspect |= VK_IMAGE_ASPECT_DEPTH_BIT;
+		m_uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
 	}
 	if (m_kBase.IsStencilBuffer())
 	{
-		uiAspect |= VK_IMAGE_ASPECT_STENCIL_BIT;
+		m_uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 	}
-	if (!uiAspect) 
+	if (!m_uiAspectMask)
 	{
-		uiAspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-	kImageViewInfo.subresourceRange.aspectMask = uiAspect;
+	kImageViewInfo.subresourceRange.aspectMask = m_uiAspectMask;
 	kImageViewInfo.subresourceRange.baseMipLevel = 0;	// TODO: Any cases where we may want to limit the mips?
 	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiMips;
 	kImageViewInfo.subresourceRange.baseArrayLayer = 0; // TODO: Support for arrays of texture-arrays
@@ -137,6 +139,75 @@ void GfTexture2D_Platform::DestroyRHI(const GfRenderContext& kCtx)
 		// Not really needed
 		memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
+{
+	// Transit image layout to transfer
+	VkImageMemoryBarrier kBarrier{};
+	kBarrier.image = GetImage();
+	kBarrier.subresourceRange.aspectMask = m_kBase.GetAspectMask();
+	kBarrier.subresourceRange.baseArrayLayer = 0; // TODO: Give more flexibility
+	kBarrier.subresourceRange.layerCount = 1; // TODO: Support for texture arrays
+	kBarrier.subresourceRange.baseMipLevel = 0;
+	kBarrier.subresourceRange.levelCount = m_kBase.GetMipMapCount();
+
+	// From uninitialized -> Transfer
+	kBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	kBarrier.srcAccessMask = 0;
+	kBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	kBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	kBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
+	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
+
+	vkCmdPipelineBarrier(kCmdBuffer.GetCmdBuffer(),
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &kBarrier);
+
+	// Copy buffer to image
+	u32 uiRegions(m_kBase.GetMipMapCount());
+
+	VkBufferImageCopy kRegion = {};
+	kRegion.bufferOffset = uiBufferOffset;
+	kRegion.bufferRowLength = 0;
+	kRegion.bufferImageHeight = 0;
+
+	kRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	kRegion.imageSubresource.mipLevel = 0;
+	kRegion.imageSubresource.baseArrayLayer = 0;
+	kRegion.imageSubresource.layerCount = 1;
+
+	kRegion.imageOffset = { 0, 0, 0 }; // Offset X,Y,Z
+	kRegion.imageExtent = {
+		m_kBase.GetWidth(),
+		m_kBase.GetHeight(),
+		1
+	};
+	vkCmdCopyBufferToImage(kCmdBuffer.GetCmdBuffer(), kFrom.GetHandle(), GetImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &kRegion);
+
+	// Transit image layout to ready to be read by shaders
+	// Transfer -> Ready for shader
+	kBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	kBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	kBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	kBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
+	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
+	vkCmdPipelineBarrier(kCmdBuffer.GetCmdBuffer(),
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &kBarrier);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

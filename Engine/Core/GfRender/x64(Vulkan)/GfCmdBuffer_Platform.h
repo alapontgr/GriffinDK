@@ -38,6 +38,8 @@ public:
 
 	GfCmdBuffer_Platform();
 
+	VkCommandBuffer GetCmdBuffer() const;
+
 private:
 
 	void InitRHI(VkCommandBuffer pCmdBuffer, VkFence pFence);
@@ -51,10 +53,6 @@ private:
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Render pass commands
-
-	void BeginRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
-
-	void EndRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
 
 	void BeginRecordingRHI(const GfRenderContext& kCtx);
 
@@ -72,8 +70,6 @@ private:
 	void CopyBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
 	void UpdateBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
-
-	void CopyBufferToTexture2DRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -96,6 +92,13 @@ private:
 	VkCommandBuffer m_pCmdBuffer;
 	VkFence			m_pFence;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkCommandBuffer GfCmdBuffer_Platform::GetCmdBuffer() const
+{
+	return m_pCmdBuffer;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCMDBUFFER_PLATFORM_H__

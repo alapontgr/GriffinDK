@@ -26,7 +26,7 @@
 
 #include "GfRender/Common/GfRenderPass.h"
 
-#include "GfRender/Common/GfBuffer.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
 
 #include "GfRender/Common/GfCmdBuffer.h"
 

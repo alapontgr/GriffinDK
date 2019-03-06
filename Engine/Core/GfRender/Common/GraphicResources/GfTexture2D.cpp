@@ -59,6 +59,12 @@ bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, ETextureFormat::Ty
 			}
 		}
 	
+		// If it is a sampled image add the Transfer_Dst usage as its data will probably be loaded after the creation
+		if ((uiUsage & ETextureUsageBits::Sampled) != 0) 
+		{
+			m_uiUsage |= ETextureUsageBits::Transfer_Dst;
+		}
+
 		m_uiFlags |= EPrivateFlags::Initialised;
 		return true;
 	}

@@ -11,12 +11,10 @@
 
 #include "GfRender/Common/GfCmdBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
-#include "GfRender/Common/GfRenderPass.h"
 #include "GfRender/Common/GfWindow.h"
 #include "GfRender/Common/GfMaterial.h"
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GraphicResources/GfBuffer.h"
-#include "GfRender/Common/GraphicResources/GfTexture2D.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -77,38 +75,6 @@ void GfCmdBuffer_Platform::SubmitRHI(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Render pass commands
-
-void GfCmdBuffer_Platform::BeginRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
-{
-	GfWindow* pWindow(kCtx.GetWindow());
-	// Begin render pass
-
-	// TODO: Refactor this
-	VkClearValue clearColor = { 1.0f, 0.0f, 0.0f, 0.0f };
-
-	VkRenderPassBeginInfo passBeginInfo{};
-	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passBeginInfo.pNext = nullptr;
-	passBeginInfo.renderPass = kRenderPass.m_pRenderPass;
-	passBeginInfo.framebuffer = kRenderPass.m_pFramebuffers[kCtx.GetCurrentFrameIdx()];
-	passBeginInfo.renderArea.extent.width = pWindow->GetWidth();
-	passBeginInfo.renderArea.extent.height = pWindow->GetHeight();
-	passBeginInfo.renderArea.offset.x = 0;
-	passBeginInfo.renderArea.offset.y = 0;
-	passBeginInfo.clearValueCount = 1;
-	passBeginInfo.pClearValues = &clearColor;
-	vkCmdBeginRenderPass(m_pCmdBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer_Platform::EndRenderPassRHI(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
-{
-	vkCmdEndRenderPass(m_pCmdBuffer);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 {
@@ -136,98 +102,6 @@ void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 {
 	VkResult eResult = vkEndCommandBuffer(m_pCmdBuffer);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor)
-{
-	// TODO: Refactor this to get rid of the barriers. This is just a temporal fix and I'll use the RenderPasses in the future
-
-	VkImageSubresourceRange kImageRange = {};
-	kImageRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	kImageRange.levelCount = 1;
-	kImageRange.layerCount = 1;
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	VkImageMemoryBarrier kBarrierPresentToClear = 
-	{
-		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
-		nullptr,                                    // const void                            *pNext
-		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          srcAccessMask
-		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          dstAccessMask
-		VK_IMAGE_LAYOUT_UNDEFINED,                  // VkImageLayout                          oldLayout
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
-		kImageRange                     // VkImageSubresourceRange                subresourceRange
-	};
-
-	VkImageMemoryBarrier kBarrierClearToPresent = 
-	{
-		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
-		nullptr,                                    // const void                            *pNext
-		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          srcAccessMask
-		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          dstAccessMask
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          oldLayout
-		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
-		kImageRange                     // VkImageSubresourceRange                subresourceRange
-	};
-
-
-	////////////////////////////////////////////////////////////////////////////////
-
-		vkCmdPipelineBarrier(
-			m_pCmdBuffer,
-			VK_PIPELINE_STAGE_TRANSFER_BIT, 
-			VK_PIPELINE_STAGE_TRANSFER_BIT, 
-			0, 0, nullptr, 0, nullptr, 1, &kBarrierPresentToClear);
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	VkClearColorValue clearColor{ vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w };
-	VkClearValue clearValue = {};
-	clearValue.color = clearColor;
-
-	vkCmdClearColorImage(m_pCmdBuffer, kCtx.GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	vkCmdPipelineBarrier(m_pCmdBuffer, 
-		VK_PIPELINE_STAGE_TRANSFER_BIT, 
-		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &kBarrierClearToPresent);
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer_Platform::SetViewportRHI(const GfViewport& kViewport)
-{
-	VkViewport kRHIViewport{};
-	kRHIViewport.x = kViewport.m_fOffsetX;
-	kRHIViewport.y = kViewport.m_fOffsetY;
-	kRHIViewport.width = kViewport.m_fWidth;
-	kRHIViewport.height = kViewport.m_fHeight;
-	kRHIViewport.minDepth = kViewport.m_fMinDepth;
-	kRHIViewport.maxDepth = kViewport.m_fMaxDepth;
-	vkCmdSetViewport(m_pCmdBuffer, 0, 1, &kRHIViewport);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer_Platform::SetScissorRHI(const GfScissor& kScissor)
-{
-	VkRect2D kRHIScissor{};
-	kRHIScissor.offset.x = kScissor.m_siOffsetX;
-	kRHIScissor.offset.y = kScissor.m_siOffsetY;
-	kRHIScissor.extent.width = kScissor.m_siWidth;
-	kRHIScissor.extent.height = kScissor.m_siHeight;
-	vkCmdSetScissor(m_pCmdBuffer, 0, 1, &kRHIScissor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -327,18 +201,6 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 		0, nullptr,
 		1, &barrier,
 		0, nullptr);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCmdBuffer_Platform::CopyBufferToTexture2DRHI(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo)
-{
-	GF_ASSERT_ALWAYS("IMPLEMENT ME!!!");
-	// Transit image layout to transfer
-
-	// Copy buffer to image
-
-	// Transit image layout to ready to be read by shaders
 }
 
 ////////////////////////////////////////////////////////////////////////////////

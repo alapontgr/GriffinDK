@@ -41,12 +41,63 @@ public:
 
 	void SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor = v4(0.0f));
 
-	void Compile(const GfRenderContext& kCtx);
+	void Create(const GfRenderContext& kCtx);
 
 	void Resize(const GfRenderContext& kCtx);
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	void BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer);
+
+	void EndPass(const GfCmdBuffer& kCmdBuffer);
+
+	void SetViewport(const GfCmdBuffer& kCmdBuffer, const GfViewport& kViewport);
+
+	void SetScissor(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor);
+	
+	// TODO: Clear Back buffer (REMOVE)
+	void ClearCurrentTarget(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 private:
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfRenderPass::BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer)
+{
+	BeginPassRHI(kCtx, kCmdBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfRenderPass::EndPass(const GfCmdBuffer& kCmdBuffer)
+{
+	EndPassRHI(kCmdBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfRenderPass::SetViewport(const GfCmdBuffer& kCmdBuffer, const GfViewport& kViewport)
+{
+	SetViewportRHI(kCmdBuffer, kViewport);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfRenderPass::SetScissor(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor)
+{
+	SetScissorRHI(kCmdBuffer, kScissor);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfRenderPass::ClearCurrentTarget(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor)
+{
+	ClearCurrentTargetRHI(kCtx, kCmdBuffer, vClearColor);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDERPASS_H__

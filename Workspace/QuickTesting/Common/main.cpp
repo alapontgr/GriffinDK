@@ -41,7 +41,7 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 
 	// Create RenderPass and CmdBuffer
 	GfRenderPass kRenderPass;
-	kRenderPass.Compile(kContext);
+	kRenderPass.Create(kContext);
 
 	// Create material
 	u32 uiVertexSize, uiFragmentSize;
@@ -92,7 +92,7 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		kCmdBuffer.BeginRecording(kContext);
 
 		// Begin render pass
-		kCmdBuffer.BeginRenderPass(kContext, kRenderPass);
+		kRenderPass.BeginPass(kContext, kCmdBuffer);
 
 		// Set Viewport and Scissor
 		kCmdBuffer.SetViewport(kViewport);
@@ -105,7 +105,7 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		kCmdBuffer.Draw(3, 1);
 
 		// End render pass
-		kCmdBuffer.EndRenderPass(kContext, kRenderPass);
+		kRenderPass.EndPass(kCmdBuffer);
 
 		// End the command buffer
 		kCmdBuffer.EndRecording(kContext);

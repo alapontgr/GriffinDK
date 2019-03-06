@@ -52,27 +52,11 @@ public:
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Render pass actions
-
-	void BeginRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
-
-	void EndRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass);
-
-	void ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor);
-
-	void SetViewport(const GfViewport& kViewport);
-
-	void SetScissor(const GfScissor& kScissor);
-
-	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
 	void CopyBufferRange(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
 	void UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
-
-	// Command used to update all the memory (all mip levels) of a Texture2D
-	void CopyBufferToTexture2D(const GfRenderContext& kCtx, const GfBuffer& kFrom, u32 uiBufferOffset, const GfTexture2D& kTo);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Material related commands
@@ -116,27 +100,6 @@ GF_FORCEINLINE void GfCmdBuffer::Submit(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::ClearCurrentTarget(const GfRenderContext& kCtx, const v4& vClearColor)
-{
-	ClearCurrentTargetRHI(kCtx, vClearColor);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::SetViewport(const GfViewport& kViewport)
-{
-	SetViewportRHI(kViewport);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::SetScissor(const GfScissor& kScissor)
-{
-	SetScissorRHI(kScissor);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
 {
 	BeginRecordingRHI(kCtx);
@@ -147,20 +110,6 @@ GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
 GF_FORCEINLINE void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
 {
 	EndRecordingRHI(kCtx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::BeginRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
-{
-	BeginRenderPassRHI(kCtx, kRenderPass);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::EndRenderPass(const GfRenderContext& kCtx, const GfRenderPass& kRenderPass)
-{
-	EndRenderPassRHI(kCtx, kRenderPass);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

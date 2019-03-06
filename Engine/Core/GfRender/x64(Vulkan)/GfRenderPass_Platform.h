@@ -18,6 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfCmdBuffer;
+struct GfViewport;
+struct GfScissor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +36,21 @@ public:
 
 protected:
 
-	void CompileRHI(const GfRenderContext& kCtx);
+	void CreateRHI(const GfRenderContext& kCtx);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer);
+
+	void EndPassRHI(const GfCmdBuffer& kCmdBuffer);
+
+	void SetViewportRHI(const GfCmdBuffer& kCmdBuffer, const GfViewport& kViewport);
+
+	void SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor);
+
+	void ClearCurrentTargetRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor);
+
+	////////////////////////////////////////////////////////////////////////////////
 
 private:
 

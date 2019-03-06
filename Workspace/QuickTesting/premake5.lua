@@ -3,10 +3,10 @@ project "QuickTesting"
 	language "C++"
 
 	links {
-		"GfCore.lib",
-		"GfFile.lib",
-		"GfEntry.lib",
-		"GfRender.lib",
+		"GfCore",
+		"GfFile",
+		"GfEntry",
+		"GfRender",
 	}
 
 	SetupGraphicsSDK();

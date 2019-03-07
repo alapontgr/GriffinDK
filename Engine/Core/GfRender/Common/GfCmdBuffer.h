@@ -61,8 +61,6 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// Material related commands
 
-	void BindMaterial(const GfMaterialTemplate& kMaterial);
-
 	// Bind a parameter set to a slot
 	void BindParameterSet(const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 		u32 uiBindPoint = 0, bool bIsGraphics = true);
@@ -124,13 +122,6 @@ GF_FORCEINLINE void GfCmdBuffer::CopyBufferRange(const GfRenderContext& kCtx, co
 GF_FORCEINLINE void GfCmdBuffer::UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
 {
 	UpdateBufferRangeRHI(kCtx, kBuffer, uiOffset, uiSize, pData);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::BindMaterial(const GfMaterialTemplate& kMaterial)
-{
-	BindMaterialRHI(kMaterial);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

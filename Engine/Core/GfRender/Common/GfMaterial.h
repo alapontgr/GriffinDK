@@ -67,6 +67,13 @@ public:
 
 	void SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize);
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	void Bind(const GfCmdBuffer& kCmdBuffer);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 private:
 
 	enum EFlags : u32
@@ -182,7 +189,12 @@ GF_FORCEINLINE void GfMaterialTemplate::SetMaterialPass(const GfRenderPass* val)
 	m_pMaterialPass = val;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
+GF_FORCEINLINE void GfMaterialTemplate::Bind(const GfCmdBuffer& kCmdBuffer)
+{
+	BindRHI(kCmdBuffer);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMATERIAL_H__

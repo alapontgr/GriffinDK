@@ -13,6 +13,7 @@
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
 #include "Gfrender/Common/GfRenderPass.h"
+#include "GfRender/Common/GfCmdBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -155,6 +156,14 @@ bool GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
 		return true;
 	}
 	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialTemplate_Platform::BindRHI(const GfCmdBuffer& kCmdBuffer)
+{
+	// TODO: Add support for Compute material
+	vkCmdBindPipeline(kCmdBuffer.GetCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GetPipeline());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

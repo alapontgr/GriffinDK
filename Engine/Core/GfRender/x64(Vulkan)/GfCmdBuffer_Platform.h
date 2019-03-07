@@ -58,12 +58,6 @@ private:
 
 	void EndRecordingRHI(const GfRenderContext& kCtx);
 
-	void ClearCurrentTargetRHI(const GfRenderContext& kCtx, const v4& vClearColor);
-
-	void SetViewportRHI(const GfViewport& kViewport);
-
-	void SetScissorRHI(const GfScissor& kScissor);
-
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
@@ -72,8 +66,7 @@ private:
 	void UpdateBufferRangeRHI(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
-
-	void BindMaterialRHI(const GfMaterialTemplate& kMaterial);
+	// Render pipeline state
 
 	void BindParameterSetRHI(const GfMaterialTemplate& kMaterial, 
 		const GfMaterialParamSet& kparamSet, 

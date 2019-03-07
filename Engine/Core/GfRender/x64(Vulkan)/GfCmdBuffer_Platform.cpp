@@ -205,14 +205,6 @@ void GfCmdBuffer_Platform::UpdateBufferRangeRHI(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::BindMaterialRHI(const GfMaterialTemplate& kMaterial)
-{
-	// TODO: Add support for Compute material
-	vkCmdBindPipeline(m_pCmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, kMaterial.GetPipeline());
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void GfCmdBuffer_Platform::BindParameterSetRHI(
 	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 	u32 uiBindPoint, bool bIsGraphics)

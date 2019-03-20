@@ -39,6 +39,9 @@ public:
 
 	void Init(GfCmdBufferType::Type eType);
 
+	////////////////////////////////////////////////////////////////////////////////
+	// CmdBuffer commands
+
 	void BeginRecording(const GfRenderContext& kCtx);
 
 	void EndRecording(const GfRenderContext& kCtx);
@@ -51,15 +54,9 @@ public:
 		GfRenderContextFamilies::Type eQueueType,
 		Bool bLast);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Buffer commands
-
-	void CopyBufferRange(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
-
-	void UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Material related commands
+	// Render pipeline state
 
 	// Bind a parameter set to a slot
 	void BindParameterSet(const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
@@ -108,20 +105,6 @@ GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
 GF_FORCEINLINE void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
 {
 	EndRecordingRHI(kCtx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::CopyBufferRange(const GfRenderContext& kCtx, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
-{
-	CopyBufferRangeRHI(kCtx, kFrom, kTo, uiFromOffset, uiToOffset, uiSize);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::UpdateBufferRange(const GfRenderContext& kCtx, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
-{
-	UpdateBufferRangeRHI(kCtx, kBuffer, uiOffset, uiSize, pData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

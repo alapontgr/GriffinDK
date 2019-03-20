@@ -11,13 +11,15 @@
 
 #include "GfRender/Common/GraphicResources/GfBuffer.h"
 #include "GfRender/Common/GfRenderContext.h"
-#include <unordered_map>
+#include "GfRender/Common/GfCmdBuffer.h"
+
+#include "GfCore/Common/GfStl.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utils
 
 // Used to obtain the StageFlags and AccessFlags to be used by a PipelineBarrier to perform the transition to a specific EBufferUsage
-static const std::unordered_map<EBufferUsage::Type, GfStageAccessConfig> g_tVulkanStageAccessFlagsMap {
+static const GfUMap<EBufferUsage::Type, GfStageAccessConfig> g_tVulkanStageAccessFlagsMap {
 	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT } },
 	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT } },
 	{ EBufferUsage::Index_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_INDEX_READ_BIT } },
@@ -124,6 +126,104 @@ void GfBuffer_Platform::DestroyPlatform(const GfRenderContext& kCtxt)
 GfStageAccessConfig GfBuffer_Platform::GetTransitionSettings() const
 {
 	return g_tVulkanStageAccessFlagsMap.at(m_kBase.m_kDesc.m_eBufferType);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfBuffer_Platform::CopyRangeRHI(
+	const GfCmdBuffer& kCmdBuffer,
+	const GfBuffer& kFrom,
+	const GfBuffer& kTo,
+	u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
+{
+	GfStageAccessConfig kCurrToTransferSettings = kTo.GetTransitionSettings();
+	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
+
+	VkBufferMemoryBarrier kBarrier;
+	kBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	kBarrier.pNext = nullptr;
+	kBarrier.buffer = kTo.GetHandle();
+	kBarrier.offset = uiToOffset;
+	kBarrier.size = uiSize;
+	kBarrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
+	kBarrier.dstAccessMask = kTransferToCurrSettings.m_eAccess;
+	// TODO: Do I need to transit between different queues
+	kBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	kBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	vkCmdPipelineBarrier(
+		kCmdBuffer.GetCmdBuffer(),
+		kCurrToTransferSettings.m_eStage,
+		kTransferToCurrSettings.m_eStage,
+		0,
+		0, nullptr,
+		1, &kBarrier,
+		0, nullptr);
+
+	VkBufferCopy kRegion;
+	kRegion.srcOffset = uiFromOffset;
+	kRegion.dstOffset = uiToOffset;
+	kRegion.size = uiSize;
+	vkCmdCopyBuffer(kCmdBuffer.GetCmdBuffer(), kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
+
+	// Go back to the original state
+	kBarrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
+	kBarrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
+	vkCmdPipelineBarrier(
+		kCmdBuffer.GetCmdBuffer(),
+		kTransferToCurrSettings.m_eStage,
+		kCurrToTransferSettings.m_eStage,
+		0,
+		0, nullptr,
+		1, &kBarrier,
+		0, nullptr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfBuffer_Platform::UpdateRangeRHI(
+	const GfCmdBuffer& kCmdBuffer,
+	const GfBuffer& kBuffer,
+	u32 uiOffset, u32 uiSize, void* pData)
+{
+	GfStageAccessConfig kCurrToTransferSettings = kBuffer.GetTransitionSettings();
+	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
+
+	// Sync to transfer operations
+	VkBufferMemoryBarrier barrier;
+	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barrier.pNext = nullptr;
+	barrier.buffer = kBuffer.GetHandle();
+	barrier.offset = uiOffset;
+	barrier.size = uiSize;
+	barrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
+	barrier.dstAccessMask = kTransferToCurrSettings.m_eAccess;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	vkCmdPipelineBarrier(
+		kCmdBuffer.GetCmdBuffer(),
+		kCurrToTransferSettings.m_eStage,
+		kTransferToCurrSettings.m_eStage,
+		0,
+		0, nullptr,
+		1, &barrier,
+		0, nullptr);
+
+	// Update data
+	vkCmdUpdateBuffer(kCmdBuffer.GetCmdBuffer(), kBuffer.GetHandle(), uiOffset, uiSize, pData);
+
+	// Sync back
+	barrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
+	barrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
+	vkCmdPipelineBarrier(
+		kCmdBuffer.GetCmdBuffer(),
+		kTransferToCurrSettings.m_eStage,
+		kCurrToTransferSettings.m_eStage,
+		0,
+		0, nullptr,
+		1, &barrier,
+		0, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

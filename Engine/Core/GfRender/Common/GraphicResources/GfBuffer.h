@@ -89,10 +89,33 @@ public:
 
 	void Destroy(const GfRenderContext& kCtxt);
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	void CopyRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+
+	void UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 private:
 
 	GfBufferDesc m_kDesc;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfBuffer::CopyRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
+{
+	CopyRangeRHI(kCmdBuffer, kFrom, kTo, uiFromOffset, uiToOffset, uiSize);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfBuffer::UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
+{
+	UpdateRangeRHI(kCmdBuffer, kBuffer, uiOffset, uiSize, pData);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFBUFFER_H__

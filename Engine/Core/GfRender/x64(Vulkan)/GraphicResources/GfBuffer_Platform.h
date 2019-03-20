@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfCmdBuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +48,15 @@ public:
 	VkDeviceMemory GetMemory() const;
 
 	GfStageAccessConfig GetTransitionSettings() const;
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Buffer commands
+
+	void CopyRangeRHI(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+
+	void UpdateRangeRHI(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+
+	////////////////////////////////////////////////////////////////////////////////
 
 private:
 

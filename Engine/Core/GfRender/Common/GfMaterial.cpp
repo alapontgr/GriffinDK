@@ -17,6 +17,8 @@
 GfMaterialTemplate::GfMaterialTemplate()
 	: GfMaterialTemplate_Platform(*this)
 	, m_pMaterialPass(nullptr)
+	, m_uiConstantsStages(0)
+	, m_uiConstantsBlockSize(0)
 	, m_uiFlags(0)
 {
 	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
@@ -91,13 +93,6 @@ GfMaterialinstance::GfMaterialinstance()
 	{
 		m_pBoundSets[i] = nullptr;
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfMaterialinstance::BindParameterSet(GfMaterialParamSet* pSet)
-{
-	GF_ASSERT_ALWAYS("Implement Me");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

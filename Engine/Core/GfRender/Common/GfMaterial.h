@@ -67,10 +67,15 @@ public:
 
 	void SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize);
 
+	void DeclareConstantsBlock(const GfShaderAccessMask& uiStages, u32 uiSize);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
 	void Bind(const GfCmdBuffer& kCmdBuffer);
+
+	// pData is expected to have at least "m_uiConstantsBlockSize" size
+	void PushConstants(const GfCmdBuffer& kCmdBuffer, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -84,8 +89,9 @@ private:
 		BlendState_Initialised		= 1 << 3,
 		VertexFormat_Initialised	= 1 << 4,
 		MaterialPass_Initialised	= 1 << 5,
-		GPUresource_Initialised		= 1 << 6,
-		FullyInitialised			= ((1<<7)-1)
+		Constants_Initialised		= 1 << 6,
+		GPUresource_Initialised		= 1 << 7,
+		FullyInitialised			= ((1<<8)-1)
 	};
 
 	struct GfShaderDesc : public GfMaterialTemplate_Platform::GfShaderDesc_Platform
@@ -121,6 +127,10 @@ private:
 	// Stages
 	GfShaderDesc				m_pShaderStages[EShaderStage::COUNT];
 
+	// Constants
+	GfShaderAccessMask			m_uiConstantsStages;
+	u32							m_uiConstantsBlockSize;
+
 	// Flags
 	GfBitMask<u32>				m_uiFlags;
 };
@@ -132,8 +142,6 @@ class GfMaterialinstance
 public:
 
 	GfMaterialinstance();
-
-	void BindParameterSet(GfMaterialParamSet* pSet);
 
 private:
 	
@@ -191,9 +199,28 @@ GF_FORCEINLINE void GfMaterialTemplate::SetMaterialPass(const GfRenderPass* val)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GF_FORCEINLINE void GfMaterialTemplate::DeclareConstantsBlock(const GfShaderAccessMask& uiStages, u32 uiSize)
+{
+	m_uiConstantsStages = uiStages;
+	m_uiConstantsBlockSize = uiSize;
+	m_uiFlags |= EFlags::Constants_Initialised;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GF_FORCEINLINE void GfMaterialTemplate::Bind(const GfCmdBuffer& kCmdBuffer)
 {
 	BindRHI(kCmdBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfMaterialTemplate::PushConstants(const GfCmdBuffer& kCmdBuffer, void* pData)
+{
+	if (m_uiFlags & EFlags::Constants_Initialised) 
+	{
+		PushConstantsRHI(kCmdBuffer, m_uiConstantsBlockSize, pData);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

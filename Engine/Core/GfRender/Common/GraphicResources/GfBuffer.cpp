@@ -15,6 +15,7 @@
 
 GfBuffer::GfBuffer()
 	: GfBuffer_Platform(*this)
+	, m_uiFlags(0)
 {
 }
 
@@ -35,6 +36,29 @@ void GfBuffer::Destroy(const GfRenderContext& kCtxt)
 	{
 		DestroyPlatform(kCtxt);
 		m_kDesc = GfBufferDesc();
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
+{
+	GF_ASSERT((m_uiFlags & EFlag::Mapped) != 0, "Buffer is already mapped");
+	if (IsMappable() && ((uiSize + uiOffset) < m_kDesc.m_ulSize)) 
+	{
+		m_uiFlags |= EFlag::Mapped;
+		return MapRHI(kCtxt, uiOffset, uiSize);
+	}
+	return nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfBuffer::UnMap(const GfRenderContext& kCtxt)
+{
+	if (m_uiFlags & EFlag::Mapped) 
+	{
+		UnMapRHI(kCtxt);
 	}
 }
 

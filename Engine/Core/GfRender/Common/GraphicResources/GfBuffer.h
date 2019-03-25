@@ -66,8 +66,8 @@ public:
 	{
 		size_t							m_ulSize			= 0;
 		size_t							m_ulAlignment		= 1;
-		GfBufferMemType					m_mMemoryProperties	= EBufferMemProperties::GPU_Local;
-		GfBufferUsage					m_mBufferUsage		= EBufferUsage::InvalidUsage;
+		GfBufferMemType					m_uiMemoryProperties	= EBufferMemProperties::GPU_Local;
+		GfBufferUsage					m_uiBufferUsage		= EBufferUsage::InvalidUsage;
 		EBufferUsage::Type				m_eBufferType		= EBufferUsage::InvalidUsage;
 		// GfRencerContextFamilies::Type	m_eTargetFamily		= GfRencerContextFamilies::Graphics;
 	};
@@ -89,6 +89,12 @@ public:
 
 	void Destroy(const GfRenderContext& kCtxt);
 
+	bool IsMappable() const;
+
+	void* Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+	
+	void UnMap(const GfRenderContext& kCtxt);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
@@ -100,7 +106,13 @@ public:
 
 private:
 
-	GfBufferDesc m_kDesc;
+	enum EFlag : u32
+	{
+		Mapped = 1 << 0,
+	};
+
+	GfBufferDesc	m_kDesc;
+	GfBitMask<u32>	m_uiFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,6 +127,13 @@ GF_FORCEINLINE void GfBuffer::CopyRange(const GfCmdBuffer& kCmdBuffer, const GfB
 GF_FORCEINLINE void GfBuffer::UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
 {
 	UpdateRangeRHI(kCmdBuffer, kBuffer, uiOffset, uiSize, pData);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfBuffer::IsMappable() const
+{
+	return (m_kDesc.m_uiMemoryProperties & EBufferMemProperties::CPU_Visible) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

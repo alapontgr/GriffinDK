@@ -49,6 +49,8 @@ protected:
 
 	void BindRHI(const GfCmdBuffer& kCmdBuffer);
 
+	void PushConstantsRHI(const GfCmdBuffer& kCmdBuffer, u32 uiSize, void* pData);
+
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -60,6 +62,8 @@ private:
 	GfMaterialTemplate&		m_kBase;
 	VkPipelineLayout		m_pLayout;
 	VkPipeline				m_pPipeline;
+
+	VkShaderStageFlags		m_uiPushConstantsStage;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

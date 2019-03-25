@@ -70,7 +70,7 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 	bufferCreateInfo.pNext = nullptr;
 	bufferCreateInfo.flags = 0; // TODO: Add support for different flags (SParse buffers)
 	bufferCreateInfo.size = m_kBase.m_kDesc.m_ulSize;
-	bufferCreateInfo.usage = m_kBase.m_kDesc.m_mBufferUsage.Flags();
+	bufferCreateInfo.usage = m_kBase.m_kDesc.m_uiBufferUsage.Flags();
 
 	// TODO: Enable Optional concurrent access at some point
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -94,7 +94,7 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 	allocateInfo.allocationSize = bufferRequirements.size;
 	allocateInfo.memoryTypeIndex = FindMemTypeIdx(
 		bufferRequirements.memoryTypeBits, 
-		m_kBase.m_kDesc.m_mMemoryProperties.Flags(), 
+		m_kBase.m_kDesc.m_uiMemoryProperties.Flags(), 
 		kCtxt.m_pPhysicalDevice);
 
 	eResult = vkAllocateMemory(kCtxt.m_pDevice, &allocateInfo, nullptr, &m_pMemory);
@@ -126,6 +126,23 @@ void GfBuffer_Platform::DestroyPlatform(const GfRenderContext& kCtxt)
 GfStageAccessConfig GfBuffer_Platform::GetTransitionSettings() const
 {
 	return g_tVulkanStageAccessFlagsMap.at(m_kBase.m_kDesc.m_eBufferType);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void* GfBuffer_Platform::MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
+{
+	void* pData(nullptr);
+	VkResult siResult =  vkMapMemory(kCtxt.m_pDevice, m_pMemory, uiOffset, uiSize, 0, &pData);
+	GF_ASSERT(siResult == VK_SUCCESS, "Failed to Map buffer's memory");
+	return pData;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfBuffer_Platform::UnMapRHI(const GfRenderContext& kCtxt)
+{
+	vkUnmapMemory(kCtxt.m_pDevice, m_pMemory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

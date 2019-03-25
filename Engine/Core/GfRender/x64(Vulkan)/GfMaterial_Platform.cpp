@@ -168,6 +168,13 @@ void GfMaterialTemplate_Platform::BindRHI(const GfCmdBuffer& kCmdBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfMaterialTemplate_Platform::PushConstantsRHI(const GfCmdBuffer& kCmdBuffer, u32 uiSize, void* pData)
+{
+	vkCmdPushConstants(kCmdBuffer.GetCmdBuffer(), m_pLayout, m_uiPushConstantsStage, 0, uiSize, pData);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 {
 	u32 uiLayoutCount(m_kBase.GetBoundLayoutCount());
@@ -189,14 +196,29 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 		}
 	}
 
+	VkPushConstantRange kPossibleRange;
 	VkPipelineLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layoutInfo.pNext = nullptr;
 	layoutInfo.flags = 0;
 	layoutInfo.setLayoutCount = uiLayoutCount;
 	layoutInfo.pSetLayouts = pLayouts;
-	layoutInfo.pushConstantRangeCount = 0;
-	layoutInfo.pPushConstantRanges = nullptr;
+	if (m_kBase.m_uiConstantsBlockSize != 0) 
+	{
+		m_uiPushConstantsStage = ConvertShaderStageFlags(m_kBase.m_uiConstantsStages);
+		// TODO: Any case we may need more ranges?
+		kPossibleRange.stageFlags = m_uiPushConstantsStage;
+		kPossibleRange.offset = 0;
+		kPossibleRange.size = m_kBase.m_uiConstantsBlockSize;
+		layoutInfo.pushConstantRangeCount = 1;
+		layoutInfo.pPushConstantRanges = &kPossibleRange;
+	}
+	else 
+	{
+		m_uiPushConstantsStage = 0;
+		layoutInfo.pushConstantRangeCount = 0;
+		layoutInfo.pPushConstantRanges = nullptr;
+	}
 	VkResult siResult = vkCreatePipelineLayout(kCtx.m_pDevice, &layoutInfo, nullptr, &m_pLayout);
 	if (siResult != VK_SUCCESS) 
 	{

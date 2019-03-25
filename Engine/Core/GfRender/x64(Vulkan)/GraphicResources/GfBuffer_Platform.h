@@ -49,6 +49,10 @@ public:
 
 	GfStageAccessConfig GetTransitionSettings() const;
 
+	void* MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+
+	void UnMapRHI(const GfRenderContext& kCtxt);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 

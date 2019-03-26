@@ -279,7 +279,7 @@ struct GfRasterState
 	f32					m_fLineWidth					= 1.0f;
 	EPolygonMode::Type	m_ePolygonMode					= EPolygonMode::Fill;
 	ECullMode::Type		m_eCullMode						= ECullMode::Back;
-	EFrontFace::Type	m_eFrontFace					= EFrontFace::Clockwise;
+	EFrontFace::Type	m_eFrontFace					= EFrontFace::CounterClockwise;
 	bool				m_bDepthClampEnabled			= false;
 	bool				m_bRasterizerDiscardEnabled		= false;
 	bool				m_bDepthBiasEnabled				= false;

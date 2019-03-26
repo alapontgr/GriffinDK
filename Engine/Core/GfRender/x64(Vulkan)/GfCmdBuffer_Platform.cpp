@@ -58,7 +58,7 @@ void GfCmdBuffer_Platform::SubmitRHI(
 	VkSubmitInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	kInfo.pNext = nullptr;
-	if (true || bLast) 
+	if (bLast) 
 	{
 		kInfo.waitSemaphoreCount = 1;
 		kInfo.pWaitSemaphores = &kSyncPrimitives.m_pImageReady;

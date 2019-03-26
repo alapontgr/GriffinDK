@@ -27,8 +27,8 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 {
 	// Create the window
 	GfWindowInitParams kWindowInit;
-	kWindowInit.m_uiWidth = 1280;
-	kWindowInit.m_uiHeight = 720;
+	kWindowInit.m_uiWidth = 512;
+	kWindowInit.m_uiHeight = 512;
 	kWindowInit.m_bVSync = false;
 	kWindowInit.m_bFullScreen = false;
 	kWindowInit.m_szWindowName = "TestGriffinApp";
@@ -95,14 +95,14 @@ s32 _GfEntry_(const GfEntryArgs& kEntryParams)
 		kRenderPass.BeginPass(kContext, kCmdBuffer);
 
 		// Set Viewport and Scissor
-		kCmdBuffer.SetViewport(kViewport);
-		kCmdBuffer.SetScissor(kScissor);
+		kRenderPass.SetViewport(kCmdBuffer, kViewport);
+		kRenderPass.SetScissor(kCmdBuffer, kScissor);
 
 		// Add commands
-		kCmdBuffer.BindMaterial(kMaterialT);
-
+		kMaterialT.Bind(kCmdBuffer);
+		
 		// Draw
-		kCmdBuffer.Draw(3, 1);
+		kCmdBuffer.Draw(6, 1);
 
 		// End render pass
 		kRenderPass.EndPass(kCmdBuffer);

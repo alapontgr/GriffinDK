@@ -2,13 +2,13 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2019/01/28
-//	File: 	GfMaterialShared_Platform.inl
+//	File: 	GfRenderCommon_Platform.inl
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFMATERIALSHARED_PLATFORM_INL__
-#define __GFMATERIALSHARED_PLATFORM_INL__
+#ifndef __GFRENDERCOMMON_PLATFORM_INL__
+#define __GFRENDERCOMMON_PLATFORM_INL__
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GfRender/Common/GfGraphicsSDK.h"
@@ -186,6 +186,19 @@ static const VkLogicOp g_pLogicOpConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const VkImageViewType g_pViewTypeConverter[] = 
+{
+	VK_IMAGE_VIEW_TYPE_1D,
+	VK_IMAGE_VIEW_TYPE_2D,
+	VK_IMAGE_VIEW_TYPE_3D,
+	VK_IMAGE_VIEW_TYPE_CUBE,
+	VK_IMAGE_VIEW_TYPE_1D_ARRAY,
+	VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+	VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Direct map for the moment
 static GF_FORCEINLINE VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
 {
@@ -285,4 +298,11 @@ static GF_FORCEINLINE VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFMATERIALSHARED_PLATFORM_INL__
+
+static GF_FORCEINLINE VkImageViewType ConvertViewType(ETextureViewType::Type eViewType) 
+{
+	return g_pViewTypeConverter[eViewType];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFRENDERCOMMON_PLATFORM_INL__

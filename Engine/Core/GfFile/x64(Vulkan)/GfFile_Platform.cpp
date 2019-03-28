@@ -34,16 +34,16 @@ const DWORD g_pCreationDisposition[] =
 
 bool GfFile::OpenFile(const char* szFilename, EFileAccessMode::Type eAccesType, GfFileHandle& kOutFileHandle)
 {
-	kOutFileHandle.m_kBase.m_ulFileSize = 0;
+	kOutFileHandle.m_ulFileSize = 0;
 	kOutFileHandle.m_eType = eAccesType;
-	kOutFileHandle.m_pHandle = CreateFileA(
+	kOutFileHandle.Plat().m_pHandle = CreateFileA(
 		szFilename,
 		g_pAccesModes[eAccesType],
 		0, NULL,
 		g_pCreationDisposition[eAccesType],
 		FILE_ATTRIBUTE_NORMAL, NULL);
 
-	if (kOutFileHandle.m_pHandle == INVALID_HANDLE_VALUE) 
+	if (kOutFileHandle.Plat().m_pHandle == INVALID_HANDLE_VALUE)
 	{
 		GF_PRINT("Attempt to open file '%s' failed with error: %d", szFilename, GetLastError());
 		return false;
@@ -55,10 +55,10 @@ bool GfFile::OpenFile(const char* szFilename, EFileAccessMode::Type eAccesType, 
 
 void GfFile::CloseFile(GfFileHandle& kHandle)
 {
-	if (kHandle.m_pHandle != INVALID_HANDLE_VALUE) 
+	if (kHandle.Plat().m_pHandle != INVALID_HANDLE_VALUE) 
 	{
-		CloseHandle(kHandle.m_pHandle);
-		kHandle.m_pHandle = INVALID_HANDLE_VALUE;
+		CloseHandle(kHandle.Plat().m_pHandle);
+		kHandle.Plat().m_pHandle = INVALID_HANDLE_VALUE;
 		kHandle.m_ulFileSize = 0;
 	}
 }
@@ -67,12 +67,12 @@ void GfFile::CloseFile(GfFileHandle& kHandle)
 
 size_t GfFile::GetFileSize(GfFileHandle& kHandle)
 {
-	if (kHandle.m_pHandle != INVALID_HANDLE_VALUE) 
+	if (kHandle.Plat().m_pHandle != INVALID_HANDLE_VALUE) 
 	{
 		if (kHandle.m_ulFileSize == 0) 
 		{
 			LARGE_INTEGER ulSize;
-			GetFileSizeEx(kHandle.m_pHandle, &ulSize);
+			GetFileSizeEx(kHandle.Plat().m_pHandle, &ulSize);
 			kHandle.m_ulFileSize = ulSize.QuadPart;
 		}
 		return kHandle.m_ulFileSize;
@@ -87,7 +87,7 @@ u32 GfFile::ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffe
 	if (kHandle.m_eType == EFileAccessMode::Read) 
 	{
 		DWORD uiOutRead(0);
-		if (!ReadFile(kHandle.m_pHandle,
+		if (!ReadFile(kHandle.Plat().m_pHandle,
 			pOutBuffer,
 			uiToRead,
 			&uiOutRead,
@@ -108,7 +108,7 @@ u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, void* pBuffer
 	{
 		DWORD uiOutWrite(0);
 		if (!WriteFile(
-			kHandle.m_pHandle,
+			kHandle.Plat().m_pHandle,
 			pBuffer,
 			uiToWrite,
 			&uiOutWrite,

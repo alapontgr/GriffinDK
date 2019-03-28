@@ -29,11 +29,11 @@ namespace EFileAccessMode
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfFileHandle : public GfFileHandle_Platform
+class GfFileHandle
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfFileHandle);
 public:
 
-	friend class GfFileHandle_Platform;
 	friend class GfFile;
 
 	GfFileHandle();
@@ -48,7 +48,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfFile : public GfFile_Platform
+class GfFile
 {
 public:
 

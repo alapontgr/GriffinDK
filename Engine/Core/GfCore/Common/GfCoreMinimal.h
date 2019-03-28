@@ -19,6 +19,8 @@
 
 #include "GfCore/Common/GfConfig.h"
 
+#include "GfCore/Common/GfPlatform.h"
+
 #include GF_SOLVE_PLATFORM_HEADER(GfCore)
 
 #include "GfCore/Common/GfDebug.h"

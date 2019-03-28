@@ -13,8 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfFileHandle::GfFileHandle()
-	: m_kPlatform(*this)
+GF_DEFINE_BASE_CTOR(GfFileHandle)
 {
 }
 

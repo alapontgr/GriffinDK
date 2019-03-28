@@ -13,16 +13,13 @@
 
 class GfFileHandle_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfFileHandle);
 public:
 
-	friend class GfFileHandle;
 	friend class GfFile;
 	
-	GfFileHandle_Platform(GfFileHandle& kBase);
-
 private:
 
-	GfFileHandle&	m_kBase;
 	HANDLE			m_pHandle;
 };
 

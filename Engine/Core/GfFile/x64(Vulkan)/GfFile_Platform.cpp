@@ -123,8 +123,7 @@ u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, void* pBuffer
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfFileHandle_Platform::GfFileHandle_Platform(GfFileHandle& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfFileHandle)
 	, m_pHandle(INVALID_HANDLE_VALUE)
 {
 }

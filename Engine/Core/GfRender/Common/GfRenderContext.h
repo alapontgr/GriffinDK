@@ -20,11 +20,10 @@ class GfWindow;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfRenderContext : public GfRenderContext_Platform
+class GfRenderContext
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfRenderContext)
 public:
-
-	friend class GfRenderContext_Platform;
 
 	GfRenderContext();
 

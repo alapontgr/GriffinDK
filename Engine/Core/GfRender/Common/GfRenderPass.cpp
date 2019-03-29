@@ -13,8 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderPass::GfRenderPass()
-	: GfRenderPass_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfRenderPass)
 {
 }
 
@@ -43,8 +42,8 @@ void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearCo
 
 void GfRenderPass::Create(const GfRenderContext& kCtx)
 {
-	CreateRHI(kCtx);
-	RecreateFramebufferRHI(kCtx);
+	m_kPlatform.CreateRHI(kCtx);
+	m_kPlatform.RecreateFramebufferRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

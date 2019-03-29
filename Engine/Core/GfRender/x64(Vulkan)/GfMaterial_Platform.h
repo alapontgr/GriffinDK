@@ -24,12 +24,9 @@ class GfCmdBuffer;
 
 class GfMaterialTemplate_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfMaterialTemplate);
 public:
-
-	friend class GfMaterialTemplate;
-
-	GfMaterialTemplate_Platform(GfMaterialTemplate& kBase);
-
+	
 	VkPipelineLayout GetLayout() const { return m_pLayout; }
 
 	VkPipeline GetPipeline() const { return m_pPipeline; }
@@ -59,7 +56,6 @@ private:
 
 	bool CreatePipeline(const GfRenderContext& kCtx);
 
-	GfMaterialTemplate&		m_kBase;
 	VkPipelineLayout		m_pLayout;
 	VkPipeline				m_pPipeline;
 

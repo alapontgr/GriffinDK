@@ -23,8 +23,9 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfCmdBufferFactory : public GfCmdBufferFactory_Platform
+class GfCmdBufferFactory
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBufferFactory);
 public:
 
 	GfCmdBufferFactory();

@@ -50,7 +50,7 @@ void GfMatUniformFactory_Platform::CreateRHI(const GfRenderContext& kCtxt)
 	descPoolInfo.pPoolSizes = pUniformEntryDescs;
 	descPoolInfo.maxSets = m_kBase.m_uiMaxAllocatedSets;
 
-	VkResult eResult = vkCreateDescriptorPool(kCtxt.m_pDevice, &descPoolInfo, nullptr, &m_pPool);
+	VkResult eResult = vkCreateDescriptorPool(kCtxt.Plat().m_pDevice, &descPoolInfo, nullptr, &m_pPool);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create the descriptor pool");
 }
 
@@ -60,7 +60,7 @@ void GfMatUniformFactory_Platform::DestroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pPool) 
 	{
-		vkDestroyDescriptorPool(kCtxt.m_pDevice, m_pPool, nullptr);
+		vkDestroyDescriptorPool(kCtxt.Plat().m_pDevice, m_pPool, nullptr);
 		m_pPool = nullptr;
 	}
 }
@@ -100,7 +100,7 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		layoutInfo.bindingCount = uiElementCount;
 		layoutInfo.pBindings = pBindings;
 
-		VkResult siResult = vkCreateDescriptorSetLayout(kCtxt.m_pDevice, &layoutInfo, nullptr, &m_pSetLayout);
+		VkResult siResult = vkCreateDescriptorSetLayout(kCtxt.Plat().m_pDevice, &layoutInfo, nullptr, &m_pSetLayout);
 		GF_ASSERT(siResult == VK_SUCCESS, "Failed to create the descriptor set layout");
 	}
 }
@@ -111,7 +111,7 @@ void GfMatParamLayout_Platform::DestroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pSetLayout) 
 	{
-		vkDestroyDescriptorSetLayout(kCtxt.m_pDevice, m_pSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(kCtxt.Plat().m_pDevice, m_pSetLayout, nullptr);
 		m_pSetLayout = nullptr;
 	}
 }
@@ -137,12 +137,12 @@ bool GfMaterialParamSet_Platform::CreateRHI(const GfRenderContext& kCtxt, GfMatU
 	VkDescriptorSetAllocateInfo kDescSetAllocInfo{};
 	kDescSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	kDescSetAllocInfo.pNext = nullptr;
-	kDescSetAllocInfo.descriptorPool = kFactory.GetPool();
+	kDescSetAllocInfo.descriptorPool = kFactory.Plat().GetPool();
 	kDescSetAllocInfo.descriptorSetCount = 1;
 
-	VkDescriptorSetLayout pSetLayout(m_kBase.m_pSetLayout->GetLayout());
+	VkDescriptorSetLayout pSetLayout(m_kBase.m_pSetLayout->Plat().GetLayout());
 	kDescSetAllocInfo.pSetLayouts = &pSetLayout;
-	VkResult eResult = vkAllocateDescriptorSets(kCtxt.m_pDevice, &kDescSetAllocInfo, &m_pParamatersSet);
+	VkResult eResult = vkAllocateDescriptorSets(kCtxt.Plat().m_pDevice, &kDescSetAllocInfo, &m_pParamatersSet);
 	return eResult == VK_SUCCESS;
 }
 
@@ -152,7 +152,7 @@ void GfMaterialParamSet_Platform::DestroyRHI(const GfRenderContext& kCtxt, GfMat
 {
 	if (m_pParamatersSet) 
 	{
-		vkFreeDescriptorSets(kCtxt.m_pDevice, kFactory.GetPool(), 1, &m_pParamatersSet);
+		vkFreeDescriptorSets(kCtxt.Plat().m_pDevice, kFactory.Plat().GetPool(), 1, &m_pParamatersSet);
 		m_pParamatersSet = nullptr;
 	}
 }
@@ -194,7 +194,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				kWriteDescSet.pImageInfo = nullptr;
 				kWriteDescSet.pTexelBufferView = nullptr;
 
-				vkUpdateDescriptorSets(kCtxt.m_pDevice, 1, &kWriteDescSet, 0, nullptr);
+				vkUpdateDescriptorSets(kCtxt.Plat().m_pDevice, 1, &kWriteDescSet, 0, nullptr);
 				break;
 			}
 			default:

@@ -115,8 +115,7 @@ static inline void ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 ui
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfMaterialTemplate_Platform::GfMaterialTemplate_Platform(GfMaterialTemplate& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfMaterialTemplate)
 	, m_pLayout(nullptr)
 	, m_pPipeline(nullptr)
 {
@@ -129,19 +128,19 @@ void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
 	if (m_pPipeline)
 	{
-		vkDestroyPipeline(kCtx.m_pDevice, m_pPipeline, nullptr);
+		vkDestroyPipeline(kCtx.Plat().m_pDevice, m_pPipeline, nullptr);
 		m_pPipeline = nullptr;
 	}
 	if (m_pLayout) 
 	{
-		vkDestroyPipelineLayout(kCtx.m_pDevice, m_pLayout, nullptr);
+		vkDestroyPipelineLayout(kCtx.Plat().m_pDevice, m_pLayout, nullptr);
 		m_pLayout = nullptr;
 	}
 	for (u32 i=0; i<EShaderStage::COUNT; ++i) 
 	{
 		if (m_kBase.m_pShaderStages[i].m_pModule) 
 		{
-			vkDestroyShaderModule(kCtx.m_pDevice, m_kBase.m_pShaderStages[i].m_pModule, nullptr);
+			vkDestroyShaderModule(kCtx.Plat().m_pDevice, m_kBase.m_pShaderStages[i].m_pModule, nullptr);
 			m_kBase.m_pShaderStages[i].m_pModule = VK_NULL_HANDLE;
 		}
 	}
@@ -163,14 +162,14 @@ bool GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
 void GfMaterialTemplate_Platform::BindRHI(const GfCmdBuffer& kCmdBuffer)
 {
 	// TODO: Add support for Compute material
-	vkCmdBindPipeline(kCmdBuffer.GetCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GetPipeline());
+	vkCmdBindPipeline(kCmdBuffer.Plat().GetCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GetPipeline());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfMaterialTemplate_Platform::PushConstantsRHI(const GfCmdBuffer& kCmdBuffer, u32 uiSize, void* pData)
 {
-	vkCmdPushConstants(kCmdBuffer.GetCmdBuffer(), m_pLayout, m_uiPushConstantsStage, 0, uiSize, pData);
+	vkCmdPushConstants(kCmdBuffer.Plat().GetCmdBuffer(), m_pLayout, m_uiPushConstantsStage, 0, uiSize, pData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +189,7 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 			GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
 			if (pLayout)
 			{
-				*pCursor = pLayout->GetLayout();
+				*pCursor = pLayout->Plat().GetLayout();
 				pCursor++;
 			}
 		}
@@ -219,7 +218,7 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 		layoutInfo.pushConstantRangeCount = 0;
 		layoutInfo.pPushConstantRanges = nullptr;
 	}
-	VkResult siResult = vkCreatePipelineLayout(kCtx.m_pDevice, &layoutInfo, nullptr, &m_pLayout);
+	VkResult siResult = vkCreatePipelineLayout(kCtx.Plat().m_pDevice, &layoutInfo, nullptr, &m_pLayout);
 	if (siResult != VK_SUCCESS) 
 	{
 		return false;
@@ -255,7 +254,7 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 			kModuleInfo.codeSize = kStage.m_uiSrcDataSize;
 			kModuleInfo.pCode = reinterpret_cast<const u32*>(kStage.m_pSourceData);
 
-			VkResult siResult = vkCreateShaderModule(kCtx.m_pDevice, &kModuleInfo, nullptr, &kStage.m_pModule);
+			VkResult siResult = vkCreateShaderModule(kCtx.Plat().m_pDevice, &kModuleInfo, nullptr, &kStage.m_pModule);
 			if (siResult != VK_SUCCESS) 
 			{
 				return false;
@@ -362,14 +361,14 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	kPipelineInfo.pDynamicState = &kDynStateInfo;
 
 	kPipelineInfo.layout = m_pLayout;
-	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->GetRenderPass();
+	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->Plat().GetRenderPass();
 	kPipelineInfo.subpass = 0;
 
 	// TODO: Add material specialization (uber-shaders)
 	kPipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	kPipelineInfo.basePipelineIndex = -1;
 
-	VkResult siResult = vkCreateGraphicsPipelines(kCtx.m_pDevice, VK_NULL_HANDLE, 1, &kPipelineInfo, nullptr, &m_pPipeline);
+	VkResult siResult = vkCreateGraphicsPipelines(kCtx.Plat().m_pDevice, VK_NULL_HANDLE, 1, &kPipelineInfo, nullptr, &m_pPipeline);
 	if (siResult != VK_SUCCESS) 
 	{
 		return false;

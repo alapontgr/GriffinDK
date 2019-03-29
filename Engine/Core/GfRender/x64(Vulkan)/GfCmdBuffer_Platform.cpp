@@ -40,9 +40,9 @@ void GfCmdBuffer_Platform::InitRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
 
 void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 {
-	VkResult eResult = vkWaitForFences(kCtx.m_pDevice, 1, &m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
+	VkResult eResult = vkWaitForFences(kCtx.Plat().m_pDevice, 1, &m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
 	GF_ASSERT(eResult == VK_SUCCESS, "Waited to long for fences");
-	eResult = vkResetFences(kCtx.m_pDevice, 1, &m_pFence);
+	eResult = vkResetFences(kCtx.Plat().m_pDevice, 1, &m_pFence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to reset the fences");
 }
 
@@ -53,7 +53,7 @@ void GfCmdBuffer_Platform::SubmitRHI(
 	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	const GfFrameSyncing& kSyncPrimitives(kCtx.GetFrameSyncPrimitives());
+	const GfFrameSyncing& kSyncPrimitives(kCtx.Plat().GetFrameSyncPrimitives());
 	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	VkSubmitInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -69,7 +69,7 @@ void GfCmdBuffer_Platform::SubmitRHI(
 	kInfo.commandBufferCount = 1;
 	kInfo.pCommandBuffers = &m_pCmdBuffer;
 
-	VkResult eResult = vkQueueSubmit(kCtx.GetQueue(eQueueType), 1, &kInfo, m_pFence);
+	VkResult eResult = vkQueueSubmit(kCtx.Plat().GetQueue(eQueueType), 1, &kInfo, m_pFence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
 }
 
@@ -110,9 +110,9 @@ void GfCmdBuffer_Platform::BindParameterSetRHI(
 	u32 uiBindPoint, bool bIsGraphics)
 {
 	VkPipelineBindPoint uiBindType(bIsGraphics ? VK_PIPELINE_BIND_POINT_GRAPHICS : VK_PIPELINE_BIND_POINT_COMPUTE);
-	VkDescriptorSet pDescriptorSet(kparamSet.GetDescriptorSet());
+	VkDescriptorSet pDescriptorSet(kparamSet.Plat().GetDescriptorSet());
 	vkCmdBindDescriptorSets(m_pCmdBuffer, uiBindType,
-		kMaterial.GetLayout(), uiBindPoint, 1, &pDescriptorSet, 0, nullptr);
+		kMaterial.Plat().GetLayout(), uiBindPoint, 1, &pDescriptorSet, 0, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

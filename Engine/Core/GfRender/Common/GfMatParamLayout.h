@@ -32,11 +32,10 @@ struct GfMaterialParameterSlot
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMatUniformFactory : public GfMatUniformFactory_Platform
+class GfMatUniformFactory
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfMatUniformFactory)
 public:
-
-	friend class GfMatUniformFactory_Platform;
 
 	GfMatUniformFactory();
 
@@ -58,11 +57,10 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMatParamLayout : public GfMatParamLayout_Platform
+class GfMatParamLayout
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfMatParamLayout)
 public:
-
-	friend class GfMatParamLayout_Platform;
 
 	GfMatParamLayout();
 
@@ -81,11 +79,10 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialParamSet : public GfMaterialParamSet_Platform
+class GfMaterialParamSet
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfMaterialParamSet)
 public: 
-
-	friend class GfMaterialParamSet_Platform;
 
 	GfMaterialParamSet();
 

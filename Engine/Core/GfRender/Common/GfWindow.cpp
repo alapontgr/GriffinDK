@@ -13,8 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfWindow::GfWindow()
-	: GfWindow_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfWindow)
 	, m_szAppName(nullptr)
 	, m_uiWidth(0)
 	, m_uiHeight(0)
@@ -32,21 +31,21 @@ void GfWindow::Init(GfWindowInitParams& kInitParams)
 	m_uiHeight = kInitParams.m_uiHeight;
 	m_bFullScreen = kInitParams.m_bFullScreen;
 	m_bVSync = kInitParams.m_bVSync;
-	InitPlatform(kInitParams);
+	m_kPlatform.InitRHI(kInitParams);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 Bool GfWindow::Tick()
 {
-	return TickPlatform();
+	return m_kPlatform.TickRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfWindow::Shutdown()
 {
-	ShutdownPlatform();
+	m_kPlatform.ShutdownRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -32,11 +32,10 @@ struct GfWindowInitParams : public GfWindowInitParams_Platform
 ////////////////////////////////////////////////////////////////////////////////
 
 struct GfEntryArgs;
-class GfWindow : public GfWindow_Platform
+class GfWindow
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfWindow);
 public:
-
-	friend class GfWindow_Platform;
 
 	GfWindow();
 

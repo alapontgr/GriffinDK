@@ -55,15 +55,14 @@ bool ProcessEvents(MSG* msg)
 ////////////////////////////////////////////////////////////////////////////////
 // Header impl
 
-GfWindow_Platform::GfWindow_Platform(GfWindow& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfWindow)
 	, m_pHwnd(nullptr)
 	, m_pInstance(nullptr)
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::InitPlatform(GfWindowInitParams& kInitParams)
+void GfWindow_Platform::InitRHI(GfWindowInitParams& kInitParams)
 {
 	// Assign the HANDLE
 	m_pInstance = GetModuleHandle(NULL);
@@ -151,7 +150,7 @@ void GfWindow_Platform::InitPlatform(GfWindowInitParams& kInitParams)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool GfWindow_Platform::TickPlatform()
+Bool GfWindow_Platform::TickRHI()
 {
 	MSG msg;
 	// Check to see if any messages are waiting in the queue
@@ -168,7 +167,7 @@ Bool GfWindow_Platform::TickPlatform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::ShutdownPlatform()
+void GfWindow_Platform::ShutdownRHI()
 {
 	CloseWindow(m_pHwnd);
 	m_pHwnd = nullptr;

@@ -16,8 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderContext::GfRenderContext()
-	: GfRenderContext_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfRenderContext)
 	, m_pWindow(nullptr)
 	, m_uiCurrentFrameIdx(0)
 {
@@ -33,7 +32,7 @@ GfRenderContext::GfRenderContext()
 void GfRenderContext::Init(GfWindow* pWindow)
 {
 	m_pWindow = pWindow;
-	InitRHI();
+	m_kPlatform.InitRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +47,7 @@ void GfRenderContext::Shutdown()
 Bool GfRenderContext::BeginFrame()
 {
 	Bool bResult(m_pWindow->Tick());
-	BeginFrameRHI();
+	m_kPlatform.BeginFrameRHI();
 	return bResult;
 }
 
@@ -56,7 +55,7 @@ Bool GfRenderContext::BeginFrame()
 
 void GfRenderContext::EndFrame()
 {
-	EndFrameRHI();
+	m_kPlatform.EndFrameRHI();
 	Flip();
 }
 

@@ -29,8 +29,9 @@ namespace GfRenderPassClear
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfRenderPass : public GfRenderPass_Platform 
+class GfRenderPass
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfRenderPass);
 public:
 
 	GfRenderPass();
@@ -68,35 +69,35 @@ private:
 
 GF_FORCEINLINE void GfRenderPass::BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer)
 {
-	BeginPassRHI(kCtx, kCmdBuffer);
+	m_kPlatform.BeginPassRHI(kCtx, kCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfRenderPass::EndPass(const GfCmdBuffer& kCmdBuffer)
 {
-	EndPassRHI(kCmdBuffer);
+	m_kPlatform.EndPassRHI(kCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfRenderPass::SetViewport(const GfCmdBuffer& kCmdBuffer, const GfViewport& kViewport)
 {
-	SetViewportRHI(kCmdBuffer, kViewport);
+	m_kPlatform.SetViewportRHI(kCmdBuffer, kViewport);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfRenderPass::SetScissor(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor)
 {
-	SetScissorRHI(kCmdBuffer, kScissor);
+	m_kPlatform.SetScissorRHI(kCmdBuffer, kScissor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfRenderPass::ClearCurrentTarget(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor)
 {
-	ClearCurrentTargetRHI(kCtx, kCmdBuffer, vClearColor);
+	m_kPlatform.ClearCurrentTargetRHI(kCtx, kCmdBuffer, vClearColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

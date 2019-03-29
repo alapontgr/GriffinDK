@@ -17,14 +17,13 @@
 	friend class TYPE##_Platform;							\
 	using PlatformT = TYPE##_Platform;						\
 	using PlatformRef = TYPE##_Platform&;					\
+	using PlatformCRef = const TYPE##_Platform&;			\
 	using PlatformPtr = TYPE##_Platform*;					\
 	PlatformT& Plat(){return m_kPlatform;}					\
 	const PlatformT& Plat() const { return m_kPlatform; }	\
 	PlatformT* PlatPtr() { return &m_kPlatform; }			\
 	private:												\
 	PlatformT	m_kPlatform;
-
-////////////////////////////////////////////////////////////////////////////////
 
 /*
 	Usage:
@@ -44,8 +43,8 @@
 	public:									\
 	friend class TYPE;						\
 	TYPE##_Platform(TYPE& kBase);			\
-	TYPE& m_kBase;							\
-	private:
+	private:								\
+	TYPE& m_kBase;							
 
 /*
 	Usage:
@@ -56,7 +55,13 @@
 #define GF_DEFINE_PLATFORM_CTOR(TYPE)	\
 	TYPE##_Platform::TYPE##_Platform(TYPE& kBase) : m_kBase(kBase)
 
+////////////////////////////////////////////////////////////////////////////////
 /*
+	Usage:
+
+	If the platform file uses a base class reference, "GF_DEFINE_BASE_CTOR" must be use to define the base class's constructor.
+	Then, the platform class must use "GF_DECLARE_PLATFORM_MEMBERS" and "GF_DEFINE_PLATFORM_CTOR"
+
 	Example:
 
 	///////////////////////////////////////////////////////

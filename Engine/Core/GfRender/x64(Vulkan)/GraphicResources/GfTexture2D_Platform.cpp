@@ -57,7 +57,7 @@ bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
 	kTextureInfo.pQueueFamilyIndices = nullptr;
 	kTextureInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	if (vkCreateImage(kCtx.m_pDevice, &kTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)
+	if (vkCreateImage(kCtx.Plat().m_pDevice, &kTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)
 	{
 		return false;
 	}
@@ -73,12 +73,12 @@ bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
 	kAllocInfo.pool = VK_NULL_HANDLE; // TODO: Use pool for textures
 	kAllocInfo.pUserData = nullptr;
 
-	if (vmaAllocateMemoryForImage(kCtx.m_kAllocator, m_pImage, &kAllocInfo, &m_pAlloc, &m_kAllocInfo) != VK_SUCCESS)
+	if (vmaAllocateMemoryForImage(kCtx.Plat().m_kAllocator, m_pImage, &kAllocInfo, &m_pAlloc, &m_kAllocInfo) != VK_SUCCESS)
 	{
 		return false;
 	}
 
-	if (vmaBindImageMemory(kCtx.m_kAllocator, m_pAlloc, m_pImage) != VK_SUCCESS)
+	if (vmaBindImageMemory(kCtx.Plat().m_kAllocator, m_pAlloc, m_pImage) != VK_SUCCESS)
 	{
 		return false;
 	}
@@ -113,7 +113,7 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiMips;
 	kImageViewInfo.subresourceRange.baseArrayLayer = 0; // TODO: Support for arrays of texture-arrays
 	kImageViewInfo.subresourceRange.layerCount = 1;
-	return vkCreateImageView(kCtx.m_pDevice, &kImageViewInfo, nullptr, &m_pImageView) != VK_SUCCESS;
+	return vkCreateImageView(kCtx.Plat().m_pDevice, &kImageViewInfo, nullptr, &m_pImageView) != VK_SUCCESS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,19 +122,19 @@ void GfTexture2D_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
 	if (m_pImageView) 
 	{
-		vkDestroyImageView(kCtx.m_pDevice, m_pImageView, nullptr);
+		vkDestroyImageView(kCtx.Plat().m_pDevice, m_pImageView, nullptr);
 		m_pImageView = nullptr;
 	}
 	if (m_pImage) 
 	{
-		vkDestroyImage(kCtx.m_pDevice, m_pImage, nullptr);
+		vkDestroyImage(kCtx.Plat().m_pDevice, m_pImage, nullptr);
 		m_pImage = nullptr;
 	
 	}
 	// Release allocated GPU memory
 	if (m_pAlloc) 
 	{
-		vmaFreeMemory(kCtx.m_kAllocator, m_pAlloc);
+		vmaFreeMemory(kCtx.Plat().m_kAllocator, m_pAlloc);
 		m_pAlloc = nullptr;
 		// Not really needed
 		memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
@@ -163,7 +163,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
 	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
 
-	vkCmdPipelineBarrier(kCmdBuffer.GetCmdBuffer(),
+	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0,
@@ -190,7 +190,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 		m_kBase.GetHeight(),
 		1
 	};
-	vkCmdCopyBufferToImage(kCmdBuffer.GetCmdBuffer(), kFrom.GetHandle(), GetImage(),
+	vkCmdCopyBufferToImage(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.GetHandle(), GetImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &kRegion);
 
 	// Transit image layout to ready to be read by shaders
@@ -201,7 +201,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 	kBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
 	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
-	vkCmdPipelineBarrier(kCmdBuffer.GetCmdBuffer(),
+	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 		0,

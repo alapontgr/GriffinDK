@@ -59,8 +59,7 @@ static const char* g_pDeviceExtensions[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderContext_Platform::GfRenderContext_Platform(GfRenderContext& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfRenderContext)
 	, m_pInstance(nullptr)
 	, m_pPhysicalDevice(nullptr)
 	, m_pDevice(nullptr)
@@ -436,7 +435,7 @@ void GfRenderContext_Platform::CreateInstance()
 
 void GfRenderContext_Platform::CreateSurface()
 {
-	GfWindow_Platform* pWindowPlat(((GfRenderContext*)this)->m_pWindow);
+	GfWindow_Platform* pWindowPlat(m_kBase.m_pWindow->PlatPtr());
 
 	VkWin32SurfaceCreateInfoKHR kSurfaceInfo;
 	kSurfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

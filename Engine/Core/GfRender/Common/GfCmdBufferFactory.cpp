@@ -21,14 +21,14 @@ GfCmdBufferFactory::GfCmdBufferFactory()
 
 void GfCmdBufferFactory::Init(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType)
 {
-	InitRHI(kCtx, eQueueType);
+	m_kPlatform.InitRHI(kCtx, eQueueType);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBufferFactory::CreateCmdBuffer(const GfRenderContext& kCtx, GfCmdBufferType::Type eType, GfCmdBuffer& kOuCmdBuffer)
 {
-	CreateCmdBufferRHI(kCtx, eType, kOuCmdBuffer);
+	m_kPlatform.CreateCmdBufferRHI(kCtx, eType, kOuCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -22,11 +22,8 @@ class GfRenderContext;
 
 class GfMatUniformFactory_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfMatUniformFactory);
 public: 
-
-	friend class GfMatUniformFactory;
-
-	GfMatUniformFactory_Platform(GfMatUniformFactory& kBase);
 
 	VkDescriptorPool GetPool() const;
 
@@ -38,7 +35,6 @@ protected:
 
 private:
 
-	GfMatUniformFactory&	m_kBase;
 	VkDescriptorPool		m_pPool;
 };
 
@@ -46,11 +42,8 @@ private:
 
 class GfMatParamLayout_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfMatParamLayout);
 public:
-
-	friend class GfMatParamLayout;
-
-	GfMatParamLayout_Platform(GfMatParamLayout& kBase);
 
 	VkDescriptorSetLayout GetLayout() const;
 
@@ -60,7 +53,6 @@ public:
 
 private:
 
-	GfMatParamLayout&		m_kBase;
 	VkDescriptorSetLayout	m_pSetLayout;
 };
 
@@ -68,11 +60,8 @@ private:
 
 class GfMaterialParamSet_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfMaterialParamSet);
 public:
-
-	friend class GfMaterialParamSet;
-
-	GfMaterialParamSet_Platform(GfMaterialParamSet& kBase);
 
 	VkDescriptorSet GetDescriptorSet() const { return m_pParamatersSet; }
 
@@ -86,7 +75,6 @@ protected:
 
 private:
 
-	GfMaterialParamSet& m_kBase;
 	VkDescriptorSet		m_pParamatersSet;
 };
 

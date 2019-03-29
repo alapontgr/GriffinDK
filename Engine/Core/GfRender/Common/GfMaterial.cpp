@@ -14,8 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // MaterialTemplate
 
-GfMaterialTemplate::GfMaterialTemplate()
-	: GfMaterialTemplate_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfMaterialTemplate)
 	, m_pMaterialPass(nullptr)
 	, m_uiConstantsStages(0)
 	, m_uiConstantsBlockSize(0)
@@ -37,7 +36,7 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 		Destroy(kCtx);
 	}
 	// Try to create the GPU resource
-	if (CreateRHI(kCtx)) 
+	if (m_kPlatform.CreateRHI(kCtx)) 
 	{
 		m_uiFlags |= EFlags::GPUresource_Initialised;
 	}
@@ -52,7 +51,7 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 {
-	DestroyRHI(kCtx);
+	m_kPlatform.DestroyRHI(kCtx);
 	m_uiFlags &= ~EFlags::GPUresource_Initialised;
 }
 

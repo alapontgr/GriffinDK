@@ -29,8 +29,9 @@ namespace GfCmdBufferType
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfCmdBuffer : public GfCmdBuffer_Platform
+class GfCmdBuffer
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBuffer);
 public:
 
 	friend class GfCmdBuffer_Platform;
@@ -80,7 +81,7 @@ private:
 
 GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
 {
-	WaitForReadyRHI(kCtx);
+	m_kPlatform.WaitForReadyRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -90,21 +91,21 @@ GF_FORCEINLINE void GfCmdBuffer::Submit(
 	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	SubmitRHI(kCtx, eQueueType, bLast);
+	m_kPlatform.SubmitRHI(kCtx, eQueueType, bLast);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
 {
-	BeginRecordingRHI(kCtx);
+	m_kPlatform.BeginRecordingRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
 {
-	EndRecordingRHI(kCtx);
+	m_kPlatform.EndRecordingRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,21 +114,21 @@ GF_FORCEINLINE void GfCmdBuffer::BindParameterSet(
 	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
 	u32 uiBindPoint, bool bIsGraphics)
 {
-	BindParameterSetRHI(kMaterial, kparamSet, uiBindPoint, bIsGraphics);
+	m_kPlatform.BindParameterSetRHI(kMaterial, kparamSet, uiBindPoint, bIsGraphics);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfCmdBuffer::DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
-	DrawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
+	m_kPlatform.DrawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfCmdBuffer::Draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
 {
-	DrawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+	m_kPlatform.DrawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -17,8 +17,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfRenderPass_Platform::GfRenderPass_Platform(GfRenderPass& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfRenderPass)
 	, m_pRenderPass(nullptr)
 {
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
@@ -34,7 +33,7 @@ void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx)
 	// Description of the whole render pass
 	VkAttachmentDescription kAttachmentsDesc{};
 	kAttachmentsDesc.flags = 0;
-	kAttachmentsDesc.format = kCtx.GetSwapchainFormat();
+	kAttachmentsDesc.format = kCtx.Plat().GetSwapchainFormat();
 	kAttachmentsDesc.samples = VK_SAMPLE_COUNT_1_BIT;
 	kAttachmentsDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	kAttachmentsDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -93,7 +92,7 @@ void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx)
 	kRenderPassInfo.dependencyCount = static_cast<u32>(tDependencies.size());
 	kRenderPassInfo.pDependencies = &tDependencies[0];
 
-	VkResult eResult = vkCreateRenderPass(kCtx.m_pDevice, &kRenderPassInfo, nullptr,
+	VkResult eResult = vkCreateRenderPass(kCtx.Plat().m_pDevice, &kRenderPassInfo, nullptr,
 		&m_pRenderPass);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create render pass");
 }
@@ -119,14 +118,14 @@ void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCm
 	passBeginInfo.renderArea.offset.y = 0;
 	passBeginInfo.clearValueCount = 1;
 	passBeginInfo.pClearValues = &clearColor;
-	vkCmdBeginRenderPass(kCmdBuffer.GetCmdBuffer(), &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(kCmdBuffer.Plat().GetCmdBuffer(), &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass_Platform::EndPassRHI(const GfCmdBuffer& kCmdBuffer)
 {
-	vkCmdEndRenderPass(kCmdBuffer.GetCmdBuffer());
+	vkCmdEndRenderPass(kCmdBuffer.Plat().GetCmdBuffer());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +139,7 @@ void GfRenderPass_Platform::SetViewportRHI(const GfCmdBuffer& kCmdBuffer, const 
 	kRHIViewport.height = kViewport.m_fHeight;
 	kRHIViewport.minDepth = kViewport.m_fMinDepth;
 	kRHIViewport.maxDepth = kViewport.m_fMaxDepth;
-	vkCmdSetViewport(kCmdBuffer.GetCmdBuffer(), 0, 1, &kRHIViewport);
+	vkCmdSetViewport(kCmdBuffer.Plat().GetCmdBuffer(), 0, 1, &kRHIViewport);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +151,7 @@ void GfRenderPass_Platform::SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const G
 	kRHIScissor.offset.y = kScissor.m_siOffsetY;
 	kRHIScissor.extent.width = kScissor.m_siWidth;
 	kRHIScissor.extent.height = kScissor.m_siHeight;
-	vkCmdSetScissor(kCmdBuffer.GetCmdBuffer(), 0, 1, &kRHIScissor);
+	vkCmdSetScissor(kCmdBuffer.Plat().GetCmdBuffer(), 0, 1, &kRHIScissor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +177,7 @@ void GfRenderPass_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, c
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          newLayout
 		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
 		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
+		kCtx.Plat().GetCurrentBackBuffer(),                       // VkImage                  image
 		kImageRange                     // VkImageSubresourceRange                subresourceRange
 	};
 
@@ -192,7 +191,7 @@ void GfRenderPass_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, c
 		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // VkImageLayout                          newLayout
 		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
 		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.GetCurrentBackBuffer(),                       // VkImage                                image
+		kCtx.Plat().GetCurrentBackBuffer(),                       // VkImage                  image
 		kImageRange                     // VkImageSubresourceRange                subresourceRange
 	};
 
@@ -200,7 +199,7 @@ void GfRenderPass_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, c
 	////////////////////////////////////////////////////////////////////////////////
 
 	vkCmdPipelineBarrier(
-		kCmdBuffer.GetCmdBuffer(),
+		kCmdBuffer.Plat().GetCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0, 0, nullptr, 0, nullptr, 1, &kBarrierPresentToClear);
@@ -211,11 +210,11 @@ void GfRenderPass_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, c
 	VkClearValue clearValue = {};
 	clearValue.color = clearColor;
 
-	vkCmdClearColorImage(kCmdBuffer.GetCmdBuffer(), kCtx.GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
+	vkCmdClearColorImage(kCmdBuffer.Plat().GetCmdBuffer(), kCtx.Plat().GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	vkCmdPipelineBarrier(kCmdBuffer.GetCmdBuffer(),
+	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &kBarrierClearToPresent);
 }
@@ -229,7 +228,7 @@ void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
 	{
 		for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
 		{
-			vkDestroyFramebuffer(kCtx.m_pDevice, m_pFramebuffers[i], nullptr);
+			vkDestroyFramebuffer(kCtx.Plat().m_pDevice, m_pFramebuffers[i], nullptr);
 			m_pFramebuffers[i] = VK_NULL_HANDLE;
 		}
 	}
@@ -249,10 +248,10 @@ void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
 
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
 	{
-		VkImageView pOutView(kCtx.GetBackBufferView(i));
+		VkImageView pOutView(kCtx.Plat().GetBackBufferView(i));
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = &pOutView;
-		VkResult eResult = vkCreateFramebuffer(kCtx.m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);
+		VkResult eResult = vkCreateFramebuffer(kCtx.Plat().m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
 		//
 	}

@@ -26,11 +26,8 @@ struct GfScissor;
 
 class GfRenderPass_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfRenderPass);
 public:
-
-	friend class GfRenderPass;
-
-	GfRenderPass_Platform(GfRenderPass& kBase);
 
 	VkRenderPass GetRenderPass() const { return m_pRenderPass; }
 
@@ -55,8 +52,6 @@ protected:
 private:
 
 	void RecreateFramebufferRHI(const GfRenderContext& kCtx);
-
-	GfRenderPass& m_kBase;
 
 public:
 	// TODO: Revise this encapsulation

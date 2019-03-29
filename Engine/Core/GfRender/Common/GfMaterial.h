@@ -25,11 +25,10 @@ class GfRenderPass;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfMaterialTemplate : public GfMaterialTemplate_Platform
+class GfMaterialTemplate
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfMaterialTemplate);
 public:
-
-	friend class GfMaterialTemplate_Platform;
 
 	GfMaterialTemplate();
 
@@ -210,7 +209,7 @@ GF_FORCEINLINE void GfMaterialTemplate::DeclareConstantsBlock(const GfShaderAcce
 
 GF_FORCEINLINE void GfMaterialTemplate::Bind(const GfCmdBuffer& kCmdBuffer)
 {
-	BindRHI(kCmdBuffer);
+	m_kPlatform.BindRHI(kCmdBuffer);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +218,7 @@ GF_FORCEINLINE void GfMaterialTemplate::PushConstants(const GfCmdBuffer& kCmdBuf
 {
 	if (m_uiFlags & EFlags::Constants_Initialised) 
 	{
-		PushConstantsRHI(kCmdBuffer, m_uiConstantsBlockSize, pData);
+		m_kPlatform.PushConstantsRHI(kCmdBuffer, m_uiConstantsBlockSize, pData);
 	}
 }
 

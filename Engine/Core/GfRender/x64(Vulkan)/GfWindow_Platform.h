@@ -26,11 +26,8 @@ struct GfWindowInitParams;
 
 class GfWindow_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfWindow);
 public:
-
-	friend class GfWindow;
-
-	GfWindow_Platform(GfWindow& kBase);
 
 	HWND GetHwnd();
 
@@ -38,13 +35,12 @@ public:
 
 private:
 
-	void InitPlatform(GfWindowInitParams& kInitParams);
+	void InitRHI(GfWindowInitParams& kInitParams);
 
-	Bool TickPlatform();
+	Bool TickRHI();
 
-	void ShutdownPlatform();
+	void ShutdownRHI();
 
-	GfWindow&	m_kBase;
 	HWND		m_pHwnd;
 	HINSTANCE	m_pInstance;
 };

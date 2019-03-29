@@ -77,7 +77,7 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 	bufferCreateInfo.queueFamilyIndexCount = 0;
 	bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-	VkResult eResult = vkCreateBuffer(kCtxt.m_pDevice, &bufferCreateInfo, nullptr, &m_pBuffer);
+	VkResult eResult = vkCreateBuffer(kCtxt.Plat().m_pDevice, &bufferCreateInfo, nullptr, &m_pBuffer);
 	if (eResult != VK_SUCCESS) 
 	{
 		return false;
@@ -85,7 +85,7 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 
 	// Get the requirements
 	VkMemoryRequirements bufferRequirements{};
-	vkGetBufferMemoryRequirements(kCtxt.m_pDevice, m_pBuffer, &bufferRequirements);
+	vkGetBufferMemoryRequirements(kCtxt.Plat().m_pDevice, m_pBuffer, &bufferRequirements);
 
 	// Allocate the memory
 	VkMemoryAllocateInfo allocateInfo{};
@@ -95,16 +95,16 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 	allocateInfo.memoryTypeIndex = FindMemTypeIdx(
 		bufferRequirements.memoryTypeBits, 
 		m_kBase.m_kDesc.m_uiMemoryProperties.Flags(), 
-		kCtxt.m_pPhysicalDevice);
+		kCtxt.Plat().m_pPhysicalDevice);
 
-	eResult = vkAllocateMemory(kCtxt.m_pDevice, &allocateInfo, nullptr, &m_pMemory);
+	eResult = vkAllocateMemory(kCtxt.Plat().m_pDevice, &allocateInfo, nullptr, &m_pMemory);
 	if (eResult != VK_SUCCESS)
 	{
 		return false;
 	}
 
 	// Bind it to the buffer
-	vkBindBufferMemory(kCtxt.m_pDevice, m_pBuffer, m_pMemory, 0);
+	vkBindBufferMemory(kCtxt.Plat().m_pDevice, m_pBuffer, m_pMemory, 0);
 	return true;
 }
 
@@ -114,8 +114,8 @@ void GfBuffer_Platform::DestroyPlatform(const GfRenderContext& kCtxt)
 {
 	if (m_pBuffer) 
 	{
-		vkDestroyBuffer(kCtxt.m_pDevice, m_pBuffer, nullptr);
-		vkFreeMemory(kCtxt.m_pDevice, m_pMemory, nullptr);
+		vkDestroyBuffer(kCtxt.Plat().m_pDevice, m_pBuffer, nullptr);
+		vkFreeMemory(kCtxt.Plat().m_pDevice, m_pMemory, nullptr);
 		m_pBuffer = nullptr;
 		m_pMemory = nullptr;
 	}
@@ -133,7 +133,7 @@ GfStageAccessConfig GfBuffer_Platform::GetTransitionSettings() const
 void* GfBuffer_Platform::MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
 	void* pData(nullptr);
-	VkResult siResult =  vkMapMemory(kCtxt.m_pDevice, m_pMemory, uiOffset, uiSize, 0, &pData);
+	VkResult siResult =  vkMapMemory(kCtxt.Plat().m_pDevice, m_pMemory, uiOffset, uiSize, 0, &pData);
 	GF_ASSERT(siResult == VK_SUCCESS, "Failed to Map buffer's memory");
 	return pData;
 }
@@ -142,7 +142,7 @@ void* GfBuffer_Platform::MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 
 
 void GfBuffer_Platform::UnMapRHI(const GfRenderContext& kCtxt)
 {
-	vkUnmapMemory(kCtxt.m_pDevice, m_pMemory);
+	vkUnmapMemory(kCtxt.Plat().m_pDevice, m_pMemory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ void GfBuffer_Platform::CopyRangeRHI(
 	kBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
-		kCmdBuffer.GetCmdBuffer(),
+		kCmdBuffer.Plat().GetCmdBuffer(),
 		kCurrToTransferSettings.m_eStage,
 		kTransferToCurrSettings.m_eStage,
 		0,
@@ -181,13 +181,13 @@ void GfBuffer_Platform::CopyRangeRHI(
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCmdBuffer.GetCmdBuffer(), kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
+	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
 
 	// Go back to the original state
 	kBarrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
 	kBarrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
 	vkCmdPipelineBarrier(
-		kCmdBuffer.GetCmdBuffer(),
+		kCmdBuffer.Plat().GetCmdBuffer(),
 		kTransferToCurrSettings.m_eStage,
 		kCurrToTransferSettings.m_eStage,
 		0,
@@ -219,7 +219,7 @@ void GfBuffer_Platform::UpdateRangeRHI(
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
-		kCmdBuffer.GetCmdBuffer(),
+		kCmdBuffer.Plat().GetCmdBuffer(),
 		kCurrToTransferSettings.m_eStage,
 		kTransferToCurrSettings.m_eStage,
 		0,
@@ -228,13 +228,13 @@ void GfBuffer_Platform::UpdateRangeRHI(
 		0, nullptr);
 
 	// Update data
-	vkCmdUpdateBuffer(kCmdBuffer.GetCmdBuffer(), kBuffer.GetHandle(), uiOffset, uiSize, pData);
+	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kBuffer.GetHandle(), uiOffset, uiSize, pData);
 
 	// Sync back
 	barrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
 	barrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
 	vkCmdPipelineBarrier(
-		kCmdBuffer.GetCmdBuffer(),
+		kCmdBuffer.Plat().GetCmdBuffer(),
 		kTransferToCurrSettings.m_eStage,
 		kCurrToTransferSettings.m_eStage,
 		0,

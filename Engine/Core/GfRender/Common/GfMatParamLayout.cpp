@@ -14,8 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory
 
-GfMatUniformFactory::GfMatUniformFactory()
-	: GfMatUniformFactory_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfMatUniformFactory)
 	, m_uiMaxAllocatedSets(0)
 {
 	for (u32 i = 0; i < EParamaterSlotType::Count; ++i) 
@@ -42,14 +41,14 @@ void GfMatUniformFactory::SetMaxAllocatedParamSets(u32 uiMaxSets)
 
 void GfMatUniformFactory::Create(const GfRenderContext& kCtxt)
 {
-	CreateRHI(kCtxt);
+	m_kPlatform.CreateRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfMatUniformFactory::Destroy(const GfRenderContext& kCtxt)
 {
-	DestroyRHI(kCtxt);
+	m_kPlatform.DestroyRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,10 +69,8 @@ u32 GfMatUniformFactory::GetUsedTypeCount() const
 ////////////////////////////////////////////////////////////////////////////////
 // GfMatParamLayout
 
-GfMatParamLayout::GfMatParamLayout()
-	: GfMatParamLayout_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfMatParamLayout)
 {
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +121,7 @@ GfMaterialParameterSlot GfMatParamLayout::GetAttrib(u32 uiSlot) const
 ////////////////////////////////////////////////////////////////////////////////
 // GfMaterialParamSet
 
-GfMaterialParamSet::GfMaterialParamSet()
-	: GfMaterialParamSet_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfMaterialParamSet)
 	, m_pSetLayout(nullptr)
 {
 }
@@ -136,7 +132,7 @@ bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactor
 {
 	if (m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised))
 	{
-		if (CreateRHI(kCtxt, kFactory)) 
+		if (m_kPlatform.CreateRHI(kCtxt, kFactory))
 		{
 			m_uiFlags |= EFlags::GPUResourceInitialised;
 			return true;
@@ -149,7 +145,7 @@ bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactor
 
 void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
-	DestroyRHI(kCtxt, kFactory);
+	m_kPlatform.DestroyRHI(kCtxt, kFactory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +155,7 @@ bool GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
 	// Check that there are some resources pending to be updated
 	if (m_uiFlags.IsEnable(EFlags::GPUUpdatePending | EFlags::GPUResourceInitialised)) 
 	{
-		UpdateRHI(kCtxt);
+		m_kPlatform.UpdateRHI(kCtxt);
 		m_uiFlags &= ~(EFlags::GPUUpdatePending | EFlags::GPUDirty);
 		m_uiDirtyResources = 0;
 		return true;

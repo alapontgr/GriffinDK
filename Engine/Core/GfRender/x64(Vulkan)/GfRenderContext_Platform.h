@@ -31,11 +31,8 @@ struct GfFrameSyncing
 
 class GfRenderContext_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfRenderContext);
 public:
-
-	friend class GfRenderContext;
-
-	GfRenderContext_Platform(GfRenderContext& kBase);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -114,8 +111,6 @@ private:
 	void CreateVulkanAllocator();
 
 	////////////////////////////////////////////////////////////////////////////////
-
-	GfRenderContext&				m_kBase;
 
 	// Queues
 	VkQueue							m_pQueues[GfRenderContextFamilies::Count];

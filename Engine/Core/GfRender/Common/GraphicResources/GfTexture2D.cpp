@@ -13,13 +13,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfTexture2D::GfTexture2D()
-	: GfTexture2D_Platform(*this)
+GF_DEFINE_BASE_CTOR(GfTexture2D)
 	, GfGraphicsResourceBase(GetType())
 	, m_uiFlags(0)
 	, m_uiUsage(0)
 	, m_eFormat(ETextureFormat::Undefined)
-	, m_uiMips(0)
+	, m_uiMips(1)
 	, m_uiWidth(0)
 	, m_uiheight(0)
 {
@@ -77,9 +76,9 @@ void GfTexture2D::Create(const GfRenderContext& kCtx)
 {
 	if (IsInitialised()) 
 	{
-		if (!CreateRHI(kCtx)) 
+		if (!m_kPlatform.CreateRHI(kCtx))
 		{
-			DestroyRHI(kCtx);
+			m_kPlatform.DestroyRHI(kCtx);
 		}
 	}
 }
@@ -88,7 +87,7 @@ void GfTexture2D::Create(const GfRenderContext& kCtx)
 
 void GfTexture2D::Destroy(const GfRenderContext& kCtx)
 {
-	DestroyRHI(kCtx);
+	m_kPlatform.DestroyRHI(kCtx);
 	m_uiFlags = 0;
 }
 

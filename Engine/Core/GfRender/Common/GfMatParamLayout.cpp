@@ -70,7 +70,25 @@ u32 GfMatUniformFactory::GetUsedTypeCount() const
 // GfMatParamLayout
 
 GF_DEFINE_BASE_CTOR(GfMatParamLayout)
+	, m_uiFlags(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMatParamLayout::Create(const GfRenderContext& kCtxt)
+{
+	if (m_kPlatform.CreateRHI(kCtxt)) 
+	{
+		m_uiFlags |= EFlags::GPU_Initialised;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMatParamLayout::Destroy(const GfRenderContext& kCtxt)
+{
+	m_kPlatform.DestroyRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,26 +100,6 @@ void GfMatParamLayout::DefineParameter(EParamaterSlotType::Type eType, GfShaderA
 	kSlot.m_AccesStages = mAccessMask;
 	kSlot.m_uiBindSlot = uiBindSlot;
 	m_tParameters.push_back(kSlot);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfMatParamLayout::Validate() const
-{
-	// Check for parameters of the same type sharing slots
-	for (size_t i = 0; i < m_tParameters.size(); ++i)
-	{	
-		const GfMaterialParameterSlot& kSlotA(m_tParameters[i]);
-		for (size_t j = i+1; j < m_tParameters.size(); ++j)
-		{
-			const GfMaterialParameterSlot& kSlotB(m_tParameters[j]);
-			if (kSlotA.m_eType == kSlotB.m_eType && kSlotA.m_uiBindSlot >= kSlotB.m_uiBindSlot)
-			{
-				return false;
-			}
-		}
-	}
-	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,6 +128,7 @@ GF_DEFINE_BASE_CTOR(GfMaterialParamSet)
 
 bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
+	GF_ASSERT(m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised), "Unable to create MaterialParamSet");
 	if (m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised))
 	{
 		if (m_kPlatform.CreateRHI(kCtxt, kFactory))
@@ -165,9 +164,9 @@ bool GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindLayout(const GfMatParamLayout* pParamLayout)
+void GfMaterialParamSet::Init(const GfMatParamLayout* pParamLayout)
 {
-	GF_ASSERT(m_pSetLayout, "TEMPORARY: Do some protection to avoid re-initialization");
+	GF_ASSERT(!m_pSetLayout, "TEMPORARY: Do some protection to avoid re-initialization");
 	m_pSetLayout = pParamLayout;
 	m_uiFlags |= (EFlags::LayoutAssigned | EFlags::GPUDirty);
 	

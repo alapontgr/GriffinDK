@@ -31,17 +31,14 @@ struct GfStageAccessConfig
 
 class GfBuffer_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfBuffer);
 public:
-
-	friend class GfBuffer;
 
 	static GfStageAccessConfig GetTransitionSettingsForType(u32 uiType);
 
-	GfBuffer_Platform(GfBuffer& kBase);
+	bool InitRHI(const GfRenderContext& kCtxt);
 
-	bool InitPlatform(const GfRenderContext& kCtxt);
-
-	void DestroyPlatform(const GfRenderContext& kCtxt);
+	void DestroyRHI(const GfRenderContext& kCtxt);
 
 	VkBuffer GetHandle() const;
 
@@ -64,7 +61,6 @@ public:
 
 private:
 
-	GfBuffer&		m_kBase;
 	VkBuffer		m_pBuffer;
 	VkDeviceMemory	m_pMemory;
 };

@@ -21,11 +21,10 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfTexture2D : public GfTexture2D_Platform, public GfGraphicsResourceBase
+class GfTexture2D : public GfGraphicsResourceBase
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfTexture2D);
 public:
-
-	friend class GfTexture2D_Platform;
 
 	enum EFlags : u16 
 	{
@@ -147,7 +146,7 @@ GF_FORCEINLINE u32 GfTexture2D::GetMipMapCount() const
 
 GF_FORCEINLINE void GfTexture2D::LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
 {
-	LoadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
+	m_kPlatform.LoadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

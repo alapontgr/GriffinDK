@@ -26,11 +26,8 @@ class GfBuffer;
 
 class GfTexture2D_Platform 
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfTexture2D);
 public:
-
-	friend class GfTexture2D;
-
-	GfTexture2D_Platform(GfTexture2D& kBase);
 
 	bool CreateRHI(const GfRenderContext& kCtx);
 
@@ -53,8 +50,6 @@ private:
 	void LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset);
 
 	////////////////////////////////////////////////////////////////////////////////
-
-	GfTexture2D& m_kBase;
 
 	VkImage				m_pImage;
 	VkImageView			m_pImageView;

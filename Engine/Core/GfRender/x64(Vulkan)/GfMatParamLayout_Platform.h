@@ -47,7 +47,7 @@ public:
 
 	VkDescriptorSetLayout GetLayout() const;
 
-	void CreateRHI(const GfRenderContext& kCtxt);
+	bool CreateRHI(const GfRenderContext& kCtxt);
 
 	void DestroyRHI(const GfRenderContext& kCtxt);
 

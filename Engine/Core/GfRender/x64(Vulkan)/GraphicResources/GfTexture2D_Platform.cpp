@@ -16,8 +16,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfTexture2D_Platform::GfTexture2D_Platform(GfTexture2D& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfTexture2D)
 	, m_pImage(nullptr)
 	, m_pImageView(nullptr)
 {
@@ -113,7 +112,8 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiMips;
 	kImageViewInfo.subresourceRange.baseArrayLayer = 0; // TODO: Support for arrays of texture-arrays
 	kImageViewInfo.subresourceRange.layerCount = 1;
-	return vkCreateImageView(kCtx.Plat().m_pDevice, &kImageViewInfo, nullptr, &m_pImageView) != VK_SUCCESS;
+	VkResult siResult = vkCreateImageView(kCtx.Plat().m_pDevice, &kImageViewInfo, nullptr, &m_pImageView);
+	return siResult == VK_SUCCESS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 	// Transit image layout to transfer
 	VkImageMemoryBarrier kBarrier{};
 	kBarrier.image = GetImage();
-	kBarrier.subresourceRange.aspectMask = m_kBase.GetAspectMask();
+	kBarrier.subresourceRange.aspectMask = m_kBase.Plat().GetAspectMask();
 	kBarrier.subresourceRange.baseArrayLayer = 0; // TODO: Give more flexibility
 	kBarrier.subresourceRange.layerCount = 1; // TODO: Support for texture arrays
 	kBarrier.subresourceRange.baseMipLevel = 0;
@@ -190,7 +190,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 		m_kBase.GetHeight(),
 		1
 	};
-	vkCmdCopyBufferToImage(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.GetHandle(), GetImage(),
+	vkCmdCopyBufferToImage(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), GetImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &kRegion);
 
 	// Transit image layout to ready to be read by shaders

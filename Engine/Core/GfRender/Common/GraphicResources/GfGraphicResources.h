@@ -15,5 +15,7 @@
 
 #include "GfRender/Common/GraphicResources/GfConstantBuffer.h"
 
+#include "GfRender/Common/GraphicResources/GfTexture2D.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFGRAPHICRESOURCES_H__

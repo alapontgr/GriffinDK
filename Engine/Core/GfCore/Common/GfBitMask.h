@@ -33,6 +33,10 @@ public:
 
 	void Toggle(const FlagT uiValue);
 
+	void Enable(const FlagT uiValue);
+
+	void Disable(const FlagT uiValue);
+
 	// With other mask
 
 	GfBitMask& operator&=(const GfBitMask& uiOther);
@@ -124,6 +128,22 @@ template <typename FlagT, FlagT uiDefault /*= 0*/>
 void GfBitMask<FlagT, uiDefault>::Toggle(const FlagT uiValue)
 {
 	m_uiFlags ^= uiValue;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+void GfBitMask<FlagT, uiDefault>::Enable(const FlagT uiValue)
+{
+	m_uiFlags |= uiValue;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename FlagT, FlagT uiDefault /*= 0*/>
+void GfBitMask<FlagT, uiDefault>::Disable(const FlagT uiValue)
+{
+	m_uiFlags &= (~uiValue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -36,7 +36,7 @@ public:
 
 	void Destroy(const GfRenderContext& kCtx);
 
-	void AssignLayout(u32 uiSlot, GfMatParamLayout* pLayout);
+	void AssignLayout(u32 uiSlot, const GfMatParamLayout* pLayout);
 
 	EPrimitiveTopology::Type GetTopology() const { return m_eTopology; }
 
@@ -121,7 +121,7 @@ private:
 	const GfRenderPass*			m_pMaterialPass;
 	
 	// Description of parameter layouts
-	GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
+	const GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
 	
 	// Stages
 	GfShaderDesc				m_pShaderStages[EShaderStage::COUNT];

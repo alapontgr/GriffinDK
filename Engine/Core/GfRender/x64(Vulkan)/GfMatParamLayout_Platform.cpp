@@ -27,7 +27,7 @@ GfMatUniformFactory_Platform::GfMatUniformFactory_Platform(GfMatUniformFactory& 
 
 void GfMatUniformFactory_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
-	GF_ASSERT(m_pPool, "Pool already initialized");
+	GF_ASSERT(!m_pPool, "Pool already initialized");
 
 	VkDescriptorPoolSize pUniformEntryDescs[EParamaterSlotType::Count];
 	
@@ -76,7 +76,7 @@ GfMatParamLayout_Platform::GfMatParamLayout_Platform(GfMatParamLayout& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
+bool GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
 	u32 uiElementCount(static_cast<u32>(m_kBase.m_tParameters.size()));
 	if (uiElementCount > 0) 
@@ -87,12 +87,12 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		VkDescriptorSetLayoutBinding* pPivot(pBindings);
 		for (const GfMaterialParameterSlot& kSlot : m_kBase.m_tParameters) 
 		{
-			pBindings->binding = kSlot.m_uiBindSlot;
-			pBindings->descriptorType = ConvertDescriptorType(kSlot.m_eType);
-			pBindings->descriptorCount = 1; // TODO: Add support for arrays
-			pBindings->stageFlags = ConvertShaderStageFlags(kSlot.m_AccesStages);
-			pBindings->pImmutableSamplers = nullptr; // TODO: Add support for immutable samplers
-			pBindings++;
+			pPivot->binding = kSlot.m_uiBindSlot;
+			pPivot->descriptorType = ConvertDescriptorType(kSlot.m_eType);
+			pPivot->descriptorCount = 1; // TODO: Add support for arrays
+			pPivot->stageFlags = ConvertShaderStageFlags(kSlot.m_AccesStages);
+			pPivot->pImmutableSamplers = nullptr; // TODO: Add support for immutable samplers
+			pPivot++;
 		}
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -101,8 +101,12 @@ void GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 		layoutInfo.pBindings = pBindings;
 
 		VkResult siResult = vkCreateDescriptorSetLayout(kCtxt.Plat().m_pDevice, &layoutInfo, nullptr, &m_pSetLayout);
-		GF_ASSERT(siResult == VK_SUCCESS, "Failed to create the descriptor set layout");
+		if (siResult == VK_SUCCESS) 
+		{
+			return true;
+		}
 	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +182,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
 
 				VkDescriptorBufferInfo kDescBuffInfo{};
-				kDescBuffInfo.buffer = kRange.m_pBuffer->GetHandle();
+				kDescBuffInfo.buffer = kRange.m_pBuffer->Plat().GetHandle();
 				kDescBuffInfo.offset = kRange.m_uiOffset;
 				kDescBuffInfo.range = kRange.m_uiSize;
 

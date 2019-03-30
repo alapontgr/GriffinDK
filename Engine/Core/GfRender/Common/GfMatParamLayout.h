@@ -64,18 +64,35 @@ public:
 
 	GfMatParamLayout();
 
-	void DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot);
+	void Create(const GfRenderContext& kCtxt);
 
-	bool Validate() const;
+	void Destroy(const GfRenderContext& kCtxt);
+
+	void DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot);
 
 	u32 GetParameterCount() const; 
 	
 	GfMaterialParameterSlot GetAttrib(u32 uiSlot) const;
 
+	bool IsGPUInitialised() const;
+
 protected:
 
-	GfVector<GfMaterialParameterSlot> m_tParameters;
+	enum EFlags : u32 
+	{
+		GPU_Initialised = 1<<0,
+	};
+
+	GfVector<GfMaterialParameterSlot>	m_tParameters;
+	u32									m_uiFlags;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfMatParamLayout::IsGPUInitialised() const
+{
+	return (m_uiFlags & EFlags::GPU_Initialised) != 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -86,15 +103,25 @@ public:
 
 	GfMaterialParamSet();
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Resource creation
+
+	// 1.
+	void Init(const GfMatParamLayout* pParamLayout);
+
+	// 2.
 	bool Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
-	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
+	////////////////////////////////////////////////////////////////////////////////
+	// Updating the resource
+
+	void BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource);
 
 	bool Update(const GfRenderContext& kCtxt);
 
-	void BindLayout(const GfMatParamLayout* pParamLayout);
+	////////////////////////////////////////////////////////////////////////////////
 
-	void BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource);
+	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 private:
 

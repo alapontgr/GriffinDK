@@ -186,9 +186,10 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 		VkDescriptorSetLayout* pCursor(pLayouts);
 		for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
 		{
-			GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
+			const GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
 			if (pLayout)
 			{
+				GF_ASSERT(pLayout->IsGPUInitialised(), "The layout needs to be initialised before the creation of the material");
 				*pCursor = pLayout->Plat().GetLayout();
 				pCursor++;
 			}

@@ -54,8 +54,7 @@ GfStageAccessConfig GfBuffer_Platform::GetTransitionSettingsForType(u32 uiType)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfBuffer_Platform::GfBuffer_Platform(GfBuffer& kBase)
-	: m_kBase(kBase)
+GF_DEFINE_PLATFORM_CTOR(GfBuffer)
 	, m_pBuffer(nullptr)
 	, m_pMemory(nullptr)
 {
@@ -63,7 +62,7 @@ GfBuffer_Platform::GfBuffer_Platform(GfBuffer& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
+bool GfBuffer_Platform::InitRHI(const GfRenderContext& kCtxt)
 {
 	VkBufferCreateInfo bufferCreateInfo{};
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -110,7 +109,7 @@ bool GfBuffer_Platform::InitPlatform(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::DestroyPlatform(const GfRenderContext& kCtxt)
+void GfBuffer_Platform::DestroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pBuffer) 
 	{
@@ -153,13 +152,13 @@ void GfBuffer_Platform::CopyRangeRHI(
 	const GfBuffer& kTo,
 	u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
 {
-	GfStageAccessConfig kCurrToTransferSettings = kTo.GetTransitionSettings();
+	GfStageAccessConfig kCurrToTransferSettings = kTo.Plat().GetTransitionSettings();
 	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
 
 	VkBufferMemoryBarrier kBarrier;
 	kBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 	kBarrier.pNext = nullptr;
-	kBarrier.buffer = kTo.GetHandle();
+	kBarrier.buffer = kTo.Plat().GetHandle();
 	kBarrier.offset = uiToOffset;
 	kBarrier.size = uiSize;
 	kBarrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
@@ -181,7 +180,7 @@ void GfBuffer_Platform::CopyRangeRHI(
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.GetHandle(), kTo.GetHandle(), 1, &kRegion);
+	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), kTo.Plat().GetHandle(), 1, &kRegion);
 
 	// Go back to the original state
 	kBarrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
@@ -203,14 +202,14 @@ void GfBuffer_Platform::UpdateRangeRHI(
 	const GfBuffer& kBuffer,
 	u32 uiOffset, u32 uiSize, void* pData)
 {
-	GfStageAccessConfig kCurrToTransferSettings = kBuffer.GetTransitionSettings();
+	GfStageAccessConfig kCurrToTransferSettings = kBuffer.Plat().GetTransitionSettings();
 	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
 
 	// Sync to transfer operations
 	VkBufferMemoryBarrier barrier;
 	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 	barrier.pNext = nullptr;
-	barrier.buffer = kBuffer.GetHandle();
+	barrier.buffer = kBuffer.Plat().GetHandle();
 	barrier.offset = uiOffset;
 	barrier.size = uiSize;
 	barrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
@@ -228,7 +227,7 @@ void GfBuffer_Platform::UpdateRangeRHI(
 		0, nullptr);
 
 	// Update data
-	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kBuffer.GetHandle(), uiOffset, uiSize, pData);
+	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kBuffer.Plat().GetHandle(), uiOffset, uiSize, pData);
 
 	// Sync back
 	barrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;

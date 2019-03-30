@@ -56,8 +56,9 @@ using GfBufferMemType = GfBitMask<u32>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfBuffer : public GfBuffer_Platform
+class GfBuffer
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfBuffer);
 public:
 
 	friend class GfBuffer_Platform;
@@ -119,14 +120,14 @@ private:
 
 GF_FORCEINLINE void GfBuffer::CopyRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
 {
-	CopyRangeRHI(kCmdBuffer, kFrom, kTo, uiFromOffset, uiToOffset, uiSize);
+	m_kPlatform.CopyRangeRHI(kCmdBuffer, kFrom, kTo, uiFromOffset, uiToOffset, uiSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfBuffer::UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
 {
-	UpdateRangeRHI(kCmdBuffer, kBuffer, uiOffset, uiSize, pData);
+	m_kPlatform.UpdateRangeRHI(kCmdBuffer, kBuffer, uiOffset, uiSize, pData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

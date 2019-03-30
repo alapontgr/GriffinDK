@@ -86,12 +86,12 @@ namespace EMaterialParamRate
 		PerRenderPass,			// Resources local to a RenderPass
 		PerMaterial,			// Shared within all the instances of the same material
 		PerInstance,			// Local configuration of each instance
-								////////////////////////////////////////////////////////////////////////////////
-								Count,
-								////////////////////////////////////////////////////////////////////////////////
-								MaxBoundSets = 8,		// Maximum number of currently bound descriptor sets in a material instance
+		////////////////////////////////////////////////////////////////////////////////
+		Count,
+		////////////////////////////////////////////////////////////////////////////////
+		MaxBoundSets = 8,		// Maximum number of currently bound descriptor sets in a material instance
 
-								Invalid = 0xff
+		Invalid = 0xff
 	};
 }
 static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundSets, "Invalid count of rates");

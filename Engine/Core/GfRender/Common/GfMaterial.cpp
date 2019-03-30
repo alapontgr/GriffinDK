@@ -57,6 +57,17 @@ void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfMaterialTemplate::AssignLayout(u32 uiSlot, const GfMatParamLayout* pLayout)
+{
+	GF_ASSERT(uiSlot<EMaterialParamRate::MaxBoundSets, "Trying to bind a layout to an incorrect slot");
+	if (uiSlot<EMaterialParamRate::MaxBoundSets)
+	{
+		m_pLayouts[uiSlot] = pLayout;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfMaterialTemplate::SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize)
 {
 	if (szEntry && pSrc) 

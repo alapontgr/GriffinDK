@@ -13,6 +13,9 @@
 
 #include "GfRender/Common/GfMaterialShared.h"
 #include "GfRender/Common/GraphicResources/GfGraphicResourcesShared.h"
+#include "GfRender/Common/GraphicResources/GfBuffer.h"
+
+#include GF_SOLVE_PLATFORM_HEADER_EXT(GfRender, GraphicResources/GfGraphicResourceBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -22,22 +25,83 @@ public:
 
 	GfGraphicsResourceBase();
 
-	GfGraphicsResourceBase(EParamaterSlotType::Type eType);
+	bool IsBufferedResource() const;
 
-	EParamaterSlotType::Type GetResourceType() const { return m_eType; }
+	bool IsTexturedResource() const;
 
 protected:
 
-	enum EFlags : u16 
+	enum EGraphicResFlags : u32 
 	{
-		BufferBound = 1<<0,
-		GPUDirty	= 1<<1,
-		GPUPending	= 1<<2,
+		BufferedResource	= 1<<0,
+		TexturedResource	= 1<<1,
+		End					= 1<<2,
 	};
 
-	GfBitMask<u16>				m_uiFlags;
-	EParamaterSlotType::Type	m_eType;
+	GfBitMask<u32>	m_uiFlags;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfGraphicsResourceBase::IsBufferedResource() const
+{
+	return m_uiFlags.IsEnable(EGraphicResFlags::BufferedResource);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfGraphicsResourceBase::IsTexturedResource() const
+{
+	return m_uiFlags.IsEnable(EGraphicResFlags::TexturedResource);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfBufferedResource : public GfGraphicsResourceBase
+{
+public:
+
+	GfBufferedResource();
+
+	void BindBuffer(const GfBuffer::GfRange& kRange);
+
+	u32 GetSize() const { return m_kBufferRange.m_uiSize; }
+
+	const GfBuffer::GfRange GetBufferRange() const { return m_kBufferRange; }
+
+protected:
+
+	enum EBUfferedResFlags : u32 
+	{
+		BufferBound = GfGraphicsResourceBase::EGraphicResFlags::End,
+	};
+
+private:
+
+	GfBuffer::GfRange m_kBufferRange;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfTexturedResource : public GfGraphicsResourceBase
+{
+public:
+
+	GfTexturedResource();
+
+	GfTexturedResource_Platform& GetSharedPlatform();
+
+protected:
+
+	GfTexturedResource_Platform m_kCommonPlatform;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatform()
+{
+	return m_kCommonPlatform;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFGRAPHICRESOURCEBASE_H__

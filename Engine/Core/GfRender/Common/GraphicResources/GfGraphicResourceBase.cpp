@@ -14,15 +14,32 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfGraphicsResourceBase::GfGraphicsResourceBase()
-	: m_eType(EParamaterSlotType::Invalid)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfGraphicsResourceBase::GfGraphicsResourceBase(EParamaterSlotType::Type eType)
-	: m_eType(eType)
+GfBufferedResource::GfBufferedResource()
 {
+	m_uiFlags.Enable(EGraphicResFlags::BufferedResource);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfBufferedResource::BindBuffer(const GfBuffer::GfRange& kRange)
+{
+	if (!m_uiFlags.IsEnable(EBUfferedResFlags::BufferBound))
+	{
+		m_kBufferRange = kRange;
+		m_uiFlags |= (EBUfferedResFlags::BufferBound);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfTexturedResource::GfTexturedResource()
+{
+	m_uiFlags.Enable(EGraphicResFlags::TexturedResource);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

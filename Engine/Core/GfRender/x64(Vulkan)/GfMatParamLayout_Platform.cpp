@@ -174,11 +174,11 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 			const GfGraphicsResourceBase* pParam(m_kBase.m_tBoundParamaters[i]);
 			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 
-			switch (pParam->GetResourceType())
+			switch (kSlot.m_eType)
 			{
 			case EParamaterSlotType::UniformBuffer:
 			{
-				const GfConstantBuffer* pCBuffer((const GfConstantBuffer*)pParam);
+				const GfBufferedResource* pCBuffer((const GfBufferedResource*)pParam);
 				const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
 
 				VkDescriptorBufferInfo kDescBuffInfo{};

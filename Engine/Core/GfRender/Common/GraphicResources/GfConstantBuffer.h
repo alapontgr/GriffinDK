@@ -12,29 +12,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GfRender/Common/GraphicResources/GfGraphicResourceBase.h"
-#include "GfRender/Common/GraphicResources/GfBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfConstantBuffer : public GfGraphicsResourceBase
+class GfConstantBuffer : public GfBufferedResource
 {
 public:
-
-	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::UniformBuffer; }
-
+		
 	GfConstantBuffer();
 
-	void BindBuffer(const GfBuffer::GfRange& kRange);
-
 	void Init(const GfRenderContext& kCtxt);
-
-	u32 GetSize() const { return m_kBufferRange.m_uiSize; }
-
-	const GfBuffer::GfRange GetBufferRange() const { return m_kBufferRange; }
-
+	
 private:
 
-	GfBuffer::GfRange m_kBufferRange;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

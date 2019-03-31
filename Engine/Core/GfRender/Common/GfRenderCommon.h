@@ -34,7 +34,7 @@ namespace EParamaterSlotType
 		StorageBuffer,
 		UniformBufferDynamic,
 		StorageBufferDynamic,
-
+		InputAttachment,
 		////////////////////////////////////////////////////////////////////////////////
 		Count,
 		Invalid = 0xff,

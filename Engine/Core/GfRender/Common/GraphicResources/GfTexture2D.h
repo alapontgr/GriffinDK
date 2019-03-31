@@ -21,7 +21,7 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfTexture2D : public GfGraphicsResourceBase
+class GfTexture2D : public GfTexturedResource
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfTexture2D);
 public:

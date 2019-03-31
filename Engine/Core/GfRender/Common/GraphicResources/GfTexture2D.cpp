@@ -14,7 +14,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfTexture2D)
-	, GfGraphicsResourceBase(GetType())
 	, m_uiFlags(0)
 	, m_uiUsage(0)
 	, m_eFormat(ETextureFormat::Undefined)

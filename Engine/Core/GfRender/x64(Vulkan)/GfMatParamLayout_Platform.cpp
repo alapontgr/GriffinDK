@@ -15,6 +15,56 @@
 #include "GfRender/Common/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void FillUniformBufferBinding(
+	const GfBufferedResource* pCBuffer,
+	VkDescriptorBufferInfo* pBufferInfosPivot,
+	VkWriteDescriptorSet* pWriteSetsPivot,
+	VkDescriptorSet pSet, u32 uiBindSlot)
+{
+	const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
+
+	pBufferInfosPivot->buffer = kRange.m_pBuffer->Plat().GetHandle();
+	pBufferInfosPivot->offset = kRange.m_uiOffset;
+	pBufferInfosPivot->range = kRange.m_uiSize;
+
+	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	pWriteSetsPivot->pNext = nullptr;
+	pWriteSetsPivot->dstSet = pSet;
+	pWriteSetsPivot->dstBinding = uiBindSlot;
+	pWriteSetsPivot->dstArrayElement = 0;
+	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	pWriteSetsPivot->descriptorCount = 1;
+	pWriteSetsPivot->pBufferInfo = pBufferInfosPivot;
+	pWriteSetsPivot->pImageInfo = nullptr;
+	pWriteSetsPivot->pTexelBufferView = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void FillUniformBufferBinding(
+	const GfTexturedResource* pTexRes,
+	VkDescriptorImageInfo* pImageInfosPivot,
+	VkWriteDescriptorSet* pWriteSetsPivot,
+	VkDescriptorSet pSet, u32 uiBindSlot)
+{
+	pImageInfosPivot->sampler = nullptr;
+	pImageInfosPivot->imageView = pTexRes->GetSharedPlatformC().GetView();
+	pImageInfosPivot->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // The texture must be initialized at this point
+
+	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	pWriteSetsPivot->pNext = nullptr;
+	pWriteSetsPivot->dstSet = pSet;
+	pWriteSetsPivot->dstBinding = uiBindSlot;
+	pWriteSetsPivot->dstArrayElement = 0;
+	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+	pWriteSetsPivot->descriptorCount = 1;
+	pWriteSetsPivot->pBufferInfo = nullptr;
+	pWriteSetsPivot->pImageInfo = pImageInfosPivot;
+	pWriteSetsPivot->pTexelBufferView = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory_Platform
 
 GfMatUniformFactory_Platform::GfMatUniformFactory_Platform(GfMatUniformFactory& kBase)
@@ -166,45 +216,78 @@ void GfMaterialParamSet_Platform::DestroyRHI(const GfRenderContext& kCtxt, GfMat
 void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 {
 	u32 uiParamCount(m_kBase.m_pSetLayout->GetParameterCount());
-	for (u32 i=0; i<uiParamCount; ++i) 
-	{
-		if (m_kBase.m_uiDirtyResources & (1 << i)) 
-		{
-			// TODO: Handle all the resource types
-			const GfGraphicsResourceBase* pParam(m_kBase.m_tBoundParamaters[i]);
-			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
+	
+	u32 uiDirtyBufferedParams(0);
+	u32 uiDirtyTexturedParams(0);
 
+	// Get number of dirty resources of each write type
+	for (u32 i=0;i<uiParamCount; ++i) 
+	{
+		if (m_kBase.m_uiDirtyResources & (1 << i))
+		{
+			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 			switch (kSlot.m_eType)
 			{
 			case EParamaterSlotType::UniformBuffer:
-			{
-				const GfBufferedResource* pCBuffer((const GfBufferedResource*)pParam);
-				const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
-
-				VkDescriptorBufferInfo kDescBuffInfo{};
-				kDescBuffInfo.buffer = kRange.m_pBuffer->Plat().GetHandle();
-				kDescBuffInfo.offset = kRange.m_uiOffset;
-				kDescBuffInfo.range = kRange.m_uiSize;
-
-				VkWriteDescriptorSet kWriteDescSet{};
-				kWriteDescSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				kWriteDescSet.pNext = nullptr;
-				kWriteDescSet.dstSet = m_pParamatersSet;
-				kWriteDescSet.dstBinding = kSlot.m_uiBindSlot; 
-				kWriteDescSet.dstArrayElement = 0;
-				kWriteDescSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				kWriteDescSet.descriptorCount = 1;
-				kWriteDescSet.pBufferInfo = &kDescBuffInfo;
-				kWriteDescSet.pImageInfo = nullptr;
-				kWriteDescSet.pTexelBufferView = nullptr;
-
-				vkUpdateDescriptorSets(kCtxt.Plat().m_pDevice, 1, &kWriteDescSet, 0, nullptr);
+				uiDirtyBufferedParams++;
 				break;
-			}
+			case EParamaterSlotType::SampledImage:
+			case EParamaterSlotType::Sampler:
+				uiDirtyTexturedParams++;
+				break;
 			default:
 				break;
 			}
 		}
+	}
+
+	u32 uiTotalDirtyResources(uiDirtyBufferedParams + uiDirtyTexturedParams);
+	if (uiTotalDirtyResources > 0) 
+	{
+		GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
+
+		VkDescriptorBufferInfo* pBufferInfos(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorBufferInfo>(uiDirtyBufferedParams));
+		GF_ASSERT(pBufferInfos, "Failed to allocate memory");
+		VkDescriptorImageInfo* pImageInfos(GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorImageInfo>(uiDirtyTexturedParams));
+		GF_ASSERT(pImageInfos, "Failed to allocate memory");
+		VkWriteDescriptorSet* pWriteSets(GfFrameMTStackAlloc::Get()->Alloc<VkWriteDescriptorSet>(uiTotalDirtyResources));
+		GF_ASSERT(pWriteSets, "Failed to allocate memory");
+
+		VkDescriptorBufferInfo* pBufferInfosPivot(pBufferInfos);
+		VkDescriptorImageInfo* pImageInfosPivot(pImageInfos);
+		VkWriteDescriptorSet* pWriteSetsPivot(pWriteSets);
+		for (u32 i=0; i<uiParamCount; ++i) 
+		{
+			if (m_kBase.m_uiDirtyResources & (1 << i)) 
+			{
+				// TODO: Handle all the resource types
+				const GfGraphicsResourceBase* pParam(m_kBase.m_tBoundParamaters[i]);
+				const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
+
+				switch (kSlot.m_eType)
+				{
+				case EParamaterSlotType::UniformBuffer:
+				{
+					const GfBufferedResource* pCBuffer((const GfBufferedResource*)pParam);
+					FillUniformBufferBinding(pCBuffer, pBufferInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
+					pBufferInfosPivot++;
+					pWriteSetsPivot++;
+					break;
+				}
+				case EParamaterSlotType::SampledImage: 
+				{
+					const GfTexturedResource* pTexRes((const GfTexturedResource*)pParam);
+					FillUniformBufferBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
+					pImageInfosPivot++;
+					pWriteSetsPivot++;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+		vkUpdateDescriptorSets(kCtxt.Plat().m_pDevice, uiTotalDirtyResources, pWriteSets, 0, nullptr);
 	}
 }
 

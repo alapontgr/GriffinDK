@@ -111,9 +111,25 @@ u32 GfMatParamLayout::GetParameterCount() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfMaterialParameterSlot GfMatParamLayout::GetAttrib(u32 uiSlot) const
+GfMaterialParameterSlot GfMatParamLayout::GetAttrib(GfParamSlotIdx uiSlot) const
 {
 	return m_tParameters[uiSlot];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfParamSlotIdx GfMatParamLayout::GetResourceIdx(EParamaterSlotType::Type eResType, u32 uiBoundSlot)
+{
+	u32 uiParamCount(GetParameterCount());
+	for (u32 i=0; i<uiParamCount; ++i)
+	{
+		const GfMaterialParameterSlot& kSlot = m_tParameters[i];
+		if (kSlot.m_eType == eResType && kSlot.m_uiBindSlot == uiBoundSlot)
+		{
+			return i;
+		}
+	}
+	return GfMaterialParameterSlot::ms_uiInvalidSlotIdx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,16 +199,19 @@ void GfMaterialParamSet::Init(const GfMatParamLayout* pParamLayout)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource)
+void GfMaterialParamSet::BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource)
 {
-	if (pResource && m_uiFlags.IsEnable(EFlags::LayoutAssigned))
+	if (uiSlotIdx != GfMaterialParameterSlot::ms_uiInvalidSlotIdx)
 	{
-		GF_ASSERT(uiSlot < ms_uiMaxResources, "Trying to bind to an invalid slot");
+		if (pResource && m_uiFlags.IsEnable(EFlags::LayoutAssigned))
+		{
+			GF_ASSERT(uiSlotIdx < ms_uiMaxResources, "Trying to bind to an invalid slot");
 
-		// Mark the GPU's resource as dirty
-		m_uiFlags |= EFlags::GPUUpdatePending;
-		m_tBoundParamaters[uiSlot] = pResource;
-		m_uiDirtyResources |= (1 << uiSlot);
+			// Mark the GPU's resource as dirty
+			m_uiFlags |= EFlags::GPUUpdatePending;
+			m_tBoundParamaters[uiSlotIdx] = pResource;
+			m_uiDirtyResources |= (1 << uiSlotIdx);
+		}
 	}
 }
 

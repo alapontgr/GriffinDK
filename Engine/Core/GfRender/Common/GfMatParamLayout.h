@@ -25,10 +25,14 @@ class GfGraphicsResourceBase;
 
 struct GfMaterialParameterSlot
 {
+	static constexpr u32 ms_uiInvalidSlotIdx = 0xffffffff;
+
+
 	EParamaterSlotType::Type	m_eType;
 	GfShaderAccessMask			m_AccesStages;
 	u32							m_uiBindSlot;
 };
+using GfParamSlotIdx = u32;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -72,7 +76,9 @@ public:
 
 	u32 GetParameterCount() const; 
 	
-	GfMaterialParameterSlot GetAttrib(u32 uiSlot) const;
+	GfMaterialParameterSlot GetAttrib(GfParamSlotIdx uiIdx) const;
+
+	GfParamSlotIdx GetResourceIdx(EParamaterSlotType::Type eResType, u32 uiBoundSlot);
 
 	bool IsGPUInitialised() const;
 
@@ -115,7 +121,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// Updating the resource
 
-	void BindResource(u32 uiSlot, const GfGraphicsResourceBase* pResource);
+	void BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource);
 
 	bool Update(const GfRenderContext& kCtxt);
 

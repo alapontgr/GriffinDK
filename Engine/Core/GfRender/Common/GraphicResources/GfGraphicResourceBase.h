@@ -90,6 +90,7 @@ public:
 	GfTexturedResource();
 
 	GfTexturedResource_Platform& GetSharedPlatform();
+	const GfTexturedResource_Platform& GetSharedPlatformC() const;
 
 protected:
 
@@ -99,6 +100,13 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatform()
+{
+	return m_kCommonPlatform;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatformC() const
 {
 	return m_kCommonPlatform;
 }

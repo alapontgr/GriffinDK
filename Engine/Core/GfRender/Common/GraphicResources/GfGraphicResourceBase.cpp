@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfGraphicsResourceBase::GfGraphicsResourceBase()
+	: m_eResourceType(EParamaterSlotType::Invalid)
 {
 }
 

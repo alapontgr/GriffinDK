@@ -21,6 +21,7 @@ GF_DEFINE_BASE_CTOR(GfTexture2D)
 	, m_uiWidth(0)
 	, m_uiheight(0)
 {
+	m_eResourceType = EParamaterSlotType::SampledImage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

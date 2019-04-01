@@ -10,6 +10,7 @@
 // Includes
 
 #include "GfRender/Common/GfMatParamLayout.h"
+#include "GfRender/Common/GraphicResources/GfGraphicResourceBase.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // GfMatUniformFactory
@@ -199,7 +200,7 @@ void GfMaterialParamSet::Init(const GfMatParamLayout* pParamLayout)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource)
+bool GfMaterialParamSet::BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource)
 {
 	if (uiSlotIdx != GfMaterialParameterSlot::ms_uiInvalidSlotIdx)
 	{
@@ -207,12 +208,17 @@ void GfMaterialParamSet::BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphics
 		{
 			GF_ASSERT(uiSlotIdx < ms_uiMaxResources, "Trying to bind to an invalid slot");
 
-			// Mark the GPU's resource as dirty
-			m_uiFlags |= EFlags::GPUUpdatePending;
-			m_tBoundParamaters[uiSlotIdx] = pResource;
-			m_uiDirtyResources |= (1 << uiSlotIdx);
+			if (m_pSetLayout->GetAttrib(uiSlotIdx).m_eType == pResource->GetResourceType()) 
+			{
+				// Mark the GPU's resource as dirty
+				m_uiFlags |= EFlags::GPUUpdatePending;
+				m_tBoundParamaters[uiSlotIdx] = pResource;
+				m_uiDirtyResources |= (1 << uiSlotIdx);
+				return true;
+			}
 		}
 	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

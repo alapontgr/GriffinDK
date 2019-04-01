@@ -121,7 +121,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	// Updating the resource
 
-	void BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource);
+	bool BindResource(GfParamSlotIdx uiSlotIdx, const GfGraphicsResourceBase* pResource);
 
 	bool Update(const GfRenderContext& kCtxt);
 

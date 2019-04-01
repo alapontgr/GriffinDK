@@ -29,6 +29,8 @@ public:
 
 	bool IsTexturedResource() const;
 
+	EParamaterSlotType::Type GetResourceType() const;
+
 protected:
 
 	enum EGraphicResFlags : u32 
@@ -38,8 +40,16 @@ protected:
 		End					= 1<<2,
 	};
 
+	EParamaterSlotType::Type m_eResourceType;
 	GfBitMask<u32>	m_uiFlags;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE EParamaterSlotType::Type GfGraphicsResourceBase::GetResourceType() const
+{
+	return m_eResourceType;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

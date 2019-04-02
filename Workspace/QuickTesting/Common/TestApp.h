@@ -33,6 +33,8 @@ private:
 
 	void Render(GfCmdBuffer& kCmdBuffer);
 
+	void DoTransferOperations(GfCmdBuffer& kCmdBuffer);
+
 	void CreateCmdBuffers();
 
 	void CreateRenderPasses();
@@ -40,8 +42,6 @@ private:
 	void CreateMaterialsAndParamSets();
 
 	void CreateResources();
-
-	void BindResourcesToParamSets();
 
 	GfWindow		m_kWindow;
 	GfRenderContext m_kContext;
@@ -51,12 +51,15 @@ private:
 
 	GfRenderPass		m_kRenderPass;
 
+	GfBuffer			m_kStagingBuffer;
+
 	GfMaterialTemplate	m_kMaterialT;
 	GfMatUniformFactory	m_kUniformFactory;
 	GfMatParamLayout	m_kParamLayout;
 	GfMaterialParamSet	m_kParamSet;
 
 	GfTexture2D			m_kTesTexture;
+	GfUniquePtr<char[]>	m_pTestTextureData;
 
 	GfViewport		m_kViewport;
 	GfScissor		m_kScissor;

@@ -50,6 +50,8 @@ public:
 
 	void UnMapRHI(const GfRenderContext& kCtxt);
 
+	void FlushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 

@@ -42,9 +42,11 @@ void GfBuffer::Destroy(const GfRenderContext& kCtxt)
 
 void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
-	GF_ASSERT((m_uiFlags & EFlag::Mapped) != 0, "Buffer is already mapped");
+	GF_ASSERT((m_uiFlags & EFlag::Mapped) == 0, "Buffer is already mapped");
 	if (IsMappable() && ((uiSize + uiOffset) < m_kDesc.m_ulSize)) 
 	{
+		m_uiMappedOffset = uiOffset;
+		m_uiMappedSize = uiSize;
 		m_uiFlags |= EFlag::Mapped;
 		return m_kPlatform.MapRHI(kCtxt, uiOffset, uiSize);
 	}
@@ -57,7 +59,16 @@ void GfBuffer::UnMap(const GfRenderContext& kCtxt)
 {
 	if (m_uiFlags & EFlag::Mapped) 
 	{
-		m_kPlatform.UnMapRHI(kCtxt);
+		if (m_kDesc.m_uiMemoryProperties & EBufferMemProperties::CPU_GPU_Coherent) 
+		{
+			m_kPlatform.UnMapRHI(kCtxt);
+		}
+		else 
+		{
+			m_kPlatform.FlushAndUnMapRHI(kCtxt, m_uiMappedOffset, m_uiMappedSize);
+			m_uiMappedSize = 0;
+			m_uiMappedOffset = 0;
+		}
 	}
 }
 

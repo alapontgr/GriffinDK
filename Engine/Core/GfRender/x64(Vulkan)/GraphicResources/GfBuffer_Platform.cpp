@@ -146,6 +146,19 @@ void GfBuffer_Platform::UnMapRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfBuffer_Platform::FlushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
+{
+	VkMappedMemoryRange kRange = {};
+	kRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+	kRange.memory = m_pMemory;
+	kRange.offset = uiOffset;
+	kRange.size = uiSize;
+	vkFlushMappedMemoryRanges(kCtxt.Plat().m_pDevice, 1, &kRange);
+	vkUnmapMemory(kCtxt.Plat().m_pDevice, m_pMemory);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfBuffer_Platform::CopyRangeRHI(
 	const GfCmdBuffer& kCmdBuffer,
 	const GfBuffer& kFrom,

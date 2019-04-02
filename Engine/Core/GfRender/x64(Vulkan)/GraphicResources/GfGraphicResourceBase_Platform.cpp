@@ -14,6 +14,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GfTexturedResource_Platform::GfTexturedResource_Platform()
+	: m_pImage(VK_NULL_HANDLE)
+	, m_pImageView(VK_NULL_HANDLE)
+	, m_uiAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
+	, m_pAlloc(nullptr)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool GfTexturedResource_Platform::CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo)
 {
 	if (vkCreateImage(kCtx.Plat().m_pDevice, pTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)

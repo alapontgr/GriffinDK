@@ -60,6 +60,13 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 		// Begin the Command buffer
 		kCmdBuffer.BeginRecording(m_kContext);
 
+		static bool bPendingTransfer(true);
+		if(bPendingTransfer)
+		{
+			bPendingTransfer = false;
+			DoTransferOperations(kCmdBuffer);
+		}
+
 		Render(kCmdBuffer);
 
 		// End the command buffer
@@ -95,7 +102,6 @@ void TestApp::Init()
 	CreateMaterialsAndParamSets();
 	CreateCmdBuffers();
 	CreateResources();
-	BindResourcesToParamSets();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +152,21 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void TestApp::DoTransferOperations(GfCmdBuffer& kCmdBuffer)
+{
+	u32 uiTextureSize(m_kTesTexture.GetWidth() * m_kTesTexture.GetHeight() * 4);
+	void* pData = m_kStagingBuffer.Map(m_kContext, 0, uiTextureSize);
+	if(pData)
+	{
+		memcpy(pData, m_pTestTextureData.get(), uiTextureSize);
+		m_kStagingBuffer.UnMap(m_kContext);
+	}
+
+	m_kTesTexture.LoadTexture2DDataFromStaging(m_kContext, kCmdBuffer, m_kStagingBuffer, 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void TestApp::CreateMaterialsAndParamSets()
 {
 	// Create material
@@ -190,22 +211,25 @@ void TestApp::CreateMaterialsAndParamSets()
 
 void TestApp::CreateResources()
 {
+	GfBuffer::GfBufferDesc kDesc;
+	kDesc.m_ulSize = 16 << 20; // 16MB
+	kDesc.m_ulAlignment = 16;
+	kDesc.m_uiMemoryProperties = EBufferMemProperties::CPU_Visible;
+	kDesc.m_uiBufferUsage = (EBufferUsage::Transfer_Src);
+	kDesc.m_eBufferType = EBufferUsage::Transfer_Src;
+	m_kStagingBuffer.Init(m_kContext, kDesc);
+
+	////////////////////////////////////////////////////////////////////////////////
 	s32 siW, siH, siComp;
-	GfUniquePtr<char[]> pTextureData = LoadTexture("Textures/uv_test.png", siW, siH, siComp);
+	m_pTestTextureData = LoadTexture("Textures/uv_test.png", siW, siH, siComp);
 	
 	ETextureUsageBits::GfMask uiUsageMask(0);
 	uiUsageMask.Set(ETextureUsageBits::Transfer_Dst | ETextureUsageBits::Sampled);
 	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::EFlags::Tilable);
 	m_kTesTexture.Create(m_kContext);
 
-	// Load data into texture's memory
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void TestApp::BindResourcesToParamSets()
-{
-
+	m_kParamSet.BindResource(0, &m_kTesTexture);
+	m_kParamSet.Update(m_kContext);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

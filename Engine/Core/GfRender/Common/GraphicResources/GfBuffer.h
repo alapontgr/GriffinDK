@@ -114,6 +114,8 @@ private:
 
 	GfBufferDesc	m_kDesc;
 	GfBitMask<u32>	m_uiFlags;
+	u32				m_uiMappedOffset;
+	u32				m_uiMappedSize;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

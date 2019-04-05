@@ -199,6 +199,34 @@ static const VkImageViewType g_pViewTypeConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static const VkFilter g_pTexFilterConverter[] =
+{
+	VK_FILTER_NEAREST,
+	VK_FILTER_LINEAR,
+	VK_FILTER_CUBIC_IMG,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkSamplerMipmapMode g_pSamplerMipMapModeConverter[] = 
+{
+	VK_SAMPLER_MIPMAP_MODE_NEAREST,
+	VK_SAMPLER_MIPMAP_MODE_LINEAR,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const VkSamplerAddressMode g_pTexAddressModeConverter[] =
+{
+	VK_SAMPLER_ADDRESS_MODE_REPEAT,
+	VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+	VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Direct map for the moment
 static GF_FORCEINLINE VkDescriptorType ConvertDescriptorType(EParamaterSlotType::Type eType)
 {
@@ -302,6 +330,27 @@ static GF_FORCEINLINE VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp
 static GF_FORCEINLINE VkImageViewType ConvertViewType(ETextureViewType::Type eViewType) 
 {
 	return g_pViewTypeConverter[eViewType];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static GF_FORCEINLINE VkFilter ConvertTexFilter(ETexFilter::Type eTexFilter)
+{
+	return g_pTexFilterConverter[eTexFilter];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static GF_FORCEINLINE VkSamplerMipmapMode ConvertTexMipMapMode(ESamplerMipMapMode::Type eMipMapMode) 
+{
+	return g_pSamplerMipMapModeConverter[eMipMapMode];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static GF_FORCEINLINE VkSamplerAddressMode ConvertTexAddressMode(ETexAddressMode::Type eTexAddressMode) 
+{
+	return g_pTexAddressModeConverter[eTexAddressMode];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

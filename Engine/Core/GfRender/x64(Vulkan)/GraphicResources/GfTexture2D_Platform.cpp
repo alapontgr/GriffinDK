@@ -114,7 +114,7 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 
 void GfTexture2D_Platform::DestroyRHI(const GfRenderContext& kCtx)
 {
-	
+	m_kBase.GetSharedPlatform().DestroyRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

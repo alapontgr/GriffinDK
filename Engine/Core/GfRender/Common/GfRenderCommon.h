@@ -24,13 +24,13 @@ namespace EParamaterSlotType
 {
 	enum Type : u8
 	{
-		Sampler = 0,
-		CombinedImageSampler,	// Texture 2D
-		SampledImage,			// Texture 2D
+		SamplerState = 0,
+		CombinedTextureSampler,
+		SampledTextured,
 		StorageImage,
 		UniformTexelBuffer,
 		StorageTexelBuffer,
-		UniformBuffer,			// Constant Buffer
+		ConstantBuffer,
 		StorageBuffer,
 		UniformBufferDynamic,
 		StorageBufferDynamic,
@@ -287,6 +287,43 @@ namespace ETextureViewType
 		ViewCubeArray,
 		////////////////////////////////////////////////////////////////////////
 		COUNT
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace ETexFilter 
+{
+	enum Type : u32 
+	{
+		Nearest = 0,
+		Linear,
+		Cubic
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace ESamplerMipMapMode 
+{
+	enum Type : u32 
+	{
+		Nearest = 0,
+		Linear
+	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace ETexAddressMode 
+{
+	enum Type : u32 
+	{
+		Repeat = 0,
+		MirroredRepeat,
+		ClampToEdge,
+		ClampToBorder,
+		MirrorClampToEdge
 	};
 }
 

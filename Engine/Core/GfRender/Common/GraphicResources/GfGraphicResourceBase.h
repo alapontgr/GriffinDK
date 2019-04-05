@@ -31,17 +31,28 @@ public:
 
 	EParamaterSlotType::Type GetResourceType() const;
 
+	bool IsGPUReady() const;
+
+	bool IsInitialised() const;
+
+	void MarkAsDestroyed();
+
+	void MarkAsGPUReady();
+
 protected:
 
 	enum EGraphicResFlags : u32 
 	{
-		BufferedResource	= 1<<0,
-		TexturedResource	= 1<<1,
-		End					= 1<<2,
+		GPUReady			= 1<<0,
+		Initialised			= 1<<1,
+		BufferedResource	= 1<<2,
+		TexturedResource	= 1<<3,
+		////////////////////////////////////////////////////////////////////////////////
+		End					= 4,
 	};
 
 	EParamaterSlotType::Type m_eResourceType;
-	GfBitMask<u32>	m_uiFlags;
+	GfBitMask<u32>	m_uiGraphicResFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,14 +66,28 @@ GF_FORCEINLINE EParamaterSlotType::Type GfGraphicsResourceBase::GetResourceType(
 
 GF_FORCEINLINE bool GfGraphicsResourceBase::IsBufferedResource() const
 {
-	return m_uiFlags.IsEnable(EGraphicResFlags::BufferedResource);
+	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::BufferedResource);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfGraphicsResourceBase::IsTexturedResource() const
 {
-	return m_uiFlags.IsEnable(EGraphicResFlags::TexturedResource);
+	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::TexturedResource);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfGraphicsResourceBase::IsGPUReady() const 
+{
+	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::GPUReady);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfGraphicsResourceBase::IsInitialised() const
+{
+	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::Initialised);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +108,7 @@ protected:
 
 	enum EBUfferedResFlags : u32 
 	{
-		BufferBound = GfGraphicsResourceBase::EGraphicResFlags::End,
+		BufferBound = 1<<GfGraphicsResourceBase::EGraphicResFlags::End,
 	};
 
 private:

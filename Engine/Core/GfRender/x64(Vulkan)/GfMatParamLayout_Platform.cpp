@@ -228,11 +228,11 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 			switch (kSlot.m_eType)
 			{
-			case EParamaterSlotType::UniformBuffer:
+			case EParamaterSlotType::ConstantBuffer:
 				uiDirtyBufferedParams++;
 				break;
-			case EParamaterSlotType::SampledImage:
-			case EParamaterSlotType::Sampler:
+			case EParamaterSlotType::SampledTextured:
+			case EParamaterSlotType::SamplerState:
 				uiDirtyTexturedParams++;
 				break;
 			default:
@@ -266,7 +266,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 
 				switch (kSlot.m_eType)
 				{
-				case EParamaterSlotType::UniformBuffer:
+				case EParamaterSlotType::ConstantBuffer:
 				{
 					const GfBufferedResource* pCBuffer((const GfBufferedResource*)pParam);
 					FillUniformBufferBinding(pCBuffer, pBufferInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
@@ -274,7 +274,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 					pWriteSetsPivot++;
 					break;
 				}
-				case EParamaterSlotType::SampledImage: 
+				case EParamaterSlotType::SampledTextured: 
 				{
 					const GfTexturedResource* pTexRes((const GfTexturedResource*)pParam);
 					FillUniformBufferBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);

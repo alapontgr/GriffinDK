@@ -14,14 +14,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfTexture2D)
-	, m_uiFlags(0)
+	, m_uiTextureFlags(0)
 	, m_uiUsage(0)
 	, m_eFormat(ETextureFormat::Undefined)
 	, m_uiMips(1)
 	, m_uiWidth(0)
 	, m_uiheight(0)
 {
-	m_eResourceType = EParamaterSlotType::SampledImage;
+	m_eResourceType = EParamaterSlotType::SampledTextured;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, ETextureFormat::Ty
 {
 	if (!IsInitialised()) 
 	{
-		m_uiFlags = uiFlags;
+		m_uiTextureFlags = uiFlags;
 		m_uiUsage = uiUsage;
 		m_eFormat = eFormat;
 		m_uiMips = uiMips;
@@ -49,12 +49,12 @@ bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, ETextureFormat::Ty
 			// Is depth buffer?
 			if (eFormat != ETextureFormat::S8_UInt)
 			{
-				m_uiFlags |= EPrivateFlags::DepthBuffer;
+				m_uiTextureFlags |= EPrivateFlags::DepthBuffer;
 			}
 			// Is stencil buffer?
 			if (eFormat > ETextureFormat::D32_SFloat) 
 			{
-				m_uiFlags |= EPrivateFlags::StencilBuffer;
+				m_uiTextureFlags |= EPrivateFlags::StencilBuffer;
 			}
 		}
 	
@@ -64,7 +64,7 @@ bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, ETextureFormat::Ty
 			m_uiUsage |= ETextureUsageBits::Transfer_Dst;
 		}
 
-		m_uiFlags |= EPrivateFlags::Initialised;
+		m_uiGraphicResFlags |= EGraphicResFlags::Initialised;
 		return true;
 	}
 	return false;
@@ -80,6 +80,10 @@ void GfTexture2D::Create(const GfRenderContext& kCtx)
 		{
 			m_kPlatform.DestroyRHI(kCtx);
 		}
+		else 
+		{
+			MarkAsGPUReady();
+		}
 	}
 }
 
@@ -88,7 +92,8 @@ void GfTexture2D::Create(const GfRenderContext& kCtx)
 void GfTexture2D::Destroy(const GfRenderContext& kCtx)
 {
 	m_kPlatform.DestroyRHI(kCtx);
-	m_uiFlags = 0;
+	m_uiTextureFlags = 0;
+	MarkAsDestroyed();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

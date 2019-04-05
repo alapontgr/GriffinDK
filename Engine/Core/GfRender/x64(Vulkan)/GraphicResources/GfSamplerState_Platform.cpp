@@ -1,28 +1,35 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2019/02/17
-//	File: 	GfConstantBuffer.cpp
+//	Date: 	2019/04/04
+//	File: 	GfSamplerState_Platform.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GraphicResources/GfConstantBuffer.h"
+#include "GfRender/Common/GraphicResources/GfSamplerState.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfConstantBuffer::GfConstantBuffer()
+GF_DEFINE_PLATFORM_CTOR(GfSamplerState)
+	, m_pSampler(nullptr)
 {
-	m_eResourceType = EParamaterSlotType::ConstantBuffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfConstantBuffer::Init(const GfRenderContext& kCtxt)
+bool GfSamplerState_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfSamplerState_Platform::DestroyRHI(const GfRenderContext& kCtxt)
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

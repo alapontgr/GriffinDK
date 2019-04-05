@@ -20,19 +20,33 @@ GfGraphicsResourceBase::GfGraphicsResourceBase()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfGraphicsResourceBase::MarkAsDestroyed()
+{
+	m_uiGraphicResFlags.Disable(EGraphicResFlags::Initialised | EGraphicResFlags::GPUReady);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfGraphicsResourceBase::MarkAsGPUReady()
+{
+	m_uiGraphicResFlags.Enable(EGraphicResFlags::GPUReady);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfBufferedResource::GfBufferedResource()
 {
-	m_uiFlags.Enable(EGraphicResFlags::BufferedResource);
+	m_uiGraphicResFlags.Enable(EGraphicResFlags::BufferedResource);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfBufferedResource::BindBuffer(const GfBuffer::GfRange& kRange)
 {
-	if (!m_uiFlags.IsEnable(EBUfferedResFlags::BufferBound))
+	if (!m_uiGraphicResFlags.IsEnable(EBUfferedResFlags::BufferBound))
 	{
 		m_kBufferRange = kRange;
-		m_uiFlags |= (EBUfferedResFlags::BufferBound);
+		m_uiGraphicResFlags |= (EBUfferedResFlags::BufferBound);
 	}
 }
 
@@ -40,7 +54,7 @@ void GfBufferedResource::BindBuffer(const GfBuffer::GfRange& kRange)
 
 GfTexturedResource::GfTexturedResource()
 {
-	m_uiFlags.Enable(EGraphicResFlags::TexturedResource);
+	m_uiGraphicResFlags.Enable(EGraphicResFlags::TexturedResource);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

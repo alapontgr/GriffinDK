@@ -26,13 +26,14 @@ class GfTexture2D : public GfTexturedResource
 	GF_DECLARE_PLATFORM_INTERFACE(GfTexture2D);
 public:
 
-	enum EFlags : u16 
+	enum ETexture2DFlags : u16 
 	{
-		Mappable = (1<<0),
-		Tilable	 = (1<<1),
+		// User flags
+		Mappable = 1<<0,
+		Tilable	 = 1<<1,
 	};
 
-	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::SampledImage; }
+	static EParamaterSlotType::Type GetType() { return EParamaterSlotType::SampledTextured; }
 
 	GfTexture2D();
 
@@ -44,8 +45,6 @@ public:
 	void Create(const GfRenderContext& kCtx);
 
 	void Destroy(const GfRenderContext& kCtx);
-
-	bool IsInitialised() const;
 
 	bool IsMappable() const;
 
@@ -70,15 +69,14 @@ public:
 
 private:
 
-	enum EPrivateFlags : u16 
+	enum EPrivateFlags : u16
 	{
 		// Continue from public flags
 		DepthBuffer		= (1<<2),
 		StencilBuffer	= (1<<3),
-		Initialised		= (1<<4),
 	};
 
-	GfBitMask<u16>				m_uiFlags;
+	GfBitMask<u16>				m_uiTextureFlags;
 	ETextureUsageBits::GfMask	m_uiUsage;
 	ETextureFormat::Type		m_eFormat;
 	u32							m_uiMips;
@@ -88,37 +86,30 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexture2D::IsInitialised() const
-{
-	return (m_uiFlags & EPrivateFlags::Initialised) != 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 GF_FORCEINLINE bool GfTexture2D::IsMappable() const
 {
-	return (m_uiFlags & EFlags::Mappable) != 0;
+	return (m_uiTextureFlags & ETexture2DFlags::Mappable) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfTexture2D::IsDepthBuffer() const
 {
-	return (m_uiFlags & EPrivateFlags::DepthBuffer) != 0;
+	return (m_uiTextureFlags & EPrivateFlags::DepthBuffer) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfTexture2D::IsStencilBuffer() const
 {
-	return (m_uiFlags & EPrivateFlags::StencilBuffer) != 0;
+	return (m_uiTextureFlags & EPrivateFlags::StencilBuffer) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfTexture2D::IsTilable() const
 {
-	return (m_uiFlags & EFlags::Tilable) != 0;
+	return (m_uiTextureFlags & ETexture2DFlags::Tilable) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

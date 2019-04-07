@@ -23,7 +23,6 @@ GF_DEFINE_BASE_CTOR(GfSamplerState)
 	, m_fMipLodBias(0.0f)
 	, m_fMinLod(0.0f)
 	, m_fMaxLod(1.0f)
-	, m_vBorderColour(0.0f)
 	, m_fMaxAnisotropy(1.0f)
 	, m_bUseAnisotropy(false)
 {
@@ -142,16 +141,6 @@ void GfSamplerState::SetMaxLod(f32 fMaxLod)
 	if (!IsGPUReady()) 
 	{
 		m_fMaxLod = fMaxLod;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSamplerState::SetBorderColour(const v4& vCol)
-{
-	if (!IsGPUReady()) 
-	{
-		m_vBorderColour = vCol;
 	}
 }
 

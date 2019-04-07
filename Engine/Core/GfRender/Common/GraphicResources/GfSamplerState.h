@@ -48,8 +48,6 @@ public:
 	
 	f32 GetMaxLod() const { return m_fMaxLod; }
 	
-	v4 GetBorderColour() const { return m_vBorderColour; }
-	
 	f32 GetMaxAnisotropy() const { return m_fMaxAnisotropy; }
 	
 	bool GetUseAnisotropy() const { return m_bUseAnisotropy; }
@@ -72,8 +70,6 @@ public:
 	
 	void SetMaxLod(f32 fMaxLod);
 	
-	void SetBorderColour(const v4& vCol);
-	
 	void SetMaxAnisotropy(f32 fMaxAnisotropy);
 	
 	void SetUseAnisotropy(bool bUseAnisotropy);
@@ -91,8 +87,6 @@ private:
 	// Lod range
 	f32							m_fMinLod;			// Default: 0.0f
 	f32							m_fMaxLod;			// Default: 1.0f
-	// Border color
-	v4							m_vBorderColour;	// Default: Black
 	// Anisotropy
 	f32							m_fMaxAnisotropy;	// Default: 1.0f
 	bool						m_bUseAnisotropy;	// Default: false

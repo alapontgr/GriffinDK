@@ -17,5 +17,7 @@
 
 #include "GfRender/Common/GraphicResources/GfTexture2D.h"
 
+#include "GfRender/Common/GraphicResources/GfSamplerState.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFGRAPHICRESOURCES_H__

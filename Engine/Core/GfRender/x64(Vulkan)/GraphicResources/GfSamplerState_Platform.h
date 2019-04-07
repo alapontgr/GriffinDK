@@ -28,10 +28,19 @@ public:
 
 	void DestroyRHI(const GfRenderContext& kCtxt);
 
+	VkSampler GetSampler() const;
+
 private:
 
 	VkSampler m_pSampler;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE VkSampler GfSamplerState_Platform::GetSampler() const
+{
+	return m_pSampler;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFSAMPLERSTATE_PLATFORM_H__

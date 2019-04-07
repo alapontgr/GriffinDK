@@ -42,7 +42,7 @@ void FillUniformBufferBinding(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void FillUniformBufferBinding(
+void FillTextureBinding(
 	const GfTexturedResource* pTexRes,
 	VkDescriptorImageInfo* pImageInfosPivot,
 	VkWriteDescriptorSet* pWriteSetsPivot,
@@ -58,6 +58,29 @@ void FillUniformBufferBinding(
 	pWriteSetsPivot->dstBinding = uiBindSlot;
 	pWriteSetsPivot->dstArrayElement = 0;
 	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+	pWriteSetsPivot->descriptorCount = 1;
+	pWriteSetsPivot->pBufferInfo = nullptr;
+	pWriteSetsPivot->pImageInfo = pImageInfosPivot;
+	pWriteSetsPivot->pTexelBufferView = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void FillSamplerStateBinding(
+	const GfSamplerState* pSampler,
+	VkDescriptorImageInfo* pImageInfosPivot,
+	VkWriteDescriptorSet* pWriteSetsPivot,
+	VkDescriptorSet pSet, u32 uiBindSlot) 
+{
+	pImageInfosPivot->sampler = pSampler->Plat().GetSampler();
+	pImageInfosPivot->imageView = nullptr;
+	
+	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	pWriteSetsPivot->pNext = nullptr;
+	pWriteSetsPivot->dstSet = pSet;
+	pWriteSetsPivot->dstBinding = uiBindSlot;
+	pWriteSetsPivot->dstArrayElement = 0;
+	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 	pWriteSetsPivot->descriptorCount = 1;
 	pWriteSetsPivot->pBufferInfo = nullptr;
 	pWriteSetsPivot->pImageInfo = pImageInfosPivot;
@@ -277,7 +300,15 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				case EParamaterSlotType::SampledTextured: 
 				{
 					const GfTexturedResource* pTexRes((const GfTexturedResource*)pParam);
-					FillUniformBufferBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
+					FillTextureBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
+					pImageInfosPivot++;
+					pWriteSetsPivot++;
+					break;
+				}
+				case EParamaterSlotType::SamplerState: 
+				{
+					const GfSamplerState* pSampler((const GfSamplerState*)pParam);
+					FillSamplerStateBinding(pSampler, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
 					pImageInfosPivot++;
 					pWriteSetsPivot++;
 					break;

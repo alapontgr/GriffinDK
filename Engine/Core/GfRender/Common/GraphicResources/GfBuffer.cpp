@@ -20,28 +20,47 @@ GF_DEFINE_BASE_CTOR(GfBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer::Init(const GfRenderContext& kCtxt, const GfBufferDesc& kDesc)
+void GfBuffer::Init(const GfBufferDesc& kDesc)
 {
-	Destroy(kCtxt);
-	m_kDesc = kDesc;
-	return m_kPlatform.InitRHI(kCtxt);
+	if (!IsInitialised()) 
+	{
+		m_kDesc = kDesc;
+		m_uiFlags.Enable(EFlag::Initialised);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool GfBuffer::Create(const GfRenderContext& kCtxt)
+{
+	if (IsInitialised()) 
+	{
+		if (m_kPlatform.CreateRHI(kCtxt)) 
+		{
+			m_uiFlags.Enable(EFlag::GPUReady);
+			return true;
+		}	
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfBuffer::Destroy(const GfRenderContext& kCtxt)
 {
-	if (m_kDesc.m_ulSize > 0) 
+	if (IsGPUReady()) 
 	{
 		m_kPlatform.DestroyRHI(kCtxt);
-		m_kDesc = GfBufferDesc();
 	}
+	m_kDesc = GfBufferDesc();
+	m_uiFlags = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
+	GF_ASSERT(IsGPUReady(), "Buffer not created");
 	GF_ASSERT((m_uiFlags & EFlag::Mapped) == 0, "Buffer is already mapped");
 	if (IsMappable() && ((uiSize + uiOffset) < m_kDesc.m_ulSize)) 
 	{

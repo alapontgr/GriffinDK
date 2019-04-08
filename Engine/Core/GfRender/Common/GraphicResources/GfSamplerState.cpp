@@ -165,4 +165,25 @@ void GfSamplerState::SetUseAnisotropy(bool bUseAnisotropy)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+GfCombinedSamplerTexture::GfCombinedSamplerTexture()
+	: m_pSampler(nullptr)
+	, m_pTexture(nullptr)
+{
+	m_eResourceType = EParamaterSlotType::CombinedTextureSampler;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfCombinedSamplerTexture::Init(const GfSamplerState* pSampler, const GfTexturedResource* pTexture)
+{
+	if (!IsInitialised()) 
+	{
+		m_uiGraphicResFlags |= EGraphicResFlags::Initialised;
+		m_pSampler = pSampler;
+		m_pTexture = pTexture;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // EOF

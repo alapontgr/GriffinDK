@@ -62,7 +62,7 @@ GF_DEFINE_PLATFORM_CTOR(GfBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer_Platform::InitRHI(const GfRenderContext& kCtxt)
+bool GfBuffer_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
 	VkBufferCreateInfo bufferCreateInfo{};
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

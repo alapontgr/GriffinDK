@@ -36,7 +36,7 @@ public:
 
 	static GfStageAccessConfig GetTransitionSettingsForType(u32 uiType);
 
-	bool InitRHI(const GfRenderContext& kCtxt);
+	bool CreateRHI(const GfRenderContext& kCtxt);
 
 	void DestroyRHI(const GfRenderContext& kCtxt);
 

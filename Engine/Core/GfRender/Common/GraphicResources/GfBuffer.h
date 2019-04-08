@@ -86,11 +86,17 @@ public:
 
 	GfBuffer();
 
-	bool Init(const GfRenderContext& kCtxt, const GfBufferDesc& kDesc);
+	void Init(const GfBufferDesc& kDesc);
+
+	bool Create(const GfRenderContext& kCtxt);
 
 	void Destroy(const GfRenderContext& kCtxt);
 
 	bool IsMappable() const;
+
+	bool IsInitialised() const;
+
+	bool IsGPUReady() const;
 
 	void* Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
 	
@@ -110,6 +116,8 @@ private:
 	enum EFlag : u32
 	{
 		Mapped = 1 << 0,
+		Initialised = 1<<1,
+		GPUReady = 1<<2
 	};
 
 	GfBufferDesc	m_kDesc;
@@ -138,6 +146,22 @@ GF_FORCEINLINE bool GfBuffer::IsMappable() const
 {
 	return (m_kDesc.m_uiMemoryProperties & EBufferMemProperties::CPU_Visible) != 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfBuffer::IsInitialised() const
+{
+	return m_uiFlags.IsEnable(EFlag::Initialised);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfBuffer::IsGPUReady() const
+{
+	return m_uiFlags.IsEnable(EFlag::GPUReady);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFBUFFER_H__

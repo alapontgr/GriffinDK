@@ -93,4 +93,37 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+
+class GfCombinedSamplerTexture : public GfGraphicsResourceBase 
+{
+public:
+
+	GfCombinedSamplerTexture();
+
+	void Init(const GfSamplerState* pSampler, const GfTexturedResource* pTexture);
+
+	const GfSamplerState* GetSampler() const;
+	const GfTexturedResource* GetTexture() const;
+
+private:
+
+	const GfSamplerState*		m_pSampler;
+	const GfTexturedResource* m_pTexture;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfSamplerState* GfCombinedSamplerTexture::GetSampler() const
+{
+	return m_pSampler;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTexturedResource* GfCombinedSamplerTexture::GetTexture() const
+{
+	return m_pTexture;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 #endif // __GFSAMPLERSTATE_H__

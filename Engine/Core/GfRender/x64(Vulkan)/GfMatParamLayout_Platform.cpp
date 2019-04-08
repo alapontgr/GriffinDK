@@ -23,7 +23,7 @@ void FillUniformBufferBinding(
 	VkDescriptorSet pSet, u32 uiBindSlot)
 {
 	const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
-
+	GF_ASSERT(kRange.m_pBuffer->IsGPUReady(), "Buffer has not been created yet");
 	pBufferInfosPivot->buffer = kRange.m_pBuffer->Plat().GetHandle();
 	pBufferInfosPivot->offset = kRange.m_uiOffset;
 	pBufferInfosPivot->range = kRange.m_uiSize;
@@ -48,6 +48,7 @@ void FillTextureBinding(
 	VkWriteDescriptorSet* pWriteSetsPivot,
 	VkDescriptorSet pSet, u32 uiBindSlot)
 {
+	GF_ASSERT(pTexRes->IsGPUReady(), "Texture not created");
 	pImageInfosPivot->sampler = nullptr;
 	pImageInfosPivot->imageView = pTexRes->GetSharedPlatformC().GetView();
 	pImageInfosPivot->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // The texture must be initialized at this point
@@ -72,6 +73,7 @@ void FillSamplerStateBinding(
 	VkWriteDescriptorSet* pWriteSetsPivot,
 	VkDescriptorSet pSet, u32 uiBindSlot) 
 {
+	GF_ASSERT(pSampler->IsGPUReady(), "Sampler not created");
 	pImageInfosPivot->sampler = pSampler->Plat().GetSampler();
 	pImageInfosPivot->imageView = nullptr;
 	
@@ -81,6 +83,33 @@ void FillSamplerStateBinding(
 	pWriteSetsPivot->dstBinding = uiBindSlot;
 	pWriteSetsPivot->dstArrayElement = 0;
 	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+	pWriteSetsPivot->descriptorCount = 1;
+	pWriteSetsPivot->pBufferInfo = nullptr;
+	pWriteSetsPivot->pImageInfo = pImageInfosPivot;
+	pWriteSetsPivot->pTexelBufferView = nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void FillCombinedSamplerTextureStateBinding(
+	const GfCombinedSamplerTexture* pCombinedSamplerTexture,
+	VkDescriptorImageInfo* pImageInfosPivot,
+	VkWriteDescriptorSet* pWriteSetsPivot,
+	VkDescriptorSet pSet, u32 uiBindSlot)
+{
+	GF_ASSERT(pCombinedSamplerTexture->GetTexture()->IsGPUReady(), "Texture not created");
+	GF_ASSERT(pCombinedSamplerTexture->GetSampler()->IsGPUReady(), "Sampler not created");
+
+	pImageInfosPivot->sampler = pCombinedSamplerTexture->GetSampler()->Plat().GetSampler();
+	pImageInfosPivot->imageView = pCombinedSamplerTexture->GetTexture()->GetSharedPlatformC().GetView();
+	pImageInfosPivot->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // The texture must be initialized at this point
+
+	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	pWriteSetsPivot->pNext = nullptr;
+	pWriteSetsPivot->dstSet = pSet;
+	pWriteSetsPivot->dstBinding = uiBindSlot;
+	pWriteSetsPivot->dstArrayElement = 0;
+	pWriteSetsPivot->descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	pWriteSetsPivot->descriptorCount = 1;
 	pWriteSetsPivot->pBufferInfo = nullptr;
 	pWriteSetsPivot->pImageInfo = pImageInfosPivot;
@@ -256,6 +285,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				break;
 			case EParamaterSlotType::SampledTextured:
 			case EParamaterSlotType::SamplerState:
+			case EParamaterSlotType::CombinedTextureSampler:
 				uiDirtyTexturedParams++;
 				break;
 			default:
@@ -309,6 +339,15 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				{
 					const GfSamplerState* pSampler((const GfSamplerState*)pParam);
 					FillSamplerStateBinding(pSampler, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
+					pImageInfosPivot++;
+					pWriteSetsPivot++;
+					break;
+				}
+				case EParamaterSlotType::CombinedTextureSampler:
+				{
+					const GfCombinedSamplerTexture* pCombinedSamplerTexture((const GfCombinedSamplerTexture*)pParam);
+					FillCombinedSamplerTextureStateBinding(
+						pCombinedSamplerTexture, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
 					pImageInfosPivot++;
 					pWriteSetsPivot++;
 					break;

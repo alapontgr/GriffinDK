@@ -180,7 +180,7 @@ void TestApp::CreateMaterialsAndParamSets()
 
 	// Prepare parameter layout
 	GfShaderAccessMask uiAccessMask(EShaderStageFlags::Fragment);
-	m_kParamLayout.DefineParameter(EParamaterSlotType::SampledImage, uiAccessMask, 0);
+	m_kParamLayout.DefineParameter(EParamaterSlotType::SampledTextured, uiAccessMask, 0);
 	m_kParamLayout.Create(m_kContext);
 
 	// Define material
@@ -198,7 +198,7 @@ void TestApp::CreateMaterialsAndParamSets()
 	// m_kMaterialT.AssignLayout(0, m_kParamLayout);
 
 	// Prepare uniform factory
-	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::SampledImage, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::SampledTextured, 1);
 	m_kUniformFactory.SetMaxAllocatedParamSets(16);
 	m_kUniformFactory.Create(m_kContext);
 
@@ -217,7 +217,8 @@ void TestApp::CreateResources()
 	kDesc.m_uiMemoryProperties = EBufferMemProperties::CPU_Visible;
 	kDesc.m_uiBufferUsage = (EBufferUsage::Transfer_Src);
 	kDesc.m_eBufferType = EBufferUsage::Transfer_Src;
-	m_kStagingBuffer.Init(m_kContext, kDesc);
+	m_kStagingBuffer.Init(kDesc);
+	m_kStagingBuffer.Create(m_kContext);
 
 	////////////////////////////////////////////////////////////////////////////////
 	s32 siW, siH, siComp;
@@ -225,7 +226,7 @@ void TestApp::CreateResources()
 	
 	ETextureUsageBits::GfMask uiUsageMask(0);
 	uiUsageMask.Set(ETextureUsageBits::Transfer_Dst | ETextureUsageBits::Sampled);
-	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::EFlags::Tilable);
+	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::ETexture2DFlags::Tilable);
 	m_kTesTexture.Create(m_kContext);
 
 	m_kParamSet.BindResource(0, &m_kTesTexture);

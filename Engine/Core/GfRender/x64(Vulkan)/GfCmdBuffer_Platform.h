@@ -59,13 +59,6 @@ private:
 	void EndRecordingRHI(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Render pipeline state
-
-	void BindParameterSetRHI(const GfMaterialTemplate& kMaterial, 
-		const GfMaterialParamSet& kparamSet, 
-		u32 uiBindPoint, bool bIsGraphics);
-
-	////////////////////////////////////////////////////////////////////////////////
 	// Draw cmds
 
 	void DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);

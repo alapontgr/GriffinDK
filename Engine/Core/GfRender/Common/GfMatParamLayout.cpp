@@ -166,6 +166,13 @@ void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFacto
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfMaterialParamSet::BindSet(const GfCmdBuffer& kCmdBuffer, const GfMaterialTemplate& kMaterial, u32 uiBindPoint /*= 0*/, bool bIsGraphics /*= true*/)
+{
+	Plat().BindRHI(kCmdBuffer, kMaterial, uiBindPoint, bIsGraphics);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
 {
 	// Check that there are some resources pending to be updated

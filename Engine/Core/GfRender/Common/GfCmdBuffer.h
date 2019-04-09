@@ -55,14 +55,6 @@ public:
 		GfRenderContextFamilies::Type eQueueType,
 		Bool bLast);
 
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Render pipeline state
-
-	// Bind a parameter set to a slot
-	void BindParameterSet(const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
-		u32 uiBindPoint = 0, bool bIsGraphics = true);
-
 	////////////////////////////////////////////////////////////////////////////////
 	// Draw commands
 
@@ -106,15 +98,6 @@ GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
 GF_FORCEINLINE void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
 {
 	m_kPlatform.EndRecordingRHI(kCtx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::BindParameterSet(
-	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
-	u32 uiBindPoint, bool bIsGraphics)
-{
-	m_kPlatform.BindParameterSetRHI(kMaterial, kparamSet, uiBindPoint, bIsGraphics);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

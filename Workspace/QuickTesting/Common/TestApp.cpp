@@ -34,12 +34,14 @@ GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize)
 GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& siHeight, s32& siComponentCount) 
 {
 	// Force 4 components
-	unsigned char *pData = stbi_load(szTexturePath, &siWidth, &siHeight, &siComponentCount, 4);
-	size_t uiTextureSize((size_t)siWidth * siHeight * siComponentCount);
+	u32 uiReqComponents(4);
+	unsigned char *pData = stbi_load(szTexturePath, &siWidth, &siHeight, &siComponentCount, uiReqComponents);
+	size_t uiTextureSize((size_t)siWidth * siHeight * uiReqComponents);
 	
 	GfUniquePtr<char[]> pSrc(new char[uiTextureSize]);
 	memcpy(pSrc.get(), pData, uiTextureSize);
 	stbi_image_free(pData);
+
 	return pSrc;
 }
 
@@ -142,6 +144,7 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 
 	// Add commands
 	m_kMaterialT.Bind(kCmdBuffer);
+	m_kParamSet.BindSet(kCmdBuffer, m_kMaterialT, 0);
 
 	// Draw
 	kCmdBuffer.Draw(6, 1);
@@ -192,10 +195,8 @@ void TestApp::CreateMaterialsAndParamSets()
 	m_kMaterialT.SetMaterialPass(&m_kRenderPass);
 	m_kMaterialT.SetShaderData(EShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
 	m_kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
+	m_kMaterialT.AssignLayout(0, &m_kParamLayout);
 	m_kMaterialT.Create(m_kContext);
-
-	// TODO: Enable the next line
-	// m_kMaterialT.AssignLayout(0, m_kParamLayout);
 
 	// Prepare uniform factory
 	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::SampledTextured, 1);

@@ -87,6 +87,7 @@ bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
 	VkImageViewCreateInfo kImageViewInfo{};
 	kImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	kImageViewInfo.flags = 0; // TODO?
+	kImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: Add support for array
 	kImageViewInfo.format = ConvertTextureFormat(m_kBase.m_eFormat);
 	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
 	u32 uiAspectMask = 0;

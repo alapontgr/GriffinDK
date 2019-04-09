@@ -12,6 +12,8 @@
 #include "GfRender/Common/GfMatParamLayout.h"
 #include "GfRender/Common/GfRenderContext.h"
 #include "GfRender/Common/GfRenderCommon.h"
+#include "GfRender/Common/GfCmdBuffer.h"
+#include "GfRender/Common/GfMaterial.h"
 #include "GfRender/Common/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -359,6 +361,15 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 		}
 		vkUpdateDescriptorSets(kCtxt.Plat().m_pDevice, uiTotalDirtyResources, pWriteSets, 0, nullptr);
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfMaterialParamSet_Platform::BindRHI(const GfCmdBuffer& kCmdBuffer, const GfMaterialTemplate& kMaterial, u32 uiBindPoint, bool bIsGraphics)
+{
+	VkPipelineBindPoint uiBindType(bIsGraphics ? VK_PIPELINE_BIND_POINT_GRAPHICS : VK_PIPELINE_BIND_POINT_COMPUTE);
+	vkCmdBindDescriptorSets(kCmdBuffer.Plat().GetCmdBuffer(), uiBindType,
+		kMaterial.Plat().GetLayout(), uiBindPoint, 1, &m_pParamatersSet, 0, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

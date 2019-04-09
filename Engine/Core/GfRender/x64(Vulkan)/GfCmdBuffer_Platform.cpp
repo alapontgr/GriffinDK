@@ -105,18 +105,6 @@ void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::BindParameterSetRHI(
-	const GfMaterialTemplate& kMaterial, const GfMaterialParamSet& kparamSet, 
-	u32 uiBindPoint, bool bIsGraphics)
-{
-	VkPipelineBindPoint uiBindType(bIsGraphics ? VK_PIPELINE_BIND_POINT_GRAPHICS : VK_PIPELINE_BIND_POINT_COMPUTE);
-	VkDescriptorSet pDescriptorSet(kparamSet.Plat().GetDescriptorSet());
-	vkCmdBindDescriptorSets(m_pCmdBuffer, uiBindType,
-		kMaterial.Plat().GetLayout(), uiBindPoint, 1, &pDescriptorSet, 0, nullptr);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void GfCmdBuffer_Platform::DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
 	vkCmdDrawIndexed(m_pCmdBuffer, uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);

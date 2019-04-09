@@ -129,6 +129,13 @@ public:
 
 	void Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
+	////////////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	void BindSet(const GfCmdBuffer& kCmdBuffer, const GfMaterialTemplate& kMaterial,u32 uiBindPoint = 0, bool bIsGraphics = true);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 private:
 
 	enum EFlags : u32 

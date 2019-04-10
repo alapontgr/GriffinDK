@@ -1,0 +1,56 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
+//	Date: 	2019/04/10
+//	File: 	GfCamera.h
+//
+//	Copyright (c) 2018 (See README.md)
+//
+////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFCAMERA_H__
+#define __GFCAMERA_H__
+////////////////////////////////////////////////////////////////////////////////
+
+#include "GfCore/Common/GfCoreMinimal.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfCamera
+{
+public:
+
+	GfCamera();
+	
+	void UpdatePerspective(f32 fFov, f32 fAspect, f32 fNear, f32 fFar);
+
+	void UpdateViewWithTarget(const v3& vPos, const v3& vTarget, const v3& vUp);
+
+	// Forward vector is a vector to the direction where the camera looks
+	void UpdateViewWithForward(const v3& vPos, const v3& vForward, const v3& vUp);
+
+	m4 GetProjection() const;
+
+	m4 GetView() const;
+
+private:
+
+	m4 m_mView;
+	m4 m_mProjection;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE m4 GfCamera::GetProjection() const
+{
+	return m_mProjection;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE m4 GfCamera::GetView() const
+{
+	return m_mView;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFCAMERA_H__

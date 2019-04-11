@@ -38,5 +38,7 @@
 
 #include "GfRender/Common/GfMaterial.h"
 
+#include "GfRender/Common/GfCamera.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDER_H__

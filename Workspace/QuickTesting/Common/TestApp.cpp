@@ -16,6 +16,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfPerFrameCB 
+{
+	m4 m_mView;
+	m4 m_mProjection;
+} g_kPerFrameCBData;
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize)
 {
 	GfFileHandle kFile;
@@ -104,6 +112,9 @@ void TestApp::Init()
 	CreateMaterialsAndParamSets();
 	CreateCmdBuffers();
 	CreateResources();
+
+	m_kCamera.UpdatePerspective(GF_DEG_TO_RAD(45.0f), (f32)m_kWindow.GetWidth() / (f32)m_kWindow.GetHeight(), 0.1f, 1000.0f);
+	m_kCamera.UpdateViewWithTarget(v3(0.0f, 0.0f, 10.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +146,17 @@ void TestApp::CreateRenderPasses()
 
 void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 {
+	// Update PerFrameCB
+	g_kPerFrameCBData.m_mView = m_kCamera.GetView(); // Identity
+	g_kPerFrameCBData.m_mProjection = m_kCamera.GetProjection(); // Identity
+
+	GfPerFrameCB* pData = m_kPerFrameCB.MapAs<GfPerFrameCB>(m_kContext);
+	if (pData) 
+	{
+		*pData = g_kPerFrameCBData;
+		m_kPerFrameCB.UnMap(m_kContext);
+	}
+
 	// Begin render pass
 	m_kRenderPass.BeginPass(m_kContext, kCmdBuffer);
 
@@ -212,6 +234,7 @@ void TestApp::CreateMaterialsAndParamSets()
 
 void TestApp::CreateResources()
 {
+	// Create staging buffer
 	GfBuffer::GfBufferDesc kDesc;
 	kDesc.m_ulSize = 16 << 20; // 16MB
 	kDesc.m_ulAlignment = 16;
@@ -220,6 +243,23 @@ void TestApp::CreateResources()
 	kDesc.m_eBufferType = EBufferUsage::Transfer_Src;
 	m_kStagingBuffer.Init(kDesc);
 	m_kStagingBuffer.Create(m_kContext);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Init constant buffer pool
+
+	kDesc.m_ulSize = sizeof(GfPerFrameCB);
+	kDesc.m_ulAlignment = 16;
+	kDesc.m_uiMemoryProperties = EBufferMemProperties::CPU_Visible;
+	kDesc.m_uiBufferUsage = (EBufferUsage::Uniform_Buffer);
+	kDesc.m_eBufferType = EBufferUsage::Uniform_Buffer;
+	m_kConstantBufferPool.Init(kDesc);
+	m_kConstantBufferPool.Create(m_kContext);
+
+	GfBuffer::GfRange kRange;
+	kRange.m_pBuffer = &m_kConstantBufferPool;
+	kRange.m_uiOffset = 0;
+	kRange.m_uiSize = sizeof(GfPerFrameCB);
+	m_kPerFrameCB.BindBuffer(kRange);
 
 	////////////////////////////////////////////////////////////////////////////////
 	s32 siW, siH, siComp;

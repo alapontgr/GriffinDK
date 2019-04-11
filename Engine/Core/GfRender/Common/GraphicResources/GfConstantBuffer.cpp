@@ -20,9 +20,23 @@ GfConstantBuffer::GfConstantBuffer()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfConstantBuffer::Init(const GfRenderContext& kCtxt)
+void* GfConstantBuffer::Map(const GfRenderContext& kCtx)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	if (m_kBufferRange.m_pBuffer && !m_kBufferRange.m_pBuffer->IsMapped())
+	{
+		return m_kBufferRange.m_pBuffer->Map(kCtx, m_kBufferRange.m_uiOffset, m_kBufferRange.m_uiSize);
+	}
+	return nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfConstantBuffer::UnMap(const GfRenderContext& kCtx)
+{
+	if (m_kBufferRange.m_pBuffer && m_kBufferRange.m_pBuffer->IsMapped())
+	{
+		m_kBufferRange.m_pBuffer->UnMap(kCtx);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

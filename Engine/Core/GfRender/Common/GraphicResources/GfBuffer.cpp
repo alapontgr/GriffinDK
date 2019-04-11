@@ -62,7 +62,7 @@ void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
 	GF_ASSERT(IsGPUReady(), "Buffer not created");
 	GF_ASSERT((m_uiFlags & EFlag::Mapped) == 0, "Buffer is already mapped");
-	if (IsMappable() && ((uiSize + uiOffset) < m_kDesc.m_ulSize)) 
+	if (IsMappable() && ((uiSize + uiOffset) <= m_kDesc.m_ulSize)) 
 	{
 		m_uiMappedOffset = uiOffset;
 		m_uiMappedSize = uiSize;

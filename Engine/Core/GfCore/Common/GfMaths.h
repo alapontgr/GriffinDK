@@ -27,16 +27,16 @@ typedef glm::mat4x4 m4;
 ////////////////////////////////////////////////////////////////////////////////
 // Constants
 
-#define GF_PI 3.14159265359
-#define GF_2PI (2.0 * GF_PI)
-#define GF_PI2 (0.5 * GF_PI)
-#define GF_PI4 (0.25 * GF_PI)
+#define GF_PI 3.14159265359f
+#define GF_2PI (2.0f * GF_PI)
+#define GF_PI2 (0.5f * GF_PI)
+#define GF_PI4 (0.25f * GF_PI)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Units conversion
 
-#define GF_DEG_TO_RAD (GF_PI / 180.0)
-#define GF_RAD_TO_DEG (180.0 / GF_PI)
+#define GF_DEG_TO_RAD(VAL) (VAL*(GF_PI / 180.0f))
+#define GF_RAD_TO_DEG(VAL) (VAL*(180.0f / GF_PI))
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utility functions

@@ -111,8 +111,6 @@ protected:
 		BufferBound = 1<<GfGraphicsResourceBase::EGraphicResFlags::End,
 	};
 
-private:
-
 	GfBuffer::GfRange m_kBufferRange;
 };
 

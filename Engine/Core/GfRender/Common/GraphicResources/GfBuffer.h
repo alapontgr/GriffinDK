@@ -98,6 +98,8 @@ public:
 
 	bool IsGPUReady() const;
 
+	bool IsMapped() const;
+
 	void* Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
 	
 	void UnMap(const GfRenderContext& kCtxt);
@@ -152,6 +154,13 @@ GF_FORCEINLINE bool GfBuffer::IsMappable() const
 GF_FORCEINLINE bool GfBuffer::IsInitialised() const
 {
 	return m_uiFlags.IsEnable(EFlag::Initialised);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfBuffer::IsMapped() const
+{
+	return m_uiFlags.IsEnable(EFlag::Mapped);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

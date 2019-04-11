@@ -52,17 +52,22 @@ private:
 	GfRenderPass		m_kRenderPass;
 
 	GfBuffer			m_kStagingBuffer;
+	GfBuffer			m_kConstantBufferPool;
 
 	GfMaterialTemplate	m_kMaterialT;
 	GfMatUniformFactory	m_kUniformFactory;
 	GfMatParamLayout	m_kParamLayout;
 	GfMaterialParamSet	m_kParamSet;
 
+	GfConstantBuffer	m_kPerFrameCB;
 	GfTexture2D			m_kTesTexture;
 	GfUniquePtr<char[]>	m_pTestTextureData;
 
 	GfViewport		m_kViewport;
 	GfScissor		m_kScissor;
+
+	// Camera
+	GfCamera		m_kCamera;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -21,11 +21,24 @@ public:
 		
 	GfConstantBuffer();
 
-	void Init(const GfRenderContext& kCtxt);
+	template <typename T>
+	T* MapAs(const GfRenderContext& kCtx);
+
+	void* Map(const GfRenderContext& kCtx);
+
+	void UnMap(const GfRenderContext& kCtx);
 	
 private:
 
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+T* GfConstantBuffer::MapAs(const GfRenderContext& kCtx)
+{
+	return static_cast<T*>(Map(kCtx));
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCONSTANTBUFFER_H__

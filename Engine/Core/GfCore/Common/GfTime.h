@@ -15,10 +15,21 @@ class GfTime
 {
 public: 
 
-	u64 GetTickCounter();
+	static u64 GetTickCounter();
 
-	u64 GetCoreFrequency();
+	static u64 GetCoreFrequency();
+
+	static f64 GetTimeInSeconds();
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE f64 GfTime::GetTimeInSeconds()
+{
+	u64 ulFreq = GetCoreFrequency();
+	u64 ulTicks = GetTickCounter();
+	return ((f64)ulTicks) / ((f64)ulFreq);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

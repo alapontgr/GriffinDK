@@ -20,6 +20,7 @@ struct GfPerFrameCB
 {
 	m4 m_mView;
 	m4 m_mProjection;
+	m4 m_mViewProjection;
 } g_kPerFrameCBData;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +62,8 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 	
 	while (m_kContext.BeginFrame())
 	{
+		Update();
+
 		u32 uiCurrFrameIdx(m_kContext.GetCurrentFrameIdx());
 		GfCmdBuffer& kCmdBuffer(m_pCmdBuffes[uiCurrFrameIdx]);
 
@@ -114,7 +117,32 @@ void TestApp::Init()
 	CreateResources();
 
 	m_kCamera.UpdatePerspective(GF_DEG_TO_RAD(45.0f), (f32)m_kWindow.GetWidth() / (f32)m_kWindow.GetHeight(), 0.1f, 1000.0f);
-	m_kCamera.UpdateViewWithTarget(v3(0.0f, 0.0f, 10.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
+	m_kCamera.UpdateViewWithTarget(v3(0.0f, 5.0f, 10.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void TestApp::Update()
+{
+	static f64 s_dLastFrameTime(GfTime::GetTimeInSeconds());
+	f64 dCurrTime = GfTime::GetTimeInSeconds();
+	f32 fElapsedTime = (f32)(dCurrTime - s_dLastFrameTime);
+	s_dLastFrameTime = dCurrTime;
+	
+	static f32 s_fDeg(0.0f);
+
+	s_fDeg += fElapsedTime * 45.0f;
+	if (s_fDeg > 360.0f) 
+	{
+		s_fDeg -= 360.0f;
+	}
+
+	f32 fSin(sinf(GF_DEG_TO_RAD(s_fDeg)));
+	f32 fCos(cosf(GF_DEG_TO_RAD(s_fDeg)));
+
+	fCos = fCos * 0.5f + 0.5f;
+
+	m_kCamera.UpdateViewWithTarget(v3(fSin * 3.0f, 0.0f, fCos * 5.0f + 2.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +177,7 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 	// Update PerFrameCB
 	g_kPerFrameCBData.m_mView = m_kCamera.GetView(); // Identity
 	g_kPerFrameCBData.m_mProjection = m_kCamera.GetProjection(); // Identity
+	g_kPerFrameCBData.m_mViewProjection = (g_kPerFrameCBData.m_mProjection * g_kPerFrameCBData.m_mView);
 
 	GfPerFrameCB* pData = m_kPerFrameCB.MapAs<GfPerFrameCB>(m_kContext);
 	if (pData) 
@@ -204,8 +233,14 @@ void TestApp::CreateMaterialsAndParamSets()
 	kVertexFormat.Init(nullptr, 0, 0, EVertexInputRate::PerVertex);
 
 	// Prepare parameter layout
-	GfShaderAccessMask uiAccessMask(EShaderStageFlags::Fragment);
-	m_kParamLayout.DefineParameter(EParamaterSlotType::CombinedTextureSampler, uiAccessMask, 0);
+	{
+		GfShaderAccessMask uiAccessMask(EShaderStageFlags::Vertex);
+		m_kParamLayout.DefineParameter(EParamaterSlotType::ConstantBuffer, uiAccessMask, 0);
+	}
+	{
+		GfShaderAccessMask uiAccessMask(EShaderStageFlags::Fragment);
+		m_kParamLayout.DefineParameter(EParamaterSlotType::CombinedTextureSampler, uiAccessMask, 1);
+	}
 	m_kParamLayout.Create(m_kContext);
 
 	// Define material
@@ -221,6 +256,7 @@ void TestApp::CreateMaterialsAndParamSets()
 	m_kMaterialT.Create(m_kContext);
 
 	// Prepare uniform factory
+	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::ConstantBuffer, 1);
 	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::CombinedTextureSampler, 1);
 	m_kUniformFactory.SetMaxAllocatedParamSets(16);
 	m_kUniformFactory.Create(m_kContext);
@@ -284,7 +320,8 @@ void TestApp::CreateResources()
 
 	m_kCombinedSamplerTexture.Init(&m_kSampler, &m_kTesTexture);
 
-	m_kParamSet.BindResource(0, &m_kCombinedSamplerTexture);
+	m_kParamSet.BindResource(0, &m_kPerFrameCB);
+	m_kParamSet.BindResource(1, &m_kCombinedSamplerTexture);
 	m_kParamSet.Update(m_kContext);
 }
 

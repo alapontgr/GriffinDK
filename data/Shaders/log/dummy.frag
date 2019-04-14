@@ -15,7 +15,7 @@ Shaders/src/dummy.frag
                               Name 17  "uvs"
                               Decorate 9(outColor) Location 0
                               Decorate 13(Albedo) DescriptorSet 0
-                              Decorate 13(Albedo) Binding 0
+                              Decorate 13(Albedo) Binding 1
                               Decorate 17(uvs) Location 0
                2:             TypeVoid
                3:             TypeFunction 2

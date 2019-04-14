@@ -88,6 +88,7 @@ void GfBuffer::UnMap(const GfRenderContext& kCtxt)
 			m_uiMappedSize = 0;
 			m_uiMappedOffset = 0;
 		}
+		m_uiFlags.Disable(EFlag::Mapped);
 	}
 }
 

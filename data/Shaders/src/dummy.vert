@@ -1,5 +1,11 @@
 #version 450
 
+layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 View;
+    mat4 Projection;
+    mat4 ViewProjection;
+} GfScene;
+
 layout(location = 0) out vec2 uvs;
 
 vec2 positions[6] = vec2[](
@@ -33,6 +39,6 @@ vec2 pUVs[6] = vec2[](
 );
 
 void main() {
-    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    gl_Position = GfScene.ViewProjection * vec4(positions[gl_VertexIndex], 0.0, 1.0);
     uvs = pUVs[gl_VertexIndex];//colors[gl_VertexIndex];
 }

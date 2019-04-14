@@ -33,7 +33,7 @@ GF_DEFINE_BASE_CTOR(GfSamplerState)
 
 void GfSamplerState::Create(const GfRenderContext& kCtxt)
 {
-	if (IsInitialised()) 
+	if (!IsGPUReady()) 
 	{
 		if (!Plat().CreateRHI(kCtxt)) 
 		{

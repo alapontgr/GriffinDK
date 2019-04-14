@@ -205,7 +205,7 @@ void TestApp::CreateMaterialsAndParamSets()
 
 	// Prepare parameter layout
 	GfShaderAccessMask uiAccessMask(EShaderStageFlags::Fragment);
-	m_kParamLayout.DefineParameter(EParamaterSlotType::SampledTextured, uiAccessMask, 0);
+	m_kParamLayout.DefineParameter(EParamaterSlotType::CombinedTextureSampler, uiAccessMask, 0);
 	m_kParamLayout.Create(m_kContext);
 
 	// Define material
@@ -221,7 +221,7 @@ void TestApp::CreateMaterialsAndParamSets()
 	m_kMaterialT.Create(m_kContext);
 
 	// Prepare uniform factory
-	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::SampledTextured, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::CombinedTextureSampler, 1);
 	m_kUniformFactory.SetMaxAllocatedParamSets(16);
 	m_kUniformFactory.Create(m_kContext);
 
@@ -262,6 +262,7 @@ void TestApp::CreateResources()
 	m_kPerFrameCB.BindBuffer(kRange);
 
 	////////////////////////////////////////////////////////////////////////////////
+	// Init texture
 	s32 siW, siH, siComp;
 	m_pTestTextureData = LoadTexture("Textures/uv_test.png", siW, siH, siComp);
 	
@@ -270,7 +271,20 @@ void TestApp::CreateResources()
 	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::ETexture2DFlags::Tilable);
 	m_kTesTexture.Create(m_kContext);
 
-	m_kParamSet.BindResource(0, &m_kTesTexture);
+	////////////////////////////////////////////////////////////////////////////////
+	// Sampler
+
+	m_kSampler.SetAddrU(ETexAddressMode::Repeat);
+	m_kSampler.SetAddrV(ETexAddressMode::Repeat);
+	m_kSampler.SetAddrW(ETexAddressMode::Repeat);
+	m_kSampler.Create(m_kContext);
+
+	////////////////////////////////////////////////////////////////////////////////
+	// Bind
+
+	m_kCombinedSamplerTexture.Init(&m_kSampler, &m_kTesTexture);
+
+	m_kParamSet.BindResource(0, &m_kCombinedSamplerTexture);
 	m_kParamSet.Update(m_kContext);
 }
 

@@ -60,6 +60,8 @@ private:
 	GfMaterialParamSet	m_kParamSet;
 
 	GfConstantBuffer	m_kPerFrameCB;
+	GfSamplerState		m_kSampler;
+	GfCombinedSamplerTexture m_kCombinedSamplerTexture;
 	GfTexture2D			m_kTesTexture;
 	GfUniquePtr<char[]>	m_pTestTextureData;
 

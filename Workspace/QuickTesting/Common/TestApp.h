@@ -35,6 +35,8 @@ private:
 
 	void Render(GfCmdBuffer& kCmdBuffer);
 
+	void Shutdown();
+
 	void DoTransferOperations(GfCmdBuffer& kCmdBuffer);
 
 	void CreateCmdBuffers();

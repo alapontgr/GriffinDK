@@ -11,6 +11,10 @@
 #define __GFMEMORYBASE_H__
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <new.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
 template <typename T, typename AlignT>
 GF_FORCEINLINE T* GfAlign(T* pBase, AlignT uiAlign = 16)
 {
@@ -39,6 +43,9 @@ public:
 
 	template<typename T, typename... Args>
 	static T* New(Args... args);
+
+	template<typename T>
+	static void Delete(T* pObj);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +55,19 @@ T* GfDefaultAllocator::New(Args... args)
 {
 	void* pMem(GfDefaultAllocator::Alloc(sizeof(T), alignof(T)));
 	GF_ASSERT(pMem, "Failed to allocate memory");
-	return new (pMem) T(args);
+	return new (pMem) T(args...);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+void GfDefaultAllocator::Delete(T* pObj)
+{
+	if (pObj) 
+	{
+		pObj->~T();
+		Free(pObj);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@ project "QuickTesting"
 
 	links {
 		"GfCore",
+		"GfInput",
 		"GfFile",
 		"GfEntry",
 		"GfRender",

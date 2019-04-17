@@ -52,6 +52,7 @@ groups["Core"] =
 		"GfMemory",
 		"GfEntry",
 		"GfRender",
+		"GfInput",
 		"GfFile",
 	}
 

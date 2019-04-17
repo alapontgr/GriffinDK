@@ -10,6 +10,7 @@
 // Includes
 
 #include "QuickTesting/Common/TestApp.h"
+#include "GfInput/Common/GfInput.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
@@ -106,6 +107,8 @@ void TestApp::Init()
 	kWindowInit.m_szWindowName = "TestGriffinApp";
 	m_kWindow.Init(kWindowInit);
 
+	GfInput::Init();
+
 	// Init the render context
 	m_kContext.Init(&m_kWindow);
 	////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +131,9 @@ void TestApp::Update()
 	f64 dCurrTime = GfTime::GetTimeInSeconds();
 	f32 fElapsedTime = (f32)(dCurrTime - s_dLastFrameTime);
 	s_dLastFrameTime = dCurrTime;
-	
+
+	GfInput::Update();
+
 	static f32 s_fDeg(0.0f);
 
 	s_fDeg += fElapsedTime * 45.0f;
@@ -202,6 +207,13 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 
 	// End render pass
 	m_kRenderPass.EndPass(kCmdBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void TestApp::Shutdown()
+{
+	GfInput::Shutdown();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

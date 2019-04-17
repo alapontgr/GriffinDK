@@ -10,6 +10,7 @@
 // Includes
 
 #include "GfRender/Common/GfWindow.h"
+#include "GfInput/Common/GfInput.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -33,6 +34,8 @@ LRESULT CALLBACK WindowProc(
 	}
 	break;
 	}
+
+	GfInput_Platform::HandleInput(message, wParam, lParam);
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }

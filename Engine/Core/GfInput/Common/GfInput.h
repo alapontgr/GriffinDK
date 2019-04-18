@@ -16,6 +16,7 @@
 
 #include "GfMemory/Common/GfMemoryBase.h"
 #include "GfInput/Common/GfMouse.h"
+#include "GfInput/Common/GfKeyboard.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,13 +42,19 @@ public:
 
 	static bool IsMouseAvailable();
 
+	static bool IsKeyboardAvailable();
+
 	static GfMouse* GetMousePtr();
+
+	static GfKeyboard* GetKeyboardPtr();
+
 
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
 	static GfMouse* ms_pActiveMouse;
+	static GfKeyboard* ms_pActiveKeyboard;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

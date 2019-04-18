@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfMouse* GfInput::ms_pActiveMouse = nullptr;
+GfKeyboard* GfInput::ms_pActiveKeyboard = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +24,11 @@ void GfInput::Init()
 	{
 		ms_pActiveMouse = GfInputAlloc::New<GfMouse>();
 	}
+	if (GfInput_Platform::IsKeyBoardPresent()) 
+	{
+		ms_pActiveKeyboard = GfInputAlloc::New<GfKeyboard>();
+	}
+		
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,6 +40,10 @@ void GfInput::Shutdown()
 		GfInputAlloc::Delete<GfMouse>(ms_pActiveMouse);
 		ms_pActiveMouse = nullptr;
 	}
+	if (ms_pActiveKeyboard) 
+	{
+		GfInputAlloc::Delete<GfKeyboard>(ms_pActiveKeyboard);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +53,10 @@ void GfInput::Update()
 	if (ms_pActiveMouse)
 	{
 		ms_pActiveMouse->Update();
+	}
+	if (ms_pActiveKeyboard) 
+	{
+		ms_pActiveKeyboard->Update();
 	}
 }
 
@@ -55,9 +69,23 @@ bool GfInput::IsMouseAvailable()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+bool GfInput::IsKeyboardAvailable()
+{
+	return ms_pActiveKeyboard != nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfMouse* GfInput::GetMousePtr()
 {
 	return ms_pActiveMouse;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfKeyboard* GfInput::GetKeyboardPtr()
+{
+	return ms_pActiveKeyboard;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

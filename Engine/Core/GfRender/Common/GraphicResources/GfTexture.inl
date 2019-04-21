@@ -1,0 +1,97 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
+//	Date: 	2019/04/21
+//	File: 	GfTexture.inl
+//
+//	Copyright (c) 2018 (See README.md)
+//
+////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFTEXTURE_INL__
+#define __GFTEXTURE_INL__
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatform()
+{
+	return m_kCommonPlatform;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatformC() const
+{
+	return m_kCommonPlatform;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexturedResource::GetMipMapCount() const
+{
+	return m_uiMips;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE ETextureFormat::Type GfTexturedResource::GetFormat() const
+{
+	return m_eFormat;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsUsageValid(ETextureUsageBits::Type eUsage) const
+{
+	return m_uiUsage.IsEnable(eUsage);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsMappable() const
+{
+	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Mappable);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsDepthBuffer() const
+{
+	return m_uiTextureFlags.IsEnable(EPrivateFlags::DepthBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsStencilBuffer() const
+{
+	return m_uiTextureFlags.IsEnable(EPrivateFlags::StencilBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsTilable() const
+{
+	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Tilable);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexturedResource::GetWidth() const
+{
+	return m_uiWidth;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexturedResource::GetHeight() const
+{
+	return m_uiHeight;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfTexture2D::LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
+{
+	m_kPlatform.LoadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+#endif // __GFTEXTURE_INL__

@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GfCore/Common/GfCoreMinimal.h"
-#include "GfRender/Common/GraphicResources/GfGraphicResourceBase.h"
+#include "GfRender/Common/GraphicResources/GfTexture.h"
 
 #include GF_SOLVE_PLATFORM_HEADER_EXT(GfRender, GraphicResources/GfTextureView)
 

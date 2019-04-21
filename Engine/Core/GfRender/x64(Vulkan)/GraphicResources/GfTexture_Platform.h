@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2019/03/31
-//	File: 	GfGraphicResourceBase_Platform.h
+//	Date: 	2019/02/18
+//	File: 	GfTexture_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFGRAPHICRESOURCEBASE_PLATFORM_H__
-#define __GFGRAPHICRESOURCEBASE_PLATFORM_H__
+#ifndef __GFTEXTURE_PLATFORM_H__
+#define __GFTEXTURE_PLATFORM_H__
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "GfRender/Common/GfGraphicsSDK.h"
@@ -18,6 +18,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfTexture2D;
+class GfCmdBuffer;
+class GfBuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +35,7 @@ public:
 
 	bool CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo);
 
-	bool AllocateImageMemoryRHI(const GfRenderContext &kCtx,VmaAllocationCreateInfo* pAllocInfo);
+	bool AllocateImageMemoryRHI(const GfRenderContext &kCtx, VmaAllocationCreateInfo* pAllocInfo);
 
 	bool BindImageWithMemoryRHI(const GfRenderContext &kCtx);
 
@@ -56,6 +59,26 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfTexture2D_Platform 
+{
+	GF_DECLARE_PLATFORM_MEMBERS(GfTexture2D);
+public:
+
+	bool CreateRHI(const GfRenderContext& kCtx);
+
+	void DestroyRHI(const GfRenderContext& kCtx);
+
+private:
+
+	bool CreateImageRHI(const GfRenderContext &kCtx);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 GF_FORCEINLINE VkImage GfTexturedResource_Platform::GetImage() const
 {
 	return m_pImage;
@@ -69,4 +92,4 @@ GF_FORCEINLINE VkImageAspectFlags GfTexturedResource_Platform::GetAspectMask() c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFGRAPHICRESOURCEBASE_PLATFORM_H__
+#endif // __GFTEXTURE_PLATFORM_H__

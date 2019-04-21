@@ -2,20 +2,87 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2019/02/18
-//	File: 	GfTexture2D.cpp
+//	File: 	GfTexture.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfRender/Common/GraphicResources/GfTexture2D.h"
+#include "GfRender/Common/GraphicResources/GfTexture.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfTexturedResource::GfTexturedResource()
+	: m_kCommonPlatform(*this)
+	, m_uiUsage(0)
+	, m_uiMips(1)
+	, m_eFormat(ETextureFormat::Undefined)
+	, m_uiTextureFlags(0)
+	, m_uiWidth(0)
+	, m_uiHeight(0)
+{
+	m_uiGraphicResFlags.Enable(EGraphicResFlags::TexturedResource);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexturedResource::SetUsage(const ETextureUsageBits::GfMask& uiUsage)
+{
+	m_uiUsage = uiUsage;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexturedResource::SetFormat(ETextureFormat::Type eFormat)
+{
+	// Detect depth buffer
+	if (eFormat >= ETextureFormat::D16_UNorm && eFormat <= ETextureFormat::D32_SFloat_S8_UInt)
+	{
+		if (!m_uiUsage.IsEnable(ETextureUsageBits::DepthStencilAttachment))
+		{
+			// Invalid configuration of texture
+			return;
+		}
+
+		// Is depth buffer?
+		if (eFormat != ETextureFormat::S8_UInt)
+		{
+			m_uiTextureFlags |= EPrivateFlags::DepthBuffer;
+		}
+		// Is stencil buffer?
+		if (eFormat > ETextureFormat::D32_SFloat)
+		{
+			m_uiTextureFlags |= EPrivateFlags::StencilBuffer;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexturedResource::SetMips(u32 uiMipsCount)
+{
+	m_uiMips = uiMipsCount;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexturedResource::SetTextureFlags(const GfFlagsMask& uiFlags)
+{
+	m_uiTextureFlags = uiFlags;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfTexturedResource::SetDimensions(u32 uiWidth, u32 uiHeight)
+{
+	m_uiWidth = uiWidth;
+	m_uiHeight = uiHeight;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfTexture2D)
-	, m_uiWidth(0)
-	, m_uiheight(0)
 {
 	// Set invalid type as this is not a valid resource to be bound
 	m_eResourceType = EParamaterSlotType::Invalid;
@@ -34,9 +101,8 @@ bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
 		SetMips(uiMips);
 		SetUsage(uiUsage);
 		SetFormat(eFormat);
-		m_uiWidth = uiWidth;
-		m_uiheight = uiHeight;
-	
+		SetDimensions(uiWidth, uiHeight);
+
 		if (eFormat >= ETextureFormat::D16_UNorm && eFormat <= ETextureFormat::D32_SFloat_S8_UInt)
 		{
 			if (!(uiUsage & ETextureUsageBits::DepthStencilAttachment))

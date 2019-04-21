@@ -24,11 +24,7 @@ GF_DEFINE_PLATFORM_CTOR(GfTexture2D)
 
 bool GfTexture2D_Platform::CreateRHI(const GfRenderContext& kCtx)
 {
-	if (CreateImageRHI(kCtx)) 
-	{
-		return CreateImageViewRHI(kCtx);
-	}
-	return false;
+	return CreateImageRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,37 +74,6 @@ bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
 	}
 	
 	return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfTexture2D_Platform::CreateImageViewRHI(const GfRenderContext &kCtx)
-{
-	VkImageViewCreateInfo kImageViewInfo{};
-	kImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	kImageViewInfo.flags = 0; // TODO?
-	kImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; // TODO: Add support for array
-	kImageViewInfo.format = ConvertTextureFormat(m_kBase.m_eFormat);
-	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
-	u32 uiAspectMask = 0;
-	if (m_kBase.IsDepthBuffer()) 
-	{
-		uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
-	}
-	if (m_kBase.IsStencilBuffer())
-	{
-		uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-	}
-	if (!uiAspectMask)
-	{
-		uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	}
-	kImageViewInfo.subresourceRange.aspectMask = uiAspectMask;
-	kImageViewInfo.subresourceRange.baseMipLevel = 0;	// TODO: Any cases where we may want to limit the mips?
-	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiMips;
-	kImageViewInfo.subresourceRange.baseArrayLayer = 0; // TODO: Support for arrays of texture-arrays
-	kImageViewInfo.subresourceRange.layerCount = 1;
-	return m_kBase.GetSharedPlatform().CreateImageViewRHI(kCtx, &kImageViewInfo);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

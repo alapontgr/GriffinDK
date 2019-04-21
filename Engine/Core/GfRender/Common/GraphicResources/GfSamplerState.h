@@ -17,6 +17,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfTextureView;
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfSamplerState : public GfGraphicsResourceBase
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfSamplerState);
@@ -100,15 +104,15 @@ public:
 
 	GfCombinedSamplerTexture();
 
-	void Init(const GfSamplerState* pSampler, const GfTexturedResource* pTexture);
+	void Init(const GfSamplerState* pSampler, const GfTextureView* pView);
 
 	const GfSamplerState* GetSampler() const;
-	const GfTexturedResource* GetTexture() const;
+	const GfTextureView* GetView() const;
 
 private:
 
 	const GfSamplerState*		m_pSampler;
-	const GfTexturedResource* m_pTexture;
+	const GfTextureView*		m_pTextureView;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,9 +124,9 @@ GF_FORCEINLINE const GfSamplerState* GfCombinedSamplerTexture::GetSampler() cons
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE const GfTexturedResource* GfCombinedSamplerTexture::GetTexture() const
+GF_FORCEINLINE const GfTextureView* GfCombinedSamplerTexture::GetView() const
 {
-	return m_pTexture;
+	return m_pTextureView;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

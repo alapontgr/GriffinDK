@@ -184,46 +184,7 @@ static const VkLogicOp g_pLogicOpConverter[] =
 	VK_LOGIC_OP_SET,
 };
 
-////////////////////////////////////////////////////////////////////////////////
 
-static const VkImageViewType g_pViewTypeConverter[] = 
-{
-	VK_IMAGE_VIEW_TYPE_1D,
-	VK_IMAGE_VIEW_TYPE_2D,
-	VK_IMAGE_VIEW_TYPE_3D,
-	VK_IMAGE_VIEW_TYPE_CUBE,
-	VK_IMAGE_VIEW_TYPE_1D_ARRAY,
-	VK_IMAGE_VIEW_TYPE_2D_ARRAY,
-	VK_IMAGE_VIEW_TYPE_CUBE_ARRAY
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-static const VkFilter g_pTexFilterConverter[] =
-{
-	VK_FILTER_NEAREST,
-	VK_FILTER_LINEAR,
-	VK_FILTER_CUBIC_IMG,
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-static const VkSamplerMipmapMode g_pSamplerMipMapModeConverter[] = 
-{
-	VK_SAMPLER_MIPMAP_MODE_NEAREST,
-	VK_SAMPLER_MIPMAP_MODE_LINEAR,
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-static const VkSamplerAddressMode g_pTexAddressModeConverter[] =
-{
-	VK_SAMPLER_ADDRESS_MODE_REPEAT,
-	VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
-	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
-	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-	VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE,
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -323,34 +284,6 @@ static GF_FORCEINLINE VkVertexInputRate ConvertInputRate(EVertexInputRate::Type 
 static GF_FORCEINLINE VkLogicOp ConvertBlendLogicOp(EBlendLogicOp::Type eLogicOp) 
 {
 	return g_pLogicOpConverter[eLogicOp];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkImageViewType ConvertViewType(ETextureViewType::Type eViewType) 
-{
-	return g_pViewTypeConverter[eViewType];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkFilter ConvertTexFilter(ETexFilter::Type eTexFilter)
-{
-	return g_pTexFilterConverter[eTexFilter];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkSamplerMipmapMode ConvertTexMipMapMode(ESamplerMipMapMode::Type eMipMapMode) 
-{
-	return g_pSamplerMipMapModeConverter[eMipMapMode];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkSamplerAddressMode ConvertTexAddressMode(ETexAddressMode::Type eTexAddressMode) 
-{
-	return g_pTexAddressModeConverter[eTexAddressMode];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

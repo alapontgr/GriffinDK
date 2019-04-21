@@ -35,10 +35,6 @@ public:
 
 	bool IsInitialised() const;
 
-	void MarkAsDestroyed();
-
-	void MarkAsGPUReady();
-
 protected:
 
 	enum EGraphicResFlags : u32 
@@ -50,6 +46,12 @@ protected:
 		////////////////////////////////////////////////////////////////////////////////
 		End					= 4,
 	};
+
+	void MarkAsDestroyed();
+
+	void MarkAsGPUReady();
+
+	void MarkAsInitialised();
 
 	EParamaterSlotType::Type m_eResourceType;
 	GfBitMask<u32>	m_uiGraphicResFlags;
@@ -120,14 +122,52 @@ class GfTexturedResource : public GfGraphicsResourceBase
 {
 public:
 
+	enum ETexture2DFlags : u16
+	{
+		// User flags
+		Mappable = 1 << 0,
+		Tilable = 1 << 1,
+	};
+	using GfFlagsMask = GfBitMask<u16>;
+
 	GfTexturedResource();
 
 	GfTexturedResource_Platform& GetSharedPlatform();
 	const GfTexturedResource_Platform& GetSharedPlatformC() const;
 
+	u32 GetMipMapCount() const;
+
+	ETextureFormat::Type GetFormat() const;
+
+	bool IsUsageValid(ETextureUsageBits::Type eUsage) const;
+
+	bool IsMappable() const;
+
+	bool IsDepthBuffer() const;
+
+	bool IsStencilBuffer() const;
+
+	bool IsTilable() const;
+
 protected:
 
+	enum EPrivateFlags : u16
+	{
+		// Continue from public flags
+		DepthBuffer = (1 << 2),
+		StencilBuffer = (1 << 3),
+	};
+
+	void SetUsage(const ETextureUsageBits::GfMask& uiUsage);
+	void SetFormat(ETextureFormat::Type eFormat);
+	void SetMips(u32 uiMipsCount);
+	void SetTextureFlags(const GfFlagsMask& uiFlags);
+
 	GfTexturedResource_Platform m_kCommonPlatform;
+	ETextureUsageBits::GfMask	m_uiUsage;
+	u32							m_uiMips;
+	ETextureFormat::Type		m_eFormat;
+	GfFlagsMask					m_uiTextureFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,6 +182,55 @@ GF_FORCEINLINE GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatfor
 GF_FORCEINLINE const GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatformC() const
 {
 	return m_kCommonPlatform;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfTexturedResource::GetMipMapCount() const
+{
+	return m_uiMips;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE ETextureFormat::Type GfTexturedResource::GetFormat() const
+{
+	return m_eFormat;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsUsageValid(ETextureUsageBits::Type eUsage) const
+{
+	return m_uiUsage.IsEnable(eUsage);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsMappable() const
+{
+	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Mappable);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsDepthBuffer() const
+{
+	return m_uiTextureFlags.IsEnable(EPrivateFlags::DepthBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsStencilBuffer() const
+{
+	return m_uiTextureFlags.IsEnable(EPrivateFlags::StencilBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfTexturedResource::IsTilable() const
+{
+	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Tilable);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

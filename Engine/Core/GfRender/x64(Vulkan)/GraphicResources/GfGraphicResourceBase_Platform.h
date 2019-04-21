@@ -23,6 +23,7 @@ class GfRenderContext;
 
 class GfTexturedResource_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfTexturedResource);
 public:
 
 	friend class GfTexturedResource;
@@ -35,22 +36,17 @@ public:
 
 	bool BindImageWithMemoryRHI(const GfRenderContext &kCtx);
 
-	bool CreateImageViewRHI(const GfRenderContext &kCtx, VkImageViewCreateInfo* pViewInfo);
-
 	void DestroyRHI(const GfRenderContext &kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
 
 	VkImage GetImage() const;
 
-	VkImageView GetView() const;
-
 	VkImageAspectFlags GetAspectMask() const;
 
 private:
 
 	VkImage				m_pImage;
-	VkImageView			m_pImageView;
 	VkImageAspectFlags	m_uiAspectMask;
 
 	// Vma Resources
@@ -64,14 +60,6 @@ GF_FORCEINLINE VkImage GfTexturedResource_Platform::GetImage() const
 {
 	return m_pImage;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkImageView GfTexturedResource_Platform::GetView() const
-{
-	return m_pImageView;
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 

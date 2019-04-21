@@ -45,14 +45,14 @@ void FillUniformBufferBinding(
 ////////////////////////////////////////////////////////////////////////////////
 
 void FillTextureBinding(
-	const GfTexturedResource* pTexRes,
+	const GfTextureView* pView,
 	VkDescriptorImageInfo* pImageInfosPivot,
 	VkWriteDescriptorSet* pWriteSetsPivot,
 	VkDescriptorSet pSet, u32 uiBindSlot)
 {
-	GF_ASSERT(pTexRes->IsGPUReady(), "Texture not created");
+	GF_ASSERT(pView->IsGPUReady(), "Texture view not created");
 	pImageInfosPivot->sampler = nullptr;
-	pImageInfosPivot->imageView = pTexRes->GetSharedPlatformC().GetView();
+	pImageInfosPivot->imageView = pView->Plat().GetView();
 	pImageInfosPivot->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // The texture must be initialized at this point
 
 	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -99,11 +99,11 @@ void FillCombinedSamplerTextureStateBinding(
 	VkWriteDescriptorSet* pWriteSetsPivot,
 	VkDescriptorSet pSet, u32 uiBindSlot)
 {
-	GF_ASSERT(pCombinedSamplerTexture->GetTexture()->IsGPUReady(), "Texture not created");
+	GF_ASSERT(pCombinedSamplerTexture->GetView()->IsGPUReady(), "Texture view not created");
 	GF_ASSERT(pCombinedSamplerTexture->GetSampler()->IsGPUReady(), "Sampler not created");
 
 	pImageInfosPivot->sampler = pCombinedSamplerTexture->GetSampler()->Plat().GetSampler();
-	pImageInfosPivot->imageView = pCombinedSamplerTexture->GetTexture()->GetSharedPlatformC().GetView();
+	pImageInfosPivot->imageView = pCombinedSamplerTexture->GetView()->Plat().GetView();
 	pImageInfosPivot->imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // The texture must be initialized at this point
 
 	pWriteSetsPivot->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -331,7 +331,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 				}
 				case EParamaterSlotType::SampledTextured: 
 				{
-					const GfTexturedResource* pTexRes((const GfTexturedResource*)pParam);
+					const GfTextureView* pTexRes((const GfTextureView*)pParam);
 					FillTextureBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
 					pImageInfosPivot++;
 					pWriteSetsPivot++;

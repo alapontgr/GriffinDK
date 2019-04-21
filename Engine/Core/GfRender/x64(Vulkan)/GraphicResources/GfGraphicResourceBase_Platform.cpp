@@ -14,9 +14,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfTexturedResource_Platform::GfTexturedResource_Platform()
-	: m_pImage(VK_NULL_HANDLE)
-	, m_pImageView(VK_NULL_HANDLE)
+GF_DEFINE_PLATFORM_CTOR(GfTexturedResource)
+	, m_pImage(VK_NULL_HANDLE)
 	, m_uiAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
 	, m_pAlloc(nullptr)
 {
@@ -29,6 +28,20 @@ bool GfTexturedResource_Platform::CreateImageRHI(const GfRenderContext &kCtx, Vk
 	if (vkCreateImage(kCtx.Plat().m_pDevice, pTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)
 	{
 		return false;
+	}
+	// Assign aspect mask
+	m_uiAspectMask = 0;
+	if (m_kBase.IsDepthBuffer())
+	{
+		m_uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	if (m_kBase.IsStencilBuffer())
+	{
+		m_uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+	if (!m_uiAspectMask)
+	{
+		m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
 	return true;
 }
@@ -57,23 +70,8 @@ bool GfTexturedResource_Platform::BindImageWithMemoryRHI(const GfRenderContext &
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexturedResource_Platform::CreateImageViewRHI(const GfRenderContext &kCtx, VkImageViewCreateInfo* pViewInfo)
-{
-	m_uiAspectMask = pViewInfo->subresourceRange.aspectMask;
-	pViewInfo->image = m_pImage;
-	VkResult siResult = vkCreateImageView(kCtx.Plat().m_pDevice, pViewInfo, nullptr, &m_pImageView);
-	return siResult == VK_SUCCESS;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void GfTexturedResource_Platform::DestroyRHI(const GfRenderContext &kCtx)
 {
-	if (m_pImageView)
-	{
-		vkDestroyImageView(kCtx.Plat().m_pDevice, m_pImageView, nullptr);
-		m_pImageView = nullptr;
-	}
 	if (m_pImage)
 	{
 		vkDestroyImage(kCtx.Plat().m_pDevice, m_pImage, nullptr);

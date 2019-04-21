@@ -37,8 +37,6 @@ private:
 
 	bool CreateImageRHI(const GfRenderContext &kCtx);
 
-	bool CreateImageViewRHI(const GfRenderContext &kCtx);
-
 	////////////////////////////////////////////////////////////////////////////////
 
 	void LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset);

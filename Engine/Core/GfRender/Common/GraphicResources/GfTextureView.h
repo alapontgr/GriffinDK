@@ -18,6 +18,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfExternTexView : public GfExternTexView_Platform
+{
+	ETextureViewType::Type m_eViewType;
+	u32 m_uiBaseLod;
+	u32 m_uiLodCount;
+	u32 m_uiBaseLayerIdx;
+	u32 m_uiLayerCount;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfTextureView : public GfGraphicsResourceBase
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfTextureView);
@@ -26,6 +37,9 @@ public:
 	GfTextureView();
 
 	void Init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType); // Required
+
+	// Init the Texture view with externally created resources (i.e. backbuffer)
+	void ExternalInit(const GfExternTexView& kExternInitParams);
 
 	void SetLodRange(u32 uiBaseLod, u32 uiLodCount);
 

@@ -27,6 +27,23 @@ GfTexturedResource::GfTexturedResource()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfTexturedResource::ExternalInit(const GfExternTexInit& kInitParams)
+{
+	bool bInitialised(IsInitialised());
+	if (!bInitialised || IsExternallyInitialized())
+	{
+		m_uiWidth = kInitParams.m_uiWidth;
+		m_uiHeight = kInitParams.m_uiHeight;
+		m_eFormat = kInitParams.m_eFormat;
+		m_kCommonPlatform.ExternalInitPlat(kInitParams);
+		MarkAsExternallyInitiailized();
+		MarkAsInitialised();
+		MarkAsGPUReady();
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfTexturedResource::SetUsage(const ETextureUsageBits::GfMask& uiUsage)
 {
 	m_uiUsage = uiUsage;
@@ -145,9 +162,13 @@ void GfTexture2D::Create(const GfRenderContext& kCtx)
 
 void GfTexture2D::Destroy(const GfRenderContext& kCtx)
 {
-	m_kPlatform.DestroyRHI(kCtx);
-	m_uiTextureFlags.Reset();
-	MarkAsDestroyed();
+	// Destroy only if needed. Do not worry if the texture was initialized with an external source
+	if (IsGPUReady() && !IsExternallyInitialized())
+	{
+		m_kPlatform.DestroyRHI(kCtx);
+		m_uiTextureFlags.Reset();
+		MarkAsDestroyed();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

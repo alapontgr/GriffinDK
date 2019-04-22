@@ -24,6 +24,13 @@ class GfBuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfExternTexInit_Platform
+{
+	VkImage	m_pExternalImage;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfTexturedResource_Platform
 {
 	GF_DECLARE_PLATFORM_MEMBERS(GfTexturedResource);
@@ -32,6 +39,8 @@ public:
 	friend class GfTexturedResource;
 
 	GfTexturedResource_Platform();
+
+	void ExternalInitPlat(const GfExternTexInit_Platform& kInitParams);
 
 	bool CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo);
 

@@ -21,6 +21,13 @@ GF_DEFINE_PLATFORM_CTOR(GfTextureView)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfTextureView_Platform::ExternInitPlat(const GfExternTexView_Platform& kInitParams)
+{
+	m_pImageView = kInitParams.m_pView;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool GfTextureView_Platform::CreateRHI(const GfRenderContext& kCtx)
 {
  	const GfTexturedResource* pTexture(m_kBase.m_pTexture);

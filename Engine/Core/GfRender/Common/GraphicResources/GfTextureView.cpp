@@ -38,6 +38,23 @@ void GfTextureView::Init(const GfTexturedResource* pTexture, ETextureViewType::T
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfTextureView::ExternalInit(const GfExternTexView& kExternInitParams)
+{
+	if (!IsInitialised() || IsExternallyInitialized()) 
+	{
+		m_uiBaseLod = kExternInitParams.m_uiBaseLod;
+		m_uiLodCount = kExternInitParams.m_uiLodCount;
+		m_uiBaseLayerIdx = kExternInitParams.m_uiBaseLayerIdx;
+		m_uiLayerCount = kExternInitParams.m_uiLayerCount;
+		m_kPlatform.ExternInitPlat(kExternInitParams);
+		MarkAsInitialised();
+		MarkAsGPUReady();
+		MarkAsExternallyInitiailized();
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfTextureView::SetLodRange(u32 uiBaseLod, u32 uiLodCount)
 {
 	if (!IsGPUReady()) 
@@ -75,7 +92,7 @@ void GfTextureView::Create(const GfRenderContext& kCtx)
 
 void GfTextureView::Destroy(const GfRenderContext& kCtx)
 {
-	if (IsGPUReady()) 
+	if (IsGPUReady() && !IsExternallyInitialized()) 
 	{
 		m_kPlatform.DestroyRHI(kCtx);
 	}

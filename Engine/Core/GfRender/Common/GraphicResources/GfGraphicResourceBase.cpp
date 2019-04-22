@@ -41,6 +41,13 @@ void GfGraphicsResourceBase::MarkAsInitialised()
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfGraphicsResourceBase::MarkAsExternallyInitiailized()
+{
+	m_uiGraphicResFlags.Enable(EGraphicResFlags::ExternallyInitialised);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfBufferedResource::GfBufferedResource()
 {
 	m_uiGraphicResFlags.Enable(EGraphicResFlags::BufferedResource);

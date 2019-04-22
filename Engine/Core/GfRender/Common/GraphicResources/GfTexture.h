@@ -21,6 +21,15 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfExternTexInit : public GfExternTexInit_Platform 
+{
+	u32						m_uiWidth;
+	u32						m_uiHeight;
+	ETextureFormat::Type	m_eFormat;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Base class for texture types
 class GfTexturedResource : public GfGraphicsResourceBase
 {
@@ -35,6 +44,9 @@ public:
 	using GfFlagsMask = GfBitMask<u16>;
 
 	GfTexturedResource();
+
+	// Init the Texture view with externally created resources (i.e. backbuffer)
+	void ExternalInit(const GfExternTexInit& kInitParams);
 
 	GfTexturedResource_Platform& GetSharedPlatform();
 	const GfTexturedResource_Platform& GetSharedPlatformC() const;
@@ -64,7 +76,6 @@ protected:
 		// Continue from public flags
 		DepthBuffer = (1 << 2),
 		StencilBuffer = (1 << 3),
-		ExternallyInitialised = (1 << 4),
 	};
 
 	void SetUsage(const ETextureUsageBits::GfMask& uiUsage);

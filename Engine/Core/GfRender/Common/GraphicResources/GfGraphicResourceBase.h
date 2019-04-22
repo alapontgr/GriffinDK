@@ -33,16 +33,19 @@ public:
 
 	bool IsInitialised() const;
 
+	bool IsExternallyInitialized() const;
+
 protected:
 
 	enum EGraphicResFlags : u32 
 	{
-		GPUReady			= 1<<0,
-		Initialised			= 1<<1,
-		BufferedResource	= 1<<2,
-		TexturedResource	= 1<<3,
+		GPUReady				= 1<<0,
+		Initialised				= 1<<1,
+		BufferedResource		= 1<<2,
+		TexturedResource		= 1<<3,
+		ExternallyInitialised	= 1<<4,
 		////////////////////////////////////////////////////////////////////////////////
-		End					= 4,
+		End						= 5,
 	};
 
 	void MarkAsDestroyed();
@@ -50,6 +53,8 @@ protected:
 	void MarkAsGPUReady();
 
 	void MarkAsInitialised();
+
+	void MarkAsExternallyInitiailized();
 
 	EParamaterSlotType::Type m_eResourceType;
 	GfBitMask<u32>	m_uiGraphicResFlags;
@@ -88,6 +93,13 @@ GF_FORCEINLINE bool GfGraphicsResourceBase::IsGPUReady() const
 GF_FORCEINLINE bool GfGraphicsResourceBase::IsInitialised() const
 {
 	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::Initialised);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool GfGraphicsResourceBase::IsExternallyInitialized() const
+{
+	return m_uiGraphicResFlags.IsEnable(EGraphicResFlags::ExternallyInitialised);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

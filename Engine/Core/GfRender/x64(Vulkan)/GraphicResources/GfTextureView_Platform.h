@@ -15,10 +15,19 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfExternTexView_Platform 
+{
+	VkImageView m_pView;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfTextureView_Platform 
 {
 	GF_DECLARE_PLATFORM_MEMBERS(GfTextureView);
 public:
+
+	void ExternInitPlat(const GfExternTexView_Platform& kInitParams);
 
 	bool CreateRHI(const GfRenderContext& kCtx);
 

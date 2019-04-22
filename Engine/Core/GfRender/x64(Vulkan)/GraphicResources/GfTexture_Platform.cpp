@@ -25,6 +25,13 @@ GF_DEFINE_PLATFORM_CTOR(GfTexturedResource)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfTexturedResource_Platform::ExternalInitPlat(const GfExternTexInit_Platform& kInitParams)
+{
+	m_pImage = kInitParams.m_pExternalImage;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 bool GfTexturedResource_Platform::CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo)
 {
 	if (vkCreateImage(kCtx.Plat().m_pDevice, pTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)

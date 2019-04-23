@@ -16,20 +16,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfWindow;
-
-////////////////////////////////////////////////////////////////////////////////
-
 class GfRenderContext
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfRenderContext)
 public:
 
-	GfRenderContext();
+	friend class GfWindow;
 
-	// Initialize with the first window ever created. Future windows will need a compatible surface
-	void PreInit(GfWindow* pWindow);
-	void Init(GfWindow* pWindow);
+	GfRenderContext();
 
 	void Shutdown();
 
@@ -42,6 +36,10 @@ private:
 		PreInitialised	= 1<<0,
 		Initialised		= 1<<1,
 	};
+
+	// Initialize with the first window ever created. Future windows will need a compatible surface
+	void PreInit(GfWindow* pWindow);
+	void Init(GfWindow* pWindow);
 
 	// Used Families
 	u32							m_pAvailableFamilies[GfRenderContextFamilies::Count];

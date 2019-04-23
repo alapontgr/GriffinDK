@@ -28,12 +28,12 @@ GF_DEFINE_PLATFORM_CTOR(GfRenderPass)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx)
+void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
 {
 	// Description of the whole render pass
 	VkAttachmentDescription kAttachmentsDesc{};
 	kAttachmentsDesc.flags = 0;
-	kAttachmentsDesc.format = kCtx.Plat().GetSwapchainFormat();
+	kAttachmentsDesc.format = pWindow->Plat().GetSwapchainFormat();
 	kAttachmentsDesc.samples = VK_SAMPLE_COUNT_1_BIT;
 	kAttachmentsDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	kAttachmentsDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -99,9 +99,8 @@ void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer)
+void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow)
 {
-	GfWindow* pWindow(kCtx.GetWindow());
 	// Begin render pass
 
 	// TODO: Refactor this
@@ -111,7 +110,7 @@ void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCm
 	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passBeginInfo.pNext = nullptr;
 	passBeginInfo.renderPass = m_pRenderPass;
-	passBeginInfo.framebuffer = m_pFramebuffers[kCtx.GetCurrentFrameIdx()];
+	passBeginInfo.framebuffer = m_pFramebuffers[pWindow->GetCurrentFrameIdx()];
 	passBeginInfo.renderArea.extent.width = pWindow->GetWidth();
 	passBeginInfo.renderArea.extent.height = pWindow->GetHeight();
 	passBeginInfo.renderArea.offset.x = 0;
@@ -156,72 +155,7 @@ void GfRenderPass_Platform::SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const G
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::ClearCurrentTargetRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor)
-{
-	// TODO: Refactor this to get rid of the barriers. This is just a temporal fix and I'll use the RenderPasses in the future
-
-	VkImageSubresourceRange kImageRange = {};
-	kImageRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	kImageRange.levelCount = 1;
-	kImageRange.layerCount = 1;
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	VkImageMemoryBarrier kBarrierPresentToClear =
-	{
-		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
-		nullptr,                                    // const void                            *pNext
-		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          srcAccessMask
-		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          dstAccessMask
-		VK_IMAGE_LAYOUT_UNDEFINED,                  // VkImageLayout                          oldLayout
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.Plat().GetCurrentBackBuffer(),                       // VkImage                  image
-		kImageRange                     // VkImageSubresourceRange                subresourceRange
-	};
-
-	VkImageMemoryBarrier kBarrierClearToPresent =
-	{
-		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // VkStructureType                        sType
-		nullptr,                                    // const void                            *pNext
-		VK_ACCESS_TRANSFER_WRITE_BIT,               // VkAccessFlags                          srcAccessMask
-		VK_ACCESS_MEMORY_READ_BIT,                  // VkAccessFlags                          dstAccessMask
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,       // VkImageLayout                          oldLayout
-		VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // VkImageLayout                          newLayout
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               srcQueueFamilyIndex
-		kCtx.GetFamilyIdx(GfRenderContextFamilies::Present),             // uint32_t                               dstQueueFamilyIndex
-		kCtx.Plat().GetCurrentBackBuffer(),                       // VkImage                  image
-		kImageRange                     // VkImageSubresourceRange                subresourceRange
-	};
-
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	vkCmdPipelineBarrier(
-		kCmdBuffer.Plat().GetCmdBuffer(),
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		0, 0, nullptr, 0, nullptr, 1, &kBarrierPresentToClear);
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	VkClearColorValue clearColor{ vClearColor.x, vClearColor.y, vClearColor.z, vClearColor.w };
-	VkClearValue clearValue = {};
-	clearValue.color = clearColor;
-
-	vkCmdClearColorImage(kCmdBuffer.Plat().GetCmdBuffer(), kCtx.Plat().GetCurrentBackBuffer(), VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &kImageRange);
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &kBarrierClearToPresent);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
+void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
 {
 	// Destroy the old one
 	if (m_pFramebuffers)
@@ -236,7 +170,6 @@ void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
 	// TODO: Refactor this to use the attachments defined as output target parameters
 
 	// REVISE
-	GfWindow* pWindow(kCtx.GetWindow());
 	VkFramebufferCreateInfo framebufferInfo{};
 	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	framebufferInfo.pNext = nullptr;
@@ -248,7 +181,7 @@ void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx)
 
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
 	{
-		VkImageView pOutView(kCtx.Plat().GetBackBufferView(i));
+		VkImageView pOutView(pWindow->GetCurrBackBufferView()->Plat().GetView());
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = &pOutView;
 		VkResult eResult = vkCreateFramebuffer(kCtx.Plat().m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);

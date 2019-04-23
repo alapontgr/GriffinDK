@@ -24,6 +24,10 @@ struct GfScissor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfWindow;
+
+////////////////////////////////////////////////////////////////////////////////
+
 class GfRenderPass_Platform 
 {
 	GF_DECLARE_PLATFORM_MEMBERS(GfRenderPass);
@@ -33,11 +37,11 @@ public:
 
 protected:
 
-	void CreateRHI(const GfRenderContext& kCtx);
+	void CreateRHI(const GfRenderContext& kCtx, const GfWindow* pWindow);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer);
+	void BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
 
 	void EndPassRHI(const GfCmdBuffer& kCmdBuffer);
 
@@ -45,13 +49,11 @@ protected:
 
 	void SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor);
 
-	void ClearCurrentTargetRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor);
-
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
-	void RecreateFramebufferRHI(const GfRenderContext& kCtx);
+	void RecreateFramebufferRHI(const GfRenderContext& kCtx, const GfWindow* pWindow);
 
 public:
 	// TODO: Revise this encapsulation

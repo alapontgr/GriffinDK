@@ -27,5 +27,7 @@
 
 #include "GfCore/Common/GfTime.h"
 
+#include "GfCore/Common/GfBitMask.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

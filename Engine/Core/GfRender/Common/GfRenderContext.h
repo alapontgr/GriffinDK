@@ -27,41 +27,26 @@ public:
 
 	GfRenderContext();
 
+	// Initialize with the first window ever created. Future windows will need a compatible surface
+	void PreInit(GfWindow* pWindow);
 	void Init(GfWindow* pWindow);
 
 	void Shutdown();
 
-	u32 GetCurrentFrameIdx() const;
-
-	Bool BeginFrame();
-
-	void EndFrame();
-
 	u32 GetFamilyIdx(GfRenderContextFamilies::Type eType) const;
-
-	GfWindow* GetWindow() const;
 
 private:
 
-	void Flip();
-
-	void OnResize();
-
-	GfWindow*					m_pWindow;
+	enum EFlags : u32 
+	{
+		PreInitialised	= 1<<0,
+		Initialised		= 1<<1,
+	};
 
 	// Used Families
 	u32							m_pAvailableFamilies[GfRenderContextFamilies::Count];
-
-	// Used as a cursor for the multi buffering of the resources of the engine
-	u32							m_uiCurrentFrameIdx;
+	GfBitMask<u32>				m_uiFlags;
 };
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE u32 GfRenderContext::GetCurrentFrameIdx() const
-{
-	return m_uiCurrentFrameIdx;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,13 +54,6 @@ GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRenderContextFamilies::Type e
 {
 	GF_ASSERT(eType >= 0 && eType < GfRenderContextFamilies::Count, "Invalid family");
 	return m_pAvailableFamilies[eType];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE GfWindow* GfRenderContext::GetWindow() const
-{
-	return m_pWindow;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

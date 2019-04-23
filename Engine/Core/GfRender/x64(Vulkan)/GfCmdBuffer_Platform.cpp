@@ -50,10 +50,11 @@ void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 
 void GfCmdBuffer_Platform::SubmitRHI(
 	const GfRenderContext& kCtx,
+	const GfWindow& kWindow,
 	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	const GfFrameSyncing& kSyncPrimitives(kCtx.Plat().GetFrameSyncPrimitives());
+	const GfFrameSyncing& kSyncPrimitives(kWindow.Plat().GetFrameSyncPrimitives());
 	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	VkSubmitInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

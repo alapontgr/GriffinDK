@@ -40,10 +40,10 @@ void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearCo
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass::Create(const GfRenderContext& kCtx)
+void GfRenderPass::Create(const GfRenderContext& kCtx, const GfWindow* pWindow)
 {
-	m_kPlatform.CreateRHI(kCtx);
-	m_kPlatform.RecreateFramebufferRHI(kCtx);
+	m_kPlatform.CreateRHI(kCtx, pWindow);
+	m_kPlatform.RecreateFramebufferRHI(kCtx, pWindow);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

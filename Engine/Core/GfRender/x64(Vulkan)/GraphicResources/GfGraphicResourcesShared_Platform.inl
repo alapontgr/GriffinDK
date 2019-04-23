@@ -255,6 +255,19 @@ static GF_FORCEINLINE VkFormat ConvertTextureFormat(ETextureFormat::Type eTextur
 	return g_pTextureFormatConverter[eTextureFormat];
 }
 
+static GF_FORCEINLINE ETextureFormat::Type ConvertTextureFormatToVkFormat(VkFormat eTextureFormat)
+{
+	for (u32 i=0;i<ETextureFormat::COUNT; ++i)
+	{
+		if (g_pTextureFormatConverter[i] == eTextureFormat) 
+		{
+			return (ETextureFormat::Type)i;
+		}
+	}
+	return ETextureFormat::Undefined;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static GF_FORCEINLINE VkImageUsageFlags ConvertTextureUsageShift(ETextureUsageShift::Type eShift)

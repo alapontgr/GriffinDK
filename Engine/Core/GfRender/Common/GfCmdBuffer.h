@@ -52,6 +52,7 @@ public:
 
 	void Submit(
 		const GfRenderContext& kCtx,
+		const GfWindow& kWindow,
 		GfRenderContextFamilies::Type eQueueType,
 		Bool bLast);
 
@@ -80,10 +81,11 @@ GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
 
 GF_FORCEINLINE void GfCmdBuffer::Submit(
 	const GfRenderContext& kCtx,
+	const GfWindow& kWindow,
 	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	m_kPlatform.SubmitRHI(kCtx, eQueueType, bLast);
+	m_kPlatform.SubmitRHI(kCtx, kWindow, eQueueType, bLast);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

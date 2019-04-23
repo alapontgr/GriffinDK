@@ -42,14 +42,14 @@ public:
 
 	void SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor = v4(0.0f));
 
-	void Create(const GfRenderContext& kCtx);
+	void Create(const GfRenderContext& kCtx, const GfWindow* pWindow);
 
 	void Resize(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
-	void BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer);
+	void BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
 
 	void EndPass(const GfCmdBuffer& kCmdBuffer);
 
@@ -57,9 +57,6 @@ public:
 
 	void SetScissor(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor);
 	
-	// TODO: Clear Back buffer (REMOVE)
-	void ClearCurrentTarget(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor);
-
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -67,9 +64,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfRenderPass::BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer)
+GF_FORCEINLINE void GfRenderPass::BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow)
 {
-	m_kPlatform.BeginPassRHI(kCtx, kCmdBuffer);
+	m_kPlatform.BeginPassRHI(kCtx, kCmdBuffer, pWindow);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,13 +88,6 @@ GF_FORCEINLINE void GfRenderPass::SetViewport(const GfCmdBuffer& kCmdBuffer, con
 GF_FORCEINLINE void GfRenderPass::SetScissor(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor)
 {
 	m_kPlatform.SetScissorRHI(kCmdBuffer, kScissor);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfRenderPass::ClearCurrentTarget(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const v4& vClearColor)
-{
-	m_kPlatform.ClearCurrentTargetRHI(kCtx, kCmdBuffer, vClearColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

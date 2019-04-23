@@ -19,6 +19,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfWindow;
 class GfRenderPass;
 class GfBuffer;
 class GfMaterialTemplate;
@@ -48,6 +49,7 @@ private:
 
 	void SubmitRHI(
 		const GfRenderContext& kCtx, 
+		const GfWindow& kWindow,
 		GfRenderContextFamilies::Type eQueueType, 
 		Bool bLast);
 

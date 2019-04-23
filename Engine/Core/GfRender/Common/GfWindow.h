@@ -16,6 +16,8 @@
 #include "GfEntry/Common/GfEntry.h"
 #include GF_SOLVE_PLATFORM_HEADER(GfWindow)
 
+#include "GfRender/Common/GraphicResources/GfTexture.h"
+#include "GfRender/Common/GraphicResources/GfTextureView.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,38 +41,62 @@ public:
 
 	GfWindow();
 
-	void Init(GfWindowInitParams& kInitParams);
+	void Init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx);
 
 	// returns GF_FALSE when the user wants to close the application
 	Bool Tick();
 
 	void Shutdown();
 
-	u32 GetWidth();
+	Bool BeginFrame(const GfRenderContext& kCtx);
 
-	u32 GetHeight();
+	void EndFrame(const GfRenderContext& kCtx);
+
+	u32 GetWidth() const;
+
+	u32 GetHeight() const;
 
 	const char* GetWindowName();
 
+	u32 GetCurrentFrameIdx() const;
+
+	const GfTextureView* GetBackBufferView(u32 uiIdx) const;
+
+	const GfTextureView* GetCurrBackBufferView() const;
+
+	const GfTexture2D* GetBackBuffer(u32 uiIdx) const;
+
+	const GfTexture2D* GetCurrBackBuffer() const;
+
 private:
+
+	void Flip();
+
+	void OnResize();
 
 	const char*			m_szAppName; // Static string
 	u32					m_uiWidth;
 	u32					m_uiHeight;
 	bool				m_bFullScreen;
 	bool				m_bVSync;
+
+	// Used as a cursor for the multi buffering of the resources of the engine
+	u32					m_uiCurrentFrameIdx;
+
+	GfVector<GfTexture2D>	m_tSwapchainTextures;
+	GfVector<GfTextureView>	m_tSwapchainTextureViews;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfWindow::GetWidth()
+GF_FORCEINLINE u32 GfWindow::GetWidth() const
 {
 	return m_uiWidth;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfWindow::GetHeight()
+GF_FORCEINLINE u32 GfWindow::GetHeight() const
 {
 	return m_uiHeight;
 }
@@ -80,6 +106,41 @@ GF_FORCEINLINE u32 GfWindow::GetHeight()
 GF_FORCEINLINE const char* GfWindow::GetWindowName() 
 {
 	return m_szAppName;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE u32 GfWindow::GetCurrentFrameIdx() const
+{
+	return m_uiCurrentFrameIdx;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTextureView* GfWindow::GetBackBufferView(u32 uiIdx) const
+{
+	return &m_tSwapchainTextureViews[uiIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTextureView* GfWindow::GetCurrBackBufferView() const
+{
+	return &m_tSwapchainTextureViews[m_uiCurrentFrameIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTexture2D* GfWindow::GetBackBuffer(u32 uiIdx) const
+{
+	return &m_tSwapchainTextures[uiIdx];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE const GfTexture2D* GfWindow::GetCurrBackBuffer() const
+{
+	return &m_tSwapchainTextures[m_uiCurrentFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

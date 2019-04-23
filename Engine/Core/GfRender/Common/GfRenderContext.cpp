@@ -17,8 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfRenderContext)
-	, m_pWindow(nullptr)
-	, m_uiCurrentFrameIdx(0)
+	, m_uiFlags(0)
 {
 	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
@@ -29,10 +28,24 @@ GF_DEFINE_BASE_CTOR(GfRenderContext)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfRenderContext::PreInit(GfWindow* pWindow)
+{
+	if (!m_uiFlags.IsEnable(EFlags::PreInitialised))
+	{
+		m_uiFlags.Enable(EFlags::PreInitialised);
+		m_kPlatform.PreInitRHI(pWindow);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void GfRenderContext::Init(GfWindow* pWindow)
 {
-	m_pWindow = pWindow;
-	m_kPlatform.InitRHI();
+	if (!m_uiFlags.IsEnable(EFlags::Initialised)) 
+	{
+		m_uiFlags.Enable(EFlags::Initialised);
+		m_kPlatform.InitRHI(pWindow);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,37 +53,6 @@ void GfRenderContext::Init(GfWindow* pWindow)
 void GfRenderContext::Shutdown()
 {
 	GF_ASSERT_ALWAYS("To Implement");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-Bool GfRenderContext::BeginFrame()
-{
-	Bool bResult(m_pWindow->Tick());
-	m_kPlatform.BeginFrameRHI();
-	return bResult;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderContext::EndFrame()
-{
-	m_kPlatform.EndFrameRHI();
-	Flip();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderContext::Flip()
-{
-	m_uiCurrentFrameIdx = GfWrap(m_uiCurrentFrameIdx + 1, 0u, GfRenderConstants::ms_uiNBufferingCount);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderContext::OnResize()
-{
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////

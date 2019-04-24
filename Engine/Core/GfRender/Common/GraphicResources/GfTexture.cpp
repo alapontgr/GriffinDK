@@ -53,6 +53,7 @@ void GfTexturedResource::SetUsage(const ETextureUsageBits::GfMask& uiUsage)
 
 void GfTexturedResource::SetFormat(ETextureFormat::Type eFormat)
 {
+	m_eFormat = eFormat;
 	// Detect depth buffer
 	if (eFormat >= ETextureFormat::D16_UNorm && eFormat <= ETextureFormat::D32_SFloat_S8_UInt)
 	{

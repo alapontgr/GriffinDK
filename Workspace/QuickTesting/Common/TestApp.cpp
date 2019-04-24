@@ -61,11 +61,11 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 {
 	Init();
 	
-	while (m_kContext.BeginFrame())
+	while (m_kWindow.BeginFrame(m_kContext))
 	{
 		Update();
 
-		u32 uiCurrFrameIdx(m_kContext.GetCurrentFrameIdx());
+		u32 uiCurrFrameIdx(m_kWindow.GetCurrentFrameIdx());
 		GfCmdBuffer& kCmdBuffer(m_pCmdBuffes[uiCurrFrameIdx]);
 
 		// Wait for the command buffer to be ready
@@ -87,9 +87,9 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 		kCmdBuffer.EndRecording(m_kContext);
 
 		// Submit command buffer
-		kCmdBuffer.Submit(m_kContext, GfRenderContextFamilies::Present, GF_TRUE);
+		kCmdBuffer.Submit(m_kContext, m_kWindow, GfRenderContextFamilies::Present, GF_TRUE);
 
-		m_kContext.EndFrame();
+		m_kWindow.EndFrame(m_kContext);
 	}
 	return 0;
 }
@@ -105,12 +105,10 @@ void TestApp::Init()
 	kWindowInit.m_bVSync = false;
 	kWindowInit.m_bFullScreen = false;
 	kWindowInit.m_szWindowName = "TestGriffinApp";
-	m_kWindow.Init(kWindowInit);
+	m_kWindow.Init(kWindowInit, m_kContext);
 
 	GfInput::Init();
 
-	// Init the render context
-	m_kContext.Init(&m_kWindow);
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Create resources
@@ -165,7 +163,7 @@ void TestApp::CreateCmdBuffers()
 
 void TestApp::CreateRenderPasses()
 {
-	m_kRenderPass.Create(m_kContext);
+	m_kRenderPass.Create(m_kContext, &m_kWindow);
 
 	// Init Viewport and Scissor state
 	m_kViewport.m_fWidth = (f32)m_kWindow.GetWidth();
@@ -192,7 +190,7 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 	}
 
 	// Begin render pass
-	m_kRenderPass.BeginPass(m_kContext, kCmdBuffer);
+	m_kRenderPass.BeginPass(m_kContext, kCmdBuffer, &m_kWindow);
 
 	// Set Viewport and Scissor
 	m_kRenderPass.SetViewport(kCmdBuffer, m_kViewport);
@@ -319,6 +317,10 @@ void TestApp::CreateResources()
 	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::ETexture2DFlags::Tilable);
 	m_kTesTexture.Create(m_kContext);
 
+	// Create view for the texture
+	m_kTestTexView.Init(&m_kTesTexture, ETextureViewType::View2D);
+	m_kTestTexView.Create(m_kContext);
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Sampler
 
@@ -330,7 +332,7 @@ void TestApp::CreateResources()
 	////////////////////////////////////////////////////////////////////////////////
 	// Bind
 
-	m_kCombinedSamplerTexture.Init(&m_kSampler, &m_kTesTexture);
+	m_kCombinedSamplerTexture.Init(&m_kSampler, &m_kTestTexView);
 
 	m_kParamSet.BindResource(0, &m_kPerFrameCB);
 	m_kParamSet.BindResource(1, &m_kCombinedSamplerTexture);

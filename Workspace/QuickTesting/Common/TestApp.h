@@ -67,6 +67,7 @@ private:
 	GfSamplerState		m_kSampler;
 	GfCombinedSamplerTexture m_kCombinedSamplerTexture;
 	GfTexture2D			m_kTesTexture;
+	GfTextureView		m_kTestTexView;
 	GfUniquePtr<char[]>	m_pTestTextureData;
 
 	GfViewport		m_kViewport;

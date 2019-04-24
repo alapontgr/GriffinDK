@@ -181,7 +181,7 @@ void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx, 
 
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
 	{
-		VkImageView pOutView(pWindow->GetCurrBackBufferView()->Plat().GetView());
+		VkImageView pOutView(pWindow->GetBackBufferView(i)->Plat().GetView());
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = &pOutView;
 		VkResult eResult = vkCreateFramebuffer(kCtx.Plat().m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);

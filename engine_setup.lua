@@ -85,6 +85,13 @@ for GroupName, GroupConfig in pairs(groups) do
 		----------------------------------------------------------
 
 	end
+
+	-- Sub groups
+	if GroupConfig._groups then
+		for _v, _g in pairs(GroupConfig._groups) do
+			SetupGroup(_g, GroupConfig.Path, GroupName, GroupName)
+		end
+	end
 end
 
 ----------------------------------------------------------

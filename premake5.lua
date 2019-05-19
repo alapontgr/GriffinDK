@@ -22,15 +22,25 @@ griffin.WorkingDirPath = griffin.WorkingDir .. "/" .. "%{prj.platform}" .. "/"
 groups = {}
 
 -- Group definition example:
--- groups["Core"] = 
--- {
+--groups["TestGroup"] = 
+--{
+--	--Path = griffin.EngineBasePath,
+--	Path = "./",
 --	Projects = 
 --	{
---		"GfCore"
---	}
---
+--		"TestProject1"
+--	},
+--	_groups = 
+--	{
+--		{
+--			Name = "TestChild",
+--			Projects = 
+--			{
+--				"TestProject1"
+--			},
+--		}
+--	},
 --}
--- The example above creates a project GfCore within the group Core. At creation the script will execute the file "premake5.lua" used to describe the project
 
 groups["External"] = 
 {
@@ -65,7 +75,7 @@ groups["Workspace"] =
 	Projects = 
 	{
 		"QuickTesting"
-	}
+	},
 
 }
 

@@ -22,7 +22,7 @@ using GfFrameMTStackAlloc = GfPerThreadStackAllocator<GfDefaultAllocator, GF_KB(
 
 namespace EParamaterSlotType
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		SamplerState = 0,
 		CombinedTextureSampler,
@@ -37,7 +37,8 @@ namespace EParamaterSlotType
 		InputAttachment,
 		////////////////////////////////////////////////////////////////////////////////
 		Count,
-		Invalid = 0xff,
+		Invalid = (~0u),
+		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -54,7 +55,8 @@ namespace EShaderStage
 		Fragment,
 		Compute,
 		////////////////////////
-		COUNT
+		COUNT,
+		RequiredBits = 3 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -80,7 +82,7 @@ using GfShaderAccessMask = GfBitMask<u32>;
 
 namespace EMaterialParamRate
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		PerFrame = 0,			// Common to all the objects of a frame
 		PerRenderPass,			// Resources local to a RenderPass
@@ -91,7 +93,7 @@ namespace EMaterialParamRate
 		////////////////////////////////////////////////////////////////////////////////
 		MaxBoundSets = 8,		// Maximum number of currently bound descriptor sets in a material instance
 
-		Invalid = 0xff
+		Invalid = (~0u),
 	};
 }
 static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundSets, "Invalid count of rates");
@@ -100,7 +102,7 @@ static_assert(EMaterialParamRate::Count <= EMaterialParamRate::MaxBoundSets, "In
 
 namespace EPrimitiveTopology
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		PointList = 0,
 		LineList,
@@ -113,6 +115,8 @@ namespace EPrimitiveTopology
 		TriListWithAdj,
 		TriStripWithAdj,
 		PatchList,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -120,11 +124,13 @@ namespace EPrimitiveTopology
 
 namespace EPolygonMode
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		Fill = 0,
 		Line,
-		Point
+		Point,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 2 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -132,12 +138,14 @@ namespace EPolygonMode
 
 namespace ECullMode
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		None,
 		Front,
 		Back,
 		FrontBack,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 2 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -145,10 +153,12 @@ namespace ECullMode
 
 namespace EFrontFace
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		CounterClockwise = 0,
 		Clockwise,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 1 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -156,7 +166,7 @@ namespace EFrontFace
 
 namespace EMultiSampleCount
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		Samples_1 = 0,
 		Samples_2,
@@ -165,6 +175,8 @@ namespace EMultiSampleCount
 		Samples_16,
 		Samples_32,
 		Samples_64,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 3 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -172,7 +184,7 @@ namespace EMultiSampleCount
 
 namespace EBlendFactor
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		Zero = 0,
 		One,
@@ -193,6 +205,8 @@ namespace EBlendFactor
 		One_Minus_Src1_Color,
 		Src1_Alpha,
 		One_Minus_Src1_Alpha,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 5 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -200,13 +214,15 @@ namespace EBlendFactor
 
 namespace EBlendOp
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		Add = 0,
 		Subtract,
 		Reverse_Subtract,
 		Min,
 		Max,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 3 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -214,7 +230,7 @@ namespace EBlendOp
 
 namespace EAttributeFormat
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		SFloat = 0,	// R32
 		SFloat2,	// R32G32
@@ -229,7 +245,10 @@ namespace EAttributeFormat
 		UInt,		// R32
 		UInt2,		// R32G32
 		UInt3,		// R32G32B32
-		UInt4		// R32G32B32A32
+		UInt4,		// R32G32B32A32
+
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -237,10 +256,12 @@ namespace EAttributeFormat
 
 namespace EVertexInputRate
 {
-	enum Type : u8
+	enum Type : u32
 	{
 		PerVertex = 0,
-		PerInstance
+		PerInstance,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 1 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -251,9 +272,9 @@ See https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkLogi
 */
 namespace EBlendLogicOp
 {
-	enum Type : u8
+	enum Type : u32
 	{
-		Clear,
+		Clear = 0,
 		And,
 		AndReversed,
 		Copy,
@@ -269,6 +290,8 @@ namespace EBlendLogicOp
 		OrInverted,
 		Nand,
 		Set,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -276,40 +299,71 @@ namespace EBlendLogicOp
 
 struct GfRasterState
 {
-	f32					m_fDepthBiasConstFactor = 0.0f;
-	f32					m_fDepthBiasClamp = 0.0f;
-	f32					m_fDepthBiasSlopeFactor = 0.0f;
-	f32					m_fLineWidth = 1.0f;
-	EPolygonMode::Type	m_ePolygonMode = EPolygonMode::Fill;
-	ECullMode::Type		m_eCullMode = ECullMode::Back;
-	EFrontFace::Type	m_eFrontFace = EFrontFace::CounterClockwise;
-	bool				m_bDepthClampEnabled = false;
-	bool				m_bRasterizerDiscardEnabled = false;
-	bool				m_bDepthBiasEnabled = false;
+	GfRasterState() 
+		: m_fDepthBiasConstFactor(0.0f)
+		, m_fDepthBiasClamp(0.0f)
+		, m_fDepthBiasSlopeFactor(0.0f)
+		, m_fLineWidth(1.0f)
+		, m_ePolygonMode(EPolygonMode::Fill)
+		, m_eCullMode(ECullMode::Back)
+		, m_eFrontFace(EFrontFace::CounterClockwise)
+		, m_bDepthClampEnabled(GF_FALSE)
+		, m_bRasterizerDiscardEnabled(GF_FALSE)
+		, m_bDepthBiasEnabled(GF_FALSE)
+		{}
+
+	f32	m_fDepthBiasConstFactor;
+	f32	m_fDepthBiasClamp;
+	f32	m_fDepthBiasSlopeFactor;
+	f32	m_fLineWidth;
+	u32	m_ePolygonMode : EPolygonMode::RequiredBits;
+	u32	m_eCullMode : ECullMode::RequiredBits;
+	u32	m_eFrontFace : EFrontFace::RequiredBits;
+	u32	m_bDepthClampEnabled : 1;
+	u32	m_bRasterizerDiscardEnabled : 1;
+	u32	m_bDepthBiasEnabled : 1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct GfMultiSamplingState
 {
-	EMultiSampleCount::Type m_uiSampleCount = EMultiSampleCount::Samples_1;
-	bool					m_bEnabled = false;
+	GfMultiSamplingState() 
+		: m_uiSampleCount(EMultiSampleCount::Samples_1)
+		, m_bEnabled(GF_FALSE)
+	{}
+
+	EMultiSampleCount::Type m_uiSampleCount : EMultiSampleCount::RequiredBits;
+	u32						m_bEnabled : 1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 struct GfBlendState
 {
-	v4					m_vBlendConstants = v4(0.0f);
-	EBlendFactor::Type	m_eSrcColorBlendFactor = EBlendFactor::Src_Alpha;
-	EBlendFactor::Type	m_eDstColorBlendFactor = EBlendFactor::One_Minus_Src_Alpha;
-	EBlendOp::Type		m_eColorBlendOp = EBlendOp::Add;
-	EBlendFactor::Type	m_eSrcAlphaBlendFactor = EBlendFactor::One;
-	EBlendFactor::Type	m_eDstAlphaBlendFactor = EBlendFactor::One;
-	EBlendOp::Type		m_eAlphaBlendOp = EBlendOp::Add;
-	EBlendLogicOp::Type m_eBlendLogicOp = EBlendLogicOp::Copy;
-	bool				m_bEnabled = false;
-	bool				m_bLogicOpEnabled = false;
+	GfBlendState() 
+		: m_vBlendConstants(0.0f)
+		, m_eSrcColorBlendFactor(EBlendFactor::Src_Alpha)
+		, m_eDstColorBlendFactor(EBlendFactor::One_Minus_Src_Alpha)
+		, m_eColorBlendOp(EBlendOp::Add)
+		, m_eSrcAlphaBlendFactor(EBlendFactor::One)
+		, m_eDstAlphaBlendFactor(EBlendFactor::One)
+		, m_eAlphaBlendOp(EBlendOp::Add)
+		, m_eBlendLogicOp(EBlendLogicOp::Copy)
+		, m_bEnabled(GF_FALSE)
+		, m_bLogicOpEnabled(GF_FALSE)
+	{}
+
+	v4	m_vBlendConstants;
+	u32 m_eSrcColorBlendFactor : EBlendFactor::RequiredBits;
+	u32 m_eDstColorBlendFactor : EBlendFactor::RequiredBits;
+	u32 m_eColorBlendOp : EBlendOp::RequiredBits;
+	u32 m_eSrcAlphaBlendFactor : EBlendFactor::RequiredBits;
+	u32 m_eDstAlphaBlendFactor : EBlendFactor::RequiredBits;
+	u32 m_eAlphaBlendOp : EBlendOp::RequiredBits;
+	u32 m_eBlendLogicOp : EBlendLogicOp::RequiredBits;
+	u32	m_bEnabled : 1;
+	u32	m_bLogicOpEnabled : 1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

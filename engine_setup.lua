@@ -63,33 +63,37 @@ for GroupName, GroupConfig in pairs(groups) do
 end
 
 -- Create the projects
+--if _Group.Projects then
 for GroupName, GroupConfig in pairs(groups) do
 	group(GroupName)
-	for k, p in pairs(GroupConfig.Projects) do
-		--print(p)
-		local RelPath = GroupName .. "/" .. p
-		local AbsPath = GroupConfig.Path .. "/" .. RelPath
-		
-		include(AbsPath)
 
-		-------------------------------------
-		---------------------
-		-- The scope of the project is still active
+	if GroupConfig.Projects then
+		for k, p in pairs(GroupConfig.Projects) do
+			--print(p)
+			local RelPath = GroupName .. "/" .. p
+			local AbsPath = GroupConfig.Path .. "/" .. RelPath
+			
+			include(AbsPath)
 
-		location(griffin.ProjVSFilesPath .. "/" .. RelPath)
-		objdir(griffin.ProjVSFilesPath .. "/" .. RelPath .. "/obj/")
-		files { AbsPath .. "/**.*"}
+			-------------------------------------
+			---------------------
+			-- The scope of the project is still active
 
-		FilterPlatforms(AbsPath, griffin.Platforms)
+			location(griffin.ProjVSFilesPath .. "/" .. RelPath)
+			objdir(griffin.ProjVSFilesPath .. "/" .. RelPath .. "/obj/")
+			files { AbsPath .. "/**.*"}
 
-		----------------------------------------------------------
+			FilterPlatforms(AbsPath, griffin.Platforms)
 
+			----------------------------------------------------------
+
+		end
 	end
 
 	-- Sub groups
 	if GroupConfig._groups then
 		for _v, _g in pairs(GroupConfig._groups) do
-			SetupGroup(_g, GroupConfig.Path, GroupName, GroupName)
+			SetupGroup(_g, _v, GroupConfig.Path, GroupName, GroupName)
 		end
 	end
 end

@@ -47,14 +47,14 @@ end
 
 ---------------------------------------------------------
 
-function SetupGroup(_Group, _AbsPath, _RelPath, Filter)
-   local GroupFilter = Filter .. "/" .. _Group.Name
+function SetupGroup(_Group, _GroupName, _AbsPath, _RelPath, Filter)
+   local GroupFilter = Filter .. "/" .. _GroupName
    group(GroupFilter)
    -- Setup projects
    if _Group.Projects then
 
       for _v, _project in pairs(_Group.Projects) do      
-         local ProjRelPath = _RelPath .. "/" .. p
+         local ProjRelPath = _RelPath .. "/" .. _project
          local ProjAbsPath = _AbsPath .. "/" .. ProjRelPath
 
          include(ProjAbsPath)
@@ -77,7 +77,7 @@ function SetupGroup(_Group, _AbsPath, _RelPath, Filter)
       for _v, _g in pairs(_Group._groups) do
          local GroupAbsPath = _AbsPath .. _g.Name
          local GroupRelPath = _RelPath .. _g.Name
-         SetupGroup(_g, GroupAbsPath, GroupRelPath, GroupFilter)
+         SetupGroup(_g, _v, GroupAbsPath, GroupRelPath, GroupFilter)
       end
    end
 end

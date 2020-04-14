@@ -68,6 +68,21 @@ groups["Core"] =
 
 }
 
+groups["Tools"] = 
+{
+	Path = griffin.EngineBasePath,
+	_groups =
+	{
+		Libraries = 
+		{
+			Projects = 
+			{
+				"GfMaterialCompiler",
+			},
+		}
+	}
+}
+
 groups["Workspace"] = 
 {
 	--Path = griffin.EngineBasePath,
@@ -76,7 +91,6 @@ groups["Workspace"] =
 	{
 		"QuickTesting"
 	},
-
 }
 
 ----------------------------------------------------------

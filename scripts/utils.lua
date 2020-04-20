@@ -1,3 +1,11 @@
+---------------------------------------------------------
+-- Context vars
+---------------------------------------------------------
+
+ProjectDeps = {}
+
+---------------------------------------------------------
+
 -- Helpers
 
 function ExistsFile(file)
@@ -48,7 +56,6 @@ end
 ---------------------------------------------------------
 
 function SetupProjectSettings(_Project, _RelPath, _AbsPath)
-   print("Mainpass" .. _Project)
    location(griffin.ProjVSFilesPath .. "/" .. _RelPath)
    objdir(griffin.ProjVSFilesPath .. "/" .. _RelPath .. "/obj/")
    files { _AbsPath .. "/**.*"}
@@ -60,6 +67,11 @@ end
 function GroupPostProcess(_Project, _RelPath, _AbsPath)
    project(_Project)
 
+   if ProjectDeps[_Project] then
+      for index, dep in ipairs(ProjectDeps[_Project]) do
+         print(_Project .. " " .. dep)
+      end
+   end
 end
 
 ---------------------------------------------------------
@@ -140,4 +152,11 @@ function SetupGraphicsSDK()
 
    filter {}
 
+end
+
+function AddSharedLibDep(_Project, _Dep)
+   if not ProjectDeps[_Project] then
+      ProjectDeps[_Project] = {}
+   end
+   table.insert(ProjectDeps[_Project], path.getabsolute(_Dep))
 end

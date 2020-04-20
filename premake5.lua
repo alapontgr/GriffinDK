@@ -50,6 +50,7 @@ groups["External"] =
 		"glm",
 		"vma",
 		"stb",
+		"dxc",
 	}
 }
 

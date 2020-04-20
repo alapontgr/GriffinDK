@@ -62,8 +62,7 @@ for GroupName, GroupConfig in pairs(groups) do
 	includedirs { GroupConfig.Path .. "/" .. GroupName}
 end
 
--- Create the projects
---if _Group.Projects then
+-- Projects main pass
 for GroupName, GroupConfig in pairs(groups) do
 	group(GroupName)
 
@@ -73,17 +72,8 @@ for GroupName, GroupConfig in pairs(groups) do
 			local RelPath = GroupName .. "/" .. p
 			local AbsPath = GroupConfig.Path .. "/" .. RelPath
 			
-			include(AbsPath)
-
-			-------------------------------------
-			---------------------
-			-- The scope of the project is still active
-
-			location(griffin.ProjVSFilesPath .. "/" .. RelPath)
-			objdir(griffin.ProjVSFilesPath .. "/" .. RelPath .. "/obj/")
-			files { AbsPath .. "/**.*"}
-
-			FilterPlatforms(AbsPath, griffin.Platforms)
+			include(AbsPath)			
+			SetupProjectSettings(p, RelPath, AbsPath)
 
 			----------------------------------------------------------
 
@@ -94,6 +84,25 @@ for GroupName, GroupConfig in pairs(groups) do
 	if GroupConfig._groups then
 		for _v, _g in pairs(GroupConfig._groups) do
 			SetupGroup(_g, _v, GroupConfig.Path, GroupName, GroupName)
+		end
+	end
+end
+
+-- Projects post-processing
+for GroupName, GroupConfig in pairs(groups) do
+	if GroupConfig.Projects then
+		for k, p in pairs(GroupConfig.Projects) do
+			--print(p)
+			local RelPath = GroupName .. "/" .. p
+			local AbsPath = GroupConfig.Path .. "/" .. RelPath		
+			GroupPostProcess(p, RelPath, AbsPath)
+		end
+	end
+
+	-- Sub groups
+	if GroupConfig._groups then
+		for _v, _g in pairs(GroupConfig._groups) do
+			DoGroupPostProcess(_g, _v, GroupConfig.Path, GroupName)
 		end
 	end
 end

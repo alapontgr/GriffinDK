@@ -8,6 +8,7 @@ project "QuickTesting"
 		"GfFile",
 		"GfEntry",
 		"GfRender",
+		"GfMaterialCompiler"
 	}
 
 	SetupGraphicsSDK();

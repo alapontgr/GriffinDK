@@ -47,10 +47,27 @@ end
 
 ---------------------------------------------------------
 
+function SetupProjectSettings(_Project, _RelPath, _AbsPath)
+   print("Mainpass" .. _Project)
+   location(griffin.ProjVSFilesPath .. "/" .. _RelPath)
+   objdir(griffin.ProjVSFilesPath .. "/" .. _RelPath .. "/obj/")
+   files { _AbsPath .. "/**.*"}
+   FilterPlatforms(_AbsPath, griffin.Platforms)
+end
+
+---------------------------------------------------------
+
+function GroupPostProcess(_Project, _RelPath, _AbsPath)
+   project(_Project)
+
+end
+
+---------------------------------------------------------
+
 function SetupGroup(_Group, _GroupName, _AbsPath, _RelPath, Filter)
    local GroupFilter = Filter .. "/" .. _GroupName
    group(GroupFilter)
-   -- Setup projects
+   -- Setup _projects
    if _Group.Projects then
 
       for _v, _project in pairs(_Group.Projects) do      
@@ -58,17 +75,7 @@ function SetupGroup(_Group, _GroupName, _AbsPath, _RelPath, Filter)
          local ProjAbsPath = _AbsPath .. "/" .. ProjRelPath
 
          include(ProjAbsPath)
-         -------------------------------------
-         ---------------------
-         -- The scope of the project is still active
-
-         location(griffin.ProjVSFilesPath .. "/" .. ProjRelPath)
-         objdir(griffin.ProjVSFilesPath .. "/" .. ProjRelPath .. "/obj/")
-         files { ProjAbsPath .. "/**.*"}
-
-         FilterPlatforms(ProjAbsPath, griffin.Platforms)
-
-         ----------------------------------------------------------
+         SetupProjectSettings(_project, ProjRelPath, ProjAbsPath)
       end
    end
 
@@ -78,6 +85,28 @@ function SetupGroup(_Group, _GroupName, _AbsPath, _RelPath, Filter)
          local GroupAbsPath = _AbsPath .. _g.Name
          local GroupRelPath = _RelPath .. _g.Name
          SetupGroup(_g, _v, GroupAbsPath, GroupRelPath, GroupFilter)
+      end
+   end
+end
+
+---------------------------------------------------------
+
+function DoGroupPostProcess(_Group, _GroupName, _AbsPath, _RelPath)
+   if _Group.Projects then
+      for _v, _project in pairs(_Group.Projects) do      
+         local ProjRelPath = _RelPath .. "/" .. _project
+         local ProjAbsPath = _AbsPath .. "/" .. ProjRelPath
+
+         GroupPostProcess(_project, ProjRelPath, ProjAbsPath)
+      end
+   end
+
+   -- Setup sub-groups
+   if _Group._groups then
+      for _v, _g in pairs(_Group._groups) do
+         local GroupAbsPath = _AbsPath .. _g.Name
+         local GroupRelPath = _RelPath .. _g.Name
+         DoGroupPostProcess(_g, _v, GroupAbsPath, GroupRelPath)
       end
    end
 end

@@ -11,4 +11,6 @@ project "QuickTesting"
 		"GfMaterialCompiler"
 	}
 
+	GfResolveDep("QuickTesting", "GfMaterialCompiler")
+
 	SetupGraphicsSDK();

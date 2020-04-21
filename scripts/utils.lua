@@ -3,6 +3,8 @@
 ---------------------------------------------------------
 
 ProjectDeps = {}
+DepsToResolve = {}
+TargetDirs = {}
 
 ---------------------------------------------------------
 
@@ -19,6 +21,12 @@ function ExistsFile(file)
    return ok, err
 end
 
+
+function CopyCMD(_From, _To)
+   dirName = path.getdirectory(_From)
+   fileName = path.getname(_From)
+   return "(robocopy \"" .. dirName .. "\" \"" .. _To .. "\" " .. fileName .. ") ^& IF %ERRORLEVEL% LEQ 4 exit /B 0"
+end
 
 ---------------------------------------------------------
 -- General Utilities
@@ -56,7 +64,7 @@ end
 ---------------------------------------------------------
 
 function SetupProjectSettings(_Project, _RelPath, _AbsPath)
-   location(griffin.ProjVSFilesPath .. "/" .. _RelPath)
+   location(TargetDirs[_project])
    objdir(griffin.ProjVSFilesPath .. "/" .. _RelPath .. "/obj/")
    files { _AbsPath .. "/**.*"}
    FilterPlatforms(_AbsPath, griffin.Platforms)
@@ -66,11 +74,19 @@ end
 
 function GroupPostProcess(_Project, _RelPath, _AbsPath)
    project(_Project)
-
-   if ProjectDeps[_Project] then
-      for index, dep in ipairs(ProjectDeps[_Project]) do
-         print(_Project .. " " .. dep)
+   if DepsToResolve[_Project] then
+      commands = {}
+      for index, projDep in ipairs(DepsToResolve[_Project]) do
+         if ProjectDeps[projDep] then
+            for index2, resDep in ipairs(ProjectDeps[projDep]) do
+               dirName = path.getdirectory(resDep)
+               fileName = path.getname(resDep)
+               dstDir = TargetDirs[_Project]
+               table.insert(commands, CopyCMD(resDep, "../" .. dstDir))
+            end
+         end
       end
+      postbuildcommands (commands)
    end
 end
 
@@ -86,6 +102,7 @@ function SetupGroup(_Group, _GroupName, _AbsPath, _RelPath, Filter)
          local ProjRelPath = _RelPath .. "/" .. _project
          local ProjAbsPath = _AbsPath .. "/" .. ProjRelPath
 
+         TargetDirs[_project] = griffin.OutPath
          include(ProjAbsPath)
          SetupProjectSettings(_project, ProjRelPath, ProjAbsPath)
       end
@@ -154,9 +171,17 @@ function SetupGraphicsSDK()
 
 end
 
-function AddSharedLibDep(_Project, _Dep)
+function GfRegisterExtDep(_Project, _Dep)
    if not ProjectDeps[_Project] then
       ProjectDeps[_Project] = {}
    end
    table.insert(ProjectDeps[_Project], path.getabsolute(_Dep))
+end
+
+-- Files registered in _DepProject with GfRegisterExtDep will be copied to the _Project output directoy
+function GfResolveDep(_Project, _DepProject)
+   if not DepsToResolve[_Project] then
+      DepsToResolve[_Project] = {}
+   end
+   table.insert(DepsToResolve[_Project], _DepProject)
 end

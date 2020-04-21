@@ -72,6 +72,7 @@ for GroupName, GroupConfig in pairs(groups) do
 			local RelPath = GroupName .. "/" .. p
 			local AbsPath = GroupConfig.Path .. "/" .. RelPath
 			
+			TargetDirs[p] = griffin.OutPath
 			include(AbsPath)			
 			SetupProjectSettings(p, RelPath, AbsPath)
 

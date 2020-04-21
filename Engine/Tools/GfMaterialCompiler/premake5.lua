@@ -9,4 +9,6 @@ project "GfMaterialCompiler"
     	libdirs { griffin.EngineBasePath .. "/" .. "External/dxc/lib" }
     	links { "dxcompiler.dll" }
 
+    	GfRegisterExtDep("GfMaterialCompiler", "../../External/dxc/lib/dxcompiler.dll")
+
     filter {}

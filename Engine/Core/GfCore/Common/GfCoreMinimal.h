@@ -11,17 +11,17 @@
 #define __GFCOREMINIMAL_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfTypes.h"
-
-#include "GfCore/Common/GfMaths.h"
-
-#include "GfCore/Common/GfUnits.h"
-
 #include "GfCore/Common/GfConfig.h"
 
 #include "GfCore/Common/GfPlatform.h"
 
 #include GF_SOLVE_PLATFORM_HEADER(GfCore)
+
+#include "GfCore/Common/GfTypes.h"
+
+#include "GfCore/Common/GfMaths.h"
+
+#include "GfCore/Common/GfUnits.h"
 
 #include "GfCore/Common/GfDebug.h"
 

@@ -13,6 +13,8 @@
 // Includes
 
 #include "glm/glm.hpp"
+#include "glm/gtx/euler_angles.hpp"
+#include "glm/gtc/quaternion.hpp"
 #include "GfCore/Common/GfTypes.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,6 +25,8 @@ typedef glm::vec4   v4;
 
 typedef glm::mat3x3 m3;
 typedef glm::mat4x4 m4;
+
+using GfQuat = glm::quat;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Constants

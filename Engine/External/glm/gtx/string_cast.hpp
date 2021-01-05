@@ -8,9 +8,10 @@
 /// @defgroup gtx_string_cast GLM_GTX_string_cast
 /// @ingroup gtx
 ///
-/// @brief Setup strings for GLM type values
+/// Include <glm/gtx/string_cast.hpp> to use the features of this extension.
 ///
-/// <glm/gtx/string_cast.hpp> need to be included to use these functionalities.
+/// Setup strings for GLM type values
+///
 /// This extension is not supported with CUDA
 
 #pragma once
@@ -23,16 +24,16 @@
 #include <string>
 #include <cmath>
 
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#	error "GLM: GLM_GTX_string_cast is an experimental extension and may change in the future. Use #define GLM_ENABLE_EXPERIMENTAL before including it, if you really want to use it."
+#if GLM_MESSAGES == GLM_ENABLE && !defined(GLM_EXT_INCLUDED)
+#	ifndef GLM_ENABLE_EXPERIMENTAL
+#		pragma message("GLM: GLM_GTX_string_cast is an experimental extension and may change in the future. Use #define GLM_ENABLE_EXPERIMENTAL before including it, if you really want to use it.")
+#	else
+#		pragma message("GLM: GLM_GTX_string_cast extension included")
+#	endif
 #endif
 
 #if(GLM_COMPILER & GLM_COMPILER_CUDA)
 #	error "GLM_GTX_string_cast is not supported on CUDA compiler"
-#endif
-
-#if GLM_MESSAGES == GLM_MESSAGES_ENABLED && !defined(GLM_EXT_INCLUDED)
-#	pragma message("GLM: GLM_GTX_string_cast extension included")
 #endif
 
 namespace glm

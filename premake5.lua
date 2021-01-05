@@ -90,7 +90,8 @@ groups["Workspace"] =
 	Path = "./",
 	Projects = 
 	{
-		"QuickTesting"
+		"QuickTesting",
+		"RTExperiments"
 	},
 }
 

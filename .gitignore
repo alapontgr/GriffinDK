@@ -11,3 +11,5 @@
 *.nvuser
 build/
 bin/
+Solutions/
+.vs/

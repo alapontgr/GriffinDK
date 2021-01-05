@@ -355,6 +355,8 @@ void GfRenderContext_Platform::CreateVulkanAllocator()
 	VmaAllocatorCreateInfo kAllocatorInfo = {};
 	kAllocatorInfo.physicalDevice = m_pPhysicalDevice;
 	kAllocatorInfo.device = m_pDevice;
+	kAllocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+	kAllocatorInfo.instance = m_pInstance;
 	vmaCreateAllocator(&kAllocatorInfo, &m_kAllocator);
 }
 

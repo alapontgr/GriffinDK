@@ -147,10 +147,9 @@ end
 -- Use this within the scope of a project to do the setup of the graphics SDK
 -- Includes and links the current active (Premake) project with the correct graphics SDKs 
 function SetupGraphicsSDK()
-
    -- Setup Vulkan SDK
-   filter {"platforms:x64(Vulkan)"}
-
+   configuration "vulkan"
+ 
    includedirs {
         os.getenv("VK_SDK_PATH") .. "/Include",
    }
@@ -163,9 +162,6 @@ function SetupGraphicsSDK()
       "VK_PROTOTYPES",
       "VK_USE_PLATFORM_WIN32_KHR",
    }
-
-   -- Setup Dx12 SDK
-   filter {"platforms:x64(Dx12)"}
 
    filter {}
 

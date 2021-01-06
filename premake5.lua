@@ -4,16 +4,18 @@
 
 griffin = {}
 griffin.EngineName = "GriffinEngine"
-griffin.Platforms = { "x64(Dx12)", "x64(Vulkan)" }
+griffin.Platforms = { "Win64" }
+griffin.GfxApis = { "Vulkan" }
 griffin.EngineBasePath = "Engine"
 griffin.OutDir = "bin"
 griffin.VSFilesDir = "build"
 griffin.WorkingDir = "data"
 griffin.VSOBJFilesDir = griffin.VSFilesDir .. "/" .. "obj"
-griffin.OutPath = griffin.OutDir .. "/" .. "%{cfg.platform}" .. "/" .. "%{cfg.buildcfg}"
+griffin.OutPath = griffin.OutDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
 griffin.ProjVSFilesPath = griffin.VSFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
 griffin.ProjVSOBJFilesPath = griffin.VSOBJFilesDir .. "/" .. "%{prj.platform}" .. "/" .. "%{prj.buildcfg}"
 griffin.WorkingDirPath = griffin.WorkingDir .. "/" .. "%{prj.platform}" .. "/"
+griffin.GriffinSrcDir = griffin.EngineBasePath .. "/Src"
 
 ----------------------------------------------------------
 -- Solution layout
@@ -52,21 +54,6 @@ groups["External"] =
 		"stb",
 		"dxc",
 	}
-}
-
-groups["Core"] = 
-{
-	Path = griffin.EngineBasePath,
-	Projects = 
-	{
-		"GfCore",
-		"GfMemory",
-		"GfEntry",
-		"GfRender",
-		"GfInput",
-		"GfFile",
-	}
-
 }
 
 groups["Tools"] = 

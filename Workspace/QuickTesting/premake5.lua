@@ -3,14 +3,23 @@ project "QuickTesting"
 	language "C++"
 
 	links {
-		"GfCore",
-		"GfInput",
-		"GfFile",
-		"GfEntry",
-		"GfRender",
-		"GfMaterialCompiler"
+		"Griffin.lib",
 	}
 
-	GfResolveDep("QuickTesting", "GfMaterialCompiler")
+	location(ProjectFilesDir)
+	targetdir(griffin.OutPath .. "/QuickTesting")
+	objdir(griffin.ObjPath .. "/QuickTesting/obj/")
 
-	SetupGraphicsSDK();
+	-------------------
+	-- Add include dirs
+	includedirs { "./", griffin.GriffinSrcDir, griffin.ExternalSrcDir }
+
+	-------------------
+	-- Add lib dirs
+	libdirs { griffin.GriffinLibDir }
+
+	-------------------
+	-- Add files
+	files {"./src/**.*"}
+
+	SetupGraphicsSDK()

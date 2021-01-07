@@ -11,13 +11,13 @@
 #define __TESTAPP_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfCore.h"
+#include "Common/GfCore/GfCore.h"
 
-#include "GfMemory/Common/GfRAII.h"
-#include "GfRender/Common/GfMaterial.h"
-#include "GfCore/Common/GfSingleton.h"
-#include "GfRender/Common/GfRender.h"
-#include "GfFile/Common/GfFile.h"
+#include "Common/GfMemory/GfRAII.h"
+#include "Common/GfCore/GfSingleton.h"
+#include "Common/GfRender/GfMaterial.h"
+#include "Common/GfRender/GfRender.h"
+#include "Common/GfFile/GfFile.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

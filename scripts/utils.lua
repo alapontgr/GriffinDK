@@ -147,24 +147,25 @@ end
 -- Use this within the scope of a project to do the setup of the graphics SDK
 -- Includes and links the current active (Premake) project with the correct graphics SDKs 
 function SetupGraphicsSDK()
-   -- Setup Vulkan SDK
-   configuration "vulkan"
- 
-   includedirs {
-        os.getenv("VK_SDK_PATH") .. "/Include",
-   }
-   libdirs { 
-      os.getenv("VK_SDK_PATH") .. "/Lib",
-   }
-   links {"vulkan-1"}      
-   defines 
-   {
-      "VK_PROTOTYPES",
-      "VK_USE_PLATFORM_WIN32_KHR",
-   }
+   -----------------------
+   -- Setup Gfx libraries
 
-   filter {}
+   if _OPTIONS["gfxapi"] == "vulkan" then
 
+      defines { "_GFX_API=Vulkan" }
+      includedirs {
+         os.getenv("VK_SDK_PATH") .. "/Include",
+      }
+      libdirs { 
+         os.getenv("VK_SDK_PATH") .. "/Lib",
+      }
+      links {"vulkan-1"}      
+      defines 
+      {
+         "VK_PROTOTYPES",
+         "VK_USE_PLATFORM_WIN32_KHR",
+      }
+   end
 end
 
 function GfRegisterExtDep(_Project, _Dep)

@@ -13,3 +13,5 @@ build/
 bin/
 Solutions/
 .vs/
+_obj/
+_bin/

@@ -11,34 +11,35 @@
 #define __GFRENDER_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "GfCore/Common/GfCoreMinimal.h"
-#include GF_SOLVE_PLATFORM_HEADER(GfRender)
+#include "Common/GfCore/GfCoreMinimal.h"
 
-#include "Gfrender/Common/GfRenderConstants.h"
+#include GF_SOLVE_GFX_API_PATH(GfRender/GfRender_Platform.h)
 
-#include "GfRender/Common/GfRenderCommon.h"
+#include "Common/GfRender/GfRenderConstants.h"
 
-#include "GfRender/Common/GfGraphicsSDK.h"
+#include "Common/GfRender/GfRenderCommon.h"
 
-#include "GfRender/Common/GfWindow.h"
+#include "Common/GfRender/GfGraphicsSDK.h"
 
-#include "GfRender/Common/GfRenderContext.h"
+#include "Common/GfRender/GfWindow.h"
 
-#include "GfRender/Common/GfRenderPass.h"
+#include "Common/GfRender/GfRenderContext.h"
 
-#include "GfRender/Common/GraphicResources/GfGraphicResources.h"
+#include "Common/GfRender/GfRenderPass.h"
 
-#include "GfRender/Common/GfCmdBuffer.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResources.h"
 
-#include "GfRender/Common/GfCmdBufferFactory.h"
+#include "Common/GfRender/GfCmdBuffer.h"
 
-#include "GfRender/Common/GfMaterialShared.h"
+#include "Common/GfRender/GfCmdBufferFactory.h"
 
-#include "GfRender/Common/GfMatParamLayout.h"
+#include "Common/GfRender/GfMaterialShared.h"
 
-#include "GfRender/Common/GfMaterial.h"
+#include "Common/GfRender/GfMatParamLayout.h"
 
-#include "GfRender/Common/GfCamera.h"
+#include "Common/GfRender/GfMaterial.h"
+
+#include "Common/GfRender/GfCamera.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFRENDER_H__

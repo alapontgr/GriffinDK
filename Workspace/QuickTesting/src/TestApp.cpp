@@ -9,8 +9,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "QuickTesting/Common/TestApp.h"
-#include "GfInput/Common/GfInput.h"
+#include "./src/TestApp.h"
+#include "Common/GfInput/GfInput.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"

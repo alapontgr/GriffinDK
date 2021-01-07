@@ -20,15 +20,15 @@ ExternalProjects =
 kind "StaticLib"
 language "C++"
 
-location(griffin.OutPath)
-objdir(griffin.ProjVSFilesPath .. "/Griffin/obj/")
-
+location(ProjectFilesDir)
+targetdir(griffin.OutPath)
+objdir(griffin.ObjPath .. "/Griffin")
 -------------------
 -- Add include dirs
 includedirs { "./Src", "./External" }
 
 -------------------
--- Add files TODO
+-- Add files
 
 fileDirs = {"./Src/Common/**.*"}
 
@@ -44,23 +44,4 @@ table.insert(fileDirs, "./Src/Vulkan/**.*")
 
 files {fileDirs}
 
------------------------
--- Setup Gfx libraries
-
-if _OPTIONS["gfxapi"] == "vulkan" then
-
-	defines { "_GFX_API=Vulkan" }
-	includedirs {
-		os.getenv("VK_SDK_PATH") .. "/Include",
-	}
-	libdirs { 
-		os.getenv("VK_SDK_PATH") .. "/Lib",
-	}
-	links {"vulkan-1"}      
-	defines 
-	{
-		"VK_PROTOTYPES",
-		"VK_USE_PLATFORM_WIN32_KHR",
-	}
-
-end
+SetupGraphicsSDK()

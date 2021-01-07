@@ -12,13 +12,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "GfCore/Common/GfCoreMinimal.h"
-
-#include "GfCore/Common/GfMaths.h"
-
-#include "GfCore/Common/GfBitMask.h"
-
-#include "GfCore/Common/GfStl.h"
+#include "Common/GfCore/GfCoreMinimal.h"
+#include "Common/GfCore/GfMaths.h"
+#include "Common/GfCore/GfBitMask.h"
+#include "Common/GfCore/GfStl.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

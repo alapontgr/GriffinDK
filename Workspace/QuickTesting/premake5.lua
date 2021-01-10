@@ -3,7 +3,7 @@ project "QuickTesting"
 	language "C++"
 
 	links {
-		"Griffin.lib",
+		"Griffin",
 	}
 
 	location(ProjectFilesDir)

@@ -29,5 +29,7 @@
 
 #include "Common/GfCore/GfBitMask.h"
 
+#include "Common/GfCore/GfStl.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

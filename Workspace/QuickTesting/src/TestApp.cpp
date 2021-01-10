@@ -59,6 +59,8 @@ GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& si
 
 s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 {
+	GfCommandLine::init(kEntryParams.m_szCmdLine);
+
 	Init();
 	
 	while (m_kWindow.BeginFrame(m_kContext))

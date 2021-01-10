@@ -16,6 +16,8 @@
 #include "Common/GfCore/GfMaths.h"
 #include "Common/GfCore/GfBitMask.h"
 #include "Common/GfCore/GfStl.h"
+#include "Common/GfCore/GfHash.h"
+#include "Common/GfCore/GfCommandLine.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

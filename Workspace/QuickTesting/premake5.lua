@@ -1,5 +1,5 @@
 project "QuickTesting"
-	kind "WindowedApp"
+	kind "ConsoleApp"
 	language "C++"
 
 	links {

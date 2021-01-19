@@ -31,5 +31,7 @@
 
 #include "Common/GfCore/GfStl.h"
 
+#include "Common/GfMemory/GfMemory.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

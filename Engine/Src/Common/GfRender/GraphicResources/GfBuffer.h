@@ -19,40 +19,18 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace EBufferUsage 
+namespace BufferType 
 {
 	enum Type : u32
 	{
-		InvalidUsage		= 0,
-		Transfer_Src		= 1 << 0,
-		Transfer_Dst		= 1 << 1,
-		Uniform_Texel		= 1 << 2,
-		Storage_Texel		= 1 << 3,
-		Uniform_Buffer		= 1 << 4,
-		Storage_Buffer		= 1 << 5,
-		Index_Buffer		= 1 << 6,
-		Vertex_Buffer		= 1 << 7,
-		Indirect_Buffer		= 1 << 8,
+		Staging = 1,
+		Vertex,
+		Index,
+		Uniform,
+		Storage,
+		// ...
 	};
 }
-// Combination of flags defined in EBufferUsage
-using GfBufferUsage = GfBitMask<u32>;
-
-////////////////////////////////////////////////////////////////////////////////
-
-namespace EBufferMemProperties 
-{
-	enum Type : u32
-	{
-		GPU_Local			= 1 << 0,
-		CPU_Visible			= 1 << 1,
-		CPU_GPU_Coherent	= 1 << 2,
-		CPU_Cached			= 1 << 3,
-		Lazy_Allocated		= 1 << 4
-	};
-}
-// Combination of flags defined in EBufferMemProperties
-using GfBufferMemType = GfBitMask<u32>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -63,17 +41,15 @@ public:
 
 	friend class GfBuffer_Platform;
 
+	using Id = s32;
+
 	struct GfBufferDesc
 	{
-		size_t							m_ulSize			= 0;
-		size_t							m_ulAlignment		= 1;
-		GfBufferMemType					m_uiMemoryProperties	= EBufferMemProperties::GPU_Local;
-		GfBufferUsage					m_uiBufferUsage		= EBufferUsage::InvalidUsage;
-		EBufferUsage::Type				m_eBufferType		= EBufferUsage::InvalidUsage;
-		// GfRencerContextFamilies::Type	m_eTargetFamily		= GfRencerContextFamilies::Graphics;
+		BufferType::Type	m_bufferType;
+		u32					m_size			= 0;
+		u32					m_alignment		= 1;
+		bool				m_mappable		= false;
 	};
-
-	////////////////////////////////////////////////////////////////////////////////
 
 	struct GfRange 
 	{
@@ -86,30 +62,30 @@ public:
 
 	GfBuffer();
 
-	void Init(const GfBufferDesc& kDesc);
+	void init(const GfBufferDesc& kDesc);
 
-	bool Create(const GfRenderContext& kCtxt);
+	bool create(const GfRenderContext& kCtxt);
 
-	void Destroy(const GfRenderContext& kCtxt);
+	void destroy(const GfRenderContext& kCtxt);
 
-	bool IsMappable() const;
+	bool isMappable() const;
 
-	bool IsInitialised() const;
+	bool isInitialised() const;
 
-	bool IsGPUReady() const;
+	bool isGPUReady() const;
 
-	bool IsMapped() const;
+	bool isMapped() const;
 
-	void* Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+	void* map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
 	
-	void UnMap(const GfRenderContext& kCtxt);
+	void unMap(const GfRenderContext& kCtxt);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
-	void CopyRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+	void copyRangeFrom(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
-	void UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+	void updateRange(const GfCmdBuffer& kCmdBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -119,55 +95,56 @@ private:
 	{
 		Mapped = 1 << 0,
 		Initialised = 1<<1,
-		GPUReady = 1<<2
+		GPUReady = 1<<2,
+		Mappable = 1<<3
 	};
 
-	GfBufferDesc	m_kDesc;
-	GfBitMask<u32>	m_uiFlags;
-	u32				m_uiMappedOffset;
-	u32				m_uiMappedSize;
+	GfBufferDesc	m_desc;
+	u32				m_flags;
+	u32				m_mappedOffset;
+	u32				m_mappedSize;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfBuffer::CopyRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
+GF_FORCEINLINE void GfBuffer::copyRangeFrom(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
 {
-	m_kPlatform.CopyRangeRHI(kCmdBuffer, kFrom, kTo, uiFromOffset, uiToOffset, uiSize);
+	m_kPlatform.copyRangeFromRHI(kCmdBuffer, kFrom, uiFromOffset, uiToOffset, uiSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfBuffer::UpdateRange(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData)
+GF_FORCEINLINE void GfBuffer::updateRange(const GfCmdBuffer& kCmdBuffer, u32 uiOffset, u32 uiSize, void* pData)
 {
-	m_kPlatform.UpdateRangeRHI(kCmdBuffer, kBuffer, uiOffset, uiSize, pData);
+	m_kPlatform.updateRangeRHI(kCmdBuffer, uiOffset, uiSize, pData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfBuffer::IsMappable() const
+GF_FORCEINLINE bool GfBuffer::isMappable() const
 {
-	return (m_kDesc.m_uiMemoryProperties & EBufferMemProperties::CPU_Visible) != 0;
+	return m_desc.m_mappable;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfBuffer::IsInitialised() const
+GF_FORCEINLINE bool GfBuffer::isInitialised() const
 {
-	return m_uiFlags.IsEnable(EFlag::Initialised);
+	return (m_flags & EFlag::Initialised);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfBuffer::IsMapped() const
+GF_FORCEINLINE bool GfBuffer::isMapped() const
 {
-	return m_uiFlags.IsEnable(EFlag::Mapped);
+	return (m_flags & EFlag::Mapped);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfBuffer::IsGPUReady() const
+GF_FORCEINLINE bool GfBuffer::isGPUReady() const
 {
-	return m_uiFlags.IsEnable(EFlag::GPUReady);
+	return (m_flags & EFlag::GPUReady);
 }
 
 

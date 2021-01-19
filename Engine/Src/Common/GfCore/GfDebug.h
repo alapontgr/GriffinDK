@@ -19,7 +19,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-enum MsgType 
+enum class MsgType : u32
 {
 	Normal,
 	Info,
@@ -39,22 +39,18 @@ void GFPrintError(const char* szFileName, u32 uiLine, const char *fmt, ...);
 // Use for logging
 #define GF_PRINT(FMT, ...) GFPrintMsg(MsgType::Normal, FMT, __VA_ARGS__)
 #define GF_INFO(FMT, ...) GFPrintMsg(MsgType::Info, FMT, __VA_ARGS__)
-#define GF_WARNING(FMT, ...) GFPrintMsg(MsgType::Warning, FMT, __VA_ARGS__)
-#define GF_ERROR(FMT, ...) GFPrintMsg(MsgType::Error, FMT, __VA_ARGS__); abort();
-
-// Use it to validate an expression. If it is invalid it will show the filename/line/expresion and the message. Also, it will assert
-#define GF_VERIFY(EXPR, MSG) \
-  if(!(EXPR)) GFPrintError(__FILE__, __LINE__, "// Expr: '%s' failed.\n// Message: %s\n", #EXPR, MSG); abort();
 
 #else
 
 #define GF_PRINT(FMT, ...) GF_NOTHING
 #define GF_INFO(FMT, ...) GF_NOTHING
-#define GF_WARNING(FMT, ...) GF_NOTHING
-#define GF_ERROR(FMT, ...) GF_NOTHING
-#define GF_VERIFY(EXPR, MSG) GF_NOTHING
 
 #endif
+
+#define GF_VERIFY(EXPR, MSG) \
+  if(!(EXPR)) { GFPrintError(__FILE__, __LINE__, "// Expr: '%s' failed.\n// Message: %s\n", #EXPR, MSG); abort(); }
+#define GF_WARNING(FMT, ...) GFPrintMsg(MsgType::Warning, FMT, __VA_ARGS__)
+#define GF_ERROR(FMT, ...) GFPrintMsg(MsgType::Error, FMT, __VA_ARGS__); abort();
 
 ////////////////////////////////////////////////////////////////////////////////
 

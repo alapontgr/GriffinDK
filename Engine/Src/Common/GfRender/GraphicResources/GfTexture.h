@@ -102,6 +102,8 @@ class GfTexture2D : public GfTexturedResource
 	GF_DECLARE_PLATFORM_INTERFACE(GfTexture2D);
 public:
 
+	using Id = s32;
+
 	GfTexture2D();
 
 	bool Init(u32 uiWidth, u32 uiHeight, u32 uiMips,

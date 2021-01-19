@@ -18,13 +18,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Utils
 
-// Used to obtain the StageFlags and AccessFlags to be used by a PipelineBarrier to perform the transition to a specific EBufferUsage
-static const GfUMap<EBufferUsage::Type, GfStageAccessConfig> g_tVulkanStageAccessFlagsMap {
-	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT } },
-	{ EBufferUsage::Transfer_Dst,	{ VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT } },
-	{ EBufferUsage::Index_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_INDEX_READ_BIT } },
-	{ EBufferUsage::Vertex_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT } },
-	{ EBufferUsage::Uniform_Buffer,	{ VK_PIPELINE_STAGE_VERTEX_SHADER_BIT , VK_ACCESS_UNIFORM_READ_BIT } }
+struct GfStageAccessConfig
+{
+	VkPipelineStageFlags	m_stage;
+	VkAccessFlags			m_access;
+};
+
+static const GfStageAccessConfig s_bufferTypePreferredSyncState[] =
+{
+	{VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT }, // Staging
+	{VK_PIPELINE_STAGE_VERTEX_INPUT_BIT , VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT }, // Vertex buffer
+	{VK_PIPELINE_STAGE_VERTEX_INPUT_BIT , VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT }, // Index buffer
+	{VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT , VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT }, // Uniform buffer
+	{VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT , VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT }, // Storage buffer
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,9 +53,43 @@ u32 FindMemTypeIdx(const u32 uiTypeFilter, VkMemoryPropertyFlags uiMemProperties
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfStageAccessConfig GfBuffer_Platform::GetTransitionSettingsForType(u32 uiType)
+static void getBufferFlags(BufferType::Type type, bool isMappable, VkBufferUsageFlags& usageFlags, VkMemoryPropertyFlags& memoryFlags)
 {
-	return g_tVulkanStageAccessFlagsMap.at((EBufferUsage::Type)uiType);
+	usageFlags = 0;
+	memoryFlags = 0;
+	if (isMappable) 
+	{
+		memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	}
+	else 
+	{
+		memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	}
+	switch (type)
+	{
+	case BufferType::Vertex:
+		usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		break;
+	case BufferType::Index:
+		usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		break;
+	case BufferType::Uniform:
+		usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		break;
+	default:
+		GF_ASSERT_ALWAYS("Buffer type not supported");
+		break;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfStageAccessConfig getTransitionSettingsForType(u32 bufferType)
+{
+	return s_bufferTypePreferredSyncState[bufferType];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +97,8 @@ GfStageAccessConfig GfBuffer_Platform::GetTransitionSettingsForType(u32 uiType)
 GF_DEFINE_PLATFORM_CTOR(GfBuffer)
 	, m_pBuffer(nullptr)
 	, m_pMemory(nullptr)
+	, m_currAccess(0)
+	, m_currStage(0)
 {
 }
 
@@ -64,12 +106,16 @@ GF_DEFINE_PLATFORM_CTOR(GfBuffer)
 
 bool GfBuffer_Platform::CreateRHI(const GfRenderContext& kCtxt)
 {
+	VkBufferUsageFlags usageFlags = 0;
+	VkMemoryPropertyFlags memoryFlags = 0;
+	getBufferFlags(m_kBase.m_desc.m_bufferType, m_kBase.m_desc.m_mappable, usageFlags, memoryFlags);
+
 	VkBufferCreateInfo bufferCreateInfo{};
 	bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferCreateInfo.pNext = nullptr;
 	bufferCreateInfo.flags = 0; // TODO: Add support for different flags (SParse buffers)
-	bufferCreateInfo.size = m_kBase.m_kDesc.m_ulSize;
-	bufferCreateInfo.usage = m_kBase.m_kDesc.m_uiBufferUsage.Flags();
+	bufferCreateInfo.size = static_cast<VkDeviceSize>(m_kBase.m_desc.m_size);
+	bufferCreateInfo.usage = usageFlags;
 
 	// TODO: Enable Optional concurrent access at some point
 	bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -91,10 +137,7 @@ bool GfBuffer_Platform::CreateRHI(const GfRenderContext& kCtxt)
 	allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocateInfo.pNext = nullptr;
 	allocateInfo.allocationSize = bufferRequirements.size;
-	allocateInfo.memoryTypeIndex = FindMemTypeIdx(
-		bufferRequirements.memoryTypeBits, 
-		m_kBase.m_kDesc.m_uiMemoryProperties.Flags(), 
-		kCtxt.Plat().m_pPhysicalDevice);
+	allocateInfo.memoryTypeIndex = FindMemTypeIdx(bufferRequirements.memoryTypeBits, memoryFlags, kCtxt.Plat().m_pPhysicalDevice);
 
 	eResult = vkAllocateMemory(kCtxt.Plat().m_pDevice, &allocateInfo, nullptr, &m_pMemory);
 	if (eResult != VK_SUCCESS)
@@ -122,13 +165,6 @@ void GfBuffer_Platform::DestroyRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfStageAccessConfig GfBuffer_Platform::GetTransitionSettings() const
-{
-	return g_tVulkanStageAccessFlagsMap.at(m_kBase.m_kDesc.m_eBufferType);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void* GfBuffer_Platform::MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
 	void* pData(nullptr);
@@ -139,14 +175,14 @@ void* GfBuffer_Platform::MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::UnMapRHI(const GfRenderContext& kCtxt)
+void GfBuffer_Platform::unMapRHI(const GfRenderContext& kCtxt)
 {
 	vkUnmapMemory(kCtxt.Plat().m_pDevice, m_pMemory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::FlushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
+void GfBuffer_Platform::flushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
 	VkMappedMemoryRange kRange = {};
 	kRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -159,100 +195,124 @@ void GfBuffer_Platform::FlushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOff
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::CopyRangeRHI(
+void GfBuffer_Platform::copyRangeFromRHI(
 	const GfCmdBuffer& kCmdBuffer,
 	const GfBuffer& kFrom,
-	const GfBuffer& kTo,
 	u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
 {
-	GfStageAccessConfig kCurrToTransferSettings = kTo.Plat().GetTransitionSettings();
-	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
+	GF_ASSERT(kFrom.m_kPlatform.m_currAccess == 0 && kFrom.m_kPlatform.m_currStage == 0, "The source has not been transited to a correct state");
+	GfStageAccessConfig srcSettings = getTransitionSettingsForType(kFrom.m_desc.m_bufferType);
+	GfStageAccessConfig dstSettings = getTransitionSettingsForType(m_kBase.m_desc.m_bufferType);
 
-	VkBufferMemoryBarrier kBarrier;
-	kBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-	kBarrier.pNext = nullptr;
-	kBarrier.buffer = kTo.Plat().GetHandle();
-	kBarrier.offset = uiToOffset;
-	kBarrier.size = uiSize;
-	kBarrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
-	kBarrier.dstAccessMask = kTransferToCurrSettings.m_eAccess;
-	// TODO: Do I need to transit between different queues
-	kBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	kBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	VkBufferMemoryBarrier barriers[2];
+	// From buffer 
+	barriers[0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barriers[0].pNext = nullptr;
+	barriers[0].buffer = kFrom.m_kPlatform.GetHandle();
+	barriers[0].offset = uiFromOffset;
+	barriers[0].size = uiSize;
+	barriers[0].srcAccessMask = srcSettings.m_access;
+	barriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+	barriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	// Destination buffer (Me)
+	barriers[1].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+	barriers[1].pNext = nullptr;
+	barriers[1].buffer = m_pBuffer;
+	barriers[1].offset = uiToOffset;
+	barriers[1].size = uiSize;
+	barriers[1].srcAccessMask = dstSettings.m_access;
+	barriers[1].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
+	// Sync with any compute or fragment operations in fly
 	vkCmdPipelineBarrier(
 		kCmdBuffer.Plat().GetCmdBuffer(),
-		kCurrToTransferSettings.m_eStage,
-		kTransferToCurrSettings.m_eStage,
+		srcSettings.m_stage | dstSettings.m_stage,
+		VK_PIPELINE_STAGE_TRANSFER_BIT ,
 		0,
 		0, nullptr,
-		1, &kBarrier,
+		2, barriers,
 		0, nullptr);
 
 	VkBufferCopy kRegion;
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), kTo.Plat().GetHandle(), 1, &kRegion);
+	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), m_pBuffer, 1, &kRegion);
 
-	// Go back to the original state
-	kBarrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
-	kBarrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
+	// Go back to the original state and sync with Compute and vertex
+	barriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barriers[0].dstAccessMask = dstSettings.m_access;
+	barriers[1].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barriers[1].dstAccessMask = dstSettings.m_access;
+
 	vkCmdPipelineBarrier(
 		kCmdBuffer.Plat().GetCmdBuffer(),
-		kTransferToCurrSettings.m_eStage,
-		kCurrToTransferSettings.m_eStage,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		srcSettings.m_stage | dstSettings.m_stage,
 		0,
 		0, nullptr,
-		1, &kBarrier,
+		2, barriers,
 		0, nullptr);
+
+	if (m_currAccess == 0 && m_currStage == 0) 
+	{
+		m_currAccess = dstSettings.m_access;
+		m_currStage = dstSettings.m_stage;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::UpdateRangeRHI(
+void GfBuffer_Platform::updateRangeRHI(
 	const GfCmdBuffer& kCmdBuffer,
-	const GfBuffer& kBuffer,
 	u32 uiOffset, u32 uiSize, void* pData)
 {
-	GfStageAccessConfig kCurrToTransferSettings = kBuffer.Plat().GetTransitionSettings();
-	GfStageAccessConfig kTransferToCurrSettings = GfBuffer_Platform::GetTransitionSettingsForType(EBufferUsage::Transfer_Dst);
+	GfStageAccessConfig syncSettings = getTransitionSettingsForType(m_kBase.m_desc.m_bufferType);
 
 	// Sync to transfer operations
 	VkBufferMemoryBarrier barrier;
 	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 	barrier.pNext = nullptr;
-	barrier.buffer = kBuffer.Plat().GetHandle();
+	barrier.buffer = m_pBuffer;
 	barrier.offset = uiOffset;
 	barrier.size = uiSize;
-	barrier.srcAccessMask = kCurrToTransferSettings.m_eAccess;
-	barrier.dstAccessMask = kTransferToCurrSettings.m_eAccess;
+	barrier.srcAccessMask = syncSettings.m_access;
+	barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
 		kCmdBuffer.Plat().GetCmdBuffer(),
-		kCurrToTransferSettings.m_eStage,
-		kTransferToCurrSettings.m_eStage,
+		syncSettings.m_stage,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0,
 		0, nullptr,
 		1, &barrier,
 		0, nullptr);
 
 	// Update data
-	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kBuffer.Plat().GetHandle(), uiOffset, uiSize, pData);
+	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), m_pBuffer, uiOffset, uiSize, pData);
 
 	// Sync back
-	barrier.srcAccessMask = kTransferToCurrSettings.m_eAccess;
-	barrier.dstAccessMask = kCurrToTransferSettings.m_eAccess;
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = syncSettings.m_access;
 	vkCmdPipelineBarrier(
 		kCmdBuffer.Plat().GetCmdBuffer(),
-		kTransferToCurrSettings.m_eStage,
-		kCurrToTransferSettings.m_eStage,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		syncSettings.m_stage,
 		0,
 		0, nullptr,
 		1, &barrier,
 		0, nullptr);
+
+	if (m_currAccess == 0 && m_currStage == 0) 
+	{
+		m_currAccess = syncSettings.m_access;
+		m_currStage = syncSettings.m_stage;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

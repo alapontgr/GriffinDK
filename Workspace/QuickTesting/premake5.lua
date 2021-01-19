@@ -22,4 +22,6 @@ project "QuickTesting"
 	-- Add files
 	files {"./src/**.*"}
 
+	files {griffin.ExternalSrcDir .. "/tinygltf/**.*"}
+
 	SetupGraphicsSDK()

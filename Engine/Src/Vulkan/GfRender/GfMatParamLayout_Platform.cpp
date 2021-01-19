@@ -25,7 +25,7 @@ void FillUniformBufferBinding(
 	VkDescriptorSet pSet, u32 uiBindSlot)
 {
 	const GfBuffer::GfRange kRange(pCBuffer->GetBufferRange());
-	GF_ASSERT(kRange.m_pBuffer->IsGPUReady(), "Buffer has not been created yet");
+	GF_ASSERT(kRange.m_pBuffer->isGPUReady(), "Buffer has not been created yet");
 	pBufferInfosPivot->buffer = kRange.m_pBuffer->Plat().GetHandle();
 	pBufferInfosPivot->offset = kRange.m_uiOffset;
 	pBufferInfosPivot->range = kRange.m_uiSize;

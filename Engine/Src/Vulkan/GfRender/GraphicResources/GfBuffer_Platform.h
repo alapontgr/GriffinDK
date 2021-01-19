@@ -19,13 +19,6 @@
 class GfRenderContext;
 class GfCmdBuffer;
 
-////////////////////////////////////////////////////////////////////////////////
-
-struct GfStageAccessConfig
-{
-	VkPipelineStageFlagBits m_eStage;
-	VkAccessFlagBits		m_eAccess;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,8 +26,6 @@ class GfBuffer_Platform
 {
 	GF_DECLARE_PLATFORM_MEMBERS(GfBuffer);
 public:
-
-	static GfStageAccessConfig GetTransitionSettingsForType(u32 uiType);
 
 	bool CreateRHI(const GfRenderContext& kCtxt);
 
@@ -44,27 +35,27 @@ public:
 
 	VkDeviceMemory GetMemory() const;
 
-	GfStageAccessConfig GetTransitionSettings() const;
-
 	void* MapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
 
-	void UnMapRHI(const GfRenderContext& kCtxt);
+	void unMapRHI(const GfRenderContext& kCtxt);
 
-	void FlushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+	void flushAndUnMapRHI(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Buffer commands
 
-	void CopyRangeRHI(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, const GfBuffer& kTo, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+	void copyRangeFromRHI(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
 
-	void UpdateRangeRHI(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kBuffer, u32 uiOffset, u32 uiSize, void* pData);
+	void updateRangeRHI(const GfCmdBuffer& kCmdBuffer, u32 uiOffset, u32 uiSize, void* pData);
 
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
-	VkBuffer		m_pBuffer;
-	VkDeviceMemory	m_pMemory;
+	VkBuffer			 m_pBuffer;
+	VkDeviceMemory		 m_pMemory;
+	VkAccessFlags		 m_currAccess;
+	VkPipelineStageFlags m_currStage;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

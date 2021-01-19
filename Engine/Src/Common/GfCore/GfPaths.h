@@ -1,29 +1,35 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2020/01/10
-//	File: 	GfCommandLine.h
+//	Date: 	2021/01/13
+//	File: 	GfPaths.h
 //
-//	Copyright (c) 2020 (See README.md)
+//	Copyright (c) 2021 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
-
+#pragma once 
 #include "Common/GfCore/GfCoreMinimal.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfCommandLine 
+class GfPaths 
 {
 public:
-	static void init(const GfString& args);
 
-	static GfString getArg(const u64 argHash);
+	static void Init();
+
+	// Convert relative path to absolute path in the working dir. Return <workingDir>/<relPath>
+	static GfString getAssetPath(const GfString& relPath);
+
+	static GfString getWorkingDir() 
+	{
+		return ms_workingDir;
+	}
 
 private:
 
-	static GfString ms_commandLineArgs;
-	static GfUMap<u64, GfString> ms_arguments;
+	// Commandline: "--workDir <path>"
+	static GfString ms_workingDir;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

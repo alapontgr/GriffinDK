@@ -29,7 +29,7 @@ public:
 
 private:
 
-	void Init();
+	void Init(const GfEntryArgs& kEntryParams);
 
 	void Update();
 
@@ -46,6 +46,8 @@ private:
 	void CreateMaterialsAndParamSets();
 
 	void CreateResources();
+
+	void loadGLTF();
 
 	GfWindow		m_kWindow;
 	GfRenderContext m_kContext;

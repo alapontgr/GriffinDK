@@ -18,6 +18,7 @@
 #include "Common/GfCore/GfStl.h"
 #include "Common/GfCore/GfHash.h"
 #include "Common/GfCore/GfCommandLine.h"
+#include "Common/GfCore/GfPaths.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif

@@ -65,6 +65,17 @@ void GfFile::CloseFile(GfFileHandle& kHandle)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+bool GfFile::DoesFileExist(const char* filePath) 
+{
+	WIN32_FIND_DATAA fd = {0};
+	HANDLE hFound = FindFirstFileA(filePath, &fd);
+	bool result = hFound != INVALID_HANDLE_VALUE;
+	FindClose(hFound);
+	return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 size_t GfFile::GetFileSize(GfFileHandle& kHandle)
 {
 	if (kHandle.Plat().m_pHandle != INVALID_HANDLE_VALUE) 
@@ -102,7 +113,7 @@ u32 GfFile::ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffe
 
 ////////////////////////////////////////////////////////////////////////////////
 
-u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, void* pBuffer)
+u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, const void* pBuffer)
 {
 	if (kHandle.m_eType == EFileAccessMode::Write) 
 	{

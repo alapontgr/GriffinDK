@@ -12,8 +12,9 @@
 #include "./src/TestApp.h"
 #include "Common/GfInput/GfInput.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+
+#include "GfMesh.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -26,17 +27,95 @@ struct GfPerFrameCB
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize)
+static GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize)
 {
 	GfFileHandle kFile;
 	GfFile::OpenFile(szFilepath, EFileAccessMode::Read, kFile);
 	GfFile::GetFileSize(kFile);
 	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
-	GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
-	u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
-	GfFile::CloseFile(kFile);
-	GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
-	return pSrc;
+	if (uiOutFileSize > 0) 
+	{
+		GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
+		u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
+		GfFile::CloseFile(kFile);
+		GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
+		return pSrc;
+	}
+	return nullptr;
+}
+
+static GfUniquePtr<char[]> LoadFileBin(const char* szFilepath, u32& uiOutFileSize) 
+{
+	GfFileHandle kFile;
+	GfFile::OpenFile(szFilepath, EFileAccessMode::Read, kFile);
+	GfFile::GetFileSize(kFile);
+	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
+	if (uiOutFileSize > 0) 
+	{
+		GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
+		u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
+		GfFile::CloseFile(kFile);
+		GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
+		return pSrc;
+	}
+	return nullptr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static bool doesFileExist(const std::string &abs_filename, void *) 
+{
+	return GfFile::DoesFileExist(abs_filename.c_str());
+}
+
+static GfString expandFilePath(const std::string & relPath, void *) 
+{
+	return GfPaths::getAssetPath(relPath);
+}
+
+static bool readWholeFile(std::vector<unsigned char>* outBuffer, std::string* error, const std::string & filePath, void *)
+{
+	GfFileHandle kFile;
+	GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Read, kFile);
+	GfFile::GetFileSize(kFile);
+	u32 fileSize = static_cast<u32>(kFile.GetFileSize());
+	if (fileSize > 0) 
+	{
+		outBuffer->resize(fileSize);
+		u32 uiRead = GfFile::ReadBytes(kFile, fileSize, outBuffer->data());
+		GfFile::CloseFile(kFile);
+		if (uiRead == fileSize) 
+		{
+			return true;
+		}
+		if (error) 
+		{
+			*error = "Failed to read file: " + filePath;
+		}
+	}
+	return false;
+}
+
+static bool writeWholeFile(std::string * error, const std::string & filePath, 
+	const std::vector<unsigned char> & data, void * userData)
+{
+	if (data.size() > 0) 
+	{
+		GfFileHandle kFile;
+		GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Write, kFile);
+		u32 fileSize = static_cast<u32>(kFile.GetFileSize());
+		u32 uiWriten = GfFile::WriteBytes(kFile, u32(data.size()), reinterpret_cast<const void*>(data.data()));
+		GfFile::CloseFile(kFile);
+		if (uiWriten == u32(data.size())) 
+		{
+			return true;
+		}
+		if (error) 
+		{
+			*error = "Failed to write to file: " + filePath;
+		}
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,9 +138,7 @@ GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& si
 
 s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 {
-	GfCommandLine::init(kEntryParams.m_szCmdLine);
-
-	Init();
+	Init(kEntryParams);
 	
 	while (m_kWindow.BeginFrame(m_kContext))
 	{
@@ -98,8 +175,11 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void TestApp::Init()
+void TestApp::Init(const GfEntryArgs& kEntryParams)
 {
+	GfCommandLine::init(kEntryParams.m_szCmdLine);
+	GfPaths::Init();
+
 	// Create the window
 	GfWindowInitParams kWindowInit;
 	kWindowInit.m_uiWidth = 512;
@@ -221,11 +301,11 @@ void TestApp::Shutdown()
 void TestApp::DoTransferOperations(GfCmdBuffer& kCmdBuffer)
 {
 	u32 uiTextureSize(m_kTesTexture.GetWidth() * m_kTesTexture.GetHeight() * 4);
-	void* pData = m_kStagingBuffer.Map(m_kContext, 0, uiTextureSize);
+	void* pData = m_kStagingBuffer.map(m_kContext, 0, uiTextureSize);
 	if(pData)
 	{
 		memcpy(pData, m_pTestTextureData.get(), uiTextureSize);
-		m_kStagingBuffer.UnMap(m_kContext);
+		m_kStagingBuffer.unMap(m_kContext);
 	}
 
 	m_kTesTexture.LoadTexture2DDataFromStaging(m_kContext, kCmdBuffer, m_kStagingBuffer, 0);
@@ -256,16 +336,19 @@ void TestApp::CreateMaterialsAndParamSets()
 	m_kParamLayout.Create(m_kContext);
 
 	// Define material
-	m_kMaterialT.SetTopology(EPrimitiveTopology::TriList);
-	m_kMaterialT.SetRasterState(GfRasterState());		// Use default RasterState
-	m_kMaterialT.SetMSState(GfMultiSamplingState());	// Default MSState (disabled)
-	m_kMaterialT.SetBlendState(GfBlendState());		// Default BlendState (disabled)
-	m_kMaterialT.SetVertexFormat(kVertexFormat);
-	m_kMaterialT.SetMaterialPass(&m_kRenderPass);
-	m_kMaterialT.SetShaderData(EShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
-	m_kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
-	m_kMaterialT.AssignLayout(0, &m_kParamLayout);
-	m_kMaterialT.Create(m_kContext);
+	if (uiVertexSize && uiFragmentSize) 
+	{
+		m_kMaterialT.SetTopology(EPrimitiveTopology::TriList);
+		m_kMaterialT.SetRasterState(GfRasterState());		// Use default RasterState
+		m_kMaterialT.SetMSState(GfMultiSamplingState());	// Default MSState (disabled)
+		m_kMaterialT.SetBlendState(GfBlendState());		// Default BlendState (disabled)
+		m_kMaterialT.SetVertexFormat(kVertexFormat);
+		m_kMaterialT.SetMaterialPass(&m_kRenderPass);
+		m_kMaterialT.SetShaderData(EShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
+		m_kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
+		m_kMaterialT.AssignLayout(0, &m_kParamLayout);
+		m_kMaterialT.Create(m_kContext);
+	}
 
 	// Prepare uniform factory
 	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::ConstantBuffer, 1);
@@ -282,26 +365,26 @@ void TestApp::CreateMaterialsAndParamSets()
 
 void TestApp::CreateResources()
 {
+	loadGLTF();
+
+	////////////////////////////////////////////////////////////////////////////////
+
 	// Create staging buffer
 	GfBuffer::GfBufferDesc kDesc;
-	kDesc.m_ulSize = 16 << 20; // 16MB
-	kDesc.m_ulAlignment = 16;
-	kDesc.m_uiMemoryProperties = EBufferMemProperties::CPU_Visible;
-	kDesc.m_uiBufferUsage = (EBufferUsage::Transfer_Src);
-	kDesc.m_eBufferType = EBufferUsage::Transfer_Src;
-	m_kStagingBuffer.Init(kDesc);
-	m_kStagingBuffer.Create(m_kContext);
+	kDesc.m_size = 16 << 20; // 16MB
+	kDesc.m_alignment = 16;
+	kDesc.m_bufferType = BufferType::Staging;
+	m_kStagingBuffer.init(kDesc);
+	m_kStagingBuffer.create(m_kContext);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Init constant buffer pool
 
-	kDesc.m_ulSize = sizeof(GfPerFrameCB);
-	kDesc.m_ulAlignment = 16;
-	kDesc.m_uiMemoryProperties = EBufferMemProperties::CPU_Visible;
-	kDesc.m_uiBufferUsage = (EBufferUsage::Uniform_Buffer);
-	kDesc.m_eBufferType = EBufferUsage::Uniform_Buffer;
-	m_kConstantBufferPool.Init(kDesc);
-	m_kConstantBufferPool.Create(m_kContext);
+	kDesc.m_size = sizeof(GfPerFrameCB);
+	kDesc.m_alignment = 16;
+	kDesc.m_bufferType = BufferType::Uniform;
+	m_kConstantBufferPool.init(kDesc);
+	m_kConstantBufferPool.create(m_kContext);
 
 	GfBuffer::GfRange kRange;
 	kRange.m_pBuffer = &m_kConstantBufferPool;
@@ -339,6 +422,11 @@ void TestApp::CreateResources()
 	m_kParamSet.BindResource(0, &m_kPerFrameCB);
 	m_kParamSet.BindResource(1, &m_kCombinedSamplerTexture);
 	m_kParamSet.Update(m_kContext);
+}
+
+void TestApp::loadGLTF()
+{
+	GfGltfLoader::Load("./Models/DamagedHelmet/glTF/DamagedHelmet.gltf");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

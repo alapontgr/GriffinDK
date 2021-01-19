@@ -73,3 +73,5 @@ u64 GfHash::compute(const GfString& str, u64 seed)
 	const u64 h = seed ^ (strSize * HASH_M);
 	return appendHash(str.data(), strSize, h);
 }
+
+////////////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static const char* s_colorCodes[MsgType::COUNT] = 
+static const char* s_colorCodes[u32(MsgType::COUNT)] = 
 {
 	"\033[0;37m",
 	"\033[1;34mINFO - ",
@@ -28,7 +28,7 @@ static const char* s_colorCodes[MsgType::COUNT] =
 void GFPrintMsg(MsgType type, const char *fmt, ...)
 {
 	va_list args;
-	fprintf(stderr, s_colorCodes[type]);
+	fprintf(stderr, s_colorCodes[static_cast<u32>(type)]);
 	va_start(args, fmt);
 	int rc = vfprintf(stdout, fmt, args);
 	va_end(args);

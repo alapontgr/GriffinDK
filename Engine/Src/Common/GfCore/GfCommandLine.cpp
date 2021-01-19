@@ -42,7 +42,14 @@ void GfCommandLine::init(const GfString& args)
 				hash = GfHash::compute(token);
 			} else
 			{
-				payload += " " + token;
+				if (payload.size() > 0) 
+				{
+					payload += " " + token;				
+				}
+				else 
+				{
+					payload = token;
+				}
 			}
 		}
 
@@ -62,3 +69,5 @@ GfString GfCommandLine::getArg(const u64 argHash)
 	}
 	return "";
 }
+
+////////////////////////////////////////////////////////////////////////////////

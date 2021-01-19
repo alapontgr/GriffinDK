@@ -14,30 +14,34 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfBuffer)
-	, m_uiFlags(0)
+	, m_flags(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer::Init(const GfBufferDesc& kDesc)
+void GfBuffer::init(const GfBufferDesc& kDesc)
 {
-	if (!IsInitialised()) 
+	if (!isInitialised()) 
 	{
-		m_kDesc = kDesc;
-		m_uiFlags.Enable(EFlag::Initialised);
+		m_desc = kDesc;
+		m_flags |= EFlag::Initialised;
+		if (m_desc.m_mappable) 
+		{
+			m_flags |= EFlag::Mappable;
+		}
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer::Create(const GfRenderContext& kCtxt)
+bool GfBuffer::create(const GfRenderContext& kCtxt)
 {
-	if (IsInitialised()) 
+	if (isInitialised()) 
 	{
 		if (m_kPlatform.CreateRHI(kCtxt)) 
 		{
-			m_uiFlags.Enable(EFlag::GPUReady);
+			m_flags |= EFlag::GPUReady;
 			return true;
 		}	
 	}
@@ -46,27 +50,27 @@ bool GfBuffer::Create(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer::Destroy(const GfRenderContext& kCtxt)
+void GfBuffer::destroy(const GfRenderContext& kCtxt)
 {
-	if (IsGPUReady()) 
+	if (isGPUReady()) 
 	{
 		m_kPlatform.DestroyRHI(kCtxt);
 	}
-	m_kDesc = GfBufferDesc();
-	m_uiFlags = 0;
+	m_desc = GfBufferDesc();
+	m_flags = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
+void* GfBuffer::map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
-	GF_ASSERT(IsGPUReady(), "Buffer not created");
-	GF_ASSERT((m_uiFlags & EFlag::Mapped) == 0, "Buffer is already mapped");
-	if (IsMappable() && ((uiSize + uiOffset) <= m_kDesc.m_ulSize)) 
+	GF_ASSERT(isGPUReady(), "Buffer not created");
+	GF_ASSERT((m_flags & EFlag::Mapped) == 0, "Buffer is already mapped");
+	if (isMappable() && ((uiSize + uiOffset) <= m_desc.m_size)) 
 	{
-		m_uiMappedOffset = uiOffset;
-		m_uiMappedSize = uiSize;
-		m_uiFlags |= EFlag::Mapped;
+		m_mappedOffset = uiOffset;
+		m_mappedSize = uiSize;
+		m_flags |= EFlag::Mapped;
 		return m_kPlatform.MapRHI(kCtxt, uiOffset, uiSize);
 	}
 	return nullptr;
@@ -74,21 +78,14 @@ void* GfBuffer::Map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer::UnMap(const GfRenderContext& kCtxt)
+void GfBuffer::unMap(const GfRenderContext& kCtxt)
 {
-	if (m_uiFlags & EFlag::Mapped) 
+	if (m_flags & EFlag::Mapped) 
 	{
-		if (m_kDesc.m_uiMemoryProperties & EBufferMemProperties::CPU_GPU_Coherent) 
-		{
-			m_kPlatform.UnMapRHI(kCtxt);
-		}
-		else 
-		{
-			m_kPlatform.FlushAndUnMapRHI(kCtxt, m_uiMappedOffset, m_uiMappedSize);
-			m_uiMappedSize = 0;
-			m_uiMappedOffset = 0;
-		}
-		m_uiFlags.Disable(EFlag::Mapped);
+		m_kPlatform.unMapRHI(kCtxt);
+		m_mappedSize = 0;
+		m_mappedOffset = 0;
+		m_flags &= ~EFlag::Mapped;
 	}
 }
 

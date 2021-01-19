@@ -56,11 +56,13 @@ public:
 
 	static void CloseFile(GfFileHandle& kHandle);
 
+	static bool DoesFileExist(const char* filePath);
+
 	static size_t GetFileSize(GfFileHandle& kHandle);
 
 	static u32 ReadBytes(const GfFileHandle& kHandle, u32 uiToRead, void* pOutBuffer);
 
-	static u32 WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, void* pBuffer);
+	static u32 WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, const void* pBuffer);
 
 private:
 };

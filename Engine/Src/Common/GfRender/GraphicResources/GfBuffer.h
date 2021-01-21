@@ -62,11 +62,13 @@ public:
 
 	GfBuffer();
 
-	void init(const GfBufferDesc& kDesc);
+	void init(const GfBufferDesc& desc);
 
-	bool create(const GfRenderContext& kCtxt);
+	bool create(const GfRenderContext& ctx);
 
-	void destroy(const GfRenderContext& kCtxt);
+	bool create(const GfRenderContext& ctx, const GfBufferDesc& desc);
+
+	void destroy(const GfRenderContext& ctx);
 
 	bool isMappable() const;
 
@@ -76,16 +78,16 @@ public:
 
 	bool isMapped() const;
 
-	void* map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize);
+	void* map(const GfRenderContext& ctx, u32 offset, u32 size);
 	
-	void unMap(const GfRenderContext& kCtxt);
+	void unMap(const GfRenderContext& ctx);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
-	void copyRangeFrom(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiFromOffset, u32 uiToOffset, u32 uiSize);
+	void copyRangeFrom(const GfCmdBuffer& cmdBuffer, const GfBuffer& from, u32 fromOffset, u32 toOffset, u32 size);
 
-	void updateRange(const GfCmdBuffer& kCmdBuffer, u32 uiOffset, u32 uiSize, void* pData);
+	void updateRange(const GfCmdBuffer& cmdBuffer, u32 offset, u32 size, void* data);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +97,7 @@ private:
 	{
 		Mapped = 1 << 0,
 		Initialised = 1<<1,
-		GPUReady = 1<<2,
-		Mappable = 1<<3
+		GPUReady = 1<<2
 	};
 
 	GfBufferDesc	m_desc;
@@ -107,9 +108,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfBuffer::copyRangeFrom(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiFromOffset, u32 uiToOffset, u32 uiSize)
+GF_FORCEINLINE void GfBuffer::copyRangeFrom(const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 srcOffset, u32 dstOffset, u32 uiSize)
 {
-	m_kPlatform.copyRangeFromRHI(kCmdBuffer, kFrom, uiFromOffset, uiToOffset, uiSize);
+	m_kPlatform.copyRangeFromRHI(kCmdBuffer, kFrom, srcOffset, dstOffset, uiSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,21 +131,21 @@ GF_FORCEINLINE bool GfBuffer::isMappable() const
 
 GF_FORCEINLINE bool GfBuffer::isInitialised() const
 {
-	return (m_flags & EFlag::Initialised);
+	return (m_flags & EFlag::Initialised) == EFlag::Initialised;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfBuffer::isMapped() const
 {
-	return (m_flags & EFlag::Mapped);
+	return (m_flags & EFlag::Mapped) == EFlag::Mapped;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE bool GfBuffer::isGPUReady() const
 {
-	return (m_flags & EFlag::GPUReady);
+	return (m_flags & EFlag::GPUReady) == EFlag::GPUReady;
 }
 
 

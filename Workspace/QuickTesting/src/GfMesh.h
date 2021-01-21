@@ -36,6 +36,7 @@ enum class VertexBufferType : u32
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
+class GfCmdBuffer;
 
 class GfSubMesh
 {
@@ -90,7 +91,7 @@ public:
 	//GfMesh(const GfMesh&& other);
 	~GfMesh();
 
-	void create(const GfRenderContext& ctx);
+	void create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer);
 	void destroy(); // Queues the buffer to be destroyed
 
 private:

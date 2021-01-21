@@ -136,14 +136,9 @@ GfMesh::~GfMesh()
 	destroy();
 }
 
-void GfMesh::create(const GfRenderContext& ctx)
+void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 {
 	GF_ASSERT(m_vertexBuffer == -1 && m_indexBuffer == -1, "Already initialized");
-	m_indexBuffer = GfBufferFactory::create();
-	m_vertexBuffer = GfBufferFactory::create();
-	GfBufferFactory::addRef(m_indexBuffer);
-	GfBufferFactory::addRef(m_vertexBuffer);
-
 	// Calculate sizes and offsets
 	u32 indexBufferSize = 0;
 	u32 vertexBufferSize = 0;
@@ -161,8 +156,76 @@ void GfMesh::create(const GfRenderContext& ctx)
 		indexBufferSize += mesh->getIndexCount() * indexSize;
 	}
 
-	GfBuffer::GfBufferDesc indexBufferDesc;
+	m_indexBuffer = GfBufferFactory::create();
+	m_vertexBuffer = GfBufferFactory::create();
+	GF_ASSERT(m_vertexBuffer != -1 && m_indexBuffer != -1, "Invalid buffers");
+	GfBufferFactory::addRef(m_indexBuffer);
+	GfBufferFactory::addRef(m_vertexBuffer);
 
+	GfBuffer::GfBufferDesc indexBufferDesc;
+	indexBufferDesc.m_bufferType = BufferType::Index;
+	indexBufferDesc.m_alignment = 0;
+	indexBufferDesc.m_mappable = false;
+	indexBufferDesc.m_size = indexBufferSize;
+	GfBuffer* indexBuffer = GfBufferFactory::get(m_indexBuffer);
+	if (indexBuffer->create(ctx, indexBufferDesc)) 
+	{
+		GF_ERROR("Failed to create resources for mesh: %s", m_name.c_str());
+	}
+
+	GfBuffer::GfBufferDesc vertexBufferDesc;
+	vertexBufferDesc.m_bufferType = BufferType::Vertex;
+	vertexBufferDesc.m_alignment = 0;
+	vertexBufferDesc.m_mappable = false;
+	vertexBufferDesc.m_size = vertexBufferSize;
+	GfBuffer* vertexBuffer = GfBufferFactory::get(m_vertexBuffer);
+	if (vertexBuffer->create(ctx, vertexBufferDesc)) 
+	{
+		GF_ERROR("Failed to create resources for mesh: %s", m_name.c_str());
+	}
+
+	// Fill the buffers with data
+	GfBuffer::Id staging = GfBufferFactory::create();
+	GfBufferFactory::addRef(staging);
+	GfBuffer::GfBufferDesc stagingBufferDesc;
+	stagingBufferDesc.m_bufferType = BufferType::Staging;
+	stagingBufferDesc.m_alignment = 0;
+	stagingBufferDesc.m_mappable = true;
+	stagingBufferDesc.m_size = vertexBufferSize + indexBufferSize;
+	GfBuffer* stagingBuffer = GfBufferFactory::get(staging);
+	if (stagingBuffer->create(ctx, stagingBufferDesc)) 
+	{
+		GF_ERROR("Failed to create staging buffer for mesh: %s", m_name.c_str());
+	}
+
+	void* data = stagingBuffer->map(ctx, 0, stagingBufferDesc.m_size);
+	char* dataChar = reinterpret_cast<char*>(data);
+	// Vertex data
+	for (const GfUniquePtr<GfSubMesh>& mesh : m_subMeshes)
+	{
+		u32 meshVertexBuffer0 = vertexSizePos * mesh->getVertexCount();
+		u32 meshVertexBuffer1 = vertexSizeNormUvTangent * mesh->getVertexCount();
+
+		memcpy(dataChar, mesh->m_posVertexData.get(), meshVertexBuffer0);
+		dataChar += meshVertexBuffer0;
+		memcpy(dataChar + meshVertexBuffer0, mesh->m_normUvTangentVertexData.get(), meshVertexBuffer1);
+		dataChar += meshVertexBuffer1;
+	}
+	// Index data
+	for (const GfUniquePtr<GfSubMesh>& mesh : m_subMeshes)
+	{
+		u32 indexSize = mesh->doesUseShortForIndex() ? static_cast<u32>(sizeof(u16)) : static_cast<u32>(sizeof(u32));
+		u32 indexBufferSize = mesh->getIndexCount() * indexSize;
+		memcpy(dataChar, mesh->m_indexData.get(), indexBufferSize);
+		dataChar += indexBufferSize;
+	}
+	stagingBuffer->unMap(ctx);
+
+	// Copy operations
+	vertexBuffer->copyRangeFrom(cmdBuffer, *stagingBuffer, 0, 0, vertexBufferSize);
+	indexBuffer->copyRangeFrom(cmdBuffer, *stagingBuffer, vertexBufferSize, 0, indexBufferSize);
+	
+	GfBufferFactory::removeRef(staging);
 }
 
 void GfMesh::destroy()

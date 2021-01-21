@@ -26,10 +26,6 @@ void GfBuffer::init(const GfBufferDesc& kDesc)
 	{
 		m_desc = kDesc;
 		m_flags |= EFlag::Initialised;
-		if (m_desc.m_mappable) 
-		{
-			m_flags |= EFlag::Mappable;
-		}
 	}
 }
 
@@ -50,11 +46,11 @@ bool GfBuffer::create(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer::destroy(const GfRenderContext& kCtxt)
+void GfBuffer::destroy(const GfRenderContext& ctx)
 {
 	if (isGPUReady()) 
 	{
-		m_kPlatform.DestroyRHI(kCtxt);
+		m_kPlatform.DestroyRHI(ctx);
 	}
 	m_desc = GfBufferDesc();
 	m_flags = 0;
@@ -62,10 +58,18 @@ void GfBuffer::destroy(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+bool GfBuffer::create(const GfRenderContext& ctx, const GfBufferDesc& desc)
+{
+	init(desc);
+	return create(ctx);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void* GfBuffer::map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 {
 	GF_ASSERT(isGPUReady(), "Buffer not created");
-	GF_ASSERT((m_flags & EFlag::Mapped) == 0, "Buffer is already mapped");
+	GF_ASSERT(!isMapped(), "Buffer is already mapped");
 	if (isMappable() && ((uiSize + uiOffset) <= m_desc.m_size)) 
 	{
 		m_mappedOffset = uiOffset;
@@ -80,7 +84,7 @@ void* GfBuffer::map(const GfRenderContext& kCtxt, u32 uiOffset, u32 uiSize)
 
 void GfBuffer::unMap(const GfRenderContext& kCtxt)
 {
-	if (m_flags & EFlag::Mapped) 
+	if (isMapped()) 
 	{
 		m_kPlatform.unMapRHI(kCtxt);
 		m_mappedSize = 0;

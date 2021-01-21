@@ -89,48 +89,64 @@ public:
 			m_resources[id].m_references -= count;
 			if (!m_resources[id].m_references) 
 			{
-				m_toRemove.push_back(id);
+				m_toRemove[m_currFrameIdx].push_back(id);
 			}
 		}
 	}
 
+	// Call it once at the end of the frame (after Present(). One frame of delay until the destruction actually happens
 	static void removePending(const GfRenderContext& ctxt) 
 	{
-		for (Id id : m_toRemove) 
+		flip();
+		for (Id id : m_toRemove[m_currFrameIdx]) 
 		{
 			m_resources[id].m_resource->Destroy(ctxt);
 			m_resources[id].m_resource = nullptr;
 			m_resources[id].m_references = 0;
 			m_avalIndices.push_back(id);
 		}
-		m_toRemove.clear();
+		m_toRemove[m_currFrameIdx].clear();
 	}
 
 	static void removeAll(const GfRenderContext& ctxt) 
 	{
 		for (const ResourceEntry& entry : m_resources) 
 		{
-			entry.m_resource->Destroy(ctxt);
-			entry.m_resource = nullptr;
-			entry.m_references = 0;
+			if (entry.m_resource) 
+			{
+				entry.m_resource->Destroy(ctxt);
+				entry.m_resource = nullptr;
+				entry.m_references = 0;
+			}
 		}
 		while (!m_avalIndices.empty()) 
 		{
 			m_avalIndices.pop();
 		}
-		m_toRemove.clear();
+		m_toRemove[0].clear();
+		m_toRemove[1].clear();
+	}
+
+private:
+
+	static void flip() 
+	{
+		m_currFrameIdx = (m_currFrameIdx + 1) & 0x1;
 	}
 
 	static GfVector<ResourceEntry> m_resources;
 	static GfQueue<Id> m_avalIndices;
-	static GfVector<Id> m_toRemove;
+	static GfVector<Id> m_toRemove [2];
+	static u32 m_currFrameIdx;
 };
 template <typename T, typename Id>
 GfVector<struct ResourceFactory<T, Id>::ResourceEntry> ResourceFactory<T, Id>::m_resources;
 template <typename T, typename Id>
 GfQueue<Id> ResourceFactory<T, Id>::m_avalIndices;
 template <typename T, typename Id>
-GfVector<Id> ResourceFactory<T, Id>::m_toRemove;
+GfVector<Id> ResourceFactory<T, Id>::m_toRemove[];
+template <typename T, typename Id>
+u32 ResourceFactory<T, Id>::m_currFrameIdx = 0;
 
 
 using GfBufferFactory = ResourceFactory<GfBuffer, GfBuffer::Id>;

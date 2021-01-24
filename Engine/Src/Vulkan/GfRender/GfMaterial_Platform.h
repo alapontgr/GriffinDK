@@ -13,7 +13,6 @@
 // Includes
 
 #include "Common/GfRender/GfGraphicsSDK.h"
-#include "Common/GfRender/GfMaterialShared.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -26,7 +26,7 @@ GF_DEFINE_BASE_CTOR(GfTextureView)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTextureView::Init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType)
+void GfTextureView::init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType)
 {
 	if (!IsInitialised())
 	{

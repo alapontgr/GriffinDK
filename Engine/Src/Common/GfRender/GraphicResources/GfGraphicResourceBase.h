@@ -11,7 +11,7 @@
 #define __GFGRAPHICRESOURCEBASE_H__
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Common/GfRender/GfMaterialShared.h"
+#include "Common/GfRender/GfRenderCommon.h"
 #include "Common/GfRender/GraphicResources/GfGraphicResourcesShared.h"
 #include "Common/GfRender/GraphicResources/GfBuffer.h"
 

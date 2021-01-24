@@ -39,12 +39,12 @@ void GfRenderContext::PreInit(GfWindow* pWindow)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::Init(GfWindow* pWindow)
+void GfRenderContext::init(GfWindow* pWindow)
 {
 	if (!m_uiFlags.IsEnable(EFlags::Initialised)) 
 	{
 		m_uiFlags.Enable(EFlags::Initialised);
-		m_kPlatform.InitRHI(pWindow);
+		m_kPlatform.initRHI(pWindow);
 	}
 }
 

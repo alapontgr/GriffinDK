@@ -106,7 +106,7 @@ public:
 
 	GfTexture2D();
 
-	bool Init(u32 uiWidth, u32 uiHeight, u32 uiMips,
+	bool init(u32 uiWidth, u32 uiHeight, u32 uiMips,
 		ETextureFormat::Type eFormat,
 		const ETextureUsageBits::GfMask& uiUsage,
 		const GfTexturedResource::GfFlagsMask& uiFlags);

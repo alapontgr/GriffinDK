@@ -30,7 +30,7 @@ public:
 
 	GfCmdBufferFactory();
 
-	void Init(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType);
+	void init(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType);
 
 	void CreateCmdBuffer(const GfRenderContext& kCtx, GfCmdBufferType::Type eType, GfCmdBuffer& kOuCmdBuffer);
 

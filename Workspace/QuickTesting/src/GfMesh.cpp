@@ -168,7 +168,7 @@ void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 	indexBufferDesc.m_mappable = false;
 	indexBufferDesc.m_size = indexBufferSize;
 	GfBuffer* indexBuffer = GfBufferFactory::get(m_indexBuffer);
-	if (indexBuffer->create(ctx, indexBufferDesc)) 
+	if (!indexBuffer->create(ctx, indexBufferDesc)) 
 	{
 		GF_ERROR("Failed to create resources for mesh: %s", m_name.c_str());
 	}
@@ -179,7 +179,7 @@ void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 	vertexBufferDesc.m_mappable = false;
 	vertexBufferDesc.m_size = vertexBufferSize;
 	GfBuffer* vertexBuffer = GfBufferFactory::get(m_vertexBuffer);
-	if (vertexBuffer->create(ctx, vertexBufferDesc)) 
+	if (!vertexBuffer->create(ctx, vertexBufferDesc)) 
 	{
 		GF_ERROR("Failed to create resources for mesh: %s", m_name.c_str());
 	}
@@ -193,7 +193,7 @@ void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 	stagingBufferDesc.m_mappable = true;
 	stagingBufferDesc.m_size = vertexBufferSize + indexBufferSize;
 	GfBuffer* stagingBuffer = GfBufferFactory::get(staging);
-	if (stagingBuffer->create(ctx, stagingBufferDesc)) 
+	if (!stagingBuffer->create(ctx, stagingBufferDesc)) 
 	{
 		GF_ERROR("Failed to create staging buffer for mesh: %s", m_name.c_str());
 	}

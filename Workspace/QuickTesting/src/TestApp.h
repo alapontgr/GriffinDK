@@ -18,6 +18,7 @@
 #include "Common/GfRender/GfMaterial.h"
 #include "Common/GfRender/GfRender.h"
 #include "Common/GfFile/GfFile.h"
+#include "GfMesh.h" 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,15 +30,13 @@ public:
 
 private:
 
-	void Init(const GfEntryArgs& kEntryParams);
+	void init(const GfEntryArgs& kEntryParams);
 
 	void Update();
 
 	void Render(GfCmdBuffer& kCmdBuffer);
 
 	void Shutdown();
-
-	void DoTransferOperations(GfCmdBuffer& kCmdBuffer);
 
 	void CreateCmdBuffers();
 
@@ -57,6 +56,8 @@ private:
 
 	GfRenderPass		m_kRenderPass;
 
+	GfUniquePtr<GfMesh> m_damagedHelmet;
+
 	GfBuffer			m_kStagingBuffer;
 	GfBuffer			m_kConstantBufferPool;
 
@@ -66,10 +67,6 @@ private:
 	GfMaterialParamSet	m_kParamSet;
 
 	GfConstantBuffer	m_kPerFrameCB;
-	GfSamplerState		m_kSampler;
-	GfCombinedSamplerTexture m_kCombinedSamplerTexture;
-	GfTexture2D			m_kTesTexture;
-	GfTextureView		m_kTestTexView;
 	GfUniquePtr<char[]>	m_pTestTextureData;
 
 	GfViewport		m_kViewport;

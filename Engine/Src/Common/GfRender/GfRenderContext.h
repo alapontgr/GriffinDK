@@ -39,7 +39,7 @@ private:
 
 	// Initialize with the first window ever created. Future windows will need a compatible surface
 	void PreInit(GfWindow* pWindow);
-	void Init(GfWindow* pWindow);
+	void init(GfWindow* pWindow);
 
 	// Used Families
 	u32							m_pAvailableFamilies[GfRenderContextFamilies::Count];

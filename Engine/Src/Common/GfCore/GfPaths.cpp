@@ -19,7 +19,7 @@ GfString GfPaths::ms_workingDir = "./";
 
 static GfString s_workingDirArg = "--workDir";
 
-void GfPaths::Init()
+void GfPaths::init()
 {
 	GfString workDir = GfCommandLine::getArg(GfHash::compute(s_workingDirArg.data(), s_workingDirArg.size()));
 	ms_workingDir = "./";
@@ -46,6 +46,11 @@ GfString GfPaths::getAssetPath(const GfString& relPath)
 	GfString absPath = ms_workingDir + path;
 	std::replace( absPath.begin(), absPath.end(), '\\', '/');
 	return absPath;
+}
+
+GfString GfPaths::getAssetPath(const char* relPath)
+{
+	return getAssetPath(GfString(relPath));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

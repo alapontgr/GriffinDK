@@ -20,7 +20,7 @@ GfCmdBuffer::GfCmdBuffer()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer::Init(GfCmdBufferType::Type eType)
+void GfCmdBuffer::init(GfCmdBufferType::Type eType)
 {
 	GF_ASSERT(m_eType == GfCmdBufferType::Invalid, "Cmd buffer already initialised");
 	m_eType = eType;

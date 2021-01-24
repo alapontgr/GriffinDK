@@ -14,7 +14,6 @@
 
 #include "stb/stb_image.h"
 
-#include "GfMesh.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,7 +29,7 @@ struct GfPerFrameCB
 static GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSize)
 {
 	GfFileHandle kFile;
-	GfFile::OpenFile(szFilepath, EFileAccessMode::Read, kFile);
+	GfFile::OpenFile(GfPaths::getAssetPath(szFilepath).c_str(), EFileAccessMode::Read, kFile);
 	GfFile::GetFileSize(kFile);
 	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
 	if (uiOutFileSize > 0) 
@@ -42,80 +41,6 @@ static GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSiz
 		return pSrc;
 	}
 	return nullptr;
-}
-
-static GfUniquePtr<char[]> LoadFileBin(const char* szFilepath, u32& uiOutFileSize) 
-{
-	GfFileHandle kFile;
-	GfFile::OpenFile(szFilepath, EFileAccessMode::Read, kFile);
-	GfFile::GetFileSize(kFile);
-	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
-	if (uiOutFileSize > 0) 
-	{
-		GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
-		u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
-		GfFile::CloseFile(kFile);
-		GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
-		return pSrc;
-	}
-	return nullptr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static bool doesFileExist(const std::string &abs_filename, void *) 
-{
-	return GfFile::DoesFileExist(abs_filename.c_str());
-}
-
-static GfString expandFilePath(const std::string & relPath, void *) 
-{
-	return GfPaths::getAssetPath(relPath);
-}
-
-static bool readWholeFile(std::vector<unsigned char>* outBuffer, std::string* error, const std::string & filePath, void *)
-{
-	GfFileHandle kFile;
-	GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Read, kFile);
-	GfFile::GetFileSize(kFile);
-	u32 fileSize = static_cast<u32>(kFile.GetFileSize());
-	if (fileSize > 0) 
-	{
-		outBuffer->resize(fileSize);
-		u32 uiRead = GfFile::ReadBytes(kFile, fileSize, outBuffer->data());
-		GfFile::CloseFile(kFile);
-		if (uiRead == fileSize) 
-		{
-			return true;
-		}
-		if (error) 
-		{
-			*error = "Failed to read file: " + filePath;
-		}
-	}
-	return false;
-}
-
-static bool writeWholeFile(std::string * error, const std::string & filePath, 
-	const std::vector<unsigned char> & data, void * userData)
-{
-	if (data.size() > 0) 
-	{
-		GfFileHandle kFile;
-		GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Write, kFile);
-		u32 fileSize = static_cast<u32>(kFile.GetFileSize());
-		u32 uiWriten = GfFile::WriteBytes(kFile, u32(data.size()), reinterpret_cast<const void*>(data.data()));
-		GfFile::CloseFile(kFile);
-		if (uiWriten == u32(data.size())) 
-		{
-			return true;
-		}
-		if (error) 
-		{
-			*error = "Failed to write to file: " + filePath;
-		}
-	}
-	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +63,7 @@ GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& si
 
 s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 {
-	Init(kEntryParams);
+	init(kEntryParams);
 	
 	while (m_kWindow.BeginFrame(m_kContext))
 	{
@@ -148,37 +73,43 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 		GfCmdBuffer& kCmdBuffer(m_pCmdBuffes[uiCurrFrameIdx]);
 
 		// Wait for the command buffer to be ready
-		kCmdBuffer.WaitForReady(m_kContext);
+		kCmdBuffer.waitForReady(m_kContext);
 
 		// Begin the Command buffer
-		kCmdBuffer.BeginRecording(m_kContext);
+		kCmdBuffer.beginRecording(m_kContext);
 
-		static bool bPendingTransfer(true);
-		if(bPendingTransfer)
+		static bool pendingInitialization(true);
+		if(pendingInitialization)
 		{
-			bPendingTransfer = false;
-			DoTransferOperations(kCmdBuffer);
+			pendingInitialization = false;
+			//DoTransferOperations(kCmdBuffer);
+			GF_INFO("Create: %s", "Damaged helmet");
+			m_damagedHelmet->create(m_kContext, kCmdBuffer);
+			GF_INFO("After Create: %s", "Damaged helmet");
 		}
 
 		Render(kCmdBuffer);
 
 		// End the command buffer
-		kCmdBuffer.EndRecording(m_kContext);
+		kCmdBuffer.endRecording(m_kContext);
 
 		// Submit command buffer
-		kCmdBuffer.Submit(m_kContext, m_kWindow, GfRenderContextFamilies::Present, GF_TRUE);
+		kCmdBuffer.submit(m_kContext, m_kWindow, GfRenderContextFamilies::Present, GF_TRUE);
 
 		m_kWindow.EndFrame(m_kContext);
+
+		// Remove pending resources to delete
+		GfBufferFactory::removePending(m_kContext);
 	}
 	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void TestApp::Init(const GfEntryArgs& kEntryParams)
+void TestApp::init(const GfEntryArgs& kEntryParams)
 {
 	GfCommandLine::init(kEntryParams.m_szCmdLine);
-	GfPaths::Init();
+	GfPaths::init();
 
 	// Create the window
 	GfWindowInitParams kWindowInit;
@@ -187,9 +118,9 @@ void TestApp::Init(const GfEntryArgs& kEntryParams)
 	kWindowInit.m_bVSync = false;
 	kWindowInit.m_bFullScreen = false;
 	kWindowInit.m_szWindowName = "TestGriffinApp";
-	m_kWindow.Init(kWindowInit, m_kContext);
+	m_kWindow.init(kWindowInit, m_kContext);
 
-	GfInput::Init();
+	GfInput::init();
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -234,7 +165,7 @@ void TestApp::Update()
 
 void TestApp::CreateCmdBuffers()
 {
-	m_kCmdBufferFactory.Init(m_kContext, GfRenderContextFamilies::Graphics);
+	m_kCmdBufferFactory.init(m_kContext, GfRenderContextFamilies::Graphics);
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
 	{
 		m_kCmdBufferFactory.CreateCmdBuffer(m_kContext, GfCmdBufferType::Primary, m_pCmdBuffes[i]);
@@ -282,8 +213,27 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 	m_kMaterialT.Bind(kCmdBuffer);
 	m_kParamSet.BindSet(kCmdBuffer, m_kMaterialT, 0);
 
+	// Bind buffers
+	GfBuffer* vertexBuffers[2] = 
+	{
+		GfBufferFactory::get(m_damagedHelmet->getVertexBuffer()),
+		GfBufferFactory::get(m_damagedHelmet->getVertexBuffer())
+	};
+	u32 vertexBufferOffsets[] = { 0,0 };
+	GfBuffer* indexBuffer(GfBufferFactory::get(m_damagedHelmet->getIndexBuffer()));
+	u32 meshCount = m_damagedHelmet->getMeshCount();
+	for (u32 i = 0; i < meshCount; ++i) 
+	{
+		const GfSubMesh& mesh = m_damagedHelmet->getMeshAt(i);
+		vertexBufferOffsets[0] = mesh.getVertexBufferOffset(0);
+		vertexBufferOffsets[1] = mesh.getVertexBufferOffset(1);
+		kCmdBuffer.bindVertexBuffers(vertexBuffers, vertexBufferOffsets, 2);
+		kCmdBuffer.bindIndexBuffer(*indexBuffer, mesh.getIndexBufferOffset(), mesh.doesUseShortForIndex());
+		kCmdBuffer.drawIndexed(mesh.getIndexCount(), 1);
+	}
+
 	// Draw
-	kCmdBuffer.Draw(6, 1);
+	//kCmdBuffer.draw(6, 1);
 
 	// End render pass
 	m_kRenderPass.EndPass(kCmdBuffer);
@@ -298,40 +248,33 @@ void TestApp::Shutdown()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void TestApp::DoTransferOperations(GfCmdBuffer& kCmdBuffer)
-{
-	u32 uiTextureSize(m_kTesTexture.GetWidth() * m_kTesTexture.GetHeight() * 4);
-	void* pData = m_kStagingBuffer.map(m_kContext, 0, uiTextureSize);
-	if(pData)
-	{
-		memcpy(pData, m_pTestTextureData.get(), uiTextureSize);
-		m_kStagingBuffer.unMap(m_kContext);
-	}
-
-	m_kTesTexture.LoadTexture2DDataFromStaging(m_kContext, kCmdBuffer, m_kStagingBuffer, 0);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void TestApp::CreateMaterialsAndParamSets()
 {
 	// Create material
 	u32 uiVertexSize, uiFragmentSize;
-	GfUniquePtr<char[]> pVertexSrc(LoadFileSrc("Shaders/bin/dummy.vert.spv", uiVertexSize));
-	GfUniquePtr<char[]> pFragSrc(LoadFileSrc("Shaders/bin/dummy.frag.spv", uiFragmentSize));
+	GfUniquePtr<char[]> pVertexSrc(LoadFileSrc("Shaders/bin/OpaqueTestVS.vert.spv", uiVertexSize));
+	GfUniquePtr<char[]> pFragSrc(LoadFileSrc("Shaders/bin/OpaqueTestFS.frag.spv", uiFragmentSize));
 
 	// Define vertex format
 	GfVertexDeclaration kVertexFormat;
-	kVertexFormat.Init(nullptr, 0, 0, EVertexInputRate::PerVertex);
+	GfVertexDeclaration::AttributeDesc vertexAttribs[4] =
+	{
+		{static_cast<u32>(offsetof(PosVertexBuffer, m_pos)),					0, 0, EAttributeFormat::SFloat3}, // Position
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_normal)),	1, 1, EAttributeFormat::SFloat3}, // Normal
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_tangent)),	2, 1, EAttributeFormat::SFloat3}, // Tangent
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_uv)),		3, 1, EAttributeFormat::SFloat2}, // UVs
+	};
+	GfVertexDeclaration::VertexBufferBinding vertexBufferBindings[] = 
+	{
+		{0, static_cast<u32>(sizeof(PosVertexBuffer)), EVertexInputRate::PerVertex},
+		{1, static_cast<u32>(sizeof(NormalsTangentUvVertexBuffer)), EVertexInputRate::PerVertex},
+	};
+	kVertexFormat.init(vertexAttribs, 4, vertexBufferBindings, 2);
 
 	// Prepare parameter layout
 	{
 		GfShaderAccessMask uiAccessMask(EShaderStageFlags::Vertex);
 		m_kParamLayout.DefineParameter(EParamaterSlotType::ConstantBuffer, uiAccessMask, 0);
-	}
-	{
-		GfShaderAccessMask uiAccessMask(EShaderStageFlags::Fragment);
-		m_kParamLayout.DefineParameter(EParamaterSlotType::CombinedTextureSampler, uiAccessMask, 1);
 	}
 	m_kParamLayout.Create(m_kContext);
 
@@ -357,7 +300,7 @@ void TestApp::CreateMaterialsAndParamSets()
 	m_kUniformFactory.Create(m_kContext);
 
 	// Prepare descriptor set
-	m_kParamSet.Init(&m_kParamLayout);
+	m_kParamSet.init(&m_kParamLayout);
 	m_kParamSet.Create(m_kContext, m_kUniformFactory);
 }
 
@@ -383,6 +326,7 @@ void TestApp::CreateResources()
 	kDesc.m_size = sizeof(GfPerFrameCB);
 	kDesc.m_alignment = 16;
 	kDesc.m_bufferType = BufferType::Uniform;
+	kDesc.m_mappable = true;
 	m_kConstantBufferPool.init(kDesc);
 	m_kConstantBufferPool.create(m_kContext);
 
@@ -393,40 +337,15 @@ void TestApp::CreateResources()
 	m_kPerFrameCB.BindBuffer(kRange);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Init texture
-	s32 siW, siH, siComp;
-	m_pTestTextureData = LoadTexture("Textures/uv_test.png", siW, siH, siComp);
-	
-	ETextureUsageBits::GfMask uiUsageMask(0);
-	uiUsageMask.Set(ETextureUsageBits::Transfer_Dst | ETextureUsageBits::Sampled);
-	m_kTesTexture.Init((u32)siW, (u32)siH, 1, ETextureFormat::R8G8B8A8_UNorm, uiUsageMask, GfTexture2D::ETexture2DFlags::Tilable);
-	m_kTesTexture.Create(m_kContext);
-
-	// Create view for the texture
-	m_kTestTexView.Init(&m_kTesTexture, ETextureViewType::View2D);
-	m_kTestTexView.Create(m_kContext);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Sampler
-
-	m_kSampler.SetAddrU(ETexAddressMode::Repeat);
-	m_kSampler.SetAddrV(ETexAddressMode::Repeat);
-	m_kSampler.SetAddrW(ETexAddressMode::Repeat);
-	m_kSampler.Create(m_kContext);
-
-	////////////////////////////////////////////////////////////////////////////////
 	// Bind
 
-	m_kCombinedSamplerTexture.Init(&m_kSampler, &m_kTestTexView);
-
 	m_kParamSet.BindResource(0, &m_kPerFrameCB);
-	m_kParamSet.BindResource(1, &m_kCombinedSamplerTexture);
 	m_kParamSet.Update(m_kContext);
 }
 
 void TestApp::loadGLTF()
 {
-	GfGltfLoader::Load("./Models/DamagedHelmet/glTF/DamagedHelmet.gltf");
+	m_damagedHelmet = GfGltfLoader::Load("./Models/DamagedHelmet/glTF/DamagedHelmet.gltf");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

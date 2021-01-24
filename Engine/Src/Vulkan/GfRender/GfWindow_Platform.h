@@ -69,7 +69,7 @@ public:
 
 private:
 
-	void InitRHI(GfWindowInitParams& kInitParams);
+	void initRHI(GfWindowInitParams& kInitParams);
 
 	void CreateSurface(const GfRenderContext& kCtx);
 

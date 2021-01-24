@@ -64,6 +64,10 @@ public:
 		return m_indexUShort;
 	}
 
+	u32 getIndexBufferOffset() const { return m_indexBufferOffset; }
+	
+	u32 getVertexBufferOffset(u32 vertexBufferIdx) const { return m_vertexBuffersOffsets[vertexBufferIdx]; }
+
 private:
 	GfSubMesh& operator= (const GfSubMesh&);
 	GfSubMesh(const GfSubMesh&);
@@ -93,6 +97,20 @@ public:
 
 	void create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer);
 	void destroy(); // Queues the buffer to be destroyed
+
+	u32 getMeshCount() const 
+	{
+		return static_cast<u32>(m_subMeshes.size());
+	}
+
+	const GfSubMesh& getMeshAt(u32 idx) 
+	{
+		GF_VERIFY(idx >= 0 && idx < getMeshCount(), "Trying to access to an invalid mesh");
+		return *m_subMeshes[idx].get();
+	}
+
+	GfBuffer::Id getVertexBuffer() const { return m_vertexBuffer; }
+	GfBuffer::Id getIndexBuffer() const { return m_indexBuffer; }
 
 private:
 	GfMesh& operator= (const GfMesh&);

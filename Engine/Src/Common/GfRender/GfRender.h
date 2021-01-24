@@ -33,8 +33,6 @@
 
 #include "Common/GfRender/GfCmdBufferFactory.h"
 
-#include "Common/GfRender/GfMaterialShared.h"
-
 #include "Common/GfRender/GfMatParamLayout.h"
 
 #include "Common/GfRender/GfMaterial.h"

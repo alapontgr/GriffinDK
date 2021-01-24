@@ -43,11 +43,11 @@ public:
 
 private:
 
-	void InitRHI(VkCommandBuffer pCmdBuffer, VkFence pFence);
+	void initRHI(VkCommandBuffer pCmdBuffer, VkFence pFence);
 
-	void WaitForReadyRHI(const GfRenderContext& kCtx);
+	void waitForReadyRHI(const GfRenderContext& kCtx);
 
-	void SubmitRHI(
+	void submitRHI(
 		const GfRenderContext& kCtx, 
 		const GfWindow& kWindow,
 		GfRenderContextFamilies::Type eQueueType, 
@@ -56,16 +56,19 @@ private:
 	////////////////////////////////////////////////////////////////////////////////
 	// Render pass commands
 
-	void BeginRecordingRHI(const GfRenderContext& kCtx);
+	void beginRecordingRHI(const GfRenderContext& kCtx);
 
-	void EndRecordingRHI(const GfRenderContext& kCtx);
+	void endRecordingRHI(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Draw cmds
 
-	void DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
+	void drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
 
-	void DrawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+	void drawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+
+	void bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount);
+
+	void bindIndexBufferRHI(const GfBuffer& buffer, u32 offset, bool useShort);
 
 	////////////////////////////////////////////////////////////////////////////////
 

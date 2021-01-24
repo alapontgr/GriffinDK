@@ -77,7 +77,11 @@ static void getBufferFlags(BufferType::Type type, bool isMappable, VkBufferUsage
 		break;
 	case BufferType::Uniform:
 		usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		memoryFlags |= isMappable ? 0 : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		break;
+	case BufferType::Staging:
+		usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		break;
 	default:
 		GF_ASSERT_ALWAYS("Buffer type not supported");

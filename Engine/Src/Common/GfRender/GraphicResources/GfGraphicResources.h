@@ -39,7 +39,7 @@ public:
 		if (m_avalIndices.size() == 0) 
 		{
 			index = static_cast<Id>(m_resources.size());
-			size_t newSize = GfMax<size_t>(m_resources.size(), 1);
+			size_t newSize = GfMax<size_t>(m_resources.size() * 2, 1);
 			m_resources.resize(newSize);
 			for (Id i = index + 1; i < static_cast<Id>(m_resources.size()); ++i) 
 			{
@@ -100,10 +100,10 @@ public:
 		flip();
 		for (Id id : m_toRemove[m_currFrameIdx]) 
 		{
-			m_resources[id].m_resource->Destroy(ctxt);
+			m_resources[id].m_resource->destroy(ctxt);
 			m_resources[id].m_resource = nullptr;
 			m_resources[id].m_references = 0;
-			m_avalIndices.push_back(id);
+			m_avalIndices.push(id);
 		}
 		m_toRemove[m_currFrameIdx].clear();
 	}
@@ -114,7 +114,7 @@ public:
 		{
 			if (entry.m_resource) 
 			{
-				entry.m_resource->Destroy(ctxt);
+				entry.m_resource->destroy(ctxt);
 				entry.m_resource = nullptr;
 				entry.m_references = 0;
 			}

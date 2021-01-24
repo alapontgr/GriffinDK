@@ -41,7 +41,7 @@ public:
 
 	GfWindow();
 
-	void Init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx);
+	void init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx);
 
 	// returns GF_FALSE when the user wants to close the application
 	Bool Tick();

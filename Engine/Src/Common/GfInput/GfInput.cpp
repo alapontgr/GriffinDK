@@ -18,7 +18,7 @@ GfKeyboard* GfInput::ms_pActiveKeyboard = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfInput::Init()
+void GfInput::init()
 {
 	if (GfInput_Platform::IsMousePresent()) 
 	{

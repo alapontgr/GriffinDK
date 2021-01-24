@@ -12,6 +12,17 @@
 #include "Common/GfRender/GfMaterial.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+
+GfVertexDeclaration::GfVertexDeclaration()
+{}
+
+void GfVertexDeclaration::init(const AttributeDesc * attribArray, const u32 attribCount, const VertexBufferBinding * vertexBufferBindings, u32 vertexBufferBindCount)
+{
+	m_attributesDescs.insert(m_attributesDescs.begin(), attribArray, attribArray+attribCount);
+	m_vertexBuffersDescs.insert(m_vertexBuffersDescs.begin(), vertexBufferBindings, vertexBufferBindings+vertexBufferBindCount);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // MaterialTemplate
 
 GF_DEFINE_BASE_CTOR(GfMaterialTemplate)

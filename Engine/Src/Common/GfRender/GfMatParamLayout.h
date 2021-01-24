@@ -12,9 +12,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
+#include "Common/GfRender/GfRenderCommon.h"
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfCore/GfStl.h"
-#include "Common/GfRender/GfMaterialShared.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfMatParamLayout_Platform.h)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ public:
 	// Resource creation
 
 	// 1.
-	void Init(const GfMatParamLayout* pParamLayout);
+	void init(const GfMatParamLayout* pParamLayout);
 
 	// 2.
 	bool Create(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);

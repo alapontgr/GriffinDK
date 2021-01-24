@@ -29,7 +29,7 @@ GfCmdBuffer_Platform::GfCmdBuffer_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::InitRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
+void GfCmdBuffer_Platform::initRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
 {
 	GF_ASSERT(!m_pCmdBuffer && !m_pFence, "CMDBuffer already initialised");
 	m_pCmdBuffer = pCmdBuffer;
@@ -38,7 +38,7 @@ void GfCmdBuffer_Platform::InitRHI (VkCommandBuffer pCmdBuffer, VkFence pFence)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::waitForReadyRHI(const GfRenderContext& kCtx)
 {
 	VkResult eResult = vkWaitForFences(kCtx.Plat().m_pDevice, 1, &m_pFence, VK_FALSE, GF_INFINITE_TIMEOUT);
 	GF_ASSERT(eResult == VK_SUCCESS, "Waited to long for fences");
@@ -48,7 +48,7 @@ void GfCmdBuffer_Platform::WaitForReadyRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::SubmitRHI(
+void GfCmdBuffer_Platform::submitRHI(
 	const GfRenderContext& kCtx,
 	const GfWindow& kWindow,
 	GfRenderContextFamilies::Type eQueueType,
@@ -76,7 +76,7 @@ void GfCmdBuffer_Platform::SubmitRHI(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::beginRecordingRHI(const GfRenderContext& kCtx)
 {
 	VkCommandBufferBeginInfo kInfo;
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -98,7 +98,7 @@ void GfCmdBuffer_Platform::BeginRecordingRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
+void GfCmdBuffer_Platform::endRecordingRHI(const GfRenderContext& kCtx)
 {
 	VkResult eResult = vkEndCommandBuffer(m_pCmdBuffer);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
@@ -106,16 +106,38 @@ void GfCmdBuffer_Platform::EndRecordingRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::DrawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+void GfCmdBuffer_Platform::drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
 	vkCmdDrawIndexed(m_pCmdBuffer, uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::DrawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+void GfCmdBuffer_Platform::drawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
 {
 	vkCmdDraw(m_pCmdBuffer, uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+}
+
+void GfCmdBuffer_Platform::bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount)
+{
+	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
+
+	VkDeviceSize* offsets(GfFrameMTStackAlloc::Get()->Alloc<VkDeviceSize>(vertexBufferCount));
+	VkBuffer* buffers(GfFrameMTStackAlloc::Get()->Alloc<VkBuffer>(vertexBufferCount));
+	for (u32 i = 0; i < vertexBufferCount; ++i) 
+	{
+		offsets[i] = static_cast<VkDeviceSize>(vertexBufferOffsets[i]);
+		buffers[i] = vertexBuffers[i]->Plat().GetHandle();
+	}
+	vkCmdBindVertexBuffers(m_pCmdBuffer, 0, vertexBufferCount, buffers, offsets);
+}
+
+void GfCmdBuffer_Platform::bindIndexBufferRHI(const GfBuffer& buffer, u32 offset, bool useShort)
+{
+	vkCmdBindIndexBuffer(m_pCmdBuffer, 
+		buffer.Plat().GetHandle(), 
+		static_cast<VkDeviceSize>(offset), 
+		useShort ? VkIndexType::VK_INDEX_TYPE_UINT16 : VkIndexType::VK_INDEX_TYPE_UINT32);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

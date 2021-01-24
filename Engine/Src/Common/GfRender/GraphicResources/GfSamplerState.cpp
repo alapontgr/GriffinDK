@@ -175,7 +175,7 @@ GfCombinedSamplerTexture::GfCombinedSamplerTexture()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCombinedSamplerTexture::Init(const GfSamplerState* pSampler, const GfTextureView* pView)
+void GfCombinedSamplerTexture::init(const GfSamplerState* pSampler, const GfTextureView* pView)
 {
 	if (!IsInitialised()) 
 	{

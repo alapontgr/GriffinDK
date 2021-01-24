@@ -10,7 +10,6 @@
 // Includes
 
 #include "Common/GfRender/GfRenderPass.h"
-#include "Common/GfRender/GfMaterialShared.h"
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderContext.h"
 #include "Common/GfRender/GfCmdBuffer.h"

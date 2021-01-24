@@ -26,20 +26,20 @@ GF_DEFINE_BASE_CTOR(GfWindow)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow::Init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
+void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 {
 	m_szAppName = kInitParams.m_szWindowName;
 	m_uiWidth = kInitParams.m_uiWidth;
 	m_uiHeight = kInitParams.m_uiHeight;
 	m_bFullScreen = kInitParams.m_bFullScreen;
 	m_bVSync = kInitParams.m_bVSync;
-	m_kPlatform.InitRHI(kInitParams);
+	m_kPlatform.initRHI(kInitParams);
 
 	// Will pre-initialize the Render context only once (further calls will have no effect)
 	kCtx.PreInit(this);
 	m_kPlatform.CreateSurface(kCtx);
 	// Only the first time this call will perform any actions
-	kCtx.Init(this);
+	kCtx.init(this);
 
 	// Finally, after everything has been initialized, create the swapchain
 	m_kPlatform.CreateSwapchain(kCtx);

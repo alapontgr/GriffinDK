@@ -108,7 +108,7 @@ GF_DEFINE_BASE_CTOR(GfTexture2D)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexture2D::Init(u32 uiWidth, u32 uiHeight, u32 uiMips, 
+bool GfTexture2D::init(u32 uiWidth, u32 uiHeight, u32 uiMips, 
 	ETextureFormat::Type eFormat, 
 	const ETextureUsageBits::GfMask& uiUsage, 
 	const GfTexturedResource::GfFlagsMask& uiFlags)

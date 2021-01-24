@@ -4,9 +4,9 @@ import glob
 import os
 
 def main():
-	srcPath = 'Shaders/src/'
-	binPath = 'Shaders/bin/'
-	logPath = 'Shaders/log/'
+	srcPath = './Shaders/src/'
+	binPath = './Shaders/bin/'
+	logPath = './Shaders/log/'
 
 	shaderFormats = [
 		'*.vert', 
@@ -15,7 +15,9 @@ def main():
 		'*.geom',
 		'*.frag',
 		'*.comp']
-
+	if not os.path.isdir(binPath):
+		os.mkdir(binPath) 
+	
 	for format in shaderFormats:
 		for shaderFile in glob.glob(srcPath + format):
 			shaderName = os.path.basename(shaderFile)

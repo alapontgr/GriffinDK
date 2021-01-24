@@ -16,10 +16,11 @@ class GfPaths
 {
 public:
 
-	static void Init();
+	static void init();
 
 	// Convert relative path to absolute path in the working dir. Return <workingDir>/<relPath>
 	static GfString getAssetPath(const GfString& relPath);
+	static GfString getAssetPath(const char* relPath);
 
 	static GfString getWorkingDir() 
 	{

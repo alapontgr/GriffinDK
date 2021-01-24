@@ -36,7 +36,7 @@ public:
 
 	GfTextureView();
 
-	void Init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType); // Required
+	void init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType); // Required
 
 	// Init the Texture view with externally created resources (i.e. backbuffer)
 	void ExternalInit(const GfExternTexView& kExternInitParams);

@@ -93,23 +93,27 @@ static inline void ConvertInputAssembler(const EPrimitiveTopology::Type eTopolog
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void ConvertInputVertex(const GfVertexDeclaration& kVertex, u32 uiBinding,
-	VkVertexInputBindingDescription& kOutVertexDesc,
+static inline void ConvertInputVertex(const GfVertexDeclaration& kVertex, 
+	VkVertexInputBindingDescription* outVertexBindings,
 	VkVertexInputAttributeDescription* pOutVertexAttributes)
 {
-	// IMPORTANT: pOutVertexAttributes must be a valid array of "kVertex.GetAttribCount()" elements. nullptr in case of 0 
-	kOutVertexDesc.binding = uiBinding;
-	kOutVertexDesc.stride = kVertex.GetStride();
-	kOutVertexDesc.inputRate = ConvertInputRate(kVertex.GetRate());
+	static VkVertexInputRate s_vertexRateTable[] = {VkVertexInputRate::VK_VERTEX_INPUT_RATE_VERTEX, VkVertexInputRate::VK_VERTEX_INPUT_RATE_INSTANCE};
 
-	u32 uiAttribCount(kVertex.GetAttribCount());
-	for (u32 i = 0; i < uiAttribCount; ++i) 
+	for (const GfVertexDeclaration::VertexBufferBinding& vertexBuffer : kVertex.getVertexBuffers()) 
 	{
-		GfVertexDeclaration::GfVertexAttrib kAttrib(kVertex.GetAttrib(i));
-		pOutVertexAttributes[i].binding = uiBinding;
-		pOutVertexAttributes[i].format = ConvertAttributeFormat(kAttrib.m_eType);
-		pOutVertexAttributes[i].location = i;
-		pOutVertexAttributes[i].offset = static_cast<u32>(kAttrib.m_uiOffset);
+		outVertexBindings->binding = vertexBuffer.m_bufferIdx;
+		outVertexBindings->inputRate = s_vertexRateTable[vertexBuffer.m_rate]; // Values are equivalent in Vulkan enum
+		outVertexBindings->stride = vertexBuffer.m_stride;
+		outVertexBindings++;
+	}
+
+	for (const GfVertexDeclaration::AttributeDesc& attribute : kVertex.getAttributes()) 
+	{
+		pOutVertexAttributes->offset = attribute.m_uiOffset;
+		pOutVertexAttributes->location = attribute.m_location;
+		pOutVertexAttributes->binding = attribute.m_vertexBufferIdx;
+		pOutVertexAttributes->format = ConvertAttributeFormat(attribute.m_eType);
+		pOutVertexAttributes++;
 	}
 }
 
@@ -274,25 +278,23 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	}
 
 	// Parse input assembler format
-	VkVertexInputBindingDescription kVertexBindingDesc{};
-	u32 uiAttribCount(m_kBase.m_kVertexFormat.GetAttribCount());
+	u32 attribCount(static_cast<u32>(m_kBase.m_kVertexFormat.getAttributes().size()));
+	u32 vertexBufferCount(static_cast<u32>(m_kBase.m_kVertexFormat.getVertexBuffers().size()));
 
-	VkVertexInputAttributeDescription* pLayouts(nullptr);
-	if (uiAttribCount) 
-	{
-		pLayouts = GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(uiAttribCount);
-	}
+	GF_VERIFY(attribCount > 0 && vertexBufferCount > 0, "Invalid vertex description");
+	VkVertexInputBindingDescription* vertexBindingDescs(GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputBindingDescription>(vertexBufferCount));
+	VkVertexInputAttributeDescription* attributes(GfFrameMTStackAlloc::Get()->Alloc<VkVertexInputAttributeDescription>(attribCount));
 
-	ConvertInputVertex(m_kBase.m_kVertexFormat, 0, kVertexBindingDesc, pLayouts);
+	ConvertInputVertex(m_kBase.m_kVertexFormat, vertexBindingDescs, attributes);
 	
 	VkPipelineVertexInputStateCreateInfo kVertexShaderInfo{};
 	kVertexShaderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	kVertexShaderInfo.pNext = nullptr;
 	kVertexShaderInfo.flags = 0;
-	kVertexShaderInfo.vertexBindingDescriptionCount = 1; // TODO: Add support for several vertex bindings
-	kVertexShaderInfo.pVertexBindingDescriptions = &kVertexBindingDesc;
-	kVertexShaderInfo.vertexAttributeDescriptionCount = uiAttribCount;
-	kVertexShaderInfo.pVertexAttributeDescriptions = pLayouts;
+	kVertexShaderInfo.vertexBindingDescriptionCount = vertexBufferCount;
+	kVertexShaderInfo.pVertexBindingDescriptions = vertexBindingDescs;
+	kVertexShaderInfo.vertexAttributeDescriptionCount = attribCount;
+	kVertexShaderInfo.pVertexAttributeDescriptions = attributes;
 
 	// Define topology to feed the shaders
 	VkPipelineInputAssemblyStateCreateInfo kAssemblerInfo{};

@@ -13,7 +13,6 @@
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderCommon.h"
-#include "Common/GfRender/GfMaterialShared.h"
 
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfMaterial_Platform.h)
 
@@ -22,6 +21,53 @@
 class GfMaterialParamSet;
 class GfMatParamLayout;
 class GfRenderPass;
+
+////////////////////////////////////////////////////////////////////////////////
+
+namespace EVertexInputRate
+{
+	enum Type : u32
+	{
+		PerVertex = 0,
+		PerInstance,
+		////////////////////////////////////////////////////////////////////////////////
+		RequiredBits = 1 // Precision needed to represent this type as a bit-field
+	};
+}
+
+class GfVertexDeclaration 
+{
+public:
+
+	struct AttributeDesc 
+	{
+		u32	m_uiOffset : 12; // Offset within the struct
+		u32 m_location : 4; // Shader binding location
+		u32 m_vertexBufferIdx : 4; // Index of the vertex buffer the data belongs to
+		EAttributeFormat::Type	m_eType : 12;	// Type of the attribute
+	};
+
+	struct VertexBufferBinding 
+	{
+		u16 m_bufferIdx : 4;				// Vertex buffer bind slot
+		u16 m_stride : 11;					// Distance in bytes of two consecutive elements
+		EVertexInputRate::Type m_rate : 1;	// Vertex: 0, Instance: 1
+	};
+
+	GfVertexDeclaration();
+
+	void init(const AttributeDesc* attribArray, const u32 attribCount, const VertexBufferBinding* vertexBufferBindings, u32 vertexBufferBindCount);
+
+	const GfVector<AttributeDesc>& getAttributes() const { return m_attributesDescs; }
+
+	const GfVector<VertexBufferBinding>& getVertexBuffers() const { return m_vertexBuffersDescs; }
+
+private:
+
+	GfVector<AttributeDesc> m_attributesDescs;
+	GfVector<VertexBufferBinding> m_vertexBuffersDescs;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -45,8 +91,6 @@ public:
 	GfMultiSamplingState GetMSState() const { return m_kMSState; }
 
 	GfBlendState GetBlendState() const { return m_kBlendState; }
-
-	GfVertexDeclaration GetVertexFormat() const { return m_kVertexFormat; }
 
 	const GfRenderPass* GetMaterialPass() const { return m_pMaterialPass; }
 

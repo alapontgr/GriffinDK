@@ -21,7 +21,7 @@ GfCmdBufferFactory_Platform::GfCmdBufferFactory_Platform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBufferFactory_Platform::InitRHI(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType)
+void GfCmdBufferFactory_Platform::initRHI(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType)
 {
 	VkCommandPoolCreateInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -61,8 +61,8 @@ void GfCmdBufferFactory_Platform::CreateCmdBufferRHI(const GfRenderContext& kCtx
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create a fence");
 
 	// Set the values to the Cmd-Buffer
-	kOuCmdBuffer.Init((GfCmdBufferType::Type)uiType);
-	kOuCmdBuffer.Plat().InitRHI(pCmdBuffer, pFence);
+	kOuCmdBuffer.init((GfCmdBufferType::Type)uiType);
+	kOuCmdBuffer.Plat().initRHI(pCmdBuffer, pFence);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

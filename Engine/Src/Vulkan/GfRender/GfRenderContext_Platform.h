@@ -50,7 +50,7 @@ protected:
 
 	void PreInitRHI(GfWindow* pWindow);
 
-	void InitRHI(GfWindow* pWindow);	
+	void initRHI(GfWindow* pWindow);	
 
 private:
 

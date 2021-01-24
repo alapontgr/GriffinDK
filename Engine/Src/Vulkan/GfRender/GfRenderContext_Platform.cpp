@@ -79,7 +79,7 @@ void GfRenderContext_Platform::PreInitRHI(GfWindow* pWindow)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext_Platform::InitRHI(GfWindow* pWindow)
+void GfRenderContext_Platform::initRHI(GfWindow* pWindow)
 {
 	CreateDevice(pWindow);
 	RetrieveQueues();

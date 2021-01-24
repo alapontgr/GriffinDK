@@ -29,6 +29,8 @@ namespace GfCmdBufferType
 
 ////////////////////////////////////////////////////////////////////////////////
 
+class GfBuffer;
+
 class GfCmdBuffer
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBuffer);
@@ -38,30 +40,33 @@ public:
 
 	GfCmdBuffer();
 
-	void Init(GfCmdBufferType::Type eType);
+	void init(GfCmdBufferType::Type eType);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// CmdBuffer commands
 
-	void BeginRecording(const GfRenderContext& kCtx);
+	void beginRecording(const GfRenderContext& kCtx);
 
-	void EndRecording(const GfRenderContext& kCtx);
+	void endRecording(const GfRenderContext& kCtx);
 
 	// Sync point to avoid start recording while the command buffer is still being processed
-	void WaitForReady(const GfRenderContext& kCtx);
+	void waitForReady(const GfRenderContext& kCtx);
 
-	void Submit(
+	void submit(
 		const GfRenderContext& kCtx,
 		const GfWindow& kWindow,
 		GfRenderContextFamilies::Type eQueueType,
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Draw commands
 
-	void DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+	void drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 
-	void Draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+	void draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+
+	void bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount);
+	
+	void bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -72,48 +77,58 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::WaitForReady(const GfRenderContext& kCtx)
+GF_FORCEINLINE void GfCmdBuffer::waitForReady(const GfRenderContext& kCtx)
 {
-	m_kPlatform.WaitForReadyRHI(kCtx);
+	m_kPlatform.waitForReadyRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::Submit(
+GF_FORCEINLINE void GfCmdBuffer::submit(
 	const GfRenderContext& kCtx,
 	const GfWindow& kWindow,
 	GfRenderContextFamilies::Type eQueueType,
 	Bool bLast)
 {
-	m_kPlatform.SubmitRHI(kCtx, kWindow, eQueueType, bLast);
+	m_kPlatform.submitRHI(kCtx, kWindow, eQueueType, bLast);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::BeginRecording(const GfRenderContext& kCtx)
+GF_FORCEINLINE void GfCmdBuffer::beginRecording(const GfRenderContext& kCtx)
 {
-	m_kPlatform.BeginRecordingRHI(kCtx);
+	m_kPlatform.beginRecordingRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::EndRecording(const GfRenderContext& kCtx)
+GF_FORCEINLINE void GfCmdBuffer::endRecording(const GfRenderContext& kCtx)
 {
-	m_kPlatform.EndRecordingRHI(kCtx);
+	m_kPlatform.endRecordingRHI(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::DrawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+GF_FORCEINLINE void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
-	m_kPlatform.DrawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
+	m_kPlatform.drawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::Draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+GF_FORCEINLINE void GfCmdBuffer::draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
 {
-	m_kPlatform.DrawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+	m_kPlatform.drawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+}
+
+GF_FORCEINLINE void GfCmdBuffer::bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount) 
+{
+	m_kPlatform.bindVertexBuffersRHI(vertexBuffers, vertexBufferOffsets, vertexBufferCount);
+}
+
+GF_FORCEINLINE void GfCmdBuffer::bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort)
+{
+	m_kPlatform.bindIndexBufferRHI(buffer, offset, useShort);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

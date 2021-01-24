@@ -72,7 +72,7 @@ GF_DEFINE_PLATFORM_CTOR(GfWindow)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::InitRHI(GfWindowInitParams& kInitParams)
+void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 {
 	// Assign the HANDLE
 	m_pInstance = GetModuleHandle(NULL);

@@ -188,7 +188,7 @@ bool GfMaterialParamSet::Update(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet::Init(const GfMatParamLayout* pParamLayout)
+void GfMaterialParamSet::init(const GfMatParamLayout* pParamLayout)
 {
 	GF_ASSERT(!m_pSetLayout, "TEMPORARY: Do some protection to avoid re-initialization");
 	m_pSetLayout = pParamLayout;

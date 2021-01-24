@@ -28,7 +28,7 @@ public:
 
 	GfSamplerState();
 
-	void Init();
+	void init();
 
 	void Create(const GfRenderContext& kCtxt);
 
@@ -104,7 +104,7 @@ public:
 
 	GfCombinedSamplerTexture();
 
-	void Init(const GfSamplerState* pSampler, const GfTextureView* pView);
+	void init(const GfSamplerState* pSampler, const GfTextureView* pView);
 
 	const GfSamplerState* GetSampler() const;
 	const GfTextureView* GetView() const;

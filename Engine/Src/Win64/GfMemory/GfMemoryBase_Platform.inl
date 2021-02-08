@@ -24,4 +24,16 @@ GF_FORCEINLINE void GfDefaultAllocator::Free(void* pAddr)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void* GfAlloca(u32 size) 
+{
+	return _malloca(static_cast<size_t>(size));
+}
+
+GF_FORCEINLINE void GfFreea(void* data) 
+{
+	_freea(data);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMEMORYSHARED_H__

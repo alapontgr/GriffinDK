@@ -21,6 +21,7 @@ class GfRenderContext;
 class GfTexture2D;
 class GfCmdBuffer;
 class GfBuffer;
+struct TextureDesc;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,34 +32,50 @@ struct GfExternTexInit_Platform
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfTexturedResource_Platform
+class GfTexture_Platform
 {
-	GF_DECLARE_PLATFORM_MEMBERS(GfTexturedResource);
+	GF_DECLARE_PLATFORM_MEMBERS(GfTexture);
 public:
 
-	friend class GfTexturedResource;
+	friend class GfTexture;
 
-	GfTexturedResource_Platform();
+	void init(const TextureDesc& desc);
 
-	void ExternalInitPlat(const GfExternTexInit_Platform& kInitParams);
+	void ExternalInitPlat(const GfExternTexInit_Platform& initParams);
 
-	bool CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo);
+	bool createRHI(const GfRenderContext& ctx);
 
-	bool AllocateImageMemoryRHI(const GfRenderContext &kCtx, VmaAllocationCreateInfo* pAllocInfo);
+	void destroyRHI(const GfRenderContext& ctx);
 
-	bool BindImageWithMemoryRHI(const GfRenderContext &kCtx);
+	bool CreateImageRHI(const GfRenderContext &ctx);
 
-	void DestroyRHI(const GfRenderContext &kCtx);
+	bool allocateImageMemoryRHI(const GfRenderContext &ctx, VmaAllocationCreateInfo* allocInfo);
+
+	bool bindImageWithMemoryRHI(const GfRenderContext &ctx);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	VkImage GetImage() const;
+	VkImage getImage() const;
 
-	VkImageAspectFlags GetAspectMask() const;
+	VkImageView getView() const;
+
+	VkImageAspectFlags getAspectMask() const;
+
+	VkImageLayout getCurrentLayout() const;
+
+	void setCurrentLayout(VkImageLayout layout);
+
+	void loadTexture2DDataFromStagingBufferRHI(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer, const GfBuffer& from, u32 bufferOffset);
+
+protected:
 
 private:
 
-	VkImage				m_pImage;
+	void createView(const GfRenderContext& kCtx);
+
+	VkImageLayout		m_currLayout;
+	VkImage				m_image;
+	VkImageView			m_view; // Used for RenderTarget textures
 	VkImageAspectFlags	m_uiAspectMask;
 
 	// Vma Resources
@@ -68,36 +85,31 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfTexture2D_Platform 
+GF_FORCEINLINE VkImage GfTexture_Platform::getImage() const
 {
-	GF_DECLARE_PLATFORM_MEMBERS(GfTexture2D);
-public:
-
-	bool CreateRHI(const GfRenderContext& kCtx);
-
-	void DestroyRHI(const GfRenderContext& kCtx);
-
-private:
-
-	bool CreateImageRHI(const GfRenderContext &kCtx);
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	void LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset);
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkImage GfTexturedResource_Platform::GetImage() const
-{
-	return m_pImage;
+	return m_image;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkImageAspectFlags GfTexturedResource_Platform::GetAspectMask() const
+GF_FORCEINLINE VkImageAspectFlags GfTexture_Platform::getAspectMask() const
 {
 	return m_uiAspectMask;
+}
+
+GF_FORCEINLINE VkImageLayout GfTexture_Platform::getCurrentLayout() const
+{
+	return m_currLayout;
+}
+
+GF_FORCEINLINE VkImageView GfTexture_Platform::getView() const
+{
+	return m_view;
+}
+
+GF_FORCEINLINE void GfTexture_Platform::setCurrentLayout(VkImageLayout layout)
+{
+	m_currLayout = layout;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

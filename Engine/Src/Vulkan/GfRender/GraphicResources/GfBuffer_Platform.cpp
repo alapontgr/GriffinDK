@@ -108,7 +108,7 @@ GF_DEFINE_PLATFORM_CTOR(GfBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfBuffer_Platform::CreateRHI(const GfRenderContext& kCtxt)
+bool GfBuffer_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	VkBufferUsageFlags usageFlags = 0;
 	VkMemoryPropertyFlags memoryFlags = 0;
@@ -156,7 +156,7 @@ bool GfBuffer_Platform::CreateRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer_Platform::DestroyRHI(const GfRenderContext& kCtxt)
+void GfBuffer_Platform::destroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pBuffer) 
 	{

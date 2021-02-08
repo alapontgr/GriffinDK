@@ -21,6 +21,7 @@ class GfRenderContext;
 class GfCmdBuffer;
 struct GfViewport;
 struct GfScissor;
+struct AttachmentDesc;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,32 +34,44 @@ class GfRenderPass_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfRenderPass);
 public:
 
-	VkRenderPass GetRenderPass() const { return m_pRenderPass; }
+	VkRenderPass GetRenderPass() const { return m_renderPass; }
 
 protected:
 
-	void CreateRHI(const GfRenderContext& kCtx, const GfWindow* pWindow);
+	void createRHI(const GfRenderContext& ctx, const GfWindow* window);
+
+	bool createRHI(const GfRenderContext& ctx,
+		const AttachmentDesc* output, u32 outputCount,
+		const AttachmentDesc* depthAttachment);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void BeginPassRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
+	void BeginPassRHI(const GfRenderContext& ctx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
 
-	void EndPassRHI(const GfCmdBuffer& kCmdBuffer);
+	void EndPassRHI(const GfCmdBuffer& cmdBuffer);
 
-	void SetViewportRHI(const GfCmdBuffer& kCmdBuffer, const GfViewport& kViewport);
+	void SetViewportRHI(const GfCmdBuffer& cmdBuffer, const GfViewport& viewport);
 
-	void SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const GfScissor& kScissor);
+	void SetScissorRHI(const GfCmdBuffer& cmdBuffer, const GfScissor& scissors);
 
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
-	void RecreateFramebufferRHI(const GfRenderContext& kCtx, const GfWindow* pWindow);
+	VkRenderPass createRenderPass(const GfRenderContext& ctx,
+		const AttachmentDesc* output, u32 outputCount,
+		const AttachmentDesc* depthAttachment);
+
+	VkFramebuffer getOrCreateFramebuffer(const GfRenderContext& ctx,
+		const AttachmentDesc* output, u32 outputCount,
+		const AttachmentDesc* depthAttachment);
 
 public:
-	// TODO: Revise this encapsulation
-	VkFramebuffer	m_pFramebuffers[GfRenderConstants::ms_uiNBufferingCount];
-	VkRenderPass	m_pRenderPass;
+	VkFramebuffer	m_framebuffer;
+	VkRenderPass	m_renderPass;
+
+	static GfUMap<u64, VkRenderPass> ms_renderPassCache;
+	static GfUMap<u64, VkFramebuffer> ms_framebufferCache;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

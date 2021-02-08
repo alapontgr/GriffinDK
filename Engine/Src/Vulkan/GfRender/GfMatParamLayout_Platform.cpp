@@ -129,7 +129,7 @@ GfMatUniformFactory_Platform::GfMatUniformFactory_Platform(GfMatUniformFactory& 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatUniformFactory_Platform::CreateRHI(const GfRenderContext& kCtxt)
+void GfMatUniformFactory_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	GF_ASSERT(!m_pPool, "Pool already initialized");
 
@@ -160,7 +160,7 @@ void GfMatUniformFactory_Platform::CreateRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatUniformFactory_Platform::DestroyRHI(const GfRenderContext& kCtxt)
+void GfMatUniformFactory_Platform::destroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pPool) 
 	{
@@ -180,7 +180,7 @@ GfMatParamLayout_Platform::GfMatParamLayout_Platform(GfMatParamLayout& kBase)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
+bool GfMatParamLayout_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	u32 uiElementCount(static_cast<u32>(m_kBase.m_tParameters.size()));
 	if (uiElementCount > 0) 
@@ -215,7 +215,7 @@ bool GfMatParamLayout_Platform::CreateRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatParamLayout_Platform::DestroyRHI(const GfRenderContext& kCtxt)
+void GfMatParamLayout_Platform::destroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pSetLayout) 
 	{
@@ -235,7 +235,7 @@ GfMaterialParamSet_Platform::GfMaterialParamSet_Platform(GfMaterialParamSet& kBa
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfMaterialParamSet_Platform::CreateRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
+bool GfMaterialParamSet_Platform::createRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
 	if (m_pParamatersSet) 
 	{
@@ -256,7 +256,7 @@ bool GfMaterialParamSet_Platform::CreateRHI(const GfRenderContext& kCtxt, GfMatU
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialParamSet_Platform::DestroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
+void GfMaterialParamSet_Platform::destroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
 	if (m_pParamatersSet) 
 	{

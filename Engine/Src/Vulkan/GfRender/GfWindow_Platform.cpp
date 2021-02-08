@@ -103,12 +103,12 @@ void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 	DEVMODE dev_screen_settings;
 	s32 siPosX = 0, siPosY = 0;
 	if (kInitParams.m_bFullScreen) {
-		m_kBase.m_uiWidth = GetSystemMetrics(SM_CXSCREEN);
-		m_kBase.m_uiHeight = GetSystemMetrics(SM_CYSCREEN);
+		m_kBase.m_width = GetSystemMetrics(SM_CXSCREEN);
+		m_kBase.m_height = GetSystemMetrics(SM_CYSCREEN);
 		memset(&dev_screen_settings, 0, sizeof(dev_screen_settings));
 		dev_screen_settings.dmSize = sizeof(dev_screen_settings);
-		dev_screen_settings.dmPelsWidth = (unsigned long)m_kBase.m_uiWidth;
-		dev_screen_settings.dmPelsHeight = (unsigned long)m_kBase.m_uiHeight;
+		dev_screen_settings.dmPelsWidth = (unsigned long)m_kBase.m_width;
+		dev_screen_settings.dmPelsHeight = (unsigned long)m_kBase.m_height;
 		dev_screen_settings.dmBitsPerPel = 32;
 		dev_screen_settings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 		ChangeDisplaySettings(&dev_screen_settings, CDS_FULLSCREEN);
@@ -120,7 +120,7 @@ void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 	}
 
 	// set the size, but not the position
-	RECT wr = { 0, 0, (s64)m_kBase.m_uiWidth, (s64)m_kBase.m_uiHeight };
+	RECT wr = { 0, 0, (s64)m_kBase.m_width, (s64)m_kBase.m_height };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE); // adjust the size
 
 	// create the window and use the result as the handle
@@ -278,11 +278,11 @@ void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
 		m_kBase.m_tSwapchainTextures.resize(uiImageCount);
 		for(u32 i=0; i<uiImageCount; ++i)
 		{
-			GfExternTexInit kInit;
+			SwapchainDesc kInit;
 			kInit.m_pExternalImage = m_tSwapChainImages[i];
-			kInit.m_eFormat = ConvertTextureFormatToVkFormat(m_kSwapChainFormat.format);
-			kInit.m_uiWidth = m_kBase.GetWidth();
-			kInit.m_uiHeight = m_kBase.GetHeight();
+			kInit.m_format = ConvertTextureFormatToVkFormat(m_kSwapChainFormat.format);
+			kInit.m_width = m_kBase.GetWidth();
+			kInit.m_height = m_kBase.GetHeight();
 			m_kBase.m_tSwapchainTextures[i].ExternalInit(kInit);
 		}
 	}

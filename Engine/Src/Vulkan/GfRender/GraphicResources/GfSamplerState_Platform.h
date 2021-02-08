@@ -24,9 +24,9 @@ class GfSamplerState_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfSamplerState);
 public:
 
-	bool CreateRHI(const GfRenderContext& kCtxt);
+	bool createRHI(const GfRenderContext& kCtxt);
 
-	void DestroyRHI(const GfRenderContext& kCtxt);
+	void destroyRHI(const GfRenderContext& kCtxt);
 
 	VkSampler GetSampler() const;
 

@@ -33,5 +33,7 @@
 
 #include "Common/GfMemory/GfMemory.h"
 
+#include "Common/GfCore/GfHash.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

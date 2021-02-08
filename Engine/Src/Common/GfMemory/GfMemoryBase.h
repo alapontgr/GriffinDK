@@ -72,6 +72,32 @@ void GfDefaultAllocator::Delete(T* pObj)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Use this function to allocate from the stack (i.e tmp arrays of data)
+void* GfAlloca(u32 size);
+void GfFreea(void* data);
+
+// Utility class
+class StackMemBlock 
+{
+public:
+	StackMemBlock(u32 size) : m_memBlock (GfAlloca(size)) 
+	{
+		GF_VERIFY(m_memBlock, "Stack Overflow!!!");
+	}
+	~StackMemBlock() 
+	{
+		GfFreea(m_memBlock);
+		m_memBlock = nullptr;
+	}
+
+	void* get() const { return m_memBlock; }
+
+private:
+	void* m_memBlock;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 #include GF_SOLVE_PLATFORM_PATH(GfMemory/GfMemoryBase_Platform.inl)
 
 ////////////////////////////////////////////////////////////////////////////////

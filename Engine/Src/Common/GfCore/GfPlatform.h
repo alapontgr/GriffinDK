@@ -22,7 +22,7 @@
 	PlatformT& Plat(){return m_kPlatform;}					\
 	const PlatformT& Plat() const { return m_kPlatform; }	\
 	PlatformT* PlatPtr() { return &m_kPlatform; }			\
-	private:												\
+	protected:												\
 	PlatformT	m_kPlatform;
 
 /*

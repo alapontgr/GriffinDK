@@ -16,8 +16,74 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_DEFINE_PLATFORM_CTOR(GfTexturedResource)
-, m_pImage(VK_NULL_HANDLE)
+VkImageType getImageType(TextureType type) 
+{
+	VkImageType s_VulkanTextureTypes[] =
+	{
+		VK_IMAGE_TYPE_1D,
+		VK_IMAGE_TYPE_2D,
+		VK_IMAGE_TYPE_3D,
+	};
+	return s_VulkanTextureTypes[static_cast<u32>(type)];
+}
+
+VkImageUsageFlags convertToVulkanUsage(TextureType type, TextureUsageMask usage) 
+{
+	VkImageUsageFlags vkUsage = 0;
+
+	vkUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+	if ((usage & TextureUsage::Sample) != 0) 
+	{
+		vkUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+
+	if ((usage & TextureUsage::Storage) != 0) 
+	{
+		vkUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
+	}
+
+	if ((usage & TextureUsage::RenderTarget) != 0) 
+	{
+		vkUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+	}
+
+	if ((usage & TextureUsage::DepthStencil) != 0) 
+	{
+		vkUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+	}
+
+	return vkUsage;
+}
+
+VkImageViewType convertToImageViewType(TextureType type, u32 w, u32 h, u32 d, u32 slices) 
+{
+	VkImageViewType viewT = VK_IMAGE_VIEW_TYPE_2D;
+	// TODO CUBEMAP support
+	switch (type) 
+	{
+	case TextureType::Type_1D:
+		viewT = slices == 1 ? VK_IMAGE_VIEW_TYPE_1D : VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+		break;
+	case TextureType::Type_2D:
+		viewT = slices == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_2D_ARRAY ;
+		break;
+	case TextureType::Type_3D:
+		GF_ASSERT(d > 1, "Invalid depth for 3D Texture");
+		viewT = VK_IMAGE_VIEW_TYPE_3D;
+		break;
+	default:
+		break;
+	}
+	return viewT;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_DEFINE_PLATFORM_CTOR(GfTexture)
+, m_currLayout(VK_IMAGE_LAYOUT_UNDEFINED)
+, m_image(VK_NULL_HANDLE)
+, m_view(nullptr)
 , m_uiAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
 , m_pAlloc(nullptr)
 {
@@ -25,26 +91,50 @@ GF_DEFINE_PLATFORM_CTOR(GfTexturedResource)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexturedResource_Platform::ExternalInitPlat(const GfExternTexInit_Platform& kInitParams)
+void GfTexture_Platform::init(const TextureDesc& desc)
 {
-	m_pImage = kInitParams.m_pExternalImage;
+}
+
+void GfTexture_Platform::ExternalInitPlat(const GfExternTexInit_Platform& kInitParams)
+{
+	m_image = kInitParams.m_pExternalImage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexturedResource_Platform::CreateImageRHI(const GfRenderContext &kCtx, VkImageCreateInfo* pTextureInfo)
+bool GfTexture_Platform::createRHI(const GfRenderContext &kCtx)
 {
-	if (vkCreateImage(kCtx.Plat().m_pDevice, pTextureInfo, nullptr, &m_pImage) != VK_SUCCESS)
+	VkImageCreateInfo kTextureInfo{};
+	kTextureInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	kTextureInfo.mipLevels = m_kBase.m_desc.m_mipCount;
+	kTextureInfo.flags = 0; // TODO if needed
+	kTextureInfo.imageType = getImageType(m_kBase.m_desc.m_textureType);
+	kTextureInfo.format = ConvertTextureFormat(m_kBase.m_desc.m_format);
+	kTextureInfo.extent.width = m_kBase.m_desc.m_width;
+	kTextureInfo.extent.height = m_kBase.m_desc.m_height;
+	kTextureInfo.extent.depth = m_kBase.m_desc.m_depth;
+	kTextureInfo.arrayLayers = m_kBase.m_desc.m_slices;
+	kTextureInfo.samples = VK_SAMPLE_COUNT_1_BIT; // TODO: Add support for MS
+	kTextureInfo.tiling = m_kBase.getIsMappable() ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+	kTextureInfo.usage = convertToVulkanUsage(m_kBase.m_desc.m_textureType, m_kBase.m_desc.m_usage);
+	kTextureInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // TODO: Add support for concurrent usage
+	kTextureInfo.queueFamilyIndexCount = 0;
+	kTextureInfo.pQueueFamilyIndices = nullptr;
+	kTextureInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	
+	if (vkCreateImage(kCtx.Plat().m_pDevice, &kTextureInfo, nullptr, &m_image) != VK_SUCCESS)
 	{
 		return false;
 	}
+
 	// Assign aspect mask
 	m_uiAspectMask = 0;
-	if (m_kBase.IsDepthBuffer())
+	if (isDepthFormat(m_kBase.m_desc.m_format))
 	{
 		m_uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
 	}
-	if (m_kBase.IsStencilBuffer())
+	if (isStencilFormat(m_kBase.m_desc.m_format))
 	{
 		m_uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 	}
@@ -52,14 +142,34 @@ bool GfTexturedResource_Platform::CreateImageRHI(const GfRenderContext &kCtx, Vk
 	{
 		m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	}
-	return true;
+
+	// Allocate memory and bind it
+	// Use vmaAllocateMemoryForImage
+	VmaAllocationCreateInfo kAllocInfo{};
+	kAllocInfo.flags = VMA_ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT;
+	kAllocInfo.usage = m_kBase.getIsMappable() ? VMA_MEMORY_USAGE_CPU_TO_GPU : VMA_MEMORY_USAGE_GPU_ONLY;
+	kAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT; // Is this needed?
+	kAllocInfo.preferredFlags = 0;
+	kAllocInfo.memoryTypeBits = 0;
+	kAllocInfo.pool = VK_NULL_HANDLE; // TODO: Use pool for textures
+	kAllocInfo.pUserData = nullptr;
+
+	if (allocateImageMemoryRHI(kCtx, &kAllocInfo))
+	{
+		if (bindImageWithMemoryRHI(kCtx))
+		{
+			createView(kCtx);
+			return true;
+		}
+	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexturedResource_Platform::AllocateImageMemoryRHI(const GfRenderContext &kCtx, VmaAllocationCreateInfo* pAllocInfo)
+bool GfTexture_Platform::allocateImageMemoryRHI(const GfRenderContext &kCtx, VmaAllocationCreateInfo* pAllocInfo)
 {
-	if (vmaAllocateMemoryForImage(kCtx.Plat().m_kAllocator, m_pImage, pAllocInfo, &m_pAlloc, &m_kAllocInfo) != VK_SUCCESS)
+	if (vmaAllocateMemoryForImage(kCtx.Plat().m_kAllocator, m_image, pAllocInfo, &m_pAlloc, &m_kAllocInfo) != VK_SUCCESS)
 	{
 		return false;
 	}
@@ -68,9 +178,9 @@ bool GfTexturedResource_Platform::AllocateImageMemoryRHI(const GfRenderContext &
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexturedResource_Platform::BindImageWithMemoryRHI(const GfRenderContext &kCtx)
+bool GfTexture_Platform::bindImageWithMemoryRHI(const GfRenderContext &kCtx)
 {
-	if (vmaBindImageMemory(kCtx.Plat().m_kAllocator, m_pAlloc, m_pImage) != VK_SUCCESS)
+	if (vmaBindImageMemory(kCtx.Plat().m_kAllocator, m_pAlloc, m_image) != VK_SUCCESS)
 	{
 		return false;
 	}
@@ -79,12 +189,12 @@ bool GfTexturedResource_Platform::BindImageWithMemoryRHI(const GfRenderContext &
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexturedResource_Platform::DestroyRHI(const GfRenderContext &kCtx)
+void GfTexture_Platform::destroyRHI(const GfRenderContext &kCtx)
 {
-	if (m_pImage)
+	if (m_image)
 	{
-		vkDestroyImage(kCtx.Plat().m_pDevice, m_pImage, nullptr);
-		m_pImage = nullptr;
+		vkDestroyImage(kCtx.Plat().m_pDevice, m_image, nullptr);
+		m_image = nullptr;
 
 	}
 	// Release allocated GPU memory
@@ -95,90 +205,27 @@ void GfTexturedResource_Platform::DestroyRHI(const GfRenderContext &kCtx)
 		// Not really needed
 		memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
 	}
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_DEFINE_PLATFORM_CTOR(GfTexture2D)
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfTexture2D_Platform::CreateRHI(const GfRenderContext& kCtx)
-{
-	return CreateImageRHI(kCtx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfTexture2D_Platform::CreateImageRHI(const GfRenderContext &kCtx)
-{
-	VkImageCreateInfo kTextureInfo{};
-	kTextureInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	kTextureInfo.mipLevels = m_kBase.m_uiMips;
-	kTextureInfo.flags = 0; // TODO if needed
-	kTextureInfo.imageType = VK_IMAGE_TYPE_2D;
-	kTextureInfo.format = ConvertTextureFormat(m_kBase.m_eFormat);
-	kTextureInfo.extent.width = m_kBase.m_uiWidth;
-	kTextureInfo.extent.height = m_kBase.m_uiHeight;
-	kTextureInfo.extent.depth = 1;
-	kTextureInfo.mipLevels = m_kBase.m_uiMips;
-	kTextureInfo.arrayLayers = 1; // TODO: Add support for arrays
-	kTextureInfo.samples = VK_SAMPLE_COUNT_1_BIT; // TODO: Add support for MS
-	kTextureInfo.tiling = m_kBase.IsTilable() ? VK_IMAGE_TILING_OPTIMAL : VK_IMAGE_TILING_LINEAR;
-	kTextureInfo.usage = ConvertTextureUsageMask(m_kBase.m_uiUsage);
-	kTextureInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // TODO: Add support for concurrent usage
-	kTextureInfo.queueFamilyIndexCount = 0;
-	kTextureInfo.pQueueFamilyIndices = nullptr;
-	kTextureInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-	
-	if (m_kBase.GetSharedPlatform().CreateImageRHI(kCtx, &kTextureInfo))
+	if (m_view) 
 	{
-		// Allocate memory and bind it
-		// Use vmaAllocateMemoryForImage
-		VmaAllocationCreateInfo kAllocInfo{};
-		kAllocInfo.flags = VMA_ALLOCATION_CREATE_STRATEGY_MIN_TIME_BIT;
-		kAllocInfo.usage = m_kBase.IsMappable() ? VMA_MEMORY_USAGE_CPU_TO_GPU : VMA_MEMORY_USAGE_GPU_ONLY;
-		kAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT; // Is this needed?
-		kAllocInfo.preferredFlags = 0;
-		kAllocInfo.memoryTypeBits = 0;
-		kAllocInfo.pool = VK_NULL_HANDLE; // TODO: Use pool for textures
-		kAllocInfo.pUserData = nullptr;
-
-		if (m_kBase.GetSharedPlatform().AllocateImageMemoryRHI(kCtx, &kAllocInfo))
-		{
-			if (m_kBase.GetSharedPlatform().BindImageWithMemoryRHI(kCtx))
-			{
-				return true;
-			}
-		}
+		vkDestroyImageView(kCtx.Plat().m_pDevice, m_view, nullptr);
+		m_view = nullptr;
 	}
-	
-	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture2D_Platform::DestroyRHI(const GfRenderContext& kCtx)
+void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
 {
-	m_kBase.GetSharedPlatform().DestroyRHI(kCtx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
-{
-	VkImage pImage(m_kBase.GetSharedPlatform().GetImage());
+	VkImage pImage(getImage());
 	// Transit image layout to transfer
 	VkImageMemoryBarrier kBarrier{};
 	kBarrier.image = pImage;
-	kBarrier.subresourceRange.aspectMask = m_kBase.GetSharedPlatform().GetAspectMask();
+	kBarrier.subresourceRange.aspectMask = getAspectMask();
 	kBarrier.subresourceRange.baseArrayLayer = 0; // TODO: Give more flexibility
 	kBarrier.subresourceRange.layerCount = 1; // TODO: Support for texture arrays
 	kBarrier.subresourceRange.baseMipLevel = 0;
-	kBarrier.subresourceRange.levelCount = m_kBase.GetMipMapCount();
+	kBarrier.subresourceRange.levelCount = m_kBase.getMipMapCount();
 
 	// From uninitialized -> Transfer
 	kBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -198,7 +245,7 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 		1, &kBarrier);
 
 	// Copy buffer to image
-	u32 uiRegions(m_kBase.GetMipMapCount());
+	u32 uiRegions(m_kBase.getMipMapCount());
 
 	VkBufferImageCopy kRegion = {};
 	kRegion.bufferOffset = uiBufferOffset;
@@ -212,8 +259,8 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 
 	kRegion.imageOffset = { 0, 0, 0 }; // Offset X,Y,Z
 	kRegion.imageExtent = {
-		m_kBase.GetWidth(),
-		m_kBase.GetHeight(),
+		m_kBase.getWidth(),
+		m_kBase.getHeight(),
 		1
 	};
 	vkCmdCopyBufferToImage(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), pImage,
@@ -234,6 +281,36 @@ void GfTexture2D_Platform::LoadTexture2DDataFromStagingBufferRHI(const GfRenderC
 		0, nullptr,
 		0, nullptr,
 		1, &kBarrier);
+}
+
+void GfTexture_Platform::createView(const GfRenderContext& ctx)
+{
+	VkImageViewCreateInfo  viewCI{};
+	viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewCI.pNext = nullptr;
+	viewCI.flags = 0;
+	viewCI.image = m_image;
+	viewCI.viewType = convertToImageViewType(
+		m_kBase.getTextureType(),
+		m_kBase.getWidth(),
+		m_kBase.getHeight(),
+		m_kBase.getDepth(),
+		m_kBase.getSlices());
+	viewCI.format = ConvertTextureFormat(m_kBase.getFormat());
+	viewCI.components = {
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// R
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// G
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// B
+		VK_COMPONENT_SWIZZLE_IDENTITY };	// A
+	viewCI.subresourceRange.aspectMask = m_uiAspectMask;
+	viewCI.subresourceRange.baseMipLevel = 0;
+	viewCI.subresourceRange.levelCount = m_kBase.getMipMapCount();
+	viewCI.subresourceRange.baseArrayLayer = 0;
+	viewCI.subresourceRange.layerCount = m_kBase.getSlices();
+	if (!vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &m_view)) 
+	{
+		GF_ERROR("Failed to create image view");
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

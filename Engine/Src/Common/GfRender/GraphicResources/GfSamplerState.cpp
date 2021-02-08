@@ -35,7 +35,7 @@ void GfSamplerState::Create(const GfRenderContext& kCtxt)
 {
 	if (!IsGPUReady()) 
 	{
-		if (!Plat().CreateRHI(kCtxt)) 
+		if (!Plat().createRHI(kCtxt)) 
 		{
 			Destroy(kCtxt);
 		}
@@ -50,7 +50,7 @@ void GfSamplerState::Create(const GfRenderContext& kCtxt)
 
 void GfSamplerState::Destroy(const GfRenderContext& kCtxt)
 {
-	Plat().DestroyRHI(kCtxt);
+	Plat().destroyRHI(kCtxt);
 	MarkAsDestroyed();
 }
 

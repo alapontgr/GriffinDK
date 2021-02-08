@@ -37,9 +37,9 @@ protected:
 		VkShaderModule m_pModule = VK_NULL_HANDLE;
 	};
 
-	void DestroyRHI(const GfRenderContext& kCtx);
+	void destroyRHI(const GfRenderContext& kCtx);
 
-	bool CreateRHI(const GfRenderContext& kCtx);
+	bool createRHI(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
 

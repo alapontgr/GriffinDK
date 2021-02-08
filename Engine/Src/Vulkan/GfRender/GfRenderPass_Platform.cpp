@@ -9,25 +9,66 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
+#include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderPass.h"
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderContext.h"
 #include "Common/GfRender/GfCmdBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+// Used for hashing
 
-GF_DEFINE_PLATFORM_CTOR(GfRenderPass)
-	, m_pRenderPass(nullptr)
+struct RenderPassDescHeader 
 {
-	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
+	u32 m_useDepth : 1;
+	u32 m_outputCount : 31;
+};
+struct AttachmentDescHeader
+{
+	u32 m_format : 16;
+	u32 m_loadOp : 4;
+	u32 m_storeOp : 4;
+	u32 m_stencilLoadOp : 4;
+	u32 m_stencilStoreOp : 4;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfUMap<u64, VkRenderPass> GfRenderPass_Platform::ms_renderPassCache;
+GfUMap<u64, VkFramebuffer> GfRenderPass_Platform::ms_framebufferCache;
+
+VkAttachmentLoadOp convertLoadOp(LoadOp op) 
+{
+	static VkAttachmentLoadOp s_table[3] =
 	{
-		m_pFramebuffers[i] = nullptr;
-	}
+		VK_ATTACHMENT_LOAD_OP_LOAD,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_LOAD_OP_DONT_CARE
+	};
+	return s_table[static_cast<u32>(op)];
+}
+
+static VkAttachmentStoreOp convertStoreOp(StoreOp op) 
+{
+	static VkAttachmentStoreOp s_table[3] =
+	{
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VK_ATTACHMENT_STORE_OP_DONT_CARE
+	};
+	return s_table[static_cast<u32>(op)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
+GF_DEFINE_PLATFORM_CTOR(GfRenderPass)
+	, m_framebuffer(nullptr)
+	, m_renderPass(nullptr)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfRenderPass_Platform::createRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
 {
 	// Description of the whole render pass
 	VkAttachmentDescription kAttachmentsDesc{};
@@ -92,8 +133,61 @@ void GfRenderPass_Platform::CreateRHI(const GfRenderContext& kCtx, const GfWindo
 	kRenderPassInfo.pDependencies = &tDependencies[0];
 
 	VkResult eResult = vkCreateRenderPass(kCtx.Plat().m_pDevice, &kRenderPassInfo, nullptr,
-		&m_pRenderPass);
+		&m_renderPass);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create render pass");
+}
+
+bool GfRenderPass_Platform::createRHI(const GfRenderContext& kCtx, 
+	const AttachmentDesc* output, u32 outputCount, 
+	const AttachmentDesc* depthAttachment)
+{
+	GF_ASSERT(outputCount > 0 || depthAttachment != nullptr, "Invalid numbr of color attachments");
+	u64 hashRP(0);
+	{
+		u32 attachmentCount = outputCount + (depthAttachment ? 1 : 0);
+		u32 reqSize = static_cast<u32>(sizeof(RenderPassDescHeader) + attachmentCount * sizeof(AttachmentDescHeader));
+		StackMemBlock block(reqSize);
+		RenderPassDescHeader* head = reinterpret_cast<RenderPassDescHeader*>(block.get());
+		head->m_outputCount = outputCount;
+		head->m_useDepth = depthAttachment ? 1 : 0;
+		AttachmentDescHeader* attachments = reinterpret_cast<AttachmentDescHeader*>(head + 1);
+		u32 pivot = 0;
+		if (head->m_useDepth)
+		{
+			attachments[pivot].m_format = depthAttachment->m_attachment->getFormat();
+			attachments[pivot].m_loadOp = static_cast<u32>(depthAttachment->m_loadOp);
+			attachments[pivot].m_storeOp = static_cast<u32>(depthAttachment->m_storeOp);
+			attachments[pivot].m_stencilLoadOp = static_cast<u32>(depthAttachment->m_stencilLoadOp);
+			attachments[pivot].m_stencilStoreOp = static_cast<u32>(depthAttachment->m_stencilStoreOp);
+			pivot++;
+		}
+		for (u32 i = 0; i < outputCount; ++i)
+		{
+			attachments[pivot].m_format = output[i].m_attachment->getFormat();
+			attachments[pivot].m_loadOp = static_cast<u32>(output[i].m_loadOp);
+			attachments[pivot].m_storeOp = static_cast<u32>(output[i].m_storeOp);
+			attachments[pivot].m_stencilLoadOp = static_cast<u32>(output[i].m_stencilLoadOp);
+			attachments[pivot].m_stencilStoreOp = static_cast<u32>(output[i].m_stencilStoreOp);
+			pivot++;
+		}
+		hashRP = GfHash::compute(head, reqSize);
+	}
+	GF_ASSERT(hashRP, "Invalid hash");
+
+	const auto entryRP = ms_renderPassCache.find(hashRP);
+	if (entryRP != ms_renderPassCache.end()) 
+	{
+		m_renderPass = entryRP->second;
+	}
+	else 
+	{
+		m_renderPass = createRenderPass(kCtx, output, outputCount, depthAttachment);
+		ms_renderPassCache[hashRP] = m_renderPass;
+	}
+
+	m_framebuffer = getOrCreateFramebuffer(kCtx, output, outputCount, depthAttachment);
+
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,8 +202,8 @@ void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCm
 	VkRenderPassBeginInfo passBeginInfo{};
 	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passBeginInfo.pNext = nullptr;
-	passBeginInfo.renderPass = m_pRenderPass;
-	passBeginInfo.framebuffer = m_pFramebuffers[pWindow->GetCurrentFrameIdx()];
+	passBeginInfo.renderPass = m_renderPass;
+	passBeginInfo.framebuffer = m_framebuffer;
 	passBeginInfo.renderArea.extent.width = pWindow->GetWidth();
 	passBeginInfo.renderArea.extent.height = pWindow->GetHeight();
 	passBeginInfo.renderArea.offset.x = 0;
@@ -152,42 +246,143 @@ void GfRenderPass_Platform::SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const G
 	vkCmdSetScissor(kCmdBuffer.Plat().GetCmdBuffer(), 0, 1, &kRHIScissor);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass_Platform::RecreateFramebufferRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
+VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& kCtx, 
+	const AttachmentDesc* output, u32 outputCount, 
+	const AttachmentDesc* depthAttachment)
 {
-	// Destroy the old one
-	if (m_pFramebuffers)
+	bool useDepth = (depthAttachment != nullptr);
+	u32 attachmentCount = outputCount + (useDepth ? 1 : 0);
+
+	StackMemBlock attachmentsDescs(static_cast<u32>(sizeof(VkAttachmentDescription)) * attachmentCount);
+	StackMemBlock attachmentsRefs(static_cast<u32>(sizeof(VkAttachmentReference)) * attachmentCount);
+	
+	VkAttachmentDescription* attachments = reinterpret_cast<VkAttachmentDescription*>(attachmentsDescs.get());
+	VkAttachmentReference* attachmentReferences = reinterpret_cast<VkAttachmentReference*>(attachmentsRefs.get());
+	
+	u32 attachmentIdx = 0;
+	VkAttachmentDescription* depthAttachmentDesc = attachments;
+	VkAttachmentReference* depthAttachmentRef = attachmentReferences;
+	if (useDepth) 
 	{
-		for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
-		{
-			vkDestroyFramebuffer(kCtx.Plat().m_pDevice, m_pFramebuffers[i], nullptr);
-			m_pFramebuffers[i] = VK_NULL_HANDLE;
-		}
+		depthAttachmentDesc->flags = 0;
+		depthAttachmentDesc->format = ConvertTextureFormat(depthAttachment->m_attachment->getFormat());
+		depthAttachmentDesc->samples = VkSampleCountFlagBits ::VK_SAMPLE_COUNT_1_BIT;
+		depthAttachmentDesc->loadOp = convertLoadOp(depthAttachment->m_loadOp);
+		depthAttachmentDesc->storeOp = convertStoreOp(depthAttachment->m_storeOp);
+		depthAttachmentDesc->stencilLoadOp = convertLoadOp(depthAttachment->m_stencilLoadOp);
+		depthAttachmentDesc->stencilStoreOp = convertStoreOp(depthAttachment->m_stencilStoreOp);
+		depthAttachmentDesc->initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		depthAttachmentDesc->finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		
+		depthAttachmentRef->attachment = attachmentIdx++;
+		depthAttachmentRef->layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	// TODO: Refactor this to use the attachments defined as output target parameters
-
-	// REVISE
-	VkFramebufferCreateInfo framebufferInfo{};
-	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	framebufferInfo.pNext = nullptr;
-	framebufferInfo.flags = 0;
-	framebufferInfo.renderPass = m_pRenderPass;
-	framebufferInfo.width = pWindow->GetWidth();
-	framebufferInfo.height = pWindow->GetHeight();
-	framebufferInfo.layers = 1;
-
-	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; i++) 
+	VkAttachmentDescription* outputAttachmentDescs = depthAttachmentDesc+1;
+	VkAttachmentReference* outputRefs = depthAttachmentRef+1;
+	for (u32 i=0; i<outputCount; ++i) 
 	{
-		VkImageView pOutView(pWindow->GetBackBufferView(i)->Plat().GetView());
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = &pOutView;
-		VkResult eResult = vkCreateFramebuffer(kCtx.Plat().m_pDevice, &framebufferInfo, VK_NULL_HANDLE, &m_pFramebuffers[i]);
+		outputAttachmentDescs[i].flags = 0;
+		outputAttachmentDescs[i].format = ConvertTextureFormat(output[i].m_attachment->getFormat());
+		outputAttachmentDescs[i].samples = VkSampleCountFlagBits ::VK_SAMPLE_COUNT_1_BIT;
+		outputAttachmentDescs[i].loadOp = convertLoadOp(output[i].m_loadOp);
+		outputAttachmentDescs[i].storeOp = convertStoreOp(output[i].m_storeOp);
+		outputAttachmentDescs[i].stencilLoadOp = convertLoadOp(output[i].m_stencilLoadOp);
+		outputAttachmentDescs[i].stencilStoreOp = convertStoreOp(output[i].m_stencilStoreOp);
+		outputAttachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		outputAttachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		
+		outputRefs[i].attachment = attachmentIdx++;
+		outputRefs[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	}
+
+	VkSubpassDescription subpassDesc{};
+	subpassDesc.flags = 0;
+	subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpassDesc.inputAttachmentCount = 0;
+	subpassDesc.pInputAttachments = nullptr;
+	subpassDesc.colorAttachmentCount = outputCount;
+	subpassDesc.pColorAttachments = outputCount > 0 ? outputRefs : nullptr;
+	subpassDesc.pResolveAttachments = nullptr; // TODO
+	subpassDesc.pDepthStencilAttachment = useDepth ? attachmentReferences : nullptr;
+	subpassDesc.preserveAttachmentCount = 0; // TODO
+	subpassDesc.pPreserveAttachments = nullptr; // TODO
+
+	VkRenderPassCreateInfo kRenderPassInfo{};
+	kRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	kRenderPassInfo.pNext = nullptr;
+	kRenderPassInfo.flags = 0;
+	kRenderPassInfo.attachmentCount = attachmentCount;
+	kRenderPassInfo.pAttachments = attachments;
+	kRenderPassInfo.subpassCount = 1;
+	kRenderPassInfo.pSubpasses = &subpassDesc;
+	kRenderPassInfo.dependencyCount = 0;
+	kRenderPassInfo.pDependencies = nullptr;
+
+	VkRenderPass renderPass(nullptr);
+	VkResult eResult = vkCreateRenderPass(kCtx.Plat().m_pDevice, &kRenderPassInfo, nullptr, &renderPass);
+	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create render pass");
+	return renderPass;
+}
+
+VkFramebuffer GfRenderPass_Platform::getOrCreateFramebuffer(const GfRenderContext& ctx, const AttachmentDesc* output, u32 outputCount, const AttachmentDesc* depthAttachment)
+{
+	bool useDepth = (depthAttachment != nullptr);
+	u32 attachmentCount = outputCount + (useDepth ? 1 : 0);
+
+	u32 reqSize = static_cast<u32>(sizeof(VkFramebufferCreateInfo)) + static_cast<u32>(sizeof(VkImageView)) * attachmentCount;
+	StackMemBlock frameBufferDescription(reqSize);
+
+	u32 width = 0;
+	u32 height = 0;
+	if (outputCount > 0) 
+	{
+		width = output[0].m_attachment->getWidth();
+		height = output[0].m_attachment->getHeight();
+	}
+	else 
+	{
+		width = depthAttachment->m_attachment->getWidth();
+		height = depthAttachment->m_attachment->getHeight();
+	}
+
+	VkFramebufferCreateInfo* frameBufferCI = reinterpret_cast<VkFramebufferCreateInfo*>(frameBufferDescription.get());
+	frameBufferCI->sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	frameBufferCI->pNext = nullptr;
+	frameBufferCI->flags = 0;
+	frameBufferCI->renderPass = nullptr;
+	frameBufferCI->pAttachments = nullptr;
+	frameBufferCI->layers = 1;
+	frameBufferCI->width = width;
+	frameBufferCI->height = height;
+	VkImageView* attachmentViews = reinterpret_cast<VkImageView*>(frameBufferCI+1);
+	u32 idx = 0;
+	if (useDepth) 
+	{
+		attachmentViews[idx++] = depthAttachment->m_attachment->Plat().getView();
+	}
+	for (u32 i = 0; i < outputCount; ++i) 
+	{
+		attachmentViews[idx++] = output[i].m_attachment->Plat().getView();
+	}
+	u64 fbHash = GfHash::compute(frameBufferCI, reqSize);
+
+	const auto entry = ms_framebufferCache.find(fbHash);
+	VkFramebuffer fb = nullptr;
+	if (entry != ms_framebufferCache.end()) 
+	{
+		fb = entry->second;
+	}
+	else 
+	{
+		frameBufferCI->attachmentCount = attachmentCount;
+		frameBufferCI->pAttachments = attachmentViews;
+		frameBufferCI->renderPass = m_renderPass;
+		VkResult eResult = vkCreateFramebuffer(ctx.Plat().m_pDevice, frameBufferCI, VK_NULL_HANDLE, &fb);
 		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
-		//
+		ms_framebufferCache[fbHash] = fb;
 	}
-
+	return fb;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

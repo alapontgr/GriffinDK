@@ -21,99 +21,128 @@ class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfExternTexInit : public GfExternTexInit_Platform 
+enum class TextureType : u32 
 {
-	u32						m_uiWidth;
-	u32						m_uiHeight;
-	ETextureFormat::Type	m_eFormat;
+	Type_1D = 0,
+	Type_2D,
+	Type_3D,
+	COUNT
+};
+
+enum class TextureNumSamples : u32 
+{
+	None = 0,
+	x4,
+	x8,
+	x16
+};
+
+namespace TextureUsage 
+{
+	enum Type
+	{
+		Sample			= 1<<0,
+		RenderTarget	= 1<<1,
+		DepthStencil	= 1<<2,
+		Storage			= 1<<3
+	};
+};
+using TextureUsageMask = u32;
+
+struct TextureDesc
+{
+	u32						m_width			= 0;
+	u32						m_height		= 0;
+	u32						m_depth			= 1;
+	u32						m_slices		= 1;
+	u32						m_mipCount		= 1;
+	TextureNumSamples		m_numSamples	= TextureNumSamples::None;
+	TextureType				m_textureType	= TextureType::Type_2D;
+	TextureFormat::Type		m_format		= TextureFormat::R8G8B8A8_UNorm;
+	TextureUsageMask		m_usage			= TextureUsage::Sample;
+	bool					m_mappable		= false;
+};
+
+// Used to initialize swapchain iomages internally
+struct SwapchainDesc : public GfExternTexInit_Platform 
+{
+	u32						m_width;
+	u32						m_height;
+	TextureFormat::Type		m_format = TextureFormat::R8G8B8A8_UNorm;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Base class for texture types
-class GfTexturedResource : public GfGraphicsResourceBase
+class GfTexture
 {
+	GF_DECLARE_PLATFORM_INTERFACE(GfTexture);
 public:
 
-	enum ETexture2DFlags : u16
+	enum Flags : u32 
 	{
-		// User flags
-		Mappable = 1 << 0,
-		Tilable = 1 << 1,
+		Initialized = 1<<0,
+		InitializedAsSwapchain = 1<<1 | Initialized,
+		GPUReady = 1<<2,
 	};
-	using GfFlagsMask = GfBitMask<u16>;
 
-	GfTexturedResource();
+	GfTexture();
+
+	bool init(const TextureDesc& desc);
+
+	void Create(const GfRenderContext& kCtx);
+
+	void Destroy(const GfRenderContext& kCtx);
 
 	// Init the Texture view with externally created resources (i.e. backbuffer)
-	void ExternalInit(const GfExternTexInit& kInitParams);
+	void ExternalInit(const SwapchainDesc& kInitParams);
 
-	GfTexturedResource_Platform& GetSharedPlatform();
-	const GfTexturedResource_Platform& GetSharedPlatformC() const;
+	bool getIsInitialized() const { return (m_flags & Flags::Initialized) != 0; }
 
-	u32 GetMipMapCount() const;
+	bool getIsGPUReady() const { return (m_flags & Flags::GPUReady) != 0; }
 
-	ETextureFormat::Type GetFormat() const;
+	bool getIsSwapchain() const {return (m_flags & Flags::InitializedAsSwapchain) != 0; };
 
-	bool IsUsageValid(ETextureUsageBits::Type eUsage) const;
+	u32 getMipMapCount() const;
 
-	bool IsMappable() const;
+	TextureFormat::Type getFormat() const;
 
-	bool IsDepthBuffer() const;
+	bool isDepthBuffer() const;
 
-	bool IsStencilBuffer() const;
+	bool isRT() const;
 
-	bool IsTilable() const;
+	u32 getWidth() const;
 
-	u32 GetWidth() const;
+	u32 getHeight() const;
 
-	u32 GetHeight() const;
+	u32 getDepth() const;
+
+	u32 getSlices() const;
+
+	TextureType getTextureType() const;
+
+	TextureUsageMask getTextureUsage() const;
+
+	bool getIsMappable() const;
 
 protected:
 
-	enum EPrivateFlags : u16
-	{
-		// Continue from public flags
-		DepthBuffer = (1 << 2),
-		StencilBuffer = (1 << 3),
-	};
-
-	void SetUsage(const ETextureUsageBits::GfMask& uiUsage);
-	void SetFormat(ETextureFormat::Type eFormat);
-	void SetMips(u32 uiMipsCount);
-	void SetTextureFlags(const GfFlagsMask& uiFlags);
-	void SetDimensions(u32 uiWidth, u32 uiHeight);
-
-	GfTexturedResource_Platform m_kCommonPlatform;
-	ETextureUsageBits::GfMask	m_uiUsage;
-	u32							m_uiMips;
-	ETextureFormat::Type		m_eFormat;
-	GfFlagsMask					m_uiTextureFlags;
-	// Resolution
-	u32							m_uiWidth;
-	u32							m_uiHeight;
+	u32 m_flags;
+	TextureDesc m_desc;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // Representation of a Texture 2D
-class GfTexture2D : public GfTexturedResource
+class GfTexture2D : public GfTexture
 {
-	GF_DECLARE_PLATFORM_INTERFACE(GfTexture2D);
 public:
 
 	using Id = s32;
 
 	GfTexture2D();
 
-	bool init(u32 uiWidth, u32 uiHeight, u32 uiMips,
-		ETextureFormat::Type eFormat,
-		const ETextureUsageBits::GfMask& uiUsage,
-		const GfTexturedResource::GfFlagsMask& uiFlags);
-
-	void Create(const GfRenderContext& kCtx);
-
-	void Destroy(const GfRenderContext& kCtx);
+	bool init(u32 width, u32 height, u32 mipCount, TextureFormat::Type format);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands

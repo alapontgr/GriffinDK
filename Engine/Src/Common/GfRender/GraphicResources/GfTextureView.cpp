@@ -26,7 +26,7 @@ GF_DEFINE_BASE_CTOR(GfTextureView)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTextureView::init(const GfTexturedResource* pTexture, ETextureViewType::Type eViewType)
+void GfTextureView::init(const GfTexture* pTexture, ETextureViewType::Type eViewType)
 {
 	if (!IsInitialised())
 	{
@@ -81,7 +81,7 @@ void GfTextureView::Create(const GfRenderContext& kCtx)
 {
 	if (!IsGPUReady()) 
 	{
-		if (m_kPlatform.CreateRHI(kCtx)) 
+		if (m_kPlatform.createRHI(kCtx)) 
 		{
 			MarkAsGPUReady();
 		}
@@ -94,7 +94,7 @@ void GfTextureView::Destroy(const GfRenderContext& kCtx)
 {
 	if (IsGPUReady() && !IsExternallyInitialized()) 
 	{
-		m_kPlatform.DestroyRHI(kCtx);
+		m_kPlatform.destroyRHI(kCtx);
 	}
 }
 

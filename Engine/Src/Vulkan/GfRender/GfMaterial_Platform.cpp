@@ -128,7 +128,7 @@ GF_DEFINE_PLATFORM_CTOR(GfMaterialTemplate)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
+void GfMaterialTemplate_Platform::destroyRHI(const GfRenderContext& kCtx)
 {
 	if (m_pPipeline)
 	{
@@ -152,7 +152,7 @@ void GfMaterialTemplate_Platform::DestroyRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfMaterialTemplate_Platform::CreateRHI(const GfRenderContext& kCtx)
+bool GfMaterialTemplate_Platform::createRHI(const GfRenderContext& kCtx)
 {
 	if (CreateLayout(kCtx) && CreatePipeline(kCtx))
 	{

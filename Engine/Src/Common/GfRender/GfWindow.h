@@ -25,8 +25,8 @@ struct GfWindowInitParams : public GfWindowInitParams_Platform
 {
 	GfEntryArgs m_kArguments;
 	const char* m_szWindowName;
-	u32         m_uiWidth;
-	u32         m_uiHeight;
+	u32         m_width;
+	u32         m_height;
 	bool        m_bFullScreen;
 	bool        m_bVSync;
 };
@@ -75,8 +75,8 @@ private:
 	void OnResize();
 
 	const char*			m_szAppName; // Static string
-	u32					m_uiWidth;
-	u32					m_uiHeight;
+	u32					m_width;
+	u32					m_height;
 	bool				m_bFullScreen;
 	bool				m_bVSync;
 
@@ -91,14 +91,14 @@ private:
 
 GF_FORCEINLINE u32 GfWindow::GetWidth() const
 {
-	return m_uiWidth;
+	return m_width;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE u32 GfWindow::GetHeight() const
 {
-	return m_uiHeight;
+	return m_height;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

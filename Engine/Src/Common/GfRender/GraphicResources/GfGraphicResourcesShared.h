@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETextureFormat 
+namespace TextureFormat 
 {
 	// Ref: https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkFormat.html
 	enum Type : u16 
@@ -227,24 +227,6 @@ namespace ETextureUsageShift
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETextureUsageBits 
-{
-	enum Type : u16 
-	{
-		Transfer_Src			= (1 << ETextureUsageShift::Transfer_Src),
-		Transfer_Dst			= (1 << ETextureUsageShift::Transfer_Dst),
-		Sampled					= (1 << ETextureUsageShift::Sampled),
-		Storage					= (1 << ETextureUsageShift::Storage),
-		ColorAttachment			= (1 << ETextureUsageShift::ColorAttachment),
-		DepthStencilAttachment	= (1 << ETextureUsageShift::DepthStencilAttachment),
-		TransientAttachment		= (1 << ETextureUsageShift::TransientAttachment),
-		InputAttachment			= (1 << ETextureUsageShift::InputAttachment),
-	};
-	using GfMask = GfBitMask<u16>;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 namespace ETextureViewType
 {
 	enum Type : u32
@@ -296,6 +278,25 @@ namespace ETexAddressMode
 		ClampToBorder,
 		MirrorClampToEdge
 	};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE bool isDepthFormat(TextureFormat::Type format) 
+{
+	return (format & (TextureFormat::D16_UNorm | 
+		TextureFormat::D16_UNorm_S8_UInt |
+		TextureFormat::D24_UNorm_S8_UInt |
+		TextureFormat::D32_SFloat | 
+		TextureFormat::D32_SFloat_S8_UInt)) != 0;
+}
+
+GF_FORCEINLINE bool isStencilFormat(TextureFormat::Type format) 
+{
+	return (format & (TextureFormat::D16_UNorm_S8_UInt |
+		TextureFormat::D24_UNorm_S8_UInt |
+		TextureFormat::S8_UInt | 
+		TextureFormat::D32_SFloat_S8_UInt)) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

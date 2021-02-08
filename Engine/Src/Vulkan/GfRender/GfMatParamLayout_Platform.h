@@ -31,9 +31,9 @@ public:
 
 protected:
 
-	void CreateRHI(const GfRenderContext& kCtxt);
+	void createRHI(const GfRenderContext& kCtxt);
 
-	void DestroyRHI(const GfRenderContext& kCtxt);
+	void destroyRHI(const GfRenderContext& kCtxt);
 
 private:
 
@@ -49,9 +49,9 @@ public:
 
 	VkDescriptorSetLayout GetLayout() const;
 
-	bool CreateRHI(const GfRenderContext& kCtxt);
+	bool createRHI(const GfRenderContext& kCtxt);
 
-	void DestroyRHI(const GfRenderContext& kCtxt);
+	void destroyRHI(const GfRenderContext& kCtxt);
 
 private:
 
@@ -69,9 +69,9 @@ public:
 
 protected:
 
-	bool CreateRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
+	bool createRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
-	void DestroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
+	void destroyRHI(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory);
 
 	void UpdateRHI(const GfRenderContext& kCtxt);
 

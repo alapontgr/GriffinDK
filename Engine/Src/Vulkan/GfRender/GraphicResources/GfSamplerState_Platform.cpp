@@ -21,7 +21,7 @@ GF_DEFINE_PLATFORM_CTOR(GfSamplerState)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfSamplerState_Platform::CreateRHI(const GfRenderContext& kCtxt)
+bool GfSamplerState_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	VkSamplerCreateInfo kSamplerInfo{};
 	kSamplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -46,7 +46,7 @@ bool GfSamplerState_Platform::CreateRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState_Platform::DestroyRHI(const GfRenderContext& kCtxt)
+void GfSamplerState_Platform::destroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pSampler) 
 	{

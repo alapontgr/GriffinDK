@@ -29,9 +29,9 @@ public:
 
 	void ExternInitPlat(const GfExternTexView_Platform& kInitParams);
 
-	bool CreateRHI(const GfRenderContext& kCtx);
+	bool createRHI(const GfRenderContext& kCtx);
 
-	void DestroyRHI(const GfRenderContext& kCtx);
+	void destroyRHI(const GfRenderContext& kCtx);
 
 	VkImageView GetView() const;
 

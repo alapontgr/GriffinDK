@@ -28,17 +28,17 @@ void GfTextureView_Platform::ExternInitPlat(const GfExternTexView_Platform& kIni
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTextureView_Platform::CreateRHI(const GfRenderContext& kCtx)
+bool GfTextureView_Platform::createRHI(const GfRenderContext& kCtx)
 {
- 	const GfTexturedResource* pTexture(m_kBase.m_pTexture);
+ 	const GfTexture* pTexture(m_kBase.m_pTexture);
 
  	VkImageViewCreateInfo kImageViewInfo{};
  	kImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
  	kImageViewInfo.flags = 0; // TODO?
  	kImageViewInfo.viewType = ConvertViewType(m_kBase.m_eViewType);
- 	kImageViewInfo.format = ConvertTextureFormat(pTexture->GetFormat());
+ 	kImageViewInfo.format = ConvertTextureFormat(pTexture->getFormat());
  	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
- 	kImageViewInfo.subresourceRange.aspectMask = pTexture->GetSharedPlatformC().GetAspectMask();
+ 	kImageViewInfo.subresourceRange.aspectMask = pTexture->GetSharedPlatformC().getAspectMask();
  	kImageViewInfo.subresourceRange.baseMipLevel = m_kBase.m_uiBaseLod;
  	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiLodCount;
 	kImageViewInfo.subresourceRange.baseArrayLayer = m_kBase.m_uiBaseLayerIdx;
@@ -49,7 +49,7 @@ bool GfTextureView_Platform::CreateRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTextureView_Platform::DestroyRHI(const GfRenderContext& kCtx)
+void GfTextureView_Platform::destroyRHI(const GfRenderContext& kCtx)
 {
 	if (m_pImageView) 
 	{

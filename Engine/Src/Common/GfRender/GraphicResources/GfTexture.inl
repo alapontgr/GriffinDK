@@ -11,86 +11,86 @@
 #define __GFTEXTURE_INL__
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatform()
+GF_FORCEINLINE u32 GfTexture::getMipMapCount() const
 {
-	return m_kCommonPlatform;
+	return m_desc.m_mipCount;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE const GfTexturedResource_Platform& GfTexturedResource::GetSharedPlatformC() const
+GF_FORCEINLINE TextureFormat::Type GfTexture::getFormat() const
 {
-	return m_kCommonPlatform;
+	return m_desc.m_format;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfTexturedResource::GetMipMapCount() const
+GF_FORCEINLINE bool GfTexture::isDepthBuffer() const
 {
-	return m_uiMips;
+	return (m_desc.m_usage & TextureUsage::DepthStencil) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE ETextureFormat::Type GfTexturedResource::GetFormat() const
+GF_FORCEINLINE bool GfTexture::isRT() const
 {
-	return m_eFormat;
+	return (m_desc.m_usage & TextureUsage::RenderTarget) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexturedResource::IsUsageValid(ETextureUsageBits::Type eUsage) const
+GF_FORCEINLINE u32 GfTexture::getWidth() const
 {
-	return m_uiUsage.IsEnable(eUsage);
+	return m_desc.m_width;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexturedResource::IsMappable() const
+GF_FORCEINLINE u32 GfTexture::getHeight() const
 {
-	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Mappable);
+	return m_desc.m_height;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexturedResource::IsDepthBuffer() const
+GF_FORCEINLINE u32 GfTexture::getDepth() const
 {
-	return m_uiTextureFlags.IsEnable(EPrivateFlags::DepthBuffer);
+	return m_desc.m_depth;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexturedResource::IsStencilBuffer() const
+GF_FORCEINLINE u32 GfTexture::getSlices() const
 {
-	return m_uiTextureFlags.IsEnable(EPrivateFlags::StencilBuffer);
+	return m_desc.m_slices;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool GfTexturedResource::IsTilable() const
+GF_FORCEINLINE TextureType GfTexture::getTextureType() const
 {
-	return m_uiTextureFlags.IsEnable(ETexture2DFlags::Tilable);
+	return m_desc.m_textureType;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfTexturedResource::GetWidth() const
+GF_FORCEINLINE TextureUsageMask GfTexture::getTextureUsage() const
 {
-	return m_uiWidth;
+	return m_desc.m_usage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfTexturedResource::GetHeight() const
+GF_FORCEINLINE bool GfTexture::getIsMappable() const
 {
-	return m_uiHeight;
+	return m_desc.m_mappable;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE void GfTexture2D::LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
 {
-	m_kPlatform.LoadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
+	m_kPlatform.loadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

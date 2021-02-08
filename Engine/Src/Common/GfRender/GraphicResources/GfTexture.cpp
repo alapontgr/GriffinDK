@@ -13,163 +13,94 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfTexturedResource::GfTexturedResource()
-	: m_kCommonPlatform(*this)
-	, m_uiUsage(0)
-	, m_uiMips(1)
-	, m_eFormat(ETextureFormat::Undefined)
-	, m_uiTextureFlags(0)
-	, m_uiWidth(0)
-	, m_uiHeight(0)
+GF_DEFINE_BASE_CTOR(GfTexture)
+	, m_flags(0)
+	, m_desc{}
 {
-	m_uiGraphicResFlags.Enable(EGraphicResFlags::TexturedResource);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexturedResource::ExternalInit(const GfExternTexInit& kInitParams)
+bool GfTexture::init(const TextureDesc& desc)
 {
-	bool bInitialised(IsInitialised());
-	if (!bInitialised || IsExternallyInitialized())
+	if (!getIsInitialized())
 	{
-		m_uiWidth = kInitParams.m_uiWidth;
-		m_uiHeight = kInitParams.m_uiHeight;
-		m_eFormat = kInitParams.m_eFormat;
-		m_kCommonPlatform.ExternalInitPlat(kInitParams);
-		MarkAsExternallyInitiailized();
-		MarkAsInitialised();
-		MarkAsGPUReady();
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexturedResource::SetUsage(const ETextureUsageBits::GfMask& uiUsage)
-{
-	m_uiUsage = uiUsage;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexturedResource::SetFormat(ETextureFormat::Type eFormat)
-{
-	m_eFormat = eFormat;
-	// Detect depth buffer
-	if (eFormat >= ETextureFormat::D16_UNorm && eFormat <= ETextureFormat::D32_SFloat_S8_UInt)
-	{
-		if (!m_uiUsage.IsEnable(ETextureUsageBits::DepthStencilAttachment))
+		bool isDepth = isDepthFormat(desc.m_format);
+		if (!isDepth || (isDepth && (desc.m_usage & TextureUsage::DepthStencil) != 0)) 
 		{
-			// Invalid configuration of texture
-			return;
+			m_desc = desc;
+			m_flags |= Flags::Initialized;
+			m_kPlatform.init(m_desc);
+			return true;
 		}
-
-		// Is depth buffer?
-		if (eFormat != ETextureFormat::S8_UInt)
-		{
-			m_uiTextureFlags |= EPrivateFlags::DepthBuffer;
-		}
-		// Is stencil buffer?
-		if (eFormat > ETextureFormat::D32_SFloat)
-		{
-			m_uiTextureFlags |= EPrivateFlags::StencilBuffer;
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexturedResource::SetMips(u32 uiMipsCount)
-{
-	m_uiMips = uiMipsCount;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexturedResource::SetTextureFlags(const GfFlagsMask& uiFlags)
-{
-	m_uiTextureFlags = uiFlags;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfTexturedResource::SetDimensions(u32 uiWidth, u32 uiHeight)
-{
-	m_uiWidth = uiWidth;
-	m_uiHeight = uiHeight;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_DEFINE_BASE_CTOR(GfTexture2D)
-{
-	// Set invalid type as this is not a valid resource to be bound
-	m_eResourceType = EParamaterSlotType::Invalid;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfTexture2D::init(u32 uiWidth, u32 uiHeight, u32 uiMips, 
-	ETextureFormat::Type eFormat, 
-	const ETextureUsageBits::GfMask& uiUsage, 
-	const GfTexturedResource::GfFlagsMask& uiFlags)
-{
-	if (!IsInitialised()) 
-	{
-		SetTextureFlags(uiFlags);
-		SetMips(uiMips);
-		SetUsage(uiUsage);
-		SetFormat(eFormat);
-		SetDimensions(uiWidth, uiHeight);
-
-		if (eFormat >= ETextureFormat::D16_UNorm && eFormat <= ETextureFormat::D32_SFloat_S8_UInt)
-		{
-			if (!(uiUsage & ETextureUsageBits::DepthStencilAttachment))
-			{
-				// Invalid configuration of texture
-				return false;
-			}
-		}
-
-		// If it is a sampled image add the Transfer_Dst usage as its data will probably be loaded after the creation
-		if ((uiUsage & ETextureUsageBits::Sampled) != 0) 
-		{
-			m_uiUsage.Enable(ETextureUsageBits::Transfer_Dst);
-		}
-
-		MarkAsInitialised();
-		return true;
 	}
 	return false;
 }
 
+void GfTexture::ExternalInit(const SwapchainDesc& kInitParams)
+{
+	if (!getIsInitialized())
+	{
+		m_desc.m_width = kInitParams.m_width;
+		m_desc.m_height = kInitParams.m_height;
+		m_desc.m_format = kInitParams.m_format;
+		m_kPlatform.ExternalInitPlat(kInitParams);
+		m_flags |= InitializedAsSwapchain;
+		m_flags |= Flags::GPUReady;
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture2D::Create(const GfRenderContext& kCtx)
+void GfTexture::Create(const GfRenderContext& kCtx)
 {
-	if (IsInitialised()) 
+	if (getIsInitialized()) 
 	{
-		if (!m_kPlatform.CreateRHI(kCtx))
+		if (!m_kPlatform.CreateImageRHI(kCtx))
 		{
-			m_kPlatform.DestroyRHI(kCtx);
+			m_kPlatform.destroyRHI(kCtx);
 		}
 		else 
 		{
-			MarkAsGPUReady();
+			m_flags |= Flags::GPUReady;
 		}
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture2D::Destroy(const GfRenderContext& kCtx)
+void GfTexture::Destroy(const GfRenderContext& kCtx)
 {
 	// Destroy only if needed. Do not worry if the texture was initialized with an external source
-	if (IsGPUReady() && !IsExternallyInitialized())
+	if (getIsGPUReady() && !getIsSwapchain())
 	{
-		m_kPlatform.DestroyRHI(kCtx);
-		m_uiTextureFlags.Reset();
-		MarkAsDestroyed();
+		m_kPlatform.destroyRHI(kCtx);
+		m_flags = 0;
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfTexture2D::GfTexture2D() 
+	: GfTexture()
+{	
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool GfTexture2D::init(u32 width, u32 height, u32 mips,
+	TextureFormat::Type format)
+{
+	TextureDesc desc;
+	desc.m_width = width;
+	desc.m_height = height;
+	desc.m_depth = 1;
+	desc.m_slices = 1;
+	desc.m_mipCount = mips;
+	desc.m_textureType = TextureType::Type_2D;
+	desc.m_format = format;
+	desc.m_usage = TextureUsage::Sample;
+	return GfTexture::init(desc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

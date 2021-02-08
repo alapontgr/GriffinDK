@@ -17,6 +17,7 @@
 #include <queue>
 #include <map>
 #include <unordered_map>
+#include <array>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,6 +40,9 @@ using GfMap = std::map<Ts...>;
 // Unordered Map
 template <typename... Ts>
 using GfUMap = std::unordered_map<Ts...>;
+
+template <typename T, size_t Count>
+using GfArray = std::array<T, Count>;
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFSTL_H__

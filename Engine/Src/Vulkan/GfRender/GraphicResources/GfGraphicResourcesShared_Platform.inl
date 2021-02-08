@@ -250,21 +250,21 @@ static const VkSamplerAddressMode g_pTexAddressModeConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkFormat ConvertTextureFormat(ETextureFormat::Type eTextureFormat)
+static GF_FORCEINLINE VkFormat ConvertTextureFormat(TextureFormat::Type eTextureFormat)
 {
 	return g_pTextureFormatConverter[eTextureFormat];
 }
 
-static GF_FORCEINLINE ETextureFormat::Type ConvertTextureFormatToVkFormat(VkFormat eTextureFormat)
+static GF_FORCEINLINE TextureFormat::Type ConvertTextureFormatToVkFormat(VkFormat eTextureFormat)
 {
-	for (u32 i=0;i<ETextureFormat::COUNT; ++i)
+	for (u32 i=0;i<TextureFormat::COUNT; ++i)
 	{
 		if (g_pTextureFormatConverter[i] == eTextureFormat) 
 		{
-			return (ETextureFormat::Type)i;
+			return (TextureFormat::Type)i;
 		}
 	}
-	return ETextureFormat::Undefined;
+	return TextureFormat::Undefined;
 }
 
 
@@ -273,21 +273,6 @@ static GF_FORCEINLINE ETextureFormat::Type ConvertTextureFormatToVkFormat(VkForm
 static GF_FORCEINLINE VkImageUsageFlags ConvertTextureUsageShift(ETextureUsageShift::Type eShift)
 {
 	return g_pImageUsageBitsConverter[eShift];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkImageUsageFlags ConvertTextureUsageMask(const ETextureUsageBits::GfMask& uimask)
-{
-	VkImageUsageFlags uiResult(0);
-	for (u16 i=0; i<ETextureUsageShift::COUNT;++i)
-	{
-		if (uimask.IsEnable((1<<i)))
-		{
-			uiResult |= g_pImageUsageBitsConverter[i];
-		}
-	}
-	return uiResult;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

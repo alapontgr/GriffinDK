@@ -113,8 +113,8 @@ void TestApp::init(const GfEntryArgs& kEntryParams)
 
 	// Create the window
 	GfWindowInitParams kWindowInit;
-	kWindowInit.m_uiWidth = 512;
-	kWindowInit.m_uiHeight = 512;
+	kWindowInit.m_width = 512;
+	kWindowInit.m_height = 512;
 	kWindowInit.m_bVSync = false;
 	kWindowInit.m_bFullScreen = false;
 	kWindowInit.m_szWindowName = "TestGriffinApp";

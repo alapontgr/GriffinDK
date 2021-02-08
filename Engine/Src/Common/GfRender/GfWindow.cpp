@@ -16,8 +16,8 @@
 
 GF_DEFINE_BASE_CTOR(GfWindow)
 	, m_szAppName(nullptr)
-	, m_uiWidth(0)
-	, m_uiHeight(0)
+	, m_width(0)
+	, m_height(0)
 	, m_bFullScreen(false)
 	, m_bVSync(false)
 	, m_uiCurrentFrameIdx(0)
@@ -29,8 +29,8 @@ GF_DEFINE_BASE_CTOR(GfWindow)
 void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 {
 	m_szAppName = kInitParams.m_szWindowName;
-	m_uiWidth = kInitParams.m_uiWidth;
-	m_uiHeight = kInitParams.m_uiHeight;
+	m_width = kInitParams.m_width;
+	m_height = kInitParams.m_height;
 	m_bFullScreen = kInitParams.m_bFullScreen;
 	m_bVSync = kInitParams.m_bVSync;
 	m_kPlatform.initRHI(kInitParams);

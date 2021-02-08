@@ -10,47 +10,40 @@
 // Includes
 
 #include "Common/GfRender/GfRenderPass.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfRenderPass)
+	, m_outputCount(0)
+	, m_depthAttachment(nullptr)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass::AddInputSlot()
+void GfRenderPass::Create(const GfRenderContext& ctx, const GfWindow* pWindow)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	m_kPlatform.createRHI(ctx, pWindow);
+	m_kPlatform.RecreateFramebufferRHI(ctx, pWindow);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass::AddOutputSlot()
+bool GfRenderPass::create(const GfRenderContext& ctx,
+	const AttachmentDesc* output, u32 outputCount, 
+	const AttachmentDesc* depthAttachment)
 {
-	GF_ASSERT_ALWAYS("Implement me!!!");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass::SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor /*= v4(0.0f)*/)
-{
-	GF_ASSERT_ALWAYS("Implement me!!!");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass::Create(const GfRenderContext& kCtx, const GfWindow* pWindow)
-{
-	m_kPlatform.CreateRHI(kCtx, pWindow);
-	m_kPlatform.RecreateFramebufferRHI(kCtx, pWindow);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfRenderPass::Resize(const GfRenderContext& kCtx)
-{
-	GF_ASSERT_ALWAYS("Implement me!!!");
+	if (depthAttachment) 
+	{
+		m_depthAttachment = depthAttachment->m_attachment;
+		GF_ASSERT(m_depthAttachment->isDepthBuffer(), "Invalid usage");
+	}
+	m_outputCount = outputCount;
+	for (u32 i=0; i<outputCount; ++i) 
+	{
+		m_attachments[i] = output[i].m_attachment;
+		GF_ASSERT(m_attachments[i]->isRT(), "Invalid usage");
+	}
+	return m_kPlatform.createRHI(ctx, output, outputCount, depthAttachment);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

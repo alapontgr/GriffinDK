@@ -47,7 +47,7 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 		Destroy(kCtx);
 	}
 	// Try to create the GPU resource
-	if (m_kPlatform.CreateRHI(kCtx)) 
+	if (m_kPlatform.createRHI(kCtx)) 
 	{
 		m_uiFlags |= EFlags::GPUresource_Initialised;
 	}
@@ -62,7 +62,7 @@ void GfMaterialTemplate::Create(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 {
-	m_kPlatform.DestroyRHI(kCtx);
+	m_kPlatform.destroyRHI(kCtx);
 	m_uiFlags &= ~EFlags::GPUresource_Initialised;
 }
 

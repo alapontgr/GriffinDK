@@ -27,9 +27,9 @@ class GfBuffer_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfBuffer);
 public:
 
-	bool CreateRHI(const GfRenderContext& kCtxt);
+	bool createRHI(const GfRenderContext& kCtxt);
 
-	void DestroyRHI(const GfRenderContext& kCtxt);
+	void destroyRHI(const GfRenderContext& kCtxt);
 
 	VkBuffer GetHandle() const;
 

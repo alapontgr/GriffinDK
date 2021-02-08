@@ -18,14 +18,31 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace GfRenderPassClear 
+class GfTexture;
+
+enum class LoadOp : u32
 {
-	enum Type : u32 
-	{
-		Clear,
-		// TODO
-	};
-}
+	Load = 0,
+	Clear,
+	DontCare
+};
+
+enum class StoreOp : u32
+{
+	Store = 0,
+	DontCare
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+struct AttachmentDesc 
+{
+	const GfTexture* m_attachment;
+	LoadOp m_loadOp = LoadOp::Load;
+	StoreOp m_storeOp = StoreOp::Store;
+	LoadOp m_stencilLoadOp = LoadOp::DontCare;
+	StoreOp m_stencilStoreOp = StoreOp::DontCare;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,20 +53,16 @@ public:
 
 	GfRenderPass();
 
-	void AddInputSlot();
+	void Create(const GfRenderContext& ctx, const GfWindow* pWindow);
 
-	void AddOutputSlot();
-
-	void SetOutputClearMode(GfRenderPassClear::Type eMode, v4 vClearColor = v4(0.0f));
-
-	void Create(const GfRenderContext& kCtx, const GfWindow* pWindow);
-
-	void Resize(const GfRenderContext& kCtx);
+	bool create(const GfRenderContext& ctx,
+		const AttachmentDesc* output, u32 outputCount,
+		const AttachmentDesc* depthAttachment);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
 
-	void BeginPass(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
+	void BeginPass(const GfRenderContext& ctx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
 
 	void EndPass(const GfCmdBuffer& kCmdBuffer);
 
@@ -60,6 +73,12 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 private:
+
+	static constexpr u32 s_MAX_ATTACHMENTS = 8;
+
+	u16 m_outputCount;
+	const GfTexture* m_depthAttachment;
+	GfArray<const GfTexture*, s_MAX_ATTACHMENTS> m_attachments;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

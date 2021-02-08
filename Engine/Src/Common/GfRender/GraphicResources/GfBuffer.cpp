@@ -35,7 +35,7 @@ bool GfBuffer::create(const GfRenderContext& kCtxt)
 {
 	if (isInitialised()) 
 	{
-		if (m_kPlatform.CreateRHI(kCtxt)) 
+		if (m_kPlatform.createRHI(kCtxt)) 
 		{
 			m_flags |= EFlag::GPUReady;
 			return true;
@@ -50,7 +50,7 @@ void GfBuffer::destroy(const GfRenderContext& ctx)
 {
 	if (isGPUReady()) 
 	{
-		m_kPlatform.DestroyRHI(ctx);
+		m_kPlatform.destroyRHI(ctx);
 	}
 	m_desc = GfBufferDesc();
 	m_flags = 0;

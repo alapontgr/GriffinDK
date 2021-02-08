@@ -13,7 +13,6 @@
 // Includes
 
 #include "Common/GfCore/GfCoreMinimal.h"
-#include "Common/GfCore/GfBitMask.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfBuffer_Platform.h)
 #include "Common/GfRender/GfRenderConstants.h"
 

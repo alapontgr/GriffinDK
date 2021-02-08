@@ -42,14 +42,14 @@ void GfMatUniformFactory::SetMaxAllocatedParamSets(u32 uiMaxSets)
 
 void GfMatUniformFactory::Create(const GfRenderContext& kCtxt)
 {
-	m_kPlatform.CreateRHI(kCtxt);
+	m_kPlatform.createRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfMatUniformFactory::Destroy(const GfRenderContext& kCtxt)
 {
-	m_kPlatform.DestroyRHI(kCtxt);
+	m_kPlatform.destroyRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ GF_DEFINE_BASE_CTOR(GfMatParamLayout)
 
 void GfMatParamLayout::Create(const GfRenderContext& kCtxt)
 {
-	if (m_kPlatform.CreateRHI(kCtxt)) 
+	if (m_kPlatform.createRHI(kCtxt)) 
 	{
 		m_uiFlags |= EFlags::GPU_Initialised;
 	}
@@ -89,7 +89,7 @@ void GfMatParamLayout::Create(const GfRenderContext& kCtxt)
 
 void GfMatParamLayout::Destroy(const GfRenderContext& kCtxt)
 {
-	m_kPlatform.DestroyRHI(kCtxt);
+	m_kPlatform.destroyRHI(kCtxt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactor
 	GF_ASSERT(m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised), "Unable to create MaterialParamSet");
 	if (m_uiFlags.IsEnable(EFlags::LayoutAssigned) && !m_uiFlags.IsEnable(EFlags::GPUResourceInitialised))
 	{
-		if (m_kPlatform.CreateRHI(kCtxt, kFactory))
+		if (m_kPlatform.createRHI(kCtxt, kFactory))
 		{
 			m_uiFlags |= EFlags::GPUResourceInitialised;
 			return true;
@@ -161,7 +161,7 @@ bool GfMaterialParamSet::Create(const GfRenderContext& kCtxt, GfMatUniformFactor
 
 void GfMaterialParamSet::Destroy(const GfRenderContext& kCtxt, GfMatUniformFactory& kFactory)
 {
-	m_kPlatform.DestroyRHI(kCtxt, kFactory);
+	m_kPlatform.destroyRHI(kCtxt, kFactory);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -176,7 +176,7 @@ void TestApp::CreateCmdBuffers()
 
 void TestApp::CreateRenderPasses()
 {
-	m_kRenderPass.Create(m_kContext, &m_kWindow);
+	//m_kRenderPass.Create(m_kContext, &m_kWindow);
 
 	// Init Viewport and Scissor state
 	m_kViewport.m_fWidth = (f32)m_kWindow.GetWidth();

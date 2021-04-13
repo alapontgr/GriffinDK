@@ -22,12 +22,6 @@ GF_DEFINE_BASE_CTOR(GfRenderPass)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderPass::Create(const GfRenderContext& ctx, const GfWindow* pWindow)
-{
-	m_kPlatform.createRHI(ctx, pWindow);
-	m_kPlatform.RecreateFramebufferRHI(ctx, pWindow);
-}
-
 bool GfRenderPass::create(const GfRenderContext& ctx,
 	const AttachmentDesc* output, u32 outputCount, 
 	const AttachmentDesc* depthAttachment)

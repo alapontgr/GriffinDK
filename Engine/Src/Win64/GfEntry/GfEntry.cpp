@@ -20,10 +20,18 @@ s32 WINAPI WinMain(
 	s32 siCmdShow)
 {
 	GfEntryArgs kParams;
-	kParams.m_pInstance = pInstance;
-	kParams.m_pPrevInstance = pPrevInstance;
 	kParams.m_szCmdLine = szCmdLine;
-	kParams.m_siCmdShow = siCmdShow;
+	_GfEntry_(kParams);
+}
+
+s32 main(s32 argc, char* argv[])
+{
+	GfEntryArgs kParams;
+	kParams.m_szCmdLine = "";
+	for (s32 i = 0; i < argc; ++i) 
+	{
+		kParams.m_szCmdLine += argv[i] + GfString((i < argc - 1) ? " " : "");
+	}
 	_GfEntry_(kParams);
 }
 

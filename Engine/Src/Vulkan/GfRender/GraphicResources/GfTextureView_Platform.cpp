@@ -38,12 +38,12 @@ bool GfTextureView_Platform::createRHI(const GfRenderContext& kCtx)
  	kImageViewInfo.viewType = ConvertViewType(m_kBase.m_eViewType);
  	kImageViewInfo.format = ConvertTextureFormat(pTexture->getFormat());
  	//kImageViewInfo.components = 0; // Default value of 0, equivelant to identity
- 	kImageViewInfo.subresourceRange.aspectMask = pTexture->GetSharedPlatformC().getAspectMask();
+ 	kImageViewInfo.subresourceRange.aspectMask = pTexture->Plat().getAspectMask();
  	kImageViewInfo.subresourceRange.baseMipLevel = m_kBase.m_uiBaseLod;
  	kImageViewInfo.subresourceRange.levelCount = m_kBase.m_uiLodCount;
 	kImageViewInfo.subresourceRange.baseArrayLayer = m_kBase.m_uiBaseLayerIdx;
  	kImageViewInfo.subresourceRange.layerCount = m_kBase.m_uiLayerCount;
-	kImageViewInfo.image = pTexture->GetSharedPlatformC().GetImage();
+	kImageViewInfo.image = pTexture->Plat().getImage();
 	return vkCreateImageView(kCtx.Plat().m_pDevice, &kImageViewInfo, nullptr, &m_pImageView) == VK_SUCCESS;
 }
 

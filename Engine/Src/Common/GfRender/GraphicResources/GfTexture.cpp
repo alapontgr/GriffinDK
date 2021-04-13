@@ -56,7 +56,7 @@ void GfTexture::Create(const GfRenderContext& kCtx)
 {
 	if (getIsInitialized()) 
 	{
-		if (!m_kPlatform.CreateImageRHI(kCtx))
+		if (!m_kPlatform.createRHI(kCtx))
 		{
 			m_kPlatform.destroyRHI(kCtx);
 		}

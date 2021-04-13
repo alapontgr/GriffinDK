@@ -93,9 +93,7 @@ void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 	kWc.lpszMenuName = NULL;
 	kWc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 	// Window name
-	wchar_t wszAppname[4096];
-	MultiByteToWideChar(CP_ACP, 0, kInitParams.m_szWindowName, -1, wszAppname, 4096);
-	kWc.lpszClassName = wszAppname;
+	kWc.lpszClassName = kInitParams.m_szWindowName;
 
 	// register the window class
 	RegisterClassEx(&kWc);
@@ -125,8 +123,8 @@ void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 
 	// create the window and use the result as the handle
 	m_pHwnd = CreateWindowEx(NULL,
-		wszAppname,										// name of the window class
-		wszAppname,										// title of the window
+		kInitParams.m_szWindowName,						// name of the window class
+		kInitParams.m_szWindowName,						// title of the window
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_SYSMENU,	// window style
 		siPosX,											// x-position of the window
 		siPosY,											// y-position of the window

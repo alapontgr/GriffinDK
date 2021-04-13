@@ -53,8 +53,6 @@ public:
 
 	GfRenderPass();
 
-	void Create(const GfRenderContext& ctx, const GfWindow* pWindow);
-
 	bool create(const GfRenderContext& ctx,
 		const AttachmentDesc* output, u32 outputCount,
 		const AttachmentDesc* depthAttachment);

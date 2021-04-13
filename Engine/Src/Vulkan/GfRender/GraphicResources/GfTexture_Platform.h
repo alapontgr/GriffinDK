@@ -47,8 +47,6 @@ public:
 
 	void destroyRHI(const GfRenderContext& ctx);
 
-	bool CreateImageRHI(const GfRenderContext &ctx);
-
 	bool allocateImageMemoryRHI(const GfRenderContext &ctx, VmaAllocationCreateInfo* allocInfo);
 
 	bool bindImageWithMemoryRHI(const GfRenderContext &ctx);

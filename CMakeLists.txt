@@ -15,15 +15,6 @@ endif()
 
 # Some useful macros
 
-macro(SetGfxSdk target)
-    if(UseVulkan)
-        target_compile_definitions(${target} PUBLIC VK_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR _GFX_API=Vulkan)
-        target_include_directories(${target} PUBLIC $ENV{VK_SDK_PATH}/Include)
-        target_link_directories(${target} PUBLIC $ENV{VK_SDK_PATH}/Lib)
-        target_link_libraries(${target} vulkan-1)
-    endif()
-endmacro()
-
 # Sync Git submodules
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -40,9 +31,23 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/repo/CMakeLists.txt")
-    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
-endif()
+# Link against Gfx API
+macro(SetGfxSdk target)
+    if(UseVulkan)
+        target_compile_definitions(${target} PUBLIC VK_PROTOTYPES VK_USE_PLATFORM_WIN32_KHR _GFX_API=Vulkan)
+        target_include_directories(${target} PUBLIC $ENV{VK_SDK_PATH}/Include)
+        target_link_directories(${target} PUBLIC $ENV{VK_SDK_PATH}/Lib)
+        target_link_libraries(${target} vulkan-1)
+    endif()
+endmacro()
+
+# Add subdirectory of submodule (performs some validation checks)
+macro(AddSubmodule submodulePath)
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${submodulePath})
+        message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+    endif()    
+    add_subdirectory(${submodulePath})
+endmacro()
 
 
 ##########################

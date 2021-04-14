@@ -17,6 +17,3 @@ target_include_directories(QuickTesting PUBLIC ${includeDirs})
 
 # Link against engine
 target_link_libraries(QuickTesting ${engineName})
-
-# Setup Gfx dependencies
-SetGfxSdk(QuickTesting)

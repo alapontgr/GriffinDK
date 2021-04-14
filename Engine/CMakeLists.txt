@@ -1,3 +1,10 @@
+# Add glslang
+add_subdirectory(External/glslang)
+
+############################
+## Setup Engine library
+############################
+
 #file(GLOB_RECURSE GF_Srcs ${CMAKE_CURRENT_SOURCE_DIR}/Src/Common)
 file(GLOB_RECURSE GF_CommonSrcs  
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/Common/*.*)
@@ -40,7 +47,7 @@ set(GF_Includes
     ${CMAKE_CURRENT_SOURCE_DIR}/External
 )
 target_include_directories(${engineName} PUBLIC ${GF_Includes})
-
+target_link_libraries(${engineName} glslang)
 target_compile_definitions(${engineName} PUBLIC _PLATFORM_DIR=Win64)
 
 # Setup Gfx dependencies

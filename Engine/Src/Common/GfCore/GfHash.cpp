@@ -61,6 +61,44 @@ static u64 appendHash(const void* buffer, u64 bufferSize, u64 h)
 	return h;
 }
 
+static u32 appendHash(const void* buffer, u32 bufferSize, u32 h)
+{
+	const u32* data = static_cast<const u32*>(buffer);
+	const u32* const end = data + (bufferSize / sizeof(u32));
+
+	while(data != end)
+	{
+		u32 k = *data++;
+
+		k *= HASH_M;
+		k ^= k >> HASH_R;
+		k *= HASH_M;
+
+		h ^= k;
+		h *= HASH_M;
+	}
+
+	const u8* data2 = reinterpret_cast<const u8*>(data);
+
+	switch(bufferSize & (sizeof(u32) - 1))
+	{
+	case 3:
+		h ^= u32(data2[2]) << 16;
+	case 2:
+		h ^= u32(data2[1]) << 8;
+	case 1:
+		h ^= u32(data2[0]);
+		h *= u32(HASH_M);
+	};
+
+	h ^= h >> u32(HASH_R);
+	h *= u32(HASH_M);
+	h ^= h >> u32(HASH_R);
+
+	GF_ASSERT(h != 0, "Invalid hash");
+	return h;
+}
+
 u64 GfHash::compute(const void* buffer, u64 size, u64 seed)
 {
 	const u64 h = seed ^ (size * HASH_M);
@@ -71,6 +109,19 @@ u64 GfHash::compute(const GfString& str, u64 seed)
 {
 	const u64 strSize = u64(str.size());
 	const u64 h = seed ^ (strSize * HASH_M);
+	return appendHash(str.data(), strSize, h);
+}
+
+u32 GfHash::compute32(const void* buffer, u32 size, u32 seed)
+{
+	const u32 h = seed ^ (size * HASH_M);
+	return appendHash(buffer, size, h);
+}
+
+u32 GfHash::compute32(const GfString& str, u32 seed)
+{
+	const u32 strSize = u32(str.size());
+	const u32 h = seed ^ (strSize * u32(HASH_M));
 	return appendHash(str.data(), strSize, h);
 }
 

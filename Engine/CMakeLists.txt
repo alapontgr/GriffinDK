@@ -1,5 +1,6 @@
-# Add glslang
-add_subdirectory(External/glslang)
+# Add some external libraries
+AddSubmodule(External/glslang)
+AddSubmodule(External/spirv-cross)
 
 ############################
 ## Setup Engine library
@@ -47,7 +48,7 @@ set(GF_Includes
     ${CMAKE_CURRENT_SOURCE_DIR}/External
 )
 target_include_directories(${engineName} PUBLIC ${GF_Includes})
-target_link_libraries(${engineName} glslang)
+target_link_libraries(${engineName} glslang spirv-cross-glsl)
 target_compile_definitions(${engineName} PUBLIC _PLATFORM_DIR=Win64)
 
 # Setup Gfx dependencies

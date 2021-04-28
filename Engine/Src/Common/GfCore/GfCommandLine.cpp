@@ -40,7 +40,7 @@ void GfCommandLine::init(const GfString& args)
 					payload = "";
 				}
 				hash = GfHash::compute(token);
-			} else
+			} else if(hash != 0)
 			{
 				if (payload.size() > 0) 
 				{
@@ -60,14 +60,14 @@ void GfCommandLine::init(const GfString& args)
 	}
 }
 
-GfString GfCommandLine::getArg(const u64 argHash) 
+GfString GfCommandLine::getArg(const u64 argHash, const GfString& defaultVal) 
 {
 	auto it = ms_arguments.find(argHash);
 	if (it != ms_arguments.end()) 
 	{
 		return it->second;
 	}
-	return "";
+	return defaultVal;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

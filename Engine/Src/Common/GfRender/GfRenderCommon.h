@@ -56,7 +56,6 @@ namespace EShaderStage
 		Compute,
 		////////////////////////
 		COUNT,
-		RequiredBits = 3 // Precision needed to represent this type as a bit-field
 	};
 }
 
@@ -77,6 +76,11 @@ namespace EShaderStageFlags
 	};
 }
 using GfShaderAccessMask = GfBitMask<u32>;
+
+static constexpr bool isGraphics(EShaderStage::Type stage) 
+{
+	return ((1 << stage) & EShaderStageFlags::AllGraphics) != 0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 

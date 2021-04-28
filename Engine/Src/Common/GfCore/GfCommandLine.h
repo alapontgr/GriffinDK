@@ -18,7 +18,7 @@ class GfCommandLine
 public:
 	static void init(const GfString& args);
 
-	static GfString getArg(const u64 argHash);
+	static GfString getArg(const u64 argHash, const GfString& defaultVal = "");
 
 private:
 

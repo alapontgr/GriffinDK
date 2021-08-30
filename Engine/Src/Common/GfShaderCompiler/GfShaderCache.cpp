@@ -1,0 +1,394 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
+//	File: 	GfShaderCache.cpp
+//
+//	Copyright (c) 2021 (See README.md)
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#include "Common/GfShaderCompiler/GfShaderCache.h"
+#include "Common/GfFile/GfFile.h"
+#include "json/single_include/nlohmann/json.hpp"
+
+#include <sstream>
+
+////////////////////////////////////////////////////////////////////////////////
+
+u32 alignPivot(u32 pivot, u32 alignment) 
+{
+	return (pivot + (alignment - (pivot % alignment)));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+GfShaderSerializer::GfShaderSerializer() 
+{
+	m_mutators.fill(-1);
+	m_mutatorCount = 0;
+	m_usedStages = 0;
+}
+
+void GfShaderSerializer::serialize(u8* data, u32& size) const
+{
+	u32 pivot = 0;
+
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(data);
+	pivot += static_cast<u32>(sizeof(GfPipelineBlobHeader));
+	if (data) 
+	{
+		header->m_mutatorCount = m_mutatorCount;
+		header->m_usedStages = m_usedStages;
+		header->m_stringCount = static_cast<u32>(m_stringCache.size());
+		header->m_bytecodesCount = static_cast<u32>(m_bytecodeSizes.size());
+		header->m_variantsCount = static_cast<u32>(m_variants.size());
+	}
+
+	// Serialize strings
+	{
+		u32 stringCount = static_cast<u32>(m_stringCache.size());
+		u32 tableSize = static_cast<u32>(sizeof(u32)) * stringCount;
+		u32 stringsReqSize = 0;
+		u32* stringOffsets(nullptr);
+		u32* stringSizes(nullptr);
+		u8* stringsData(nullptr);
+		if (data) 
+		{
+			stringOffsets = reinterpret_cast<u32*>(header+1);
+			stringSizes = stringOffsets + stringCount;
+			stringsData = reinterpret_cast<u8*>(stringSizes+stringCount);
+			header->m_stringCacheOffsets = pivot;
+			header->m_stringCacheSizes = pivot + stringCount * tableSize;
+		}
+		pivot += tableSize * 2;
+		for (u32 i = 0; i < stringCount; ++i) 
+		{
+			u32 reqSize = static_cast<u32>(m_stringCache[i].size() + 1);
+			if (data) 
+			{
+				stringOffsets[i] = pivot + stringsReqSize;
+				stringSizes[i] = static_cast<u32>(m_stringCache[i].size());
+				memcpy(stringsData + stringsReqSize, m_stringCache[i].c_str(), reqSize);
+			}
+			stringsReqSize += reqSize; // Include null terminator
+		}
+		pivot = alignPivot(pivot + stringsReqSize, 16);
+	}
+
+	// Serialize bytecodes
+	{
+		u32 bytecodesCount = static_cast<u32>(m_bytecodeCache.size());
+		u32 tableSize = static_cast<u32>(sizeof(u32)) * bytecodesCount;
+		u32 bytecodesReqSize = 0;
+		u32* bytecodesOffsets(nullptr);
+		u32* bytecodesSizes(nullptr);
+		u8* bytecodesData(nullptr);
+		if (data) 
+		{
+			bytecodesOffsets = reinterpret_cast<u32*>(data + pivot);
+			bytecodesSizes = bytecodesOffsets + bytecodesCount;
+			bytecodesData = reinterpret_cast<u8*>(bytecodesSizes + bytecodesCount);
+			header->m_bytecodeCacheOffsets = pivot;
+			header->m_stringCacheSizes = pivot + bytecodesCount * tableSize;			
+		}
+		pivot += tableSize * 2;
+		for (u32 i=0; i<bytecodesCount; ++i) 
+		{
+			if (data) 
+			{
+				bytecodesSizes[i] = m_bytecodeSizes[i];
+				bytecodesOffsets[i] = pivot + bytecodesReqSize;
+				memcpy(bytecodesData + bytecodesReqSize, m_bytecodeCache[i].get(), m_bytecodeSizes[i]);
+			}
+			bytecodesReqSize += m_bytecodeSizes[i];
+		}
+		pivot = alignPivot(pivot + bytecodesReqSize, 16);
+	}
+
+	// Serialize descriptors
+	{
+		u32 descriptorsReqSize = static_cast<u32>(sizeof(GfDescriptorBindingSlot) * m_descriptors.size());
+		if (data && descriptorsReqSize) 
+		{
+			header->m_descriptorsOffset = pivot;
+			memcpy(data + pivot, &m_descriptors[0], descriptorsReqSize);
+		}
+		pivot = alignPivot(pivot + descriptorsReqSize, 16);
+	}
+
+	// Serialize variants data
+	{
+		u32 variantHashesArraySize = static_cast<u32>(sizeof(MutatorHash) * m_variants.size());
+		u32 variantDataSize = static_cast<u32>(sizeof(GfShaderVariantData));
+		u32* variantHashes(nullptr);
+		u8* variantData(nullptr);
+		if (data) 
+		{
+			header->m_variantsCount = static_cast<u32>(m_variants.size());
+			header->m_variantsHashesArrayOffset = pivot;
+			header->m_variantsOffset = pivot + variantHashesArraySize;
+			variantHashes = reinterpret_cast<u32*>(data + pivot);
+			variantData = (data + pivot + variantHashesArraySize);
+		}
+		u32 variantsReqSize = 0;
+		u32 variantIdx = 0;
+		for (auto it = m_variants.begin(); it != m_variants.end(); ++it) 
+		{
+			GF_ASSERT(((pivot + variantsReqSize) % alignof(GfShaderVariantData)) == 0, "Invalid alignment");
+			if (data) 
+			{
+				variantHashes[variantIdx++] = it->first;
+				memcpy(variantData, &it->second->m_data, variantDataSize);
+			}
+			variantsReqSize += variantDataSize;
+		}
+		pivot = alignPivot(pivot + variantsReqSize, 16);
+	}
+	
+	if (data) 
+	{
+		GF_ASSERT(size == pivot, "Invalid size");
+	}
+	else 
+	{
+		size = pivot;
+	}
+}
+
+s32 GfShaderSerializer::addString(const GfString& token)
+{
+	size_t idx = m_stringCache.size();
+	m_stringCache.push_back(token);
+	return static_cast<s32>(idx);
+}
+
+void GfShaderSerializer::enableStage(EShaderStage::Type stage)
+{
+	m_usedStages |= (1<<stage);
+}
+
+void GfShaderSerializer::addMutator(const GfString& mutatorName)
+{
+	if (m_mutatorCount < s_MAX_MUTATOR_COUNT) 
+	{
+		m_mutators[m_mutatorCount++] = addString(mutatorName);
+	}
+}
+
+GfString GfShaderSerializer::getMutatorNameAt(u32 idx) const
+{
+	if (idx < m_mutatorCount) 
+	{
+		return m_stringCache[m_mutators[idx]];
+	}
+	return "";
+}
+
+GfString GfShaderSerializer::mutatorHashToDefines(MutatorHash hash) const
+{
+	GfString header("");
+	for (u32 i = 0; i < m_mutatorCount; ++i) 
+	{
+		if ((hash & (1 << i)) != 0) 
+		{
+			header += "#define " + getMutatorNameAt(i) + " 1 \n";
+		}
+	}
+	return std::move(header);
+}
+
+u32 GfShaderSerializer::getMutatorCount() const
+{
+	return m_mutatorCount;
+}
+
+u32 GfShaderSerializer::getStageEnabled(EShaderStage::Type stage) const
+{
+	return (m_usedStages & (1<<stage)) != 0;
+}
+
+s32 GfShaderSerializer::addShaderBytecode(ShaderBytecode shaderBytecode, u32 size)
+{
+	size_t idx = m_bytecodeCache.size();
+	m_bytecodeCache.push_back(std::move(shaderBytecode));
+	m_bytecodeSizes.push_back(size);
+	return static_cast<s32>(idx);
+}
+
+s32 GfShaderSerializer::addBindingsArray(const GfDescriptorBindingSlot* bindingsArray, u32 count)
+{
+	u32 idx = static_cast<u32>(m_descriptors.size());
+	m_descriptors.insert(m_descriptors.end(), bindingsArray, bindingsArray + count);
+	return idx;
+}
+
+GfShaderSerializer::ShaderVariant* GfShaderSerializer::getVariant(MutatorHash mutatorHash)
+{
+	auto entry = m_variants.find(mutatorHash);
+	if (entry == m_variants.end())
+	{
+		GfUniquePtr<ShaderVariant> variant = std::make_unique<ShaderVariant>();
+		ShaderVariant* ptr = variant.get();
+		m_variants[mutatorHash] = std::move(variant);
+		return ptr;
+	}
+	return entry->second.get();
+}
+
+void GfShaderSerializer::ShaderVariant::setVariantShaderBytecode(EShaderStage::Type stage, s32 bytecodeIdx)
+{
+	m_data.m_stagesBytecodeIdxs[stage] = bytecodeIdx;
+}
+
+void GfShaderSerializer::ShaderVariant::setDescriptorSetLayoutRange(u32 set, s16 idx, s16 count)
+{
+	m_data.m_setBindingsIdx[set] = idx;
+	m_data.m_setsBindingsCount[set] = count;
+}
+
+s32 GfShaderSerializer::ShaderVariant::getBytecodeIndexForStage(EShaderStage::Type stage) const
+{
+	return m_data.m_stagesBytecodeIdxs[stage];
+}
+
+GfUniquePtr<u8[]> GfShaderSerializer::serializeToBlob(u32& reqSize) const
+{
+	serialize(nullptr, reqSize);
+	GfUniquePtr<u8[]> data(new u8[reqSize]);
+	serialize(data.get(), reqSize);
+	return data;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static const char* s_ShaderCacheFilename = "GfShaderCache.json";
+
+void GfShaderCacheFile::init(const GfString& cacheDirPath)
+{
+	m_fileHashToName.clear();
+	m_filenameToHash.clear();
+	m_cacheDirPath = cacheDirPath;
+	std::replace( m_cacheDirPath.begin(), m_cacheDirPath.end(), '\\', '/');
+	if (m_cacheDirPath[m_cacheDirPath.size() - 1] != '/') 
+	{
+		m_cacheDirPath += '/';
+	}
+	GfString filePath = m_cacheDirPath + s_ShaderCacheFilename;
+	if (GfFile::DoesFileExist(filePath.c_str()))
+	{
+		loadParseCache(filePath);
+	}
+}
+
+bool GfShaderCacheFile::skipCompilation(const GfString& shaderName, const u64 srcHash) const
+{
+	u64 nameHash = GfHash::compute(shaderName);
+	const auto entry = m_filenameToHash.find(nameHash);
+	if (entry != m_filenameToHash.end())
+	{
+		return entry->second == srcHash;
+	}
+	return false;
+}
+
+void GfShaderCacheFile::registerShaderBlob(const GfString& filename, const u64 srcHash, const GfShaderSerializer& shader)
+{
+	u64 nameHash = GfHash::compute(filename);
+	m_filenameToHash[nameHash] = srcHash;
+	m_fileHashToName[nameHash] = filename;
+
+	GfString shaderFile = getShaderFilename(nameHash, m_cacheDirPath);
+
+	u32 blobSize(0);
+	GfUniquePtr<u8[]> blob = shader.serializeToBlob(blobSize);
+	
+	// Write file
+	GfFileHandle kFile;
+	if (GfFile::OpenFile(shaderFile.c_str(), EFileAccessMode::Write, kFile)) 
+	{
+		GfFile::WriteBytes(kFile, blobSize, blob.get());
+		GfFile::CloseFile(kFile);
+	}
+
+	saveCache(m_cacheDirPath + s_ShaderCacheFilename);
+}
+
+GfString GfShaderCacheFile::getShaderFile(const GfString& shaderName) const
+{
+	u64 nameHash = GfHash::compute(shaderName);
+	const auto entry = m_filenameToHash.find(nameHash);
+	GfString shaderFile = m_cacheDirPath;
+	if (entry != m_filenameToHash.end()) 
+	{
+		return getShaderFilename(nameHash, m_cacheDirPath);
+	}
+	return "";
+}
+
+GfString GfShaderCacheFile::getShaderFilename(const u64 srcHash, const GfString& basePath)
+{
+	GfString shaderFile = basePath;
+	std::ostringstream oss;
+	oss << srcHash;
+	shaderFile += oss.str();
+	return std::move(shaderFile);
+}
+
+void GfShaderCacheFile::loadParseCache(const GfString& filePath)
+{
+	if (GfFile::DoesFileExist(filePath.c_str())) 
+	{
+		u32 fileSize(0);
+		GfFileHandle kFile;
+		GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Read, kFile);
+		GfFile::GetFileSize(kFile);
+		fileSize = static_cast<u32>(kFile.GetFileSize());
+		if (fileSize > 0)
+		{
+			GfUniquePtr<char[]> pSrc(new char[fileSize + 1]);
+			u32 uiRead = GfFile::ReadBytes(kFile, fileSize, pSrc.get());
+			GfFile::CloseFile(kFile);
+			GF_ASSERT(uiRead == fileSize, "Invalid size read");
+			pSrc[fileSize] = 0;
+			
+			nlohmann::json jsonFileRoot = nlohmann::json::parse(pSrc.get());
+			nlohmann::json cacheJson = jsonFileRoot["cache"];
+			for (auto& element : cacheJson) 
+			{
+				u64 filenameHash = element["fileHash"];
+				u64 srcHash = element["srcHash"];
+
+				GfString shaderFilePath = getShaderFilename(filenameHash, m_cacheDirPath);
+				if (GfFile::DoesFileExist(shaderFilePath.c_str())) 
+				{
+					m_filenameToHash[filenameHash] = srcHash;
+				}
+			}
+		}
+	}
+}
+
+void GfShaderCacheFile::saveCache(const GfString& filePath)
+{
+	GfFile::CreateDir(m_cacheDirPath.c_str());
+
+	nlohmann::json root;
+	nlohmann::json cache;
+	for (auto& it : m_filenameToHash) 
+	{
+		nlohmann::json entry;
+		entry["fileHash"] = it.first;
+		entry["srcHash"] = it.second;
+		entry["ShaderFilename"] = m_fileHashToName[it.first];
+		cache.push_back(entry);
+	}
+	root["cache"] = cache;
+	GfString jsonFile = root.dump();
+
+	GfFileHandle handle;
+	if (GfFile::OpenFile(filePath.c_str(), EFileAccessMode::Write, handle)) 
+	{
+		GfFile::WriteBytes(handle, jsonFile.size(), jsonFile.data());
+		GfFile::CloseFile(handle);
+	}
+}

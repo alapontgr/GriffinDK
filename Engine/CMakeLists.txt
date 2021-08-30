@@ -1,6 +1,23 @@
 # Add some external libraries
+set(ENABLE_HLSL OFF)
+set(ENABLE_SPVREMAPPER OFF)
+set(ENABLE_CTEST OFF)
+set(BUILD_TESTING OFF)
 AddSubmodule(External/glslang)
+
+set(SPIRV_CROSS_CLI OFF)
+set(SPIRV_CROSS_ENABLE_HLSL OFF)
+set(SPIRV_CROSS_ENABLE_MSL OFF)
+set(SPIRV_CROSS_ENABLE_CPP OFF)
+set(SPIRV_CROSS_ENABLE_REFLECT OFF)
+set(SPIRV_CROSS_ENABLE_C_API OFF)
+set(SPIRV_CROSS_ENABLE_UTIL OFF)
 AddSubmodule(External/spirv-cross)
+
+set_target_properties (glslang PROPERTIES FOLDER glslang)
+set_target_properties (glslangValidator PROPERTIES FOLDER glslang)
+set_target_properties (spirv-cross-core PROPERTIES FOLDER spirv-cross)
+set_target_properties (spirv-cross-glsl PROPERTIES FOLDER spirv-cross)
 
 ############################
 ## Setup Engine library
@@ -14,6 +31,7 @@ set(GF_ExternalSrcDirs
     glm
     vma
     stb
+    json
 )
 set(GF_ExternalSrcs "")
 foreach(externalDir ${GF_ExternalSrcDirs})
@@ -48,7 +66,7 @@ set(GF_Includes
     ${CMAKE_CURRENT_SOURCE_DIR}/External
 )
 target_include_directories(${engineName} PUBLIC ${GF_Includes})
-target_link_libraries(${engineName} glslang spirv-cross-glsl)
+target_link_libraries(${engineName} glslang SPIRV spirv-cross-glsl)
 target_compile_definitions(${engineName} PUBLIC _PLATFORM_DIR=Win64)
 
 # Setup Gfx dependencies

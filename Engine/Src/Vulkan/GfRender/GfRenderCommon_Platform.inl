@@ -199,7 +199,7 @@ static GF_FORCEINLINE VkDescriptorType ConvertDescriptorType(u32 eType)
 static GF_FORCEINLINE VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages)
 {
 	VkShaderStageFlags uiResult(0);
-	for (u32 i = 0; i < EShaderStage::COUNT; ++i)
+	for (u32 i = 0; i < EShaderStage::Count; ++i)
 	{
 		if ((kStages & (1 << i)) != 0)
 		{

@@ -24,13 +24,14 @@ namespace EParamaterSlotType
 {
 	enum Type : u32
 	{
-		SamplerState = 0,
+		Sampler = 0,
 		CombinedTextureSampler,
-		SampledTextured,
+		Texture,
+		SamplerTexture, // Sampler + Texture
 		StorageImage,
 		UniformTexelBuffer,
 		StorageTexelBuffer,
-		ConstantBuffer,
+		UniformBuffer,
 		StorageBuffer,
 		UniformBufferDynamic,
 		StorageBufferDynamic,
@@ -55,7 +56,7 @@ namespace EShaderStage
 		Fragment,
 		Compute,
 		////////////////////////
-		COUNT,
+		Count,
 	};
 }
 
@@ -378,6 +379,24 @@ struct GfScissor
 	s32 m_siWidth;
 	s32 m_siHeight;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+// This represents a binding slot in a Descriptor. Used to represent the layout of uniforms.
+struct alignas(4) GfDescriptorBindingSlot 
+{
+	u32 m_stageFlags : 12; // Stages accessing the resource. See EShaderStageFlags
+	u32 m_descriptorType : 4; // See EParamaterSlotType
+	u32 m_bindingSlot : 16; //
+	u32 m_arraySize; // If array, the number of entries.
+};
+static_assert(EParamaterSlotType::Count <= (1<<4), "GfDescriptorBindingSlot::m_descriptorType overflows");
+static_assert(EShaderStage::Count <= 12, "GfDescriptorBindingSlot::m_stageFlags overflows");
+
+////////////////////////////////////////////////////////////////////////////////
+
+static constexpr u32 s_MAX_DESCRIPTOR_SETS = 8;
+static constexpr u32 s_MAX_BINDINGS_PER_SET = 16;
 
 ////////////////////////////////////////////////////////////////////////////////
 

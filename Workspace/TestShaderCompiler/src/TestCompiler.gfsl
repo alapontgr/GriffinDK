@@ -1,0 +1,68 @@
+#version 450
+
+#pragma once
+#pragma mutator NORMAL_MAPPING
+#pragma mutator SKINNING
+#pragma GF_VS
+#pragma GF_FS
+
+#ifdef GF_VS
+
+layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 View;
+    mat4 Projection;
+    mat4 ViewProjection;
+} GfScene;
+layout(location = 0) out vec2 out_uvs;
+
+vec2 positions[6] = vec2[](
+    vec2(-0.5, 0.5),
+    vec2(0.5, 0.5),
+    vec2(0.5, -0.5),
+
+    vec2(0.5, -0.5),
+    vec2(-0.5, -0.5),
+    vec2(-0.5, 0.5)    
+);
+
+vec3 colors[6] = vec3[](
+    vec3(1.0, 0.0, 0.0),
+    vec3(0.0, 1.0, 0.0),
+    vec3(0.0, 0.0, 1.0),
+
+    vec3(0.0, 0.0, 1.0),
+    vec3(1.0, 0.0, 0.0),
+    vec3(1.0, 1.0, 0.0)
+);
+
+vec2 pUVs[6] = vec2[](
+    vec2(0.0, 2.0),
+    vec2(2.0, 2.0),
+    vec2(2.0, 0.0),
+
+    vec2(2.0, 0.0),
+    vec2(0.0, 0.0),
+    vec2(0.0, 2.0)
+);
+
+void main() {
+    gl_Position = GfScene.ViewProjection * vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    out_uvs = pUVs[gl_VertexIndex];//colors[gl_VertexIndex];
+}
+
+#endif // GF_VS
+
+///////////////////////////////////////////////////
+
+#ifdef GF_FS
+
+layout(set = 0, binding=1) uniform sampler2D Albedo;
+
+layout(location = 0) in vec2 in_uvs;
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    outColor = texture(Albedo, in_uvs);
+}
+
+#endif // GF_FS

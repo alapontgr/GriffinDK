@@ -64,6 +64,8 @@ public:
 
 	static u32 WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, const void* pBuffer);
 
+	static void CreateDir(const char* dirPath);
+
 private:
 };
 

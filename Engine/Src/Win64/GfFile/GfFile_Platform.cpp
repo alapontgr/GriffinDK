@@ -132,6 +132,17 @@ u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, const void* p
 	return 0;
 }
 
+void GfFile::CreateDir(const char* dirPath) 
+{
+	if(CreateDirectoryA(dirPath, NULL) == 0)
+	{
+		if (GetLastError() != ERROR_ALREADY_EXISTS) 
+		{
+			GF_PRINT("Failed to create directory %s", dirPath);
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_PLATFORM_CTOR(GfFileHandle)

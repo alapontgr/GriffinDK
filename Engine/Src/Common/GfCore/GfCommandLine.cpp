@@ -34,7 +34,7 @@ void GfCommandLine::init(const GfString& args)
 		{
 			if (token[0] == '-') 
 			{
-				if (hash != 0 && payload.size() != 0) 
+				if (hash != 0) 
 				{
 					ms_arguments[hash] = payload;
 					payload = "";

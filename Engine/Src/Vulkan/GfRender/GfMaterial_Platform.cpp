@@ -140,7 +140,7 @@ void GfMaterialTemplate_Platform::destroyRHI(const GfRenderContext& kCtx)
 		vkDestroyPipelineLayout(kCtx.Plat().m_pDevice, m_pLayout, nullptr);
 		m_pLayout = nullptr;
 	}
-	for (u32 i=0; i<EShaderStage::COUNT; ++i) 
+	for (u32 i=0; i<EShaderStage::Count; ++i) 
 	{
 		if (m_kBase.m_pShaderStages[i].m_pModule) 
 		{
@@ -238,11 +238,11 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
 	// Define Shader modules
-	VkPipelineShaderStageCreateInfo* pStages(GfFrameMTStackAlloc::Get()->Alloc<VkPipelineShaderStageCreateInfo>(EShaderStage::COUNT));
+	VkPipelineShaderStageCreateInfo* pStages(GfFrameMTStackAlloc::Get()->Alloc<VkPipelineShaderStageCreateInfo>(EShaderStage::Count));
 	if (!pStages) {return false; }
 
 	u32 uiStageCount(0);
-	for (u32 i=0; i<EShaderStage::COUNT; ++i) 
+	for (u32 i=0; i<EShaderStage::Count; ++i) 
 	{
 		GfMaterialTemplate::GfShaderDesc& kStage(m_kBase.m_pShaderStages[i]);
 		if (kStage.m_pSourceData && kStage.m_szEntryPoint)

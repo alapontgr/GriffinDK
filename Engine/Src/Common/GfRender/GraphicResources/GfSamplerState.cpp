@@ -26,7 +26,7 @@ GF_DEFINE_BASE_CTOR(GfSamplerState)
 	, m_fMaxAnisotropy(1.0f)
 	, m_bUseAnisotropy(false)
 {
-	m_eResourceType = EParamaterSlotType::SamplerState;
+	m_eResourceType = EParamaterSlotType::Sampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

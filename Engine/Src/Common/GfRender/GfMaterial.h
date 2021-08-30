@@ -168,7 +168,7 @@ private:
 	const GfMatParamLayout*			m_pLayouts[EMaterialParamRate::MaxBoundSets];
 	
 	// Stages
-	GfShaderDesc				m_pShaderStages[EShaderStage::COUNT];
+	GfShaderDesc				m_pShaderStages[EShaderStage::Count];
 
 	// Constants
 	GfShaderAccessMask			m_uiConstantsStages;

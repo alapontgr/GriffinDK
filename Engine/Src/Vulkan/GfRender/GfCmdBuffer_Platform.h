@@ -39,13 +39,17 @@ public:
 
 	GfCmdBuffer_Platform();
 
-	VkCommandBuffer GetCmdBuffer() const;
+	VkCommandBuffer getCmdBuffer() const { return m_cmdBuffer; }
+
+	VkFence getFence() const { return m_fence; }
 
 private:
 
-	void initRHI(VkCommandBuffer pCmdBuffer, VkFence pFence);
+	void initRHI(const GfRenderContext& ctx, const class GfCmdBufferFactory& factory, u32 type);
 
-	void waitForReadyRHI(const GfRenderContext& kCtx);
+	void waitForReadyRHI(const GfRenderContext& ctx);
+
+	bool isReady(const GfRenderContext& ctx);
 
 	void submitRHI(
 		const GfRenderContext& kCtx, 
@@ -54,11 +58,21 @@ private:
 		Bool bLast);
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Render pass commands
 
 	void beginRecordingRHI(const GfRenderContext& kCtx);
 
 	void endRecordingRHI(const GfRenderContext& kCtx);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void beginRenderPass(GfRenderPass* renderPass);
+	
+	void endRenderPass();
+
+	void bindShaderPipe(class GfShaderPipeline* pipeline, u32 variantHash,
+		const struct GfShaderPipeConfig* config,
+		const class GfVertexDeclaration* vertexFormat,
+		const class GfRenderPass* renderPass);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -73,16 +87,28 @@ private:
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
-	VkCommandBuffer m_pCmdBuffer;
-	VkFence			m_pFence;
+	VkCommandBuffer m_cmdBuffer;
+	VkFence			m_fence;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE VkCommandBuffer GfCmdBuffer_Platform::GetCmdBuffer() const
+class GfCmdBufferFactory_Platform
 {
-	return m_pCmdBuffer;
-}
+public:
+
+	friend class GfCmdBufferFactory;
+
+	GfCmdBufferFactory_Platform();
+
+	VkCommandPool getPool() const { return m_pool; }
+
+private:
+
+	void initRHI(const GfRenderContext& ctx, GfRenderContextFamilies::Type queueType);
+
+	void shutdown(const GfRenderContext& ctx);
+
+	VkCommandPool m_pool;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCMDBUFFER_PLATFORM_H__

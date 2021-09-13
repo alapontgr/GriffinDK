@@ -75,6 +75,17 @@ void GfShaderSerializer::serialize(u8* data, u32& size) const
 		pivot = alignPivot(pivot + stringsReqSize, 16);
 	}
 
+	// Serialize mutators
+	{
+		u32 mutatorsReqSize = static_cast<u32>(sizeof(u32) * m_mutators.size());
+		if (data) 
+		{
+			header->m_mutatorsOffset = pivot;
+			memcpy(data + pivot, m_mutators.data(), mutatorsReqSize);
+		}
+		pivot = alignPivot(pivot + mutatorsReqSize, 16);
+	}
+
 	// Serialize bytecodes
 	{
 		u32 bytecodesCount = static_cast<u32>(m_bytecodeCache.size());
@@ -89,15 +100,15 @@ void GfShaderSerializer::serialize(u8* data, u32& size) const
 			bytecodesSizes = bytecodesOffsets + bytecodesCount;
 			bytecodesData = reinterpret_cast<u8*>(bytecodesSizes + bytecodesCount);
 			header->m_bytecodeCacheOffsets = pivot;
-			header->m_stringCacheSizes = pivot + bytecodesCount * tableSize;			
+			header->m_bytecodeSizes = pivot + bytecodesCount * tableSize;			
 		}
-		pivot += tableSize * 2;
+		pivot += tableSize * 2; // *2 because dealing with two tables (bytecodesSizes & bytecodesOffsets)
 		for (u32 i=0; i<bytecodesCount; ++i) 
 		{
 			if (data) 
 			{
-				bytecodesSizes[i] = m_bytecodeSizes[i];
 				bytecodesOffsets[i] = pivot + bytecodesReqSize;
+				bytecodesSizes[i] = m_bytecodeSizes[i];
 				memcpy(bytecodesData + bytecodesReqSize, m_bytecodeCache[i].get(), m_bytecodeSizes[i]);
 			}
 			bytecodesReqSize += m_bytecodeSizes[i];
@@ -118,7 +129,7 @@ void GfShaderSerializer::serialize(u8* data, u32& size) const
 
 	// Serialize variants data
 	{
-		u32 variantHashesArraySize = static_cast<u32>(sizeof(MutatorHash) * m_variants.size());
+		u32 variantHashesArraySize = static_cast<u32>(sizeof(GfVariantHash) * m_variants.size());
 		u32 variantDataSize = static_cast<u32>(sizeof(GfShaderVariantData));
 		u32* variantHashes(nullptr);
 		u8* variantData(nullptr);
@@ -184,7 +195,7 @@ GfString GfShaderSerializer::getMutatorNameAt(u32 idx) const
 	return "";
 }
 
-GfString GfShaderSerializer::mutatorHashToDefines(MutatorHash hash) const
+GfString GfShaderSerializer::mutatorHashToDefines(GfVariantHash hash) const
 {
 	GfString header("");
 	for (u32 i = 0; i < m_mutatorCount; ++i) 
@@ -222,7 +233,7 @@ s32 GfShaderSerializer::addBindingsArray(const GfDescriptorBindingSlot* bindings
 	return idx;
 }
 
-GfShaderSerializer::ShaderVariant* GfShaderSerializer::getVariant(MutatorHash mutatorHash)
+GfShaderSerializer::ShaderVariant* GfShaderSerializer::getVariant(GfVariantHash mutatorHash)
 {
 	auto entry = m_variants.find(mutatorHash);
 	if (entry == m_variants.end())
@@ -257,6 +268,101 @@ GfUniquePtr<u8[]> GfShaderSerializer::serializeToBlob(u32& reqSize) const
 	GfUniquePtr<u8[]> data(new u8[reqSize]);
 	serialize(data.get(), reqSize);
 	return data;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void GfShaderDeserializer::deserialize(GfUniquePtr<u8[]>&& blob)
+{
+	m_binary = std::move(blob);
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(blob.get());
+	m_stringOffsets.set(reinterpret_cast<u32*>(blob.get() + header->m_stringCacheOffsets), header->m_stringCount);
+	m_bytecodeOffsets.set(reinterpret_cast<u32*>(blob.get() + header->m_bytecodeCacheOffsets), header->m_bytecodesCount);
+	m_bytecodeSizes.set(reinterpret_cast<u32*>(blob.get() + header->m_bytecodeSizes), header->m_bytecodesCount);
+	m_mutators.set(reinterpret_cast<s32*>(blob.get() + header->m_mutatorsOffset), header->m_mutatorCount);
+	// Deserialize variants data
+	m_variantsDataCache.clear();
+	for (u32 i = 0; i < header->m_variantsCount; ++i) 
+	{
+		u32 variantHash = reinterpret_cast<const u32*>(m_binary.get() + header->m_variantsHashesArrayOffset)[i];
+		const GfShaderVariantData* variantData = reinterpret_cast<const GfShaderVariantData*>(m_binary.get() + header->m_variantsOffset) + i;
+		m_variantsDataCache[variantHash] = variantData;
+	}
+}
+
+s32 GfShaderDeserializer::findIdxForMutator(const GfString& mutatorName) const
+{
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	for (s32 i = 0; i < static_cast<s32>(header->m_mutatorCount); ++i) 
+	{
+		if (mutatorName == getCachedString(m_mutators[i])) 
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+const GfShaderVariantData* GfShaderDeserializer::getVariantData(u32 variantHash) const
+{
+	auto entry = m_variantsDataCache.find(variantHash);
+	return (entry != m_variantsDataCache.end()) ? entry->second : nullptr;
+}
+
+const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindingsForStage(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount) const
+{
+	GF_ASSERT(descSet < s_MAX_DESCRIPTOR_SETS, "Invalid descriptor set index");
+	GF_ASSERT(variant, "Invalid variant");
+	s16 bindingsIdx = variant->m_setBindingsIdx[descSet];
+	if (bindingsIdx >= 0 && variant->m_setsBindingsCount[descSet] > 0) 
+	{
+		bindingCount = static_cast<u32>(variant->m_setsBindingsCount[descSet]);
+		return getDescriptorBindings(variant->m_setBindingsIdx[descSet]);
+	}
+	return nullptr;
+}
+
+const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVariantData* variant, EShaderStage::Type stage, u32& bytecodeSize) const
+{
+	GF_ASSERT(variant, "Invalid variant");
+	bytecodeSize = getBytecodeSize(variant->m_stagesBytecodeIdxs[stage]);
+	return getBytecodePtr(variant->m_stagesBytecodeIdxs[stage]);
+}
+
+bool GfShaderDeserializer::isGraphics() const
+{
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	return (header->m_usedStages & ((1<<EShaderStage::Vertex) | (1 << EShaderStage::Fragment))) != 0;
+}
+
+bool GfShaderDeserializer::isCompute() const
+{
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	return (header->m_usedStages & (1<<EShaderStage::Compute)) != 0;;
+}
+
+const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindings(u32 idx) const
+{
+	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	GfDescriptorBindingSlot* descriptorBindings = reinterpret_cast<GfDescriptorBindingSlot*>(m_binary.get() + header->m_descriptorsOffset);
+	return descriptorBindings + idx;
+}
+
+const char* GfShaderDeserializer::getCachedString(u32 idx) const
+{
+	const char* str = reinterpret_cast<const char*>(m_binary.get() + m_stringOffsets[idx]);
+	return str;
+}
+
+const u32* GfShaderDeserializer::getBytecodePtr(u32 idx) const
+{
+	const u32* bytecode = reinterpret_cast<const u32*>(m_binary.get() + m_bytecodeOffsets[idx]);
+	return bytecode;
+}
+
+u32 GfShaderDeserializer::getBytecodeSize(u32 idx) const
+{
+	return m_bytecodeSizes[idx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

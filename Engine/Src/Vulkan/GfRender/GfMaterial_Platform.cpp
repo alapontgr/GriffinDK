@@ -166,14 +166,14 @@ bool GfMaterialTemplate_Platform::createRHI(const GfRenderContext& kCtx)
 void GfMaterialTemplate_Platform::BindRHI(const GfCmdBuffer& kCmdBuffer)
 {
 	// TODO: Add support for Compute material
-	vkCmdBindPipeline(kCmdBuffer.Plat().GetCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GetPipeline());
+	vkCmdBindPipeline(kCmdBuffer.Plat().getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, GetPipeline());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfMaterialTemplate_Platform::PushConstantsRHI(const GfCmdBuffer& kCmdBuffer, u32 uiSize, void* pData)
 {
-	vkCmdPushConstants(kCmdBuffer.Plat().GetCmdBuffer(), m_pLayout, m_uiPushConstantsStage, 0, uiSize, pData);
+	vkCmdPushConstants(kCmdBuffer.Plat().getCmdBuffer(), m_pLayout, m_uiPushConstantsStage, 0, uiSize, pData);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

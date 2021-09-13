@@ -17,9 +17,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace GfCmdBufferType 
+namespace GfCmdBufferType
 {
-	enum Type : u32 
+	enum Type : u32
 	{
 		Invalid,
 		Primary,
@@ -37,26 +37,33 @@ class GfCmdBuffer
 public:
 
 	friend class GfCmdBuffer_Platform;
+	friend class GfCmdBufferCache;
 
-	GfCmdBuffer();
-
-	void init(GfCmdBufferType::Type eType);
+	static GfCmdBuffer* get(const GfRenderContext* ctx, 
+		GfCmdBufferType::Type type,
+		GfRenderContextFamilies::Type queue);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// CmdBuffer commands
 
-	void beginRecording(const GfRenderContext& kCtx);
+	void beginRecording();
 
-	void endRecording(const GfRenderContext& kCtx);
+	void endRecording();
+
+	bool isReady();
 
 	// Sync point to avoid start recording while the command buffer is still being processed
-	void waitForReady(const GfRenderContext& kCtx);
+	void waitForReady();
 
-	void submit(
-		const GfRenderContext& kCtx,
-		const GfWindow& kWindow,
-		GfRenderContextFamilies::Type eQueueType,
-		Bool bLast);
+	void submit(const GfWindow& kWindow, Bool bLast);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void beginRenderPass(GfRenderPass* renderPass);
+	
+	void endRenderPass();
+
+	void bindShaderPipe(const class GfShaderVariant& shaderVariant);
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -72,39 +79,61 @@ public:
 
 private:
 
-	GfCmdBufferType::Type	m_eType;
+	GfCmdBuffer();
+
+	GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
+		const GfCmdBufferType::Type type, GfRenderContextFamilies::Type queue);
+
+	GfCmdBufferType::Type	m_type;
+	GfRenderContextFamilies::Type m_queue;
+	const GfRenderContext* m_ctx;
+	class GfCmdBufferCache* m_cache;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::waitForReady(const GfRenderContext& kCtx)
+class GfCmdBufferFactory
 {
-	m_kPlatform.waitForReadyRHI(kCtx);
+	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBufferFactory);
+public:
+
+	GfCmdBufferFactory();
+
+	void init(const GfRenderContext& kCtx, GfRenderContextFamilies::Type eQueueType);
+
+	void shutdown(const GfRenderContext& ctx);
+
+	bool isInitialized() const { return m_initialized; }
+
+private:
+
+	bool m_initialized;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+GF_FORCEINLINE void GfCmdBuffer::waitForReady()
+{
+	m_kPlatform.waitForReadyRHI(*m_ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::submit(
-	const GfRenderContext& kCtx,
-	const GfWindow& kWindow,
-	GfRenderContextFamilies::Type eQueueType,
-	Bool bLast)
+GF_FORCEINLINE void GfCmdBuffer::beginRecording()
 {
-	m_kPlatform.submitRHI(kCtx, kWindow, eQueueType, bLast);
+	m_kPlatform.beginRecordingRHI(*m_ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE void GfCmdBuffer::beginRecording(const GfRenderContext& kCtx)
+GF_FORCEINLINE void GfCmdBuffer::endRecording()
 {
-	m_kPlatform.beginRecordingRHI(kCtx);
+	m_kPlatform.endRecordingRHI(*m_ctx);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::endRecording(const GfRenderContext& kCtx)
+GF_FORCEINLINE bool GfCmdBuffer::isReady()
 {
-	m_kPlatform.endRecordingRHI(kCtx);
+	return m_kPlatform.isReady(*m_ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

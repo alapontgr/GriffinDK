@@ -232,7 +232,7 @@ void GfBuffer_Platform::copyRangeFromRHI(
 
 	// Sync with any compute or fragment operations in fly
 	vkCmdPipelineBarrier(
-		kCmdBuffer.Plat().GetCmdBuffer(),
+		kCmdBuffer.Plat().getCmdBuffer(),
 		srcSettings.m_stage | dstSettings.m_stage,
 		VK_PIPELINE_STAGE_TRANSFER_BIT ,
 		0,
@@ -244,7 +244,7 @@ void GfBuffer_Platform::copyRangeFromRHI(
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), m_pBuffer, 1, &kRegion);
+	vkCmdCopyBuffer(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().GetHandle(), m_pBuffer, 1, &kRegion);
 
 	// Go back to the original state and sync with Compute and vertex
 	barriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -253,7 +253,7 @@ void GfBuffer_Platform::copyRangeFromRHI(
 	barriers[1].dstAccessMask = dstSettings.m_access;
 
 	vkCmdPipelineBarrier(
-		kCmdBuffer.Plat().GetCmdBuffer(),
+		kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		srcSettings.m_stage | dstSettings.m_stage,
 		0,
@@ -289,7 +289,7 @@ void GfBuffer_Platform::updateRangeRHI(
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 	vkCmdPipelineBarrier(
-		kCmdBuffer.Plat().GetCmdBuffer(),
+		kCmdBuffer.Plat().getCmdBuffer(),
 		syncSettings.m_stage,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0,
@@ -298,13 +298,13 @@ void GfBuffer_Platform::updateRangeRHI(
 		0, nullptr);
 
 	// Update data
-	vkCmdUpdateBuffer(kCmdBuffer.Plat().GetCmdBuffer(), m_pBuffer, uiOffset, uiSize, pData);
+	vkCmdUpdateBuffer(kCmdBuffer.Plat().getCmdBuffer(), m_pBuffer, uiOffset, uiSize, pData);
 
 	// Sync back
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.dstAccessMask = syncSettings.m_access;
 	vkCmdPipelineBarrier(
-		kCmdBuffer.Plat().GetCmdBuffer(),
+		kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		syncSettings.m_stage,
 		0,

@@ -236,7 +236,7 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
 	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
 
-	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
+	vkCmdPipelineBarrier(kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0,
@@ -263,7 +263,7 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 		m_kBase.getHeight(),
 		1
 	};
-	vkCmdCopyBufferToImage(kCmdBuffer.Plat().GetCmdBuffer(), kFrom.Plat().GetHandle(), pImage,
+	vkCmdCopyBufferToImage(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().GetHandle(), pImage,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &kRegion);
 
 	// Transit image layout to ready to be read by shaders
@@ -274,7 +274,7 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 	kBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
 	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
-	vkCmdPipelineBarrier(kCmdBuffer.Plat().GetCmdBuffer(),
+	vkCmdPipelineBarrier(kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 		0,

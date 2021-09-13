@@ -45,4 +45,37 @@ template <typename T, size_t Count>
 using GfArray = std::array<T, Count>;
 
 ////////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+class GfWeakArray 
+{
+public:
+
+	GfWeakArray() 
+		: m_ptr(nullptr)
+		, m_count(0) {}
+
+	GfWeakArray(const T* ptr, const u32 count) 
+		: m_ptr(ptr)
+		, m_count(count) {}
+
+	void set(const T* ptr, const u32 count) 
+	{
+		m_ptr = ptr;
+		m_count = count;
+	}
+
+	const T& operator[] (u32 i) const { GF_ASSERT(i >= 0 && i < m_count, "Invalid index"); return m_ptr[i]; }
+
+	const u32 size() const { return m_count; }
+
+	const T* data() const { return m_ptr; }
+
+private:
+
+	const T* m_ptr;
+	u32 m_count;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 #endif // __GFSTL_H__

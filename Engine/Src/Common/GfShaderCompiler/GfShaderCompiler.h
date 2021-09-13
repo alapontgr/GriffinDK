@@ -7,6 +7,8 @@
 //	Copyright (c) 2021 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFSHADERCOMPILER_H__
+#define __GFSHADERCOMPILER_H__
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderCommon.h"
@@ -29,11 +31,11 @@ private:
 
 	bool parse(const GfString& filename, const GfString& src, GfShaderSerializer& outSerializer, GfString& outSrc, GfString& outErrors);
 
-	GfVector<GfShaderSerializer::MutatorHash> uberize(const GfShaderSerializer& serializer);
+	GfVector<GfVariantHash> uberize(const GfShaderSerializer& serializer);
 
 	bool compileVariant(const GfString& parsedSrc,
 		const GfShaderSerializer& serializer,
-		const GfShaderSerializer::MutatorHash hash,
+		const GfVariantHash hash,
 		GfShaderSerializer::ShaderVariant* variant, 
 		GfVector<GfShaderSerializer::ShaderBytecode>* bytecodeCache,
 		GfVector<u32>* bytecodeSizes,
@@ -48,3 +50,5 @@ private:
 	GfString m_baseShaderDirPath;
 	GfString m_engineShaderDirPath; 
 };
+
+#endif

@@ -7,6 +7,9 @@
 //	Copyright (c) 2021 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
+#ifndef __GFSHADERCACHE_H__
+#define __GFSHADERCACHE_H__
+////////////////////////////////////////////////////////////////////////////////
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderCommon.h"
@@ -53,13 +56,15 @@ struct GfShaderVariantData
 };
 static_assert((sizeof(GfShaderVariantData) % alignof(GfShaderVariantData)) == 0, "Invalid alignment");
 
+using GfVariantHash = u32;
+
 class GfShaderSerializer
 {
 public:
 
 	friend class GfShaderCompiler;
 	using ShaderBytecode = GfUniquePtr<u32[]>;
-	using MutatorHash = u32;
+	
 	using BytecodeHash = u64;
 
 	struct ShaderVariant 
@@ -88,13 +93,13 @@ public:
 
 	GfString getMutatorNameAt(u32 idx) const;
 
-	GfString mutatorHashToDefines(MutatorHash hash) const;
+	GfString mutatorHashToDefines(GfVariantHash hash) const;
 
 	u32 getMutatorCount() const;
 
 	u32 getStageEnabled(EShaderStage::Type stage) const;
 
-	ShaderVariant* getVariant(MutatorHash mutatorHash);
+	ShaderVariant* getVariant(GfVariantHash mutatorHash);
 
 	// Queues the shader bytecode at the end of the m_bytecodeCache
 	s32 addShaderBytecode(ShaderBytecode shaderBytecode, u32 size);
@@ -133,12 +138,36 @@ public:
 
 	GfShaderDeserializer() {}
 
-	void deserialize(GfUniquePtr<u8[]> blob);
+	void deserialize(GfUniquePtr<u8[]>&& blob);
+
+	s32 findIdxForMutator(const GfString& mutatorName) const;
+
+	const GfShaderVariantData* getVariantData(GfVariantHash variantHash) const;
+
+	const GfDescriptorBindingSlot* getDescriptorBindingsForStage(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount) const;
+
+	const u32* getStageBytecodeForVariant(const GfShaderVariantData* variant, EShaderStage::Type stage, u32& bytecodeSize) const;
+
+	bool isGraphics() const;
+
+	bool isCompute() const;
 
 private:
-	GfUniquePtr<u8[]> m_binary;
 
-	GfUMap<u32, GfShaderVariantData*> m_hashToVariantData;
+	const GfDescriptorBindingSlot* getDescriptorBindings(u32 idx) const;
+
+	const char* getCachedString(u32 idx) const;
+
+	const u32* getBytecodePtr(u32 idx) const;
+
+	u32 getBytecodeSize(u32 idx) const;
+
+	GfUniquePtr<u8[]> m_binary;
+	GfWeakArray<u32> m_stringOffsets;
+	GfWeakArray<u32> m_bytecodeOffsets;
+	GfWeakArray<u32> m_bytecodeSizes;
+	GfWeakArray<s32> m_mutators;
+	GfUMap<u32, const GfShaderVariantData*> m_variantsDataCache;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,3 +208,4 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+#endif

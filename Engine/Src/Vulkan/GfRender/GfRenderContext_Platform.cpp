@@ -148,7 +148,7 @@ bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 				break;
 			}
 		}
-		if (uiOutPresentFamilyIndex == UINT32_MAX ||
+		if (uiOutGraphicsFamilyIndex == UINT32_MAX ||
 			uiOutPresentFamilyIndex == UINT32_MAX) 
 		{
 			return false;
@@ -279,13 +279,10 @@ void GfRenderContext_Platform::CreateDevice(GfWindow* pWindow)
 		}
 
 		// Assign the families indices
-		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Present] = uiPresentFamilyIdx;
 		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Graphics] = uiGraphicsFamilyIdx;
 		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Transfer] = uiGraphicsFamilyIdx;
 		// It'll be the graphics queue
 		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::Compute] = uiComputeFamilyIdx;
-		// Temporarily async compute will fallback to the compute queue. In the end it will probably be the graphics queue
-		m_kBase.m_pAvailableFamilies[GfRenderContextFamilies::AsyncCompute] = uiComputeFamilyIdx;
 
 		// Check extensions
 #if defined(_DEBUG) || defined (_DEBUGOPT)
@@ -308,11 +305,11 @@ void GfRenderContext_Platform::CreateDevice(GfWindow* pWindow)
 		GfVector<VkDeviceQueueCreateInfo> tQueueInfoList;
 		tQueueInfoList.push_back(kQueueInfo);
 
-		if (m_kBase.GetFamilyIdx(GfRenderContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRenderContextFamilies::Present)) {
-			// Almost the same configuration apart of the family index to use
-			kQueueInfo.queueFamilyIndex = uiPresentFamilyIdx;
-			tQueueInfoList.push_back(kQueueInfo);
-		}
+		//if (m_kBase.GetFamilyIdx(GfRenderContextFamilies::Graphics) != m_kBase.GetFamilyIdx(GfRenderContextFamilies::Present)) {
+		//	// Almost the same configuration apart of the family index to use
+		//	kQueueInfo.queueFamilyIndex = uiPresentFamilyIdx;
+		//	tQueueInfoList.push_back(kQueueInfo);
+		//}
 
 		// Features to be enabled, by default it is all disabled
 		VkPhysicalDeviceFeatures kFeatures{};

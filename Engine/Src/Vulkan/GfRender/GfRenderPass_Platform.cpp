@@ -210,14 +210,14 @@ void GfRenderPass_Platform::BeginPassRHI(const GfRenderContext& kCtx, const GfCm
 	passBeginInfo.renderArea.offset.y = 0;
 	passBeginInfo.clearValueCount = 1;
 	passBeginInfo.pClearValues = &clearColor;
-	vkCmdBeginRenderPass(kCmdBuffer.Plat().GetCmdBuffer(), &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(kCmdBuffer.Plat().getCmdBuffer(), &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfRenderPass_Platform::EndPassRHI(const GfCmdBuffer& kCmdBuffer)
 {
-	vkCmdEndRenderPass(kCmdBuffer.Plat().GetCmdBuffer());
+	vkCmdEndRenderPass(kCmdBuffer.Plat().getCmdBuffer());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +231,7 @@ void GfRenderPass_Platform::SetViewportRHI(const GfCmdBuffer& kCmdBuffer, const 
 	kRHIViewport.height = kViewport.m_fHeight;
 	kRHIViewport.minDepth = kViewport.m_fMinDepth;
 	kRHIViewport.maxDepth = kViewport.m_fMaxDepth;
-	vkCmdSetViewport(kCmdBuffer.Plat().GetCmdBuffer(), 0, 1, &kRHIViewport);
+	vkCmdSetViewport(kCmdBuffer.Plat().getCmdBuffer(), 0, 1, &kRHIViewport);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ void GfRenderPass_Platform::SetScissorRHI(const GfCmdBuffer& kCmdBuffer, const G
 	kRHIScissor.offset.y = kScissor.m_siOffsetY;
 	kRHIScissor.extent.width = kScissor.m_siWidth;
 	kRHIScissor.extent.height = kScissor.m_siHeight;
-	vkCmdSetScissor(kCmdBuffer.Plat().GetCmdBuffer(), 0, 1, &kRHIScissor);
+	vkCmdSetScissor(kCmdBuffer.Plat().getCmdBuffer(), 0, 1, &kRHIScissor);
 }
 
 VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& kCtx, 

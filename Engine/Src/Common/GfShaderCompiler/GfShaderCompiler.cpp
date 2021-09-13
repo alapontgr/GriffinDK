@@ -221,7 +221,7 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 	}
 
 	// Uberize based on mutators
-	GfVector<GfShaderSerializer::MutatorHash> mutatorHashes = uberize(*shaderSerializer.get());
+	GfVector<GfVariantHash> mutatorHashes = uberize(*shaderSerializer.get());
 
 	// TODO: Distribute variants compilation
 	GfVector<GfShaderSerializer::ShaderBytecode> bytecodeCache;
@@ -236,7 +236,7 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 
 	// Compile variants
 	bool success = true;
-	for (GfShaderSerializer::MutatorHash hash : mutatorHashes) 
+	for (GfVariantHash hash : mutatorHashes) 
 	{
 		success = success && compileVariant(
 			parsedSrc, 
@@ -263,7 +263,7 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 	}
 
 	// Reflection
-	for (GfShaderSerializer::MutatorHash hash : mutatorHashes) 
+	for (GfVariantHash hash : mutatorHashes) 
 	{
 		success = success && reflectVariant(
 			*shaderSerializer.get(), 
@@ -357,14 +357,14 @@ bool GfShaderCompiler::parse(const GfString& filename, const GfString& src, GfSh
 	return true;
 }
 
-GfVector<GfShaderSerializer::MutatorHash> GfShaderCompiler::uberize(const GfShaderSerializer& serializer)
+GfVector<GfVariantHash> GfShaderCompiler::uberize(const GfShaderSerializer& serializer)
 {
-	GfVector<GfShaderSerializer::MutatorHash> hashes;
+	GfVector<GfVariantHash> hashes;
 	const u32 hashCount = 1 << serializer.m_mutatorCount;
 	hashes.reserve(hashCount);
 	// Assuming all mutators are boolean so we do base-2 combinatorial
 	// N-bit set to one means the mutator keyword is active, o means disabled
-	for (GfShaderSerializer::MutatorHash hash = 0; hash < hashCount; ++hash) 
+	for (GfVariantHash hash = 0; hash < hashCount; ++hash) 
 	{
 		hashes.push_back(hash);
 	}
@@ -374,7 +374,7 @@ GfVector<GfShaderSerializer::MutatorHash> GfShaderCompiler::uberize(const GfShad
 bool GfShaderCompiler::compileVariant(
 	const GfString& parsedSrc, 
 	const GfShaderSerializer& serializer, 
-	const GfShaderSerializer::MutatorHash hash,
+	const GfVariantHash hash,
 	GfShaderSerializer::ShaderVariant* variant, 
 	GfVector<GfShaderSerializer::ShaderBytecode>* bytecodeCache, 
 	GfVector<u32>* bytecodeSizes,
@@ -564,8 +564,4 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 	}
 
 	return true;
-}
-
-void GfShaderDeserializer::deserialize(GfUniquePtr<u8[]> blob)
-{
 }

@@ -20,11 +20,9 @@ namespace GfRenderContextFamilies
 {
 	enum Type : u32
 	{
-		Present = 0,
-		Transfer,
-		Graphics,
+		Graphics = 0,
 		Compute,
-		AsyncCompute,
+		Transfer,
 		Count,
 		InvalidIdx = 0xffffffff
 	};

@@ -364,7 +364,7 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	kPipelineInfo.pDynamicState = &kDynStateInfo;
 
 	kPipelineInfo.layout = m_pLayout;
-	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->Plat().GetRenderPass();
+	kPipelineInfo.renderPass = m_kBase.m_pMaterialPass->Plat().getRenderPass();
 	kPipelineInfo.subpass = 0;
 
 	// TODO: Add material specialization (uber-shaders)

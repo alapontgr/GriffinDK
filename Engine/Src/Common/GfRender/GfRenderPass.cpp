@@ -16,28 +16,59 @@
 
 GF_DEFINE_BASE_CTOR(GfRenderPass)
 	, m_outputCount(0)
-	, m_depthAttachment(nullptr)
+	, m_depthAttachment()
+	, m_hash(0)
+	, m_clearColor(0.0f)
+	, m_depthClear(0.0f)
+	, m_stencilClear(0)
+	, m_width(0)
+	, m_height(0)
+	, m_offsetX(0)
+	, m_offsetY(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfRenderPass::create(const GfRenderContext& ctx,
-	const AttachmentDesc* output, u32 outputCount, 
-	const AttachmentDesc* depthAttachment)
+struct HashableAttachmentEntry 
 {
-	if (depthAttachment) 
+	u16 m_sampleCount;
+	TextureFormat::Type m_format;
+	LoadOp m_loadOp;
+	StoreOp m_storeOp;
+	LoadOp m_stencilLoadOp;
+	StoreOp m_stencilStoreOp;
+};
+
+void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount, const AttachmentDesc* depthAttachment)
+{
+	m_depthAttachment.m_attachment = nullptr;
+	if (depthAttachment && depthAttachment->m_attachment) 
 	{
-		m_depthAttachment = depthAttachment->m_attachment;
-		GF_ASSERT(m_depthAttachment->isDepthBuffer(), "Invalid usage");
+		m_depthAttachment = *depthAttachment;
+		GF_ASSERT(m_depthAttachment.m_attachment->isDepthBuffer(), "Invalid usage");
 	}
+	
 	m_outputCount = outputCount;
+	m_attachments.clear();
+	m_attachments.reserve(outputCount);
 	for (u32 i=0; i<outputCount; ++i) 
 	{
-		m_attachments[i] = output[i].m_attachment;
-		GF_ASSERT(m_attachments[i]->isRT(), "Invalid usage");
+		m_attachments[i] = output[i];
+		GF_ASSERT(m_attachments[i].m_attachment->isRT(), "Invalid usage");
 	}
-	return m_kPlatform.createRHI(ctx, output, outputCount, depthAttachment);
+
+	updateHash();
+	m_kPlatform.markAsChanged();
+}
+
+void GfRenderPass::updateHash() 
+{
+	GF_ASSERT_ALWAYS("TODO: Implement me");
+	// To consider for hash:
+	// 1. Width and height
+	// 2. Depth attachment reference (HashableAttachmentEntry)
+	// 3. Color attachments (HashableAttachmentEntry)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

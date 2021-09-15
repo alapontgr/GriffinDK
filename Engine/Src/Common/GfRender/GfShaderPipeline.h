@@ -27,6 +27,7 @@ struct GfShaderPipeConfig
 	GfRasterState m_rasterState;
 	EPrimitiveTopology::Type m_topology = EPrimitiveTopology::TriList;
 	GfMultiSamplingState m_msaState;
+	GfDepthState m_depthState;
 };
 
 class GfShaderPipeline 

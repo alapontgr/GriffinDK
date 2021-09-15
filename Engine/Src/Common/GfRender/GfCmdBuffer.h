@@ -15,6 +15,8 @@
 #include "Common/GfCore/GfCoreMinimal.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfCmdBuffer_Platform.h)
 
+#include "Common/GfRender/GfShaderPipeline.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace GfCmdBufferType
@@ -28,6 +30,15 @@ namespace GfCmdBufferType
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+struct GfRenderPipelineState 
+{
+	const GfVertexDeclaration* m_curVertexFormat = nullptr;
+	GfRenderPass* m_curRenderPass = nullptr;
+	GfShaderPipeline* m_curPipeline = nullptr;
+	GfVariantHash m_curVariantHash = 0;
+	GfShaderPipeConfig m_config;
+};
 
 class GfBuffer;
 
@@ -59,23 +70,33 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	void setBlendState(const GfBlendState& blendState);
+
+	void setRasterState(const GfRasterState& rasterState);
+
+	void setDepthState(const GfDepthState& depthState);
+
+	void setTopology(EPrimitiveTopology::Type topology);
+
+	void setMSAAState(const GfMultiSamplingState& msaaState);
+
+	void setVertexFormat(const GfVertexDeclaration* vertexFormat);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 	void beginRenderPass(GfRenderPass* renderPass);
 	
 	void endRenderPass();
 
 	void bindShaderPipe(const class GfShaderVariant& shaderVariant);
 
-	////////////////////////////////////////////////////////////////////////////////
-
-	void drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
-
-	void draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
-
 	void bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount);
 	
 	void bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort);
 
-	////////////////////////////////////////////////////////////////////////////////
+	void drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+
+	void draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 
 private:
 
@@ -84,10 +105,16 @@ private:
 	GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
 		const GfCmdBufferType::Type type, GfRenderContextFamilies::Type queue);
 
+	void reset();
+
+	void drawcallCommon();
+
 	GfCmdBufferType::Type	m_type;
 	GfRenderContextFamilies::Type m_queue;
 	const GfRenderContext* m_ctx;
 	class GfCmdBufferCache* m_cache;
+
+	GfRenderPipelineState m_curState;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,30 +161,6 @@ GF_FORCEINLINE void GfCmdBuffer::endRecording()
 GF_FORCEINLINE bool GfCmdBuffer::isReady()
 {
 	return m_kPlatform.isReady(*m_ctx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
-{
-	m_kPlatform.drawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
-{
-	m_kPlatform.drawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
-}
-
-GF_FORCEINLINE void GfCmdBuffer::bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount) 
-{
-	m_kPlatform.bindVertexBuffersRHI(vertexBuffers, vertexBufferOffsets, vertexBufferCount);
-}
-
-GF_FORCEINLINE void GfCmdBuffer::bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort)
-{
-	m_kPlatform.bindIndexBufferRHI(buffer, offset, useShort);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

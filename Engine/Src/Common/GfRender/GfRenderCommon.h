@@ -380,6 +380,11 @@ struct GfScissor
 	s32 m_siHeight;
 };
 
+struct GfDepthState 
+{
+	GfDepthState() { GF_ASSERT_ALWAYS("TODO: Implement me"); }
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // This represents a binding slot in a Descriptor. Used to represent the layout of uniforms.

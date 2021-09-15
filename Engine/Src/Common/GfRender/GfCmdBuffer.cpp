@@ -11,19 +11,11 @@
 
 #include "Common/GfRender/GfCmdBuffer.h"
 #include "Common/GfRender/GfShaderPipeline.h"
+#include "Common/GfRender/GfRenderPass.h"
 
 #include <mutex>
 
 ////////////////////////////////////////////////////////////////////////////////
-
-struct GfRenderStateDynamic 
-{
-	GfRenderPass* m_curRenderPass = nullptr;
-	GfVertexDeclaration* m_curVertexFormat = nullptr;
-	GfShaderPipeline* m_curPipeline = nullptr;
-	GfVariantHash m_curVariantHash;
-	GfShaderPipeConfig m_config;
-};
 
 class GfCmdBufferCache 
 {
@@ -57,6 +49,7 @@ GfCmdBuffer* GfCmdBufferCache::get(const GfRenderContext* ctx, GfCmdBufferType::
 		if (buffer->isReady()) 
 		{
 			m_avalCmdBuffers.pop();
+			buffer->reset();
 			return buffer;
 		}
 	}
@@ -65,6 +58,7 @@ GfCmdBuffer* GfCmdBufferCache::get(const GfRenderContext* ctx, GfCmdBufferType::
 	GfUniquePtr<GfCmdBuffer> cmdBuffer = GfUniquePtr<GfCmdBuffer>(new GfCmdBuffer(ctx, this, type, queue));
 	m_createdCmdBuffers.push_back(std::move(cmdBuffer));
 	GfCmdBuffer* buffer = m_createdCmdBuffers.back().get();
+	buffer->reset();
 	return buffer;
 }
 
@@ -77,7 +71,6 @@ void GfCmdBufferCache::returnToCache(GfCmdBuffer* cmdBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static thread_local GfRenderStateDynamic s_curState;
 GfCmdBufferCache s_cmdBufferCaches[GfRenderContextFamilies::Count];
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,20 +121,71 @@ GfCmdBuffer::GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
 {
 }
 
+void GfCmdBuffer::reset() 
+{
+	GF_ASSERT(m_ctx, "Context was not initialized");
+	m_curState = GfRenderPipelineState();
+}
+
+void GfCmdBuffer::drawcallCommon() 
+{
+	GF_ASSERT(m_curState.m_curVertexFormat, "A vertex format was not provided");
+	GF_ASSERT(m_curState.m_curRenderPass, "A RenderPass needs to be active");
+	GF_ASSERT(m_type == GfCmdBufferType::Primary, "TODO: Add support for secondary command buffer recording");
+	
+	// Bind pipeline for variant
+	m_kPlatform.bindShaderPipe(m_curState.m_curPipeline, m_curState.m_curVariantHash, &m_curState.m_config, m_curState.m_curVertexFormat, m_curState.m_curRenderPass);
+
+	// Bind batch resources. Bind & Update descriptor sets
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
+
+void GfCmdBuffer::setBlendState(const GfBlendState& blendState) 
+{
+	m_curState.m_config.m_blendState = blendState;
+}
+
+void GfCmdBuffer::setRasterState(const GfRasterState& rasterState) 
+{
+	m_curState.m_config.m_rasterState = rasterState;
+}
+
+void GfCmdBuffer::setDepthState(const GfDepthState& depthState) 
+{
+	m_curState.m_config.m_depthState = depthState;
+}
+
+void GfCmdBuffer::setTopology(EPrimitiveTopology::Type topology) 
+{
+	m_curState.m_config.m_topology = topology;
+}
+
+void GfCmdBuffer::setMSAAState(const GfMultiSamplingState& msaaState) 
+{
+	m_curState.m_config.m_msaState = msaaState;
+}
+
+void GfCmdBuffer::setVertexFormat(const GfVertexDeclaration* vertexFormat) 
+{
+	m_curState.m_curVertexFormat = vertexFormat;
+}
 
 void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 {
-	GF_ASSERT(!s_curState.m_curRenderPass, "Trying to begin a pass before end");
-	s_curState.m_curRenderPass = renderPass;
-	m_kPlatform.beginRenderPass(renderPass);
+	GF_ASSERT(!m_curState.m_curRenderPass, "Trying to begin a pass before end");
+	GF_ASSERT(renderPass->getWidth() != 0 && renderPass->getHeight(), "Resolution was not initialized");
+
+	m_curState.m_curRenderPass = renderPass;
+	m_kPlatform.beginRenderPass(*m_ctx, renderPass);
 }
 
 void GfCmdBuffer::endRenderPass()
 {
-	GF_ASSERT(s_curState.m_curRenderPass, "Trying to end an invalid pass");
+	GF_ASSERT(m_curState.m_curRenderPass, "Trying to end an invalid pass");
 	m_kPlatform.endRenderPass();
-	s_curState.m_curRenderPass = nullptr;
+	m_curState.m_curRenderPass = nullptr;
 }
 
 void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
@@ -149,12 +193,11 @@ void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
 	GfShaderPipeline* pipeline = shaderVariant.getPipeline();
 	GfVariantHash variantHash = shaderVariant.getVariantHash();
 
-	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && s_curState.m_curVertexFormat), "Invalid active vertex format");
-	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && s_curState.m_curRenderPass), "Invalid active Render Pass");
+	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && m_curState.m_curVertexFormat), "Invalid active vertex format");
+	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && m_curState.m_curRenderPass), "Invalid active Render Pass");
 
-	s_curState.m_curPipeline = pipeline;
-	s_curState.m_curVariantHash = variantHash;
-	m_kPlatform.bindShaderPipe(pipeline, variantHash, &s_curState.m_config, s_curState.m_curVertexFormat, s_curState.m_curRenderPass);
+	m_curState.m_curPipeline = pipeline;
+	m_curState.m_curVariantHash = variantHash;
 }
 
 void GfCmdBuffer::submit(
@@ -164,6 +207,28 @@ void GfCmdBuffer::submit(
 	m_kPlatform.submitRHI(*m_ctx, kWindow, m_queue, bLast);
 	GF_ASSERT(m_cache, "Invalid cache");
 	m_cache->returnToCache(this);
+}
+
+void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+{
+	drawcallCommon();
+	m_kPlatform.drawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
+}
+
+void GfCmdBuffer::draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+{
+	drawcallCommon();
+	m_kPlatform.drawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+}
+
+void GfCmdBuffer::bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount) 
+{	
+	m_kPlatform.bindVertexBuffersRHI(vertexBuffers, vertexBufferOffsets, vertexBufferCount);
+}
+
+void GfCmdBuffer::bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort)
+{
+	m_kPlatform.bindIndexBufferRHI(buffer, offset, useShort);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

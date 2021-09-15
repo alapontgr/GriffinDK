@@ -12,6 +12,7 @@
 #include "Common/GfRender/GfCmdBuffer.h"
 #include "Common/GfRender/GfRenderContext.h"
 #include "Common/GfRender/GfWindow.h"
+#include "Common/GfRender/GfRenderPass.h"
 #include "Common/GfRender/GfShaderPipeline.h"
 #include "Common/GfRender/GfMaterial.h"
 #include "Common/GfRender/GfMatParamLayout.h"
@@ -158,14 +159,52 @@ void GfCmdBuffer_Platform::endRecordingRHI(const GfRenderContext& kCtx)
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to end command buffer");
 }
 
-void GfCmdBuffer_Platform::beginRenderPass(GfRenderPass* renderPass)
+void GfCmdBuffer_Platform::beginRenderPass(const GfRenderContext& ctx, GfRenderPass* renderPass)
 {
-	GF_ASSERT_ALWAYS("TODO");
+	renderPass->Plat().getOrCreateRenderPass(ctx);
+	VkRenderPass renderPassVK = renderPass->Plat().getRenderPass();
+	VkFramebuffer frameBufferVK = renderPass->Plat().getFramebuffer();
+
+	bool usesDepth = renderPass->usesDepthAttachment();
+	u32 attachmentCount = renderPass->getAttachmentCount() + (usesDepth ? 1 : 0);
+
+	StackMemBlock clearColorsMem(static_cast<u32>(sizeof(VkClearValue)) * attachmentCount);
+	VkClearValue* clearColors = reinterpret_cast<VkClearValue*>(clearColorsMem.get());
+	u32 idx = 0;
+	if (usesDepth) 
+	{
+		VkClearValue& depthClear = clearColors[idx++];
+		depthClear.depthStencil.depth = renderPass->getDepthClear();
+		depthClear.depthStencil.stencil = renderPass->getStencilClear();
+	}
+
+	v4 clearColor = renderPass->getClearColor();
+	for (; idx < attachmentCount; ++idx) 
+	{
+		VkClearValue& clear = clearColors[idx];
+		clear.color.float32[0] = clearColor[0];
+		clear.color.float32[1] = clearColor[1];
+		clear.color.float32[2] = clearColor[2];
+		clear.color.float32[3] = clearColor[3];
+	}
+
+	VkRenderPassBeginInfo passBeginInfo{};
+	passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passBeginInfo.pNext = nullptr;
+	passBeginInfo.renderPass = renderPassVK;
+	passBeginInfo.framebuffer = frameBufferVK;
+	passBeginInfo.renderArea.extent.width = renderPass->getWidth();
+	passBeginInfo.renderArea.extent.height = renderPass->getHeight();
+	passBeginInfo.renderArea.offset.x = renderPass->getOffsetX();
+	passBeginInfo.renderArea.offset.y = renderPass->getOffsetY();
+	passBeginInfo.clearValueCount = attachmentCount;
+	passBeginInfo.pClearValues = clearColors;
+	vkCmdBeginRenderPass(getCmdBuffer(), &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void GfCmdBuffer_Platform::endRenderPass()
 {
-	GF_ASSERT_ALWAYS("TODO");
+	vkCmdEndRenderPass(getCmdBuffer());
 }
 
 void GfCmdBuffer_Platform::bindShaderPipe(GfShaderPipeline* pipeline, u32 variantHash,

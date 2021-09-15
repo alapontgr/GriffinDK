@@ -68,6 +68,19 @@ GF_DEFINE_PLATFORM_CTOR(GfRenderPass)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfRenderPass_Platform::getOrCreateRenderPass(const GfRenderContext& ctx)
+{
+	// If the hash is the same the RenderPass is the same
+	if (m_renderPass == VK_NULL_HANDLE) 
+	{
+		GF_ASSERT_ALWAYS("TODO: Implement creation of RenderPass");	
+	}
+	if (m_framebuffer == VK_NULL_HANDLE) 
+	{
+		GF_ASSERT_ALWAYS("TODO: Implement creation of Framebuffer");
+	}
+}
+
 void GfRenderPass_Platform::createRHI(const GfRenderContext& kCtx, const GfWindow* pWindow)
 {
 	// Description of the whole render pass
@@ -170,6 +183,7 @@ bool GfRenderPass_Platform::createRHI(const GfRenderContext& kCtx,
 			attachments[pivot].m_stencilStoreOp = static_cast<u32>(output[i].m_stencilStoreOp);
 			pivot++;
 		}
+		// TODO: We can use the hash calculated in the base class
 		hashRP = GfHash::compute(head, reqSize);
 	}
 	GF_ASSERT(hashRP, "Invalid hash");
@@ -188,6 +202,12 @@ bool GfRenderPass_Platform::createRHI(const GfRenderContext& kCtx,
 	m_framebuffer = getOrCreateFramebuffer(kCtx, output, outputCount, depthAttachment);
 
 	return true;
+}
+
+void GfRenderPass_Platform::markAsChanged()
+{
+	m_renderPass = VK_NULL_HANDLE;
+	m_framebuffer = VK_NULL_HANDLE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

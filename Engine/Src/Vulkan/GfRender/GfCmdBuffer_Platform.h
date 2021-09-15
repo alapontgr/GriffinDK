@@ -65,7 +65,7 @@ private:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void beginRenderPass(GfRenderPass* renderPass);
+	void beginRenderPass(const GfRenderContext& kCtx, GfRenderPass* renderPass);
 	
 	void endRenderPass();
 

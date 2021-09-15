@@ -34,7 +34,11 @@ class GfRenderPass_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfRenderPass);
 public:
 
-	VkRenderPass GetRenderPass() const { return m_renderPass; }
+	VkRenderPass getRenderPass() const { return m_renderPass; }
+
+	VkFramebuffer getFramebuffer() const { return m_framebuffer; }
+
+	void getOrCreateRenderPass(const GfRenderContext& ctx);
 
 protected:
 
@@ -43,6 +47,8 @@ protected:
 	bool createRHI(const GfRenderContext& ctx,
 		const AttachmentDesc* output, u32 outputCount,
 		const AttachmentDesc* depthAttachment);
+
+	void markAsChanged();
 
 	////////////////////////////////////////////////////////////////////////////////
 

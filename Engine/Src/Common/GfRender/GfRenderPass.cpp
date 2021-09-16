@@ -42,6 +42,12 @@ struct HashableAttachmentEntry
 
 void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount, const AttachmentDesc* depthAttachment)
 {
+	setAttachments(output, outputCount, v4(0.0f), depthAttachment);
+}
+
+void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount, const v4& clearColor,
+	const AttachmentDesc* depthAttachment, f32 clearDepth, u32 clearStencil) 
+{
 	m_depthAttachment.m_attachment = nullptr;
 	if (depthAttachment && depthAttachment->m_attachment) 
 	{
@@ -58,17 +64,43 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 		GF_ASSERT(m_attachments[i].m_attachment->isRT(), "Invalid usage");
 	}
 
+	m_clearColor = clearColor;
+	m_depthClear = clearDepth;
+	m_stencilClear = clearStencil;
+
 	updateHash();
 	m_kPlatform.markAsChanged();
 }
 
 void GfRenderPass::updateHash() 
 {
-	GF_ASSERT_ALWAYS("TODO: Implement me");
-	// To consider for hash:
-	// 1. Width and height
-	// 2. Depth attachment reference (HashableAttachmentEntry)
-	// 3. Color attachments (HashableAttachmentEntry)
+	m_hash = 0;
+	u32 attachmentCount = m_outputCount + (usesDepthAttachment() ? 1 : 0);
+	u32 reqSize = static_cast<u32>(attachmentCount * sizeof(HashableAttachmentEntry));
+	StackMemBlock block(reqSize);
+	HashableAttachmentEntry* attachmmentDesc = reinterpret_cast<HashableAttachmentEntry*>(block.get());
+	HashableAttachmentEntry* pivot = attachmmentDesc;
+	if (usesDepthAttachment())
+	{
+		pivot->m_sampleCount = 1; // TODO MSAA
+		pivot->m_format = m_depthAttachment.m_attachment->getFormat();
+		pivot->m_loadOp = m_depthAttachment.m_loadOp;
+		pivot->m_storeOp = m_depthAttachment.m_storeOp;
+		pivot->m_stencilLoadOp = m_depthAttachment.m_stencilLoadOp;
+		pivot->m_stencilStoreOp = m_depthAttachment.m_stencilStoreOp;
+		pivot++;
+	}
+	for (u32 i = 0; i < m_outputCount; ++i)
+	{
+		pivot->m_sampleCount = 1; // TODO MSAA
+		pivot->m_format = m_attachments[i].m_attachment->getFormat();
+		pivot->m_loadOp = m_attachments[i].m_loadOp;
+		pivot->m_storeOp = m_attachments[i].m_storeOp;
+		pivot->m_stencilLoadOp = m_attachments[i].m_stencilLoadOp;
+		pivot->m_stencilStoreOp = m_attachments[i].m_stencilStoreOp;
+		pivot++;
+	}
+	m_hash = GfHash::compute(attachmmentDesc, reqSize);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

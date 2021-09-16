@@ -215,6 +215,28 @@ void GfCmdBuffer_Platform::bindShaderPipe(GfShaderPipeline* pipeline, u32 varian
 	GF_ASSERT_ALWAYS("TODO");
 }
 
+void GfCmdBuffer_Platform::setViewport(const GfRenderContext& ctx, const GfViewport& viewport)
+{
+	VkViewport viewportVK;
+	viewportVK.x = viewport.m_fOffsetX;
+	viewportVK.y = viewport.m_fOffsetY;
+	viewportVK.minDepth = viewport.m_fMinDepth;
+	viewportVK.maxDepth = viewport.m_fMaxDepth;
+	viewportVK.width = viewport.m_fWidth;
+	viewportVK.height = viewport.m_fHeight;
+	vkCmdSetViewport(getCmdBuffer(), 0, 1, &viewportVK);
+}
+
+void GfCmdBuffer_Platform::setScissors(const GfRenderContext& ctx, const GfScissor& scissor)
+{
+	VkRect2D scissorVK;
+	scissorVK.offset.x = scissor.m_siOffsetX;
+	scissorVK.offset.y = scissor.m_siOffsetY;
+	scissorVK.extent.width = scissor.m_siWidth;
+	scissorVK.extent.height = scissor.m_siHeight;
+	vkCmdSetScissor(getCmdBuffer(), 0, 1, &scissorVK);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)

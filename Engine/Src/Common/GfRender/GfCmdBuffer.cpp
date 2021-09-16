@@ -178,6 +178,8 @@ void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 	GF_ASSERT(renderPass->getWidth() != 0 && renderPass->getHeight(), "Resolution was not initialized");
 
 	m_curState.m_curRenderPass = renderPass;
+	m_kPlatform.setViewport(*m_ctx, renderPass->getViewport());
+	m_kPlatform.setScissors(*m_ctx, renderPass->getScissor());
 	m_kPlatform.beginRenderPass(*m_ctx, renderPass);
 }
 

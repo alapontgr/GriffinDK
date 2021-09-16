@@ -74,6 +74,10 @@ private:
 		const class GfVertexDeclaration* vertexFormat,
 		const class GfRenderPass* renderPass);
 
+	void setViewport(const GfRenderContext& ctx, const GfViewport& viewport);
+
+	void setScissors(const GfRenderContext& ctx, const GfScissor& scissor);
+
 	////////////////////////////////////////////////////////////////////////////////
 
 	void drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);

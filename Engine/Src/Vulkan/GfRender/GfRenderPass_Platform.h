@@ -42,40 +42,20 @@ public:
 
 protected:
 
-	void createRHI(const GfRenderContext& ctx, const GfWindow* window);
-
-	bool createRHI(const GfRenderContext& ctx,
-		const AttachmentDesc* output, u32 outputCount,
-		const AttachmentDesc* depthAttachment);
-
 	void markAsChanged();
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	void BeginPassRHI(const GfRenderContext& ctx, const GfCmdBuffer& kCmdBuffer, const GfWindow* pWindow);
-
-	void EndPassRHI(const GfCmdBuffer& cmdBuffer);
-
-	void SetViewportRHI(const GfCmdBuffer& cmdBuffer, const GfViewport& viewport);
-
-	void SetScissorRHI(const GfCmdBuffer& cmdBuffer, const GfScissor& scissors);
-
-	////////////////////////////////////////////////////////////////////////////////
 
 private:
 
-	VkRenderPass createRenderPass(const GfRenderContext& ctx,
-		const AttachmentDesc* output, u32 outputCount,
-		const AttachmentDesc* depthAttachment);
+	VkRenderPass createRenderPass(const GfRenderContext& ctx);
 
-	VkFramebuffer getOrCreateFramebuffer(const GfRenderContext& ctx,
-		const AttachmentDesc* output, u32 outputCount,
-		const AttachmentDesc* depthAttachment);
+	VkFramebuffer getCreateFramebuffer(const GfRenderContext& ctx);
 
 public:
 	VkFramebuffer	m_framebuffer;
 	VkRenderPass	m_renderPass;
 
+	static GfMutex ms_renderPasscacheMutex;
+	static GfMutex ms_framebuffercacheMutex;
 	static GfUMap<u64, VkRenderPass> ms_renderPassCache;
 	static GfUMap<u64, VkFramebuffer> ms_framebufferCache;
 };

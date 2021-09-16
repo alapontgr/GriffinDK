@@ -35,5 +35,7 @@
 
 #include "Common/GfCore/GfHash.h"
 
+#include "Common/GfCore/GfThreading.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFCOREMINIMAL_H__

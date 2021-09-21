@@ -15,7 +15,7 @@
 
 GfConstantBuffer::GfConstantBuffer()
 {
-	m_eResourceType = EParamaterSlotType::UniformBuffer;
+	m_eResourceType = ParamaterSlotType::UniformBuffer;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

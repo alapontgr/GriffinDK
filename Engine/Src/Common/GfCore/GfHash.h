@@ -23,4 +23,11 @@ public:
 	static u64 compute(const GfString& str, u64 seed = 123);
 };
 
+template <typename T>
+class GfHashable 
+{
+public:
+	u64 getHash() const { return GfHash::compute(this, sizeof(T)); }
+};
+
 ////////////////////////////////////////////////////////////////////////////////

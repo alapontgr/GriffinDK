@@ -26,7 +26,7 @@ GF_DEFINE_BASE_CTOR(GfSamplerState)
 	, m_fMaxAnisotropy(1.0f)
 	, m_bUseAnisotropy(false)
 {
-	m_eResourceType = EParamaterSlotType::Sampler;
+	m_eResourceType = ParamaterSlotType::Sampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ GfCombinedSamplerTexture::GfCombinedSamplerTexture()
 	: m_pSampler(nullptr)
 	, m_pTextureView(nullptr)
 {
-	m_eResourceType = EParamaterSlotType::CombinedTextureSampler;
+	m_eResourceType = ParamaterSlotType::CombinedTextureSampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

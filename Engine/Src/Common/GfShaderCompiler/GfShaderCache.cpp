@@ -173,7 +173,7 @@ s32 GfShaderSerializer::addString(const GfString& token)
 	return static_cast<s32>(idx);
 }
 
-void GfShaderSerializer::enableStage(EShaderStage::Type stage)
+void GfShaderSerializer::enableStage(ShaderStage::Type stage)
 {
 	m_usedStages |= (1<<stage);
 }
@@ -213,7 +213,7 @@ u32 GfShaderSerializer::getMutatorCount() const
 	return m_mutatorCount;
 }
 
-u32 GfShaderSerializer::getStageEnabled(EShaderStage::Type stage) const
+u32 GfShaderSerializer::getStageEnabled(ShaderStage::Type stage) const
 {
 	return (m_usedStages & (1<<stage)) != 0;
 }
@@ -246,7 +246,7 @@ GfShaderSerializer::ShaderVariant* GfShaderSerializer::getVariant(GfVariantHash 
 	return entry->second.get();
 }
 
-void GfShaderSerializer::ShaderVariant::setVariantShaderBytecode(EShaderStage::Type stage, s32 bytecodeIdx)
+void GfShaderSerializer::ShaderVariant::setVariantShaderBytecode(ShaderStage::Type stage, s32 bytecodeIdx)
 {
 	m_data.m_stagesBytecodeIdxs[stage] = bytecodeIdx;
 }
@@ -257,7 +257,7 @@ void GfShaderSerializer::ShaderVariant::setDescriptorSetLayoutRange(u32 set, s16
 	m_data.m_setsBindingsCount[set] = count;
 }
 
-s32 GfShaderSerializer::ShaderVariant::getBytecodeIndexForStage(EShaderStage::Type stage) const
+s32 GfShaderSerializer::ShaderVariant::getBytecodeIndexForStage(ShaderStage::Type stage) const
 {
 	return m_data.m_stagesBytecodeIdxs[stage];
 }
@@ -322,7 +322,7 @@ const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindingsForSta
 	return nullptr;
 }
 
-const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVariantData* variant, EShaderStage::Type stage, u32& bytecodeSize) const
+const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVariantData* variant, ShaderStage::Type stage, u32& bytecodeSize) const
 {
 	GF_ASSERT(variant, "Invalid variant");
 	bytecodeSize = getBytecodeSize(variant->m_stagesBytecodeIdxs[stage]);
@@ -332,13 +332,13 @@ const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVarian
 bool GfShaderDeserializer::isGraphics() const
 {
 	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
-	return (header->m_usedStages & ((1<<EShaderStage::Vertex) | (1 << EShaderStage::Fragment))) != 0;
+	return (header->m_usedStages & ((1<<ShaderStage::Vertex) | (1 << ShaderStage::Fragment))) != 0;
 }
 
 bool GfShaderDeserializer::isCompute() const
 {
 	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
-	return (header->m_usedStages & (1<<EShaderStage::Compute)) != 0;;
+	return (header->m_usedStages & (1<<ShaderStage::Compute)) != 0;;
 }
 
 const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindings(u32 idx) const

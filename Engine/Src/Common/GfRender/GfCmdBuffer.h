@@ -38,6 +38,7 @@ struct GfRenderPipelineState
 	GfShaderPipeline* m_curPipeline = nullptr;
 	GfVariantHash m_curVariantHash = 0;
 	GfShaderPipeConfig m_config;
+	u64 m_configHash; // Hash computed considering only the static information of the ShaderPipeConfig
 };
 
 class GfBuffer;
@@ -74,13 +75,19 @@ public:
 
 	void setRasterState(const GfRasterState& rasterState);
 
-	void setDepthState(const GfDepthState& depthState);
-
-	void setTopology(EPrimitiveTopology::Type topology);
+	void setTopology(PrimitiveTopology::Type topology);
 
 	void setMSAAState(const GfMultiSamplingState& msaaState);
 
 	void setVertexFormat(const GfVertexDeclaration* vertexFormat);
+
+	void setDepthState(const GfDepthState& depthState);
+	
+	void setStencilCompareMask(StencilFace::Type targetFace, u32 compareMask);
+
+	void setStencilWriteMask(StencilFace::Type targetFace, u32 writeMask);
+
+	void setStencilReferenceValue(StencilFace::Type targetFace, u32 refVal);
 
 	////////////////////////////////////////////////////////////////////////////////
 

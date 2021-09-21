@@ -70,7 +70,7 @@ private:
 	void endRenderPass();
 
 	void bindShaderPipe(class GfShaderPipeline* pipeline, u32 variantHash,
-		const struct GfShaderPipeConfig* config,
+		const struct GfShaderPipeConfig* config, u64 configHash,
 		const class GfVertexDeclaration* vertexFormat,
 		const class GfRenderPass* renderPass);
 

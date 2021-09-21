@@ -28,7 +28,7 @@ struct GfMaterialParameterSlot
 	static constexpr u32 ms_uiInvalidSlotIdx = 0xffffffff;
 
 
-	EParamaterSlotType::Type	m_eType;
+	ParamaterSlotType::Type	m_eType;
 	GfShaderAccessMask			m_AccesStages;
 	u32							m_uiBindSlot;
 };
@@ -43,7 +43,7 @@ public:
 
 	GfMatUniformFactory();
 
-	void SetMaxAllocationsPerParamType(EParamaterSlotType::Type eType, u32 uiMaxAllocations);
+	void SetMaxAllocationsPerParamType(ParamaterSlotType::Type eType, u32 uiMaxAllocations);
 
 	void SetMaxAllocatedParamSets(u32 uiMaxSets);
 
@@ -56,7 +56,7 @@ private:
 	u32 GetUsedTypeCount() const;
 
 	u32 m_uiMaxAllocatedSets;
-	u32 m_pCountPerUniformType[EParamaterSlotType::Count];
+	u32 m_pCountPerUniformType[ParamaterSlotType::Count];
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,13 +72,13 @@ public:
 
 	void Destroy(const GfRenderContext& kCtxt);
 
-	void DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot);
+	void DefineParameter(ParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot);
 
 	u32 GetParameterCount() const; 
 	
 	GfMaterialParameterSlot GetAttrib(GfParamSlotIdx uiIdx) const;
 
-	GfParamSlotIdx GetResourceIdx(EParamaterSlotType::Type eResType, u32 uiBoundSlot);
+	GfParamSlotIdx GetResourceIdx(ParamaterSlotType::Type eResType, u32 uiBoundSlot);
 
 	bool IsGPUInitialised() const;
 

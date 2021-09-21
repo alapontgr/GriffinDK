@@ -259,10 +259,10 @@ void TestApp::CreateMaterialsAndParamSets()
 	GfVertexDeclaration kVertexFormat;
 	GfVertexDeclaration::AttributeDesc vertexAttribs[4] =
 	{
-		{static_cast<u32>(offsetof(PosVertexBuffer, m_pos)),					0, 0, EAttributeFormat::SFloat3}, // Position
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_normal)),	1, 1, EAttributeFormat::SFloat3}, // Normal
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_tangent)),	2, 1, EAttributeFormat::SFloat3}, // Tangent
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_uv)),		3, 1, EAttributeFormat::SFloat2}, // UVs
+		{static_cast<u32>(offsetof(PosVertexBuffer, m_pos)),					0, 0, AttributeFormat::SFloat3}, // Position
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_normal)),	1, 1, AttributeFormat::SFloat3}, // Normal
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_tangent)),	2, 1, AttributeFormat::SFloat3}, // Tangent
+		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_uv)),		3, 1, AttributeFormat::SFloat2}, // UVs
 	};
 	GfVertexDeclaration::VertexBufferBinding vertexBufferBindings[] = 
 	{
@@ -273,29 +273,29 @@ void TestApp::CreateMaterialsAndParamSets()
 
 	// Prepare parameter layout
 	{
-		GfShaderAccessMask uiAccessMask(EShaderStageFlags::Vertex);
-		m_kParamLayout.DefineParameter(EParamaterSlotType::UniformBuffer, uiAccessMask, 0);
+		GfShaderAccessMask uiAccessMask(ShaderStageFlags::Vertex);
+		m_kParamLayout.DefineParameter(ParamaterSlotType::UniformBuffer, uiAccessMask, 0);
 	}
 	m_kParamLayout.Create(m_kContext);
 
 	// Define material
 	if (uiVertexSize && uiFragmentSize) 
 	{
-		m_kMaterialT.SetTopology(EPrimitiveTopology::TriList);
+		m_kMaterialT.SetTopology(PrimitiveTopology::TriList);
 		m_kMaterialT.SetRasterState(GfRasterState());		// Use default RasterState
 		m_kMaterialT.SetMSState(GfMultiSamplingState());	// Default MSState (disabled)
 		m_kMaterialT.SetBlendState(GfBlendState());		// Default BlendState (disabled)
 		m_kMaterialT.SetVertexFormat(kVertexFormat);
 		m_kMaterialT.SetMaterialPass(&m_kRenderPass);
-		m_kMaterialT.SetShaderData(EShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
-		m_kMaterialT.SetShaderData(EShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
+		m_kMaterialT.SetShaderData(ShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
+		m_kMaterialT.SetShaderData(ShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
 		m_kMaterialT.AssignLayout(0, &m_kParamLayout);
 		m_kMaterialT.Create(m_kContext);
 	}
 
 	// Prepare uniform factory
-	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::UniformBuffer, 1);
-	m_kUniformFactory.SetMaxAllocationsPerParamType(EParamaterSlotType::CombinedTextureSampler, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(ParamaterSlotType::UniformBuffer, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(ParamaterSlotType::CombinedTextureSampler, 1);
 	m_kUniformFactory.SetMaxAllocatedParamSets(16);
 	m_kUniformFactory.Create(m_kContext);
 

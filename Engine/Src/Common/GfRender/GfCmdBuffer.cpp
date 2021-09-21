@@ -134,7 +134,9 @@ void GfCmdBuffer::drawcallCommon()
 	GF_ASSERT(m_type == GfCmdBufferType::Primary, "TODO: Add support for secondary command buffer recording");
 	
 	// Bind pipeline for variant
-	m_kPlatform.bindShaderPipe(m_curState.m_curPipeline, m_curState.m_curVariantHash, &m_curState.m_config, m_curState.m_curVertexFormat, m_curState.m_curRenderPass);
+	m_kPlatform.bindShaderPipe(m_curState.m_curPipeline, m_curState.m_curVariantHash, 
+		&m_curState.m_config, m_curState.m_configHash,
+		m_curState.m_curVertexFormat, m_curState.m_curRenderPass);
 
 	// Bind batch resources. Bind & Update descriptor sets
 
@@ -152,12 +154,7 @@ void GfCmdBuffer::setRasterState(const GfRasterState& rasterState)
 	m_curState.m_config.m_rasterState = rasterState;
 }
 
-void GfCmdBuffer::setDepthState(const GfDepthState& depthState) 
-{
-	m_curState.m_config.m_depthState = depthState;
-}
-
-void GfCmdBuffer::setTopology(EPrimitiveTopology::Type topology) 
+void GfCmdBuffer::setTopology(PrimitiveTopology::Type topology) 
 {
 	m_curState.m_config.m_topology = topology;
 }
@@ -170,6 +167,27 @@ void GfCmdBuffer::setMSAAState(const GfMultiSamplingState& msaaState)
 void GfCmdBuffer::setVertexFormat(const GfVertexDeclaration* vertexFormat) 
 {
 	m_curState.m_curVertexFormat = vertexFormat;
+}
+
+void GfCmdBuffer::setDepthState(const GfDepthState& depthState) 
+{
+	m_curState.m_config.m_depthState = depthState;
+	m_curState.m_configHash = GfHash::compute(&m_curState.m_config, sizeof(GfShaderPipeConfig));
+}
+
+void GfCmdBuffer::setStencilCompareMask(StencilFace::Type targetFace, u32 compareMask) 
+{
+	GF_ASSERT_ALWAYS("TODO: Implement me!");
+}
+
+void GfCmdBuffer::setStencilWriteMask(StencilFace::Type targetFace, u32 writeMask) 
+{
+	GF_ASSERT_ALWAYS("TODO: Implement me!");
+}
+
+void GfCmdBuffer::setStencilReferenceValue(StencilFace::Type targetFace, u32 refVal) 
+{
+	GF_ASSERT_ALWAYS("TODO: Implement me!");
 }
 
 void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)

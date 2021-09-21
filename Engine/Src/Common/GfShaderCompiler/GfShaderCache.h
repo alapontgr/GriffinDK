@@ -49,7 +49,7 @@ struct GfPipelineBlobHeader
 struct GfShaderVariantData 
 {
 	// Indices to bytecode blobs in GfShaderSerializer::m_bytecodeCache
-	GfArray<s32, EShaderStage::Count> m_stagesBytecodeIdxs;
+	GfArray<s32, ShaderStage::Count> m_stagesBytecodeIdxs;
 	// Each entry is an index to the global cache
 	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setBindingsIdx;
 	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setsBindingsCount;
@@ -76,18 +76,18 @@ public:
 			m_data.m_setsBindingsCount.fill(-1);
 		}
 
-		void setVariantShaderBytecode(EShaderStage::Type stage, s32 bytecodeIdx);
+		void setVariantShaderBytecode(ShaderStage::Type stage, s32 bytecodeIdx);
 
 		void setDescriptorSetLayoutRange(u32 set, s16 idx, s16 count);
 
-		s32 getBytecodeIndexForStage(EShaderStage::Type stage) const;
+		s32 getBytecodeIndexForStage(ShaderStage::Type stage) const;
 
 		GfShaderVariantData m_data;
 	};
 
 	GfShaderSerializer();
 
-	void enableStage(EShaderStage::Type stage);
+	void enableStage(ShaderStage::Type stage);
 
 	void addMutator(const GfString& mutatorName);
 
@@ -97,7 +97,7 @@ public:
 
 	u32 getMutatorCount() const;
 
-	u32 getStageEnabled(EShaderStage::Type stage) const;
+	u32 getStageEnabled(ShaderStage::Type stage) const;
 
 	ShaderVariant* getVariant(GfVariantHash mutatorHash);
 
@@ -146,7 +146,7 @@ public:
 
 	const GfDescriptorBindingSlot* getDescriptorBindingsForStage(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount) const;
 
-	const u32* getStageBytecodeForVariant(const GfShaderVariantData* variant, EShaderStage::Type stage, u32& bytecodeSize) const;
+	const u32* getStageBytecodeForVariant(const GfShaderVariantData* variant, ShaderStage::Type stage, u32& bytecodeSize) const;
 
 	bool isGraphics() const;
 

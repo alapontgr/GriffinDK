@@ -208,7 +208,7 @@ void GfCmdBuffer_Platform::endRenderPass()
 }
 
 void GfCmdBuffer_Platform::bindShaderPipe(GfShaderPipeline* pipeline, u32 variantHash,
-		const GfShaderPipeConfig* config,
+		const GfShaderPipeConfig* config, u64 configHash,
 		const GfVertexDeclaration* vertexFormat,
 		const GfRenderPass* renderPass)
 {

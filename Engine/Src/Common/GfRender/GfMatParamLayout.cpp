@@ -18,7 +18,7 @@
 GF_DEFINE_BASE_CTOR(GfMatUniformFactory)
 	, m_uiMaxAllocatedSets(0)
 {
-	for (u32 i = 0; i < EParamaterSlotType::Count; ++i) 
+	for (u32 i = 0; i < ParamaterSlotType::Count; ++i) 
 	{
 		m_pCountPerUniformType[i] = 0;
 	}
@@ -26,7 +26,7 @@ GF_DEFINE_BASE_CTOR(GfMatUniformFactory)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatUniformFactory::SetMaxAllocationsPerParamType(EParamaterSlotType::Type eType, u32 uiMaxAllocations)
+void GfMatUniformFactory::SetMaxAllocationsPerParamType(ParamaterSlotType::Type eType, u32 uiMaxAllocations)
 {
 	m_pCountPerUniformType[eType] = uiMaxAllocations;
 }
@@ -57,7 +57,7 @@ void GfMatUniformFactory::Destroy(const GfRenderContext& kCtxt)
 u32 GfMatUniformFactory::GetUsedTypeCount() const
 {
 	u32 uiUsed(0);
-	for (u32 i=0; i<EParamaterSlotType::Count; ++i) 
+	for (u32 i=0; i<ParamaterSlotType::Count; ++i) 
 	{
 		if (m_pCountPerUniformType[i] > 0) 
 		{
@@ -94,7 +94,7 @@ void GfMatParamLayout::Destroy(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMatParamLayout::DefineParameter(EParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot)
+void GfMatParamLayout::DefineParameter(ParamaterSlotType::Type eType, GfShaderAccessMask mAccessMask, u32 uiBindSlot)
 {
 	GfMaterialParameterSlot kSlot;
 	kSlot.m_eType = eType;
@@ -119,7 +119,7 @@ GfMaterialParameterSlot GfMatParamLayout::GetAttrib(GfParamSlotIdx uiSlot) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfParamSlotIdx GfMatParamLayout::GetResourceIdx(EParamaterSlotType::Type eResType, u32 uiBoundSlot)
+GfParamSlotIdx GfMatParamLayout::GetResourceIdx(ParamaterSlotType::Type eResType, u32 uiBoundSlot)
 {
 	u32 uiParamCount(GetParameterCount());
 	for (u32 i=0; i<uiParamCount; ++i)

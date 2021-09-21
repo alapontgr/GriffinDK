@@ -15,29 +15,29 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GfUMap<u64, EShaderStage::Type> s_hashToShaderStage = 
+static GfUMap<u64, ShaderStage::Type> s_hashToShaderStage = 
 {
-	{GfHash::compute("GF_VS"), EShaderStage::Vertex},
-	{GfHash::compute("GF_FS"), EShaderStage::Fragment},
-	{GfHash::compute("GF_CS"), EShaderStage::Compute},
+	{GfHash::compute("GF_VS"), ShaderStage::Vertex},
+	{GfHash::compute("GF_FS"), ShaderStage::Fragment},
+	{GfHash::compute("GF_CS"), ShaderStage::Compute},
 };
 
-static GfUMap<EShaderStage::Type, GfString> s_stageToDefine = 
+static GfUMap<ShaderStage::Type, GfString> s_stageToDefine = 
 {
-	{EShaderStage::Vertex, GfString("#define GF_VS 1\n")},
-	{EShaderStage::Fragment, GfString("#define GF_FS 1\n")},
-	{EShaderStage::Compute, GfString("#define GF_CS 1\n")},
+	{ShaderStage::Vertex, GfString("#define GF_VS 1\n")},
+	{ShaderStage::Fragment, GfString("#define GF_FS 1\n")},
+	{ShaderStage::Compute, GfString("#define GF_CS 1\n")},
 };
 static GfString s_Version = "#version 450\n";
 
-static GfUMap<EShaderStage::Type, EShLanguage> s_shaderStageToGLSLangStage =
+static GfUMap<ShaderStage::Type, EShLanguage> s_shaderStageToGLSLangStage =
 {
-	{EShaderStage::Vertex, EShLangVertex},
+	{ShaderStage::Vertex, EShLangVertex},
 	//{EShLangTessControl},
 	//{EShLangTessEvaluation},
 	//{EShLangGeometry},
-	{EShaderStage::Fragment, EShLangFragment},
-	{EShaderStage::Compute, EShLangCompute},
+	{ShaderStage::Fragment, EShLangFragment},
+	{ShaderStage::Compute, EShLangCompute},
 	//{EShLangRayGen},
 	//{EShLangRayGenNV = EShLangRayGen},
 	//{EShLangIntersect},
@@ -54,7 +54,7 @@ static GfUMap<EShaderStage::Type, EShLanguage> s_shaderStageToGLSLangStage =
 	//{EShLangMeshNV},
 };
 
-static GfString addShaderStageHeader(const GfString& src, EShaderStage::Type stage) 
+static GfString addShaderStageHeader(const GfString& src, ShaderStage::Type stage) 
 {
 	return s_Version + s_stageToDefine[stage] + src;
 }
@@ -387,9 +387,9 @@ bool GfShaderCompiler::compileVariant(
 	const EShMessages messages = EShMessages(EShMsgSpvRules | EShMsgVulkanRules);
 	const glslang::EShTargetLanguageVersion langVersion = glslang::EShTargetSpv_1_3;
 
-	for (u32 i = 0; i < EShaderStage::Count; ++i) 
+	for (u32 i = 0; i < ShaderStage::Count; ++i) 
 	{
-		EShaderStage::Type shaderStage = static_cast<EShaderStage::Type>(i);
+		ShaderStage::Type shaderStage = static_cast<ShaderStage::Type>(i);
 		if (serializer.getStageEnabled(shaderStage)) 
 		{
 			GfString stageSrc = addShaderStageHeader(src, shaderStage);
@@ -457,13 +457,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 	{
 		for (u32 binding=0; binding<s_MAX_BINDINGS_PER_SET; ++binding) 
 		{
-			uniforms[set][binding].m_descriptorType = EParamaterSlotType::Invalid;
+			uniforms[set][binding].m_descriptorType = ParamaterSlotType::Invalid;
 			uniforms[set][binding].m_stageFlags = 0;
 			uniforms[set][binding].m_arraySize = 0;
 		}
 	}
 
-	auto addDescriptorsOfType = [&](EShaderStage::Type stage, EParamaterSlotType::Type type, 
+	auto addDescriptorsOfType = [&](ShaderStage::Type stage, ParamaterSlotType::Type type, 
 		const spirv_cross::Compiler& compiler, const spirv_cross::SmallVector<spirv_cross::Resource>& resources) -> bool
 	{
 		for (auto &resource : resources)
@@ -529,21 +529,21 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 		return true;
 	};
 
-	for (u32 i = 0; i < EShaderStage::Count; ++i)
+	for (u32 i = 0; i < ShaderStage::Count; ++i)
 	{
-		s32 idx = variant->getBytecodeIndexForStage(static_cast<EShaderStage::Type>(i));
+		s32 idx = variant->getBytecodeIndexForStage(static_cast<ShaderStage::Type>(i));
 		if (idx >= 0) 
 		{
 			const u32* bytecode = serializer.m_bytecodeCache[idx].get();
 			const u32 sizeInBytes = serializer.m_bytecodeSizes[idx];
 			spirv_cross::Compiler compiler(bytecode, sizeInBytes / (sizeof(u32)));
 			spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::UniformBuffer, compiler, resources.uniform_buffers)) return false;
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::Texture, compiler, resources.separate_images)) return false;
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::SamplerTexture, compiler, resources.sampled_images)) return false;
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::StorageBuffer, compiler, resources.storage_buffers)) return false;
-			if(!addDescriptorsOfType(static_cast<EShaderStage::Type>(i), EParamaterSlotType::StorageImage, compiler, resources.storage_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::UniformBuffer, compiler, resources.uniform_buffers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Texture, compiler, resources.separate_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::SamplerTexture, compiler, resources.sampled_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageBuffer, compiler, resources.storage_buffers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageImage, compiler, resources.storage_images)) return false;
 		}
 	}
 

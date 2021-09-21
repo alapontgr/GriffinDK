@@ -133,15 +133,15 @@ void GfMatUniformFactory_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	GF_ASSERT(!m_pPool, "Pool already initialized");
 
-	VkDescriptorPoolSize pUniformEntryDescs[EParamaterSlotType::Count];
+	VkDescriptorPoolSize pUniformEntryDescs[ParamaterSlotType::Count];
 	
 	VkDescriptorPoolSize* pPivot = pUniformEntryDescs;
-	for (u32 i = 0; i < EParamaterSlotType::Count; ++i) 
+	for (u32 i = 0; i < ParamaterSlotType::Count; ++i) 
 	{
 		if (m_kBase.m_pCountPerUniformType[i] > 0) 
 		{
 			pPivot->descriptorCount = m_kBase.m_pCountPerUniformType[i];
-			pPivot->type = ConvertDescriptorType((EParamaterSlotType::Type)i);
+			pPivot->type = ConvertDescriptorType((ParamaterSlotType::Type)i);
 			pPivot++;
 		}
 	}
@@ -282,12 +282,12 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 			const GfMaterialParameterSlot& kSlot(m_kBase.m_pSetLayout->GetAttrib(i));
 			switch (kSlot.m_eType)
 			{
-			case EParamaterSlotType::UniformBuffer:
+			case ParamaterSlotType::UniformBuffer:
 				uiDirtyBufferedParams++;
 				break;
-			case EParamaterSlotType::Texture:
-			case EParamaterSlotType::Sampler:
-			case EParamaterSlotType::CombinedTextureSampler:
+			case ParamaterSlotType::Texture:
+			case ParamaterSlotType::Sampler:
+			case ParamaterSlotType::CombinedTextureSampler:
 				uiDirtyTexturedParams++;
 				break;
 			default:
@@ -321,7 +321,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 
 				switch (kSlot.m_eType)
 				{
-				case EParamaterSlotType::UniformBuffer:
+				case ParamaterSlotType::UniformBuffer:
 				{
 					const GfBufferedResource* pCBuffer((const GfBufferedResource*)pParam);
 					FillUniformBufferBinding(pCBuffer, pBufferInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
@@ -329,7 +329,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 					pWriteSetsPivot++;
 					break;
 				}
-				case EParamaterSlotType::Texture: 
+				case ParamaterSlotType::Texture: 
 				{
 					const GfTextureView* pTexRes((const GfTextureView*)pParam);
 					FillTextureBinding(pTexRes, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
@@ -337,7 +337,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 					pWriteSetsPivot++;
 					break;
 				}
-				case EParamaterSlotType::Sampler: 
+				case ParamaterSlotType::Sampler: 
 				{
 					const GfSamplerState* pSampler((const GfSamplerState*)pParam);
 					FillSamplerStateBinding(pSampler, pImageInfosPivot, pWriteSetsPivot, m_pParamatersSet, kSlot.m_uiBindSlot);
@@ -345,7 +345,7 @@ void GfMaterialParamSet_Platform::UpdateRHI(const GfRenderContext& kCtxt)
 					pWriteSetsPivot++;
 					break;
 				}
-				case EParamaterSlotType::CombinedTextureSampler:
+				case ParamaterSlotType::CombinedTextureSampler:
 				{
 					const GfCombinedSamplerTexture* pCombinedSamplerTexture((const GfCombinedSamplerTexture*)pParam);
 					FillCombinedSamplerTextureStateBinding(

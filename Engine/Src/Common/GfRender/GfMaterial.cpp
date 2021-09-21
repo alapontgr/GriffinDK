@@ -12,17 +12,6 @@
 #include "Common/GfRender/GfMaterial.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-
-GfVertexDeclaration::GfVertexDeclaration()
-{}
-
-void GfVertexDeclaration::init(const AttributeDesc * attribArray, const u32 attribCount, const VertexBufferBinding * vertexBufferBindings, u32 vertexBufferBindCount)
-{
-	m_attributesDescs.insert(m_attributesDescs.begin(), attribArray, attribArray+attribCount);
-	m_vertexBuffersDescs.insert(m_vertexBuffersDescs.begin(), vertexBufferBindings, vertexBufferBindings+vertexBufferBindCount);
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // MaterialTemplate
 
 GF_DEFINE_BASE_CTOR(GfMaterialTemplate)
@@ -31,7 +20,7 @@ GF_DEFINE_BASE_CTOR(GfMaterialTemplate)
 	, m_uiConstantsBlockSize(0)
 	, m_uiFlags(0)
 {
-	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
+	for (u32 i = 0; i < MaterialParamRate::MaxBoundSets; ++i)
 	{
 		m_pLayouts[i] = nullptr;
 	}
@@ -70,8 +59,8 @@ void GfMaterialTemplate::Destroy(const GfRenderContext& kCtx)
 
 void GfMaterialTemplate::AssignLayout(u32 uiSlot, const GfMatParamLayout* pLayout)
 {
-	GF_ASSERT(uiSlot<EMaterialParamRate::MaxBoundSets, "Trying to bind a layout to an incorrect slot");
-	if (uiSlot<EMaterialParamRate::MaxBoundSets)
+	GF_ASSERT(uiSlot<MaterialParamRate::MaxBoundSets, "Trying to bind a layout to an incorrect slot");
+	if (uiSlot<MaterialParamRate::MaxBoundSets)
 	{
 		m_pLayouts[uiSlot] = pLayout;
 	}
@@ -79,7 +68,7 @@ void GfMaterialTemplate::AssignLayout(u32 uiSlot, const GfMatParamLayout* pLayou
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfMaterialTemplate::SetShaderData(EShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize)
+void GfMaterialTemplate::SetShaderData(ShaderStage::Type eStage, const char* szEntry, const char* pSrc, u32 uiSrcDataSize)
 {
 	if (szEntry && pSrc) 
 	{
@@ -94,7 +83,7 @@ void GfMaterialTemplate::SetShaderData(EShaderStage::Type eStage, const char* sz
 u32 GfMaterialTemplate::GetBoundLayoutCount() const
 {
 	u32 uiCount(0);
-	for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
+	for (u32 i = 0; i < MaterialParamRate::MaxBoundSets; ++i)
 	{
 		if (m_pLayouts[i]) 
 		{
@@ -110,7 +99,7 @@ u32 GfMaterialTemplate::GetBoundLayoutCount() const
 GfMaterialinstance::GfMaterialinstance()
 	: m_pTemplate(nullptr)
 {
-	for (u32 i=0; i<EMaterialParamRate::MaxBoundSets; ++i) 
+	for (u32 i=0; i<MaterialParamRate::MaxBoundSets; ++i) 
 	{
 		m_pBoundSets[i] = nullptr;
 	}

@@ -22,16 +22,16 @@ static inline void ConvertRasterState(const GfRasterState& kRasterState, VkPipel
 	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	kOut.pNext = nullptr;
 	kOut.flags = 0;
-	kOut.depthBiasConstantFactor = kRasterState.m_fDepthBiasConstFactor;
-	kOut.depthBiasClamp = kRasterState.m_fDepthBiasClamp;
-	kOut.depthBiasSlopeFactor = kRasterState.m_fDepthBiasSlopeFactor;
-	kOut.lineWidth = kRasterState.m_fLineWidth;
-	kOut.polygonMode = ConvertPolygonMode(kRasterState.m_ePolygonMode);
-	kOut.cullMode = ConvertCullMode(kRasterState.m_eCullMode);
-	kOut.frontFace = ConvertFrontFace(kRasterState.m_eFrontFace);
-	kOut.depthClampEnable = kRasterState.m_bDepthClampEnabled ? VK_TRUE : VK_FALSE;
-	kOut.rasterizerDiscardEnable = kRasterState.m_bRasterizerDiscardEnabled ? VK_TRUE : VK_FALSE;
-	kOut.depthBiasEnable = kRasterState.m_bDepthBiasEnabled ? VK_TRUE : VK_FALSE;
+	kOut.depthBiasConstantFactor = kRasterState.m_depthBiasConstFactor;
+	kOut.depthBiasClamp = kRasterState.m_depthBiasClamp;
+	kOut.depthBiasSlopeFactor = kRasterState.m_depthBiasSlopeFactor;
+	kOut.lineWidth = kRasterState.m_lineWidth;
+	kOut.polygonMode = ConvertPolygonMode(kRasterState.m_polygonMode);
+	kOut.cullMode = ConvertCullMode(kRasterState.m_cullMode);
+	kOut.frontFace = ConvertFrontFace(kRasterState.m_frontFace);
+	kOut.depthClampEnable = kRasterState.m_depthClampEnabled ? VK_TRUE : VK_FALSE;
+	kOut.rasterizerDiscardEnable = kRasterState.m_rasterizerDiscardEnabled ? VK_TRUE : VK_FALSE;
+	kOut.depthBiasEnable = kRasterState.m_depthBiasEnabled ? VK_TRUE : VK_FALSE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,12 +55,12 @@ static inline void ConvertBlendState(const GfBlendState& kBlendState,
 	VkPipelineColorBlendAttachmentState& kBlendAttachment, VkPipelineColorBlendStateCreateInfo& kOut)
 {
 	kBlendAttachment.blendEnable = kBlendState.m_bEnabled ? VK_TRUE : VK_FALSE;
-	kBlendAttachment.srcColorBlendFactor = ConvertBlendFactor(kBlendState.m_eSrcColorBlendFactor);
-	kBlendAttachment.dstColorBlendFactor = ConvertBlendFactor(kBlendState.m_eDstColorBlendFactor);
-	kBlendAttachment.colorBlendOp = ConvertBlendOp(kBlendState.m_eColorBlendOp);
-	kBlendAttachment.srcAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_eSrcAlphaBlendFactor);
-	kBlendAttachment.dstAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_eDstAlphaBlendFactor);
-	kBlendAttachment.alphaBlendOp = ConvertBlendOp(kBlendState.m_eAlphaBlendOp);;
+	kBlendAttachment.srcColorBlendFactor = ConvertBlendFactor(kBlendState.m_srcColorBlendFactor);
+	kBlendAttachment.dstColorBlendFactor = ConvertBlendFactor(kBlendState.m_dstColorBlendFactor);
+	kBlendAttachment.colorBlendOp = ConvertBlendOp(kBlendState.m_colorBlendOp);
+	kBlendAttachment.srcAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_srcAlphaBlendFactor);
+	kBlendAttachment.dstAlphaBlendFactor = ConvertBlendFactor(kBlendState.m_dstAlphaBlendFactor);
+	kBlendAttachment.alphaBlendOp = ConvertBlendOp(kBlendState.m_alphaBlendOp);;
 	kBlendAttachment.colorWriteMask =
 		VK_COLOR_COMPONENT_R_BIT |
 		VK_COLOR_COMPONENT_G_BIT |
@@ -71,18 +71,18 @@ static inline void ConvertBlendState(const GfBlendState& kBlendState,
 	kOut.pNext = nullptr;
 	kOut.flags = 0;
 	kOut.logicOpEnable = kBlendState.m_bLogicOpEnabled ? VK_TRUE : VK_FALSE;
-	kOut.logicOp = ConvertBlendLogicOp(kBlendState.m_eBlendLogicOp);
+	kOut.logicOp = ConvertBlendLogicOp(kBlendState.m_blendLogicOp);
 	kOut.attachmentCount = 1;
 	kOut.pAttachments = &kBlendAttachment;
-	kOut.blendConstants[0] = kBlendState.m_vBlendConstants.x;
-	kOut.blendConstants[1] = kBlendState.m_vBlendConstants.y;
-	kOut.blendConstants[2] = kBlendState.m_vBlendConstants.z;
-	kOut.blendConstants[3] = kBlendState.m_vBlendConstants.w;
+	kOut.blendConstants[0] = kBlendState.m_blendConstants.x;
+	kOut.blendConstants[1] = kBlendState.m_blendConstants.y;
+	kOut.blendConstants[2] = kBlendState.m_blendConstants.z;
+	kOut.blendConstants[3] = kBlendState.m_blendConstants.w;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void ConvertInputAssembler(const EPrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
+static inline void ConvertInputAssembler(const PrimitiveTopology::Type eTopology, VkPipelineInputAssemblyStateCreateInfo& kOut) 
 {
 	kOut.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	kOut.pNext = nullptr;
@@ -140,7 +140,7 @@ void GfMaterialTemplate_Platform::destroyRHI(const GfRenderContext& kCtx)
 		vkDestroyPipelineLayout(kCtx.Plat().m_pDevice, m_pLayout, nullptr);
 		m_pLayout = nullptr;
 	}
-	for (u32 i=0; i<EShaderStage::Count; ++i) 
+	for (u32 i=0; i<ShaderStage::Count; ++i) 
 	{
 		if (m_kBase.m_pShaderStages[i].m_pModule) 
 		{
@@ -188,7 +188,7 @@ bool GfMaterialTemplate_Platform::CreateLayout(const GfRenderContext& kCtx)
 		pLayouts = GfFrameMTStackAlloc::Get()->Alloc<VkDescriptorSetLayout>(uiLayoutCount);
 		
 		VkDescriptorSetLayout* pCursor(pLayouts);
-		for (u32 i = 0; i < EMaterialParamRate::MaxBoundSets; ++i)
+		for (u32 i = 0; i < MaterialParamRate::MaxBoundSets; ++i)
 		{
 			const GfMatParamLayout* pLayout(m_kBase.m_pLayouts[i]);
 			if (pLayout)
@@ -238,11 +238,11 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
 	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
 
 	// Define Shader modules
-	VkPipelineShaderStageCreateInfo* pStages(GfFrameMTStackAlloc::Get()->Alloc<VkPipelineShaderStageCreateInfo>(EShaderStage::Count));
+	VkPipelineShaderStageCreateInfo* pStages(GfFrameMTStackAlloc::Get()->Alloc<VkPipelineShaderStageCreateInfo>(ShaderStage::Count));
 	if (!pStages) {return false; }
 
 	u32 uiStageCount(0);
-	for (u32 i=0; i<EShaderStage::Count; ++i) 
+	for (u32 i=0; i<ShaderStage::Count; ++i) 
 	{
 		GfMaterialTemplate::GfShaderDesc& kStage(m_kBase.m_pShaderStages[i]);
 		if (kStage.m_pSourceData && kStage.m_szEntryPoint)
@@ -269,7 +269,7 @@ bool GfMaterialTemplate_Platform::CreatePipeline(const GfRenderContext& kCtx)
  			pStages[uiStageCount].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
  			pStages[uiStageCount].pNext = nullptr;
  			pStages[uiStageCount].flags = 0;
- 			pStages[uiStageCount].stage = ConvertShaderStage((EShaderStage::Type)i);
+ 			pStages[uiStageCount].stage = ConvertShaderStage((ShaderStage::Type)i);
  			pStages[uiStageCount].module = kStage.m_pModule;
  			pStages[uiStageCount].pName = kStage.m_szEntryPoint;
  			pStages[uiStageCount].pSpecializationInfo = nullptr;

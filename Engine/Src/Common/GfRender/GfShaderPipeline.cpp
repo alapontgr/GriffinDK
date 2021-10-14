@@ -30,9 +30,15 @@ GF_DEFINE_BASE_CTOR(GfShaderPipeline)
 {
 }
 
-void GfShaderPipeline::setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob, const u32 blobSize)
+GfShaderPipeline::GfShaderPipeline(GfUniquePtr<u8[]>&& shaderBlob) 
+	: m_kPlatform(*this)
 {
-	GF_ASSERT_ALWAYS("TODO");
+	setShaderBlob(std::move(shaderBlob));
+}
+
+void GfShaderPipeline::setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob)
+{
+	m_shaderData.deserialize(std::move(shaderBlob));
 }
 
 GfShaderVariant::GfShaderVariant(GfShaderPipeline* shaderPipeline)
@@ -40,12 +46,29 @@ GfShaderVariant::GfShaderVariant(GfShaderPipeline* shaderPipeline)
 	, m_variantHash(0)
 {}
 
-void GfShaderVariant::enableKeyWord(const GfString& mutator) 
+GfShaderVariant::GfShaderVariant(const GfShaderVariant& base)
+	: m_pipeline(base.m_pipeline)
+	, m_variantHash(base.m_variantHash)
+{}
+
+bool GfShaderVariant::enableKeyWord(const GfString& mutator) 
 {
-	GF_ASSERT_ALWAYS("TODO");
+	GF_ASSERT(m_pipeline, "Shader variant not initialized with a valid GfShaderPipeline");
+	s32 idx = m_pipeline->getDeserializer().findIdxForMutator(mutator);
+	if (idx >= 0) 
+	{
+		m_variantHash |= (1<<idx);
+	}
+	return false;
 }
 
-void GfShaderVariant::disableKeyWord(const GfString& mutator)
+bool GfShaderVariant::disableKeyWord(const GfString& mutator)
 {
-	GF_ASSERT_ALWAYS("TODO");
+	GF_ASSERT(m_pipeline, "Shader variant not initialized with a valid GfShaderPipeline");
+	s32 idx = m_pipeline->getDeserializer().findIdxForMutator(mutator);
+	if (idx >= 0) 
+	{
+		m_variantHash &= ~(1 << idx);
+	}
+	return false;
 }

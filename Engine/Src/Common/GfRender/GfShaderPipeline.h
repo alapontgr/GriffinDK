@@ -77,7 +77,9 @@ public:
 
 	GfShaderPipeline();
 
-	void setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob, const u32 blobSize);
+	GfShaderPipeline(GfUniquePtr<u8[]>&& shaderBlob);
+
+	void setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob);
 
 	const GfShaderDeserializer& getDeserializer() const { return m_shaderData; }
 
@@ -95,9 +97,11 @@ class GfShaderVariant
 public:
 	GfShaderVariant(GfShaderPipeline* shaderPipeline);
 	
-	void enableKeyWord(const GfString& mutator);
+	GfShaderVariant(const GfShaderVariant& base);
 
-	void disableKeyWord(const GfString& mutator);
+	bool enableKeyWord(const GfString& mutator);
+
+	bool disableKeyWord(const GfString& mutator);
 	
 	GfVariantHash getVariantHash() const { return m_variantHash; }
 

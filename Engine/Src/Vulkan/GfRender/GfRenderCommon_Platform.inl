@@ -27,6 +27,7 @@ static const VkDescriptorType g_pDescriptorTypeConverter[] =
 	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 	VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
 	VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
+	VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +185,29 @@ static const VkLogicOp g_pLogicOpConverter[] =
 	VK_LOGIC_OP_SET,
 };
 
+static const VkCompareOp g_compareOpLUT[] = 
+{
+	VK_COMPARE_OP_NEVER,
+	VK_COMPARE_OP_LESS,
+	VK_COMPARE_OP_EQUAL,
+	VK_COMPARE_OP_LESS_OR_EQUAL,
+	VK_COMPARE_OP_GREATER,
+	VK_COMPARE_OP_NOT_EQUAL,
+	VK_COMPARE_OP_GREATER_OR_EQUAL,
+	VK_COMPARE_OP_ALWAYS
+};
 
+static const VkStencilOp g_stencilOpLUT[] = 
+{
+	VK_STENCIL_OP_KEEP,
+	VK_STENCIL_OP_ZERO,
+	VK_STENCIL_OP_REPLACE,
+	VK_STENCIL_OP_INCREMENT_AND_CLAMP,
+	VK_STENCIL_OP_DECREMENT_AND_CLAMP,
+	VK_STENCIL_OP_INVERT,
+	VK_STENCIL_OP_INCREMENT_AND_WRAP,
+	VK_STENCIL_OP_DECREMENT_AND_WRAP
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -196,12 +219,12 @@ static GF_FORCEINLINE VkDescriptorType ConvertDescriptorType(u32 eType)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkShaderStageFlags ConvertShaderStageFlags(GfShaderAccessMask kStages)
+static GF_FORCEINLINE VkShaderStageFlags ConvertShaderStageFlags(u32 stagesMask)
 {
 	VkShaderStageFlags uiResult(0);
 	for (u32 i = 0; i < ShaderStage::Count; ++i)
 	{
-		if ((kStages & (1 << i)) != 0)
+		if ((stagesMask & (1 << i)) != 0)
 		{
 			uiResult |= g_pShaderStageFlagsConverter[i];
 		}
@@ -284,6 +307,16 @@ static GF_FORCEINLINE VkVertexInputRate ConvertInputRate(u32 eInputRate)
 static GF_FORCEINLINE VkLogicOp ConvertBlendLogicOp(u32 eLogicOp)
 {
 	return g_pLogicOpConverter[eLogicOp];
+}
+
+static GF_FORCEINLINE VkCompareOp ConvertCompareOp(u32 compareOp) 
+{
+	return g_compareOpLUT[compareOp];
+}
+
+static GF_FORCEINLINE VkStencilOp ConvertStencilOp(u32 stencilOp) 
+{
+	return g_stencilOpLUT[stencilOp];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

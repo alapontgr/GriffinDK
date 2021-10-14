@@ -29,6 +29,10 @@ public:
 
 	u32 GetFamilyIdx(GfRenderContextFamilies::Type eType) const;
 
+	void tick();
+
+	u32 getCurFrame() const { return m_curFrame; }
+
 private:
 
 	enum EFlags : u32 
@@ -44,6 +48,7 @@ private:
 	// Used Families
 	u32							m_pAvailableFamilies[GfRenderContextFamilies::Count];
 	GfBitMask<u32>				m_uiFlags;
+	u32 m_curFrame;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

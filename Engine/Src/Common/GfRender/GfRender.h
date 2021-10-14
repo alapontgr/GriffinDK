@@ -29,10 +29,6 @@
 
 #include "Common/GfRender/GraphicResources/GfGraphicResources.h"
 
-#include "Common/GfRender/GfMatParamLayout.h"
-
-#include "Common/GfRender/GfMaterial.h"
-
 #include "Common/GfRender/GfShaderPipeline.h"
 
 #include "Common/GfRender/GfCmdBuffer.h"

@@ -53,6 +53,7 @@ struct GfShaderVariantData
 	// Each entry is an index to the global cache
 	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setBindingsIdx;
 	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setsBindingsCount;
+	GfArray<u64, s_MAX_DESCRIPTOR_SETS> m_setsLayoutHash; // TODO: If space becomes a problem, optimize this
 };
 static_assert((sizeof(GfShaderVariantData) % alignof(GfShaderVariantData)) == 0, "Invalid alignment");
 
@@ -74,11 +75,12 @@ public:
 			m_data.m_stagesBytecodeIdxs.fill(-1);
 			m_data.m_setBindingsIdx.fill(-1);
 			m_data.m_setsBindingsCount.fill(-1);
+			m_data.m_setsLayoutHash.fill(0);
 		}
 
 		void setVariantShaderBytecode(ShaderStage::Type stage, s32 bytecodeIdx);
 
-		void setDescriptorSetLayoutRange(u32 set, s16 idx, s16 count);
+		void setDescriptorSetLayoutRangeAndHash(u32 set, s16 idx, s16 count, u64 hash);
 
 		s32 getBytecodeIndexForStage(ShaderStage::Type stage) const;
 
@@ -144,13 +146,15 @@ public:
 
 	const GfShaderVariantData* getVariantData(GfVariantHash variantHash) const;
 
-	const GfDescriptorBindingSlot* getDescriptorBindingsForStage(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount) const;
+	const GfDescriptorBindingSlot* getDescriptorBindings(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount, u64& layoutHash) const;
 
-	const u32* getStageBytecodeForVariant(const GfShaderVariantData* variant, ShaderStage::Type stage, u32& bytecodeSize) const;
+	const u32* getStageBytecodeForVariant(const GfShaderVariantData* variant, ShaderStage::Type stage, size_t& bytecodeSize) const;
 
 	bool isGraphics() const;
 
 	bool isCompute() const;
+
+	u32 getUsedStages() const;
 
 private:
 

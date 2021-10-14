@@ -53,8 +53,8 @@ void GfCmdBufferFactory_Platform::shutdown(const GfRenderContext& ctx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfCmdBuffer_Platform::GfCmdBuffer_Platform()
-	: m_cmdBuffer(nullptr)
+GF_DEFINE_PLATFORM_CTOR(GfCmdBuffer)
+	, m_cmdBuffer(nullptr)
 	, m_fence(0)
 {
 }
@@ -207,12 +207,29 @@ void GfCmdBuffer_Platform::endRenderPass()
 	vkCmdEndRenderPass(getCmdBuffer());
 }
 
-void GfCmdBuffer_Platform::bindShaderPipe(GfShaderPipeline* pipeline, u32 variantHash,
-		const GfShaderPipeConfig* config, u64 configHash,
-		const GfVertexDeclaration* vertexFormat,
-		const GfRenderPass* renderPass)
+void GfCmdBuffer_Platform::drawcallCommonGraphics(GfRenderPipelineState* state)
 {
-	GF_ASSERT_ALWAYS("TODO");
+	// Retrieve pipeline and layout
+	if ((state->getFlags() & GfRenderStateFlags::BindMaterial) != 0) 
+	{
+		GfShaderPipeline* pipeline = state->getActivePipeline();
+		GF_ASSERT(pipeline->isCompute(), "Trying to render graphics with a Compute Shader");
+		GfVariantDataVK variantData = pipeline->Plat().getOrCreateGraphicsPipeline(
+			*m_kBase.m_ctx, 
+			state->getHash(), 
+			state->getActiveVariantData(),
+			&state->getConfig(), 
+			state->getVertexFormat(), 
+			state->getCurRenderPass());
+		GF_ASSERT(variantData.m_pipeline != VK_NULL_HANDLE, "Failed to obtain valid pipeline");
+		vkCmdBindPipeline(getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, variantData.m_pipeline);
+		state->disableFlag(GfRenderStateFlags::BindMaterial);
+	}
+
+	// Get descriptor set (create, update if needed)
+	GF_ASSERT_ALWAYS("TODO: Implement descriptor sets logic");
+	// Bind descriptor sets
+
 }
 
 void GfCmdBuffer_Platform::setViewport(const GfRenderContext& ctx, const GfViewport& viewport)
@@ -239,15 +256,17 @@ void GfCmdBuffer_Platform::setScissors(const GfRenderContext& ctx, const GfSciss
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
+void GfCmdBuffer_Platform::drawIndexedRHI(GfRenderPipelineState* state, u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
+	drawcallCommonGraphics(state);
 	vkCmdDrawIndexed(m_cmdBuffer, uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCmdBuffer_Platform::drawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
+void GfCmdBuffer_Platform::drawRHI(GfRenderPipelineState* state, u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
 {
+	drawcallCommonGraphics(state);
 	vkCmdDraw(m_cmdBuffer, uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
 }
 

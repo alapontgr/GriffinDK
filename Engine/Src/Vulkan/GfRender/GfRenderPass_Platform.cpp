@@ -76,6 +76,8 @@ void GfRenderPass_Platform::getOrCreateRenderPass(const GfRenderContext& ctx)
 	if (m_renderPass == VK_NULL_HANDLE) 
 	{
 		u64 hash = m_kBase.getHash();
+
+		GfLock<GfMutex> lock(ms_renderPasscacheMutex);
 		const auto entryRP = ms_renderPassCache.find(hash);
 		if (entryRP != ms_renderPassCache.end()) 
 		{
@@ -101,9 +103,7 @@ void GfRenderPass_Platform::markAsChanged()
 
 
 VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& ctx)
-{
-	GfLock<GfMutex> lock(ms_renderPasscacheMutex);
-
+{	
 	// Do a second safe search in case another thread was previously creating this RenderPass
 	const auto entryRP = ms_renderPassCache.find(m_kBase.getHash());
 	if (entryRP != ms_renderPassCache.end()) 
@@ -223,28 +223,23 @@ VkFramebuffer GfRenderPass_Platform::getCreateFramebuffer(const GfRenderContext&
 	}
 	u64 fbHash = GfHash::compute(frameBufferCI, reqSize);
 
-	const auto entry = ms_framebufferCache.find(fbHash);
 	VkFramebuffer fb = nullptr;
-	if (entry != ms_framebufferCache.end()) 
-	{
-		fb = entry->second;
-	}
-	else 
 	{
 		GfLock<GfMutex> lock(ms_framebuffercacheMutex);
-		// Do a second safe search in case another thread was previously creating this Framebuffer (during the search)
-		const auto entryFB = ms_framebufferCache.find(fbHash);
-		if (entryFB != ms_framebufferCache.end()) 
+		const auto entry = ms_framebufferCache.find(fbHash);
+		if (entry != ms_framebufferCache.end()) 
 		{
-			return entryFB->second;
+			fb = entry->second;
 		}
-
-		frameBufferCI->attachmentCount = attachmentCount;
-		frameBufferCI->pAttachments = attachmentViews;
-		frameBufferCI->renderPass = m_renderPass;
-		VkResult eResult = vkCreateFramebuffer(ctx.Plat().m_pDevice, frameBufferCI, VK_NULL_HANDLE, &fb);
-		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
-		ms_framebufferCache[fbHash] = fb;
+		else 
+		{
+			frameBufferCI->attachmentCount = attachmentCount;
+			frameBufferCI->pAttachments = attachmentViews;
+			frameBufferCI->renderPass = m_renderPass;
+			VkResult eResult = vkCreateFramebuffer(ctx.Plat().m_pDevice, frameBufferCI, VK_NULL_HANDLE, &fb);
+			GF_ASSERT(eResult == VK_SUCCESS, "Failed to create framebuffer");
+			ms_framebufferCache[fbHash] = fb;
+		}
 	}
 	return fb;
 }

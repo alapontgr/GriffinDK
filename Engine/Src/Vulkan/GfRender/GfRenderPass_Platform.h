@@ -50,7 +50,6 @@ private:
 
 	VkFramebuffer getCreateFramebuffer(const GfRenderContext& ctx);
 
-public:
 	VkFramebuffer	m_framebuffer;
 	VkRenderPass	m_renderPass;
 

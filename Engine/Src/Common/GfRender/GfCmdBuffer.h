@@ -31,14 +31,76 @@ namespace GfCmdBufferType
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfRenderPipelineState 
+namespace GfRenderStateFlags 
 {
+	enum Type : u32 
+	{
+		BindMaterial = 1<<0
+	};
+}
+
+struct GfShaderPipeState 
+{
+	GfShaderPipeline* m_curPipeline = nullptr;
+	const GfShaderVariantData* m_curVariant = nullptr;
+	GfVariantHash m_curVariantHash = 0;
+};
+
+class GfRenderPipelineState 
+{
+public:
+
+	u64 getHash() const { return m_pipelineHash; }
+
+	GfBlendState getBlendState() const { return m_config.m_blendState; }
+	GfRasterState getRasterState() const { return m_config.m_rasterState; }
+	PrimitiveTopology::Type getTopology() const { return m_config.m_topology; }
+	GfMultiSamplingState getMsState() const { return m_config.m_msaState; }
+	GfDepthState getDepthState() const { return m_config.m_depthState; }
+	const GfVertexDeclaration* getVertexFormat() const { return m_curVertexFormat; }
+	GfRenderPass* getCurRenderPass() const { return m_curRenderPass; }
+	GfShaderPipeline* getActivePipeline() const { return m_curShaderState.m_curPipeline; }
+	GfVariantHash getActiveShaderVariant() const { return m_curShaderState.m_curVariantHash; }
+	const GfShaderVariantData* getActiveVariantData() const { return m_curShaderState.m_curVariant; }
+	u32 getFlags() const { return m_stateFlags; }
+
+	const GfShaderPipeConfig& getConfig() const { return m_config; }
+
+	void setBlendState(const GfBlendState& blendState) { m_config.m_blendState = blendState; updateHash(); }
+	void setRasterState(const GfRasterState& rasterState) { m_config.m_rasterState = rasterState; updateHash(); }
+	void setTopology(PrimitiveTopology::Type topology) { m_config.m_topology = topology; updateHash(); }
+	void setMSAAState(const GfMultiSamplingState& msaaState) { m_config.m_msaState = msaaState; updateHash(); }
+	void setDepthState(const GfDepthState& depthState) { m_config.m_depthState = depthState; updateHash(); }
+	void setVertexFormat(const GfVertexDeclaration* vertexFormat) { m_curVertexFormat = vertexFormat; updateHash(); }
+	void setRenderPass(GfRenderPass* renderPass) { m_curRenderPass = renderPass; updateHash(); }
+	void setShaderPipe(GfShaderPipeline* pipeline, const GfVariantHash variantHash) 
+	{
+		m_curShaderState.m_curPipeline = pipeline;
+		m_curShaderState.m_curVariantHash = variantHash;
+		m_curShaderState.m_curVariant =  pipeline->getDeserializer().getVariantData(variantHash);
+		enableFlag(GfRenderStateFlags::BindMaterial);
+		updateHash();
+	}
+	void enableFlag(GfRenderStateFlags::Type flag) 
+	{
+		m_stateFlags |= flag;
+	}
+	void disableFlag(GfRenderStateFlags::Type flag) 
+	{
+		m_stateFlags &= ~flag;
+	}
+
+
+private:
+	void updateHash();
+
 	const GfVertexDeclaration* m_curVertexFormat = nullptr;
 	GfRenderPass* m_curRenderPass = nullptr;
-	GfShaderPipeline* m_curPipeline = nullptr;
-	GfVariantHash m_curVariantHash = 0;
+	GfShaderPipeState m_curShaderState;
 	GfShaderPipeConfig m_config;
-	u64 m_configHash; // Hash computed considering only the static information of the ShaderPipeConfig
+	u32 m_stateFlags = 0;
+
+	u64 m_pipelineHash = 0;
 };
 
 class GfBuffer;
@@ -113,8 +175,6 @@ private:
 		const GfCmdBufferType::Type type, GfRenderContextFamilies::Type queue);
 
 	void reset();
-
-	void drawcallCommon();
 
 	GfCmdBufferType::Type	m_type;
 	GfRenderContextFamilies::Type m_queue;

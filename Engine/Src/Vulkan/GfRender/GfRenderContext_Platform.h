@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfWindow;
-
+class GfDescriptorSetFactoryVK;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +33,8 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 
 	VkQueue GetQueue(GfRenderContextFamilies::Type eType) const;	
+
+	GfDescriptorSetFactoryVK* getDescSetFactory() const { return m_descSetFactory; }
 
 	// Main settings
 	VkInstance						m_pInstance;
@@ -51,6 +53,10 @@ protected:
 	void PreInitRHI(GfWindow* pWindow);
 
 	void initRHI(GfWindow* pWindow);	
+
+	void shutdown();
+
+	void tick();
 
 private:
 
@@ -81,6 +87,8 @@ private:
 	////////////////////////////////////////////////////////////////////////////////
 	// Queues
 	VkQueue	m_pQueues[GfRenderContextFamilies::Count];
+
+	GfDescriptorSetFactoryVK* m_descSetFactory;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

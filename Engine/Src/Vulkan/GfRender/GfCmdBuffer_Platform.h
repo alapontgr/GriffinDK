@@ -15,6 +15,7 @@
 #include "Common/GfCore/GfMaths.h"
 #include "Common/GfRender/GfGraphicsSDK.h"
 #include "Common/GfRender/GfRenderConstants.h"
+#include "Common/GfRender/GfShaderPipeline.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -30,12 +31,14 @@ struct GfScissor;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+struct GfRenderPipelineState;
+
 class GfCmdBuffer_Platform
 {
+	GF_DECLARE_PLATFORM_MEMBERS(GfCmdBuffer);
 public:
 
 	friend class GfCmdBufferFactory_Platform;
-	friend class GfCmdBuffer;
 
 	GfCmdBuffer_Platform();
 
@@ -69,20 +72,17 @@ private:
 	
 	void endRenderPass();
 
-	void bindShaderPipe(class GfShaderPipeline* pipeline, u32 variantHash,
-		const struct GfShaderPipeConfig* config, u64 configHash,
-		const class GfVertexDeclaration* vertexFormat,
-		const class GfRenderPass* renderPass);
-
 	void setViewport(const GfRenderContext& ctx, const GfViewport& viewport);
 
 	void setScissors(const GfRenderContext& ctx, const GfScissor& scissor);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void drawIndexedRHI(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
+	void drawcallCommonGraphics(GfRenderPipelineState* state);
 
-	void drawRHI(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
+	void drawIndexedRHI(GfRenderPipelineState* state, u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
+
+	void drawRHI(GfRenderPipelineState* state, u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 
 	void bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount);
 

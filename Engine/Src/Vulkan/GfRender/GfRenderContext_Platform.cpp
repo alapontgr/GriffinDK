@@ -15,6 +15,7 @@
 #include "Common/GfRender/GfRenderContext.h"
 #include "Common/GfRender/GfWindow.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfRender_Platform.h)
+#include GF_SOLVE_GFX_API_PATH(GfRender/GfShaderPipeline_Platform.h)
 
 #include "Common/GfCore/GfMaths.h"
 #include "Common/GfCore/GfStl.h"
@@ -84,6 +85,24 @@ void GfRenderContext_Platform::initRHI(GfWindow* pWindow)
 	CreateDevice(pWindow);
 	RetrieveQueues();
 	CreateVulkanAllocator();
+	// Factories
+	m_descSetFactory = new GfDescriptorSetFactoryVK(m_pDevice);
+}
+
+void GfRenderContext_Platform::shutdown()
+{
+	m_descSetFactory->shutdown();
+
+	// Shutdown device
+	GF_ASSERT_ALWAYS("TODO: Implement proper shutdown logic");
+
+	// Finally release memory
+	delete m_descSetFactory;
+}
+
+void GfRenderContext_Platform::tick() 
+{
+	getDescSetFactory()->tick();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

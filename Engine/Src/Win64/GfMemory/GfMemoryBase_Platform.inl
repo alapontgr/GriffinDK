@@ -27,7 +27,7 @@ GF_FORCEINLINE void GfDefaultAllocator::Free(void* pAddr)
 
 GF_FORCEINLINE void* GfAlloca(u32 size) 
 {
-	return _malloca(static_cast<size_t>(size));
+	return (size != 0) ? _malloca(static_cast<size_t>(size)) : nullptr;
 }
 
 GF_FORCEINLINE void GfFreea(void* data) 

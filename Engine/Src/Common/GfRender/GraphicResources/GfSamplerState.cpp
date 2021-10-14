@@ -170,7 +170,7 @@ GfCombinedSamplerTexture::GfCombinedSamplerTexture()
 	: m_pSampler(nullptr)
 	, m_pTextureView(nullptr)
 {
-	m_eResourceType = ParamaterSlotType::CombinedTextureSampler;
+	m_eResourceType = ParamaterSlotType::CombinedImageSampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

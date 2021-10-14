@@ -75,6 +75,22 @@ GfCmdBufferCache s_cmdBufferCaches[GfRenderContextFamilies::Count];
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void GfRenderPipelineState::updateHash() 
+{
+	struct GfRenderStateHasher 
+	{
+		u64 renderPassHash;
+		u64 vertexFormatHash;
+		u64 configHash;
+		GfVariantHash variantHash;
+	} stateHasher;
+	stateHasher.renderPassHash = m_curRenderPass ? m_curRenderPass->getHash() : 0;
+	stateHasher.vertexFormatHash = m_curVertexFormat ? m_curVertexFormat->getHash() : 0;
+	stateHasher.configHash = GfHash::compute(&m_config, sizeof(GfShaderPipeConfig));
+	stateHasher.variantHash = m_curShaderState.m_curPipeline ? m_curShaderState.m_curVariantHash : 0;
+	m_pipelineHash = GfHash::compute(&stateHasher, sizeof(GfRenderStateHasher));
+}
+
 GfCmdBufferFactory::GfCmdBufferFactory()
 	: m_initialized(false)
 {
@@ -127,52 +143,36 @@ void GfCmdBuffer::reset()
 	m_curState = GfRenderPipelineState();
 }
 
-void GfCmdBuffer::drawcallCommon() 
-{
-	GF_ASSERT(m_curState.m_curVertexFormat, "A vertex format was not provided");
-	GF_ASSERT(m_curState.m_curRenderPass, "A RenderPass needs to be active");
-	GF_ASSERT(m_type == GfCmdBufferType::Primary, "TODO: Add support for secondary command buffer recording");
-	
-	// Bind pipeline for variant
-	m_kPlatform.bindShaderPipe(m_curState.m_curPipeline, m_curState.m_curVariantHash, 
-		&m_curState.m_config, m_curState.m_configHash,
-		m_curState.m_curVertexFormat, m_curState.m_curRenderPass);
-
-	// Bind batch resources. Bind & Update descriptor sets
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer::setBlendState(const GfBlendState& blendState) 
 {
-	m_curState.m_config.m_blendState = blendState;
+	m_curState.setBlendState(blendState);
 }
 
 void GfCmdBuffer::setRasterState(const GfRasterState& rasterState) 
 {
-	m_curState.m_config.m_rasterState = rasterState;
+	m_curState.setRasterState(rasterState);
 }
 
 void GfCmdBuffer::setTopology(PrimitiveTopology::Type topology) 
 {
-	m_curState.m_config.m_topology = topology;
+	m_curState.setTopology(topology);
 }
 
 void GfCmdBuffer::setMSAAState(const GfMultiSamplingState& msaaState) 
 {
-	m_curState.m_config.m_msaState = msaaState;
+	m_curState.setMSAAState(msaaState);
 }
 
 void GfCmdBuffer::setVertexFormat(const GfVertexDeclaration* vertexFormat) 
 {
-	m_curState.m_curVertexFormat = vertexFormat;
+	m_curState.setVertexFormat(vertexFormat);
 }
 
 void GfCmdBuffer::setDepthState(const GfDepthState& depthState) 
 {
-	m_curState.m_config.m_depthState = depthState;
-	m_curState.m_configHash = GfHash::compute(&m_curState.m_config, sizeof(GfShaderPipeConfig));
+	m_curState.setDepthState(depthState);
 }
 
 void GfCmdBuffer::setStencilCompareMask(StencilFace::Type targetFace, u32 compareMask) 
@@ -192,10 +192,10 @@ void GfCmdBuffer::setStencilReferenceValue(StencilFace::Type targetFace, u32 ref
 
 void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 {
-	GF_ASSERT(!m_curState.m_curRenderPass, "Trying to begin a pass before end");
+	GF_ASSERT(!m_curState.getCurRenderPass(), "Trying to begin a pass before end");
 	GF_ASSERT(renderPass->getWidth() != 0 && renderPass->getHeight(), "Resolution was not initialized");
 
-	m_curState.m_curRenderPass = renderPass;
+	m_curState.setRenderPass(renderPass);
 	m_kPlatform.setViewport(*m_ctx, renderPass->getViewport());
 	m_kPlatform.setScissors(*m_ctx, renderPass->getScissor());
 	m_kPlatform.beginRenderPass(*m_ctx, renderPass);
@@ -203,9 +203,9 @@ void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 
 void GfCmdBuffer::endRenderPass()
 {
-	GF_ASSERT(m_curState.m_curRenderPass, "Trying to end an invalid pass");
+	GF_ASSERT(m_curState.getCurRenderPass(), "Trying to end an invalid pass");
 	m_kPlatform.endRenderPass();
-	m_curState.m_curRenderPass = nullptr;
+	m_curState.setRenderPass(nullptr);
 }
 
 void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
@@ -213,11 +213,10 @@ void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
 	GfShaderPipeline* pipeline = shaderVariant.getPipeline();
 	GfVariantHash variantHash = shaderVariant.getVariantHash();
 
-	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && m_curState.m_curVertexFormat), "Invalid active vertex format");
-	GF_ASSERT(pipeline->isCompute() || (!pipeline->isCompute() && m_curState.m_curRenderPass), "Invalid active Render Pass");
+	GF_ASSERT(pipeline->isCompute() || m_curState.getVertexFormat(), "Invalid active vertex format");
+	GF_ASSERT(pipeline->isCompute() || m_curState.getCurRenderPass(), "Invalid active Render Pass");
 
-	m_curState.m_curPipeline = pipeline;
-	m_curState.m_curVariantHash = variantHash;
+	m_curState.setShaderPipe(pipeline, variantHash);
 }
 
 void GfCmdBuffer::submit(
@@ -231,14 +230,12 @@ void GfCmdBuffer::submit(
 
 void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)
 {
-	drawcallCommon();
-	m_kPlatform.drawIndexedRHI(uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
+	m_kPlatform.drawIndexedRHI(&m_curState, uiIdxCount, uiInstanceCount, uiIdxOffset, uiVertexOffset, uiFirstInstanceId);
 }
 
 void GfCmdBuffer::draw(u32 uiVertexCount, u32 uiInstanceCount, u32 uiFirstVertex /*= 0*/, u32 uiFirstInstance /*= 0*/)
 {
-	drawcallCommon();
-	m_kPlatform.drawRHI(uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
+	m_kPlatform.drawRHI(&m_curState, uiVertexCount, uiInstanceCount, uiFirstVertex, uiFirstInstance);
 }
 
 void GfCmdBuffer::bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount) 

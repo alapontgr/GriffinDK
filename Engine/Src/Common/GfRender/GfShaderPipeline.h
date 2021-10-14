@@ -59,6 +59,10 @@ public:
 
 	u64 getHash() const { return m_hash; }
 
+	u32 getAttribCount() const { return static_cast<u32>(m_attributesDescs.size()); }
+
+	u32 getVertexBufferBindCount() const { return static_cast<u32>(m_vertexBuffersDescs.size()); }
+
 private:
 
 	GfVector<AttributeDesc> m_attributesDescs;
@@ -78,6 +82,8 @@ public:
 	const GfShaderDeserializer& getDeserializer() const { return m_shaderData; }
 
 	bool isCompute() const { return m_shaderData.isCompute(); }
+
+	u32 getUsedStages() const { return m_shaderData.getUsedStages(); }
 
 private:
 

@@ -538,12 +538,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 			const u32 sizeInBytes = serializer.m_bytecodeSizes[idx];
 			spirv_cross::Compiler compiler(bytecode, sizeInBytes / (sizeof(u32)));
 			spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
 			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::UniformBuffer, compiler, resources.uniform_buffers)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Texture, compiler, resources.separate_images)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::SamplerTexture, compiler, resources.sampled_images)) return false;
 			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageBuffer, compiler, resources.storage_buffers)) return false;
+			//if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::InputAttachment, compiler, resources.stage_inputs)) return false;
 			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageImage, compiler, resources.storage_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::CombinedImageSampler, compiler, resources.sampled_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::SampledImage, compiler, resources.separate_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
 		}
 	}
 
@@ -557,9 +558,11 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 				return l.m_bindingSlot < r.m_bindingSlot;
 			});
 
-			s16 offset = static_cast<s16>(serializer.addBindingsArray(&uniforms[set][0], usedBindings[set]));
+			u32 tmpOffset = serializer.addBindingsArray(&uniforms[set][0], usedBindings[set]);
+			GF_ASSERT(tmpOffset <= 0x7fffu, "Invalid offset");
+			s16 offset = static_cast<s16>(tmpOffset);
 			s16 count = static_cast<s16>(usedBindings[set]);
-			variant->setDescriptorSetLayoutRange(set, offset, count);
+			variant->setDescriptorSetLayoutRangeAndHash(set, offset, count, GfHash::compute(&uniforms[set][0], sizeof(GfDescriptorBindingSlot) * usedBindings[set]));
 		}
 	}
 

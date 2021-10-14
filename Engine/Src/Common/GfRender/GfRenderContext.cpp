@@ -18,12 +18,19 @@
 
 GF_DEFINE_BASE_CTOR(GfRenderContext)
 	, m_uiFlags(0)
+	, m_curFrame(0)
 {
 	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
 		// Give an invalid value as the default value
 		m_pAvailableFamilies[i] = GfRenderContextFamilies::InvalidIdx;
 	}
+}
+
+void GfRenderContext::tick() 
+{
+	m_curFrame++;
+	m_kPlatform.tick();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

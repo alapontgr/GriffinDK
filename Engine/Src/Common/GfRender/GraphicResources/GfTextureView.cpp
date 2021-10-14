@@ -21,7 +21,7 @@ GF_DEFINE_BASE_CTOR(GfTextureView)
 	, m_uiBaseLayerIdx(0)
 	, m_uiLayerCount(1)
 {
-	m_eResourceType = ParamaterSlotType::Texture;
+	m_eResourceType = ParamaterSlotType::SampledImage;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

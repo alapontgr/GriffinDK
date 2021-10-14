@@ -25,9 +25,8 @@ namespace ParamaterSlotType
 	enum Type : u32
 	{
 		Sampler = 0,
-		CombinedTextureSampler,
-		Texture,
-		SamplerTexture, // Sampler + Texture
+		CombinedImageSampler,
+		SampledImage,
 		StorageImage,
 		UniformTexelBuffer,
 		StorageTexelBuffer,
@@ -41,6 +40,7 @@ namespace ParamaterSlotType
 		Invalid = (~0u),
 		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
+	static_assert(ParamaterSlotType::Count <= (1 << ParamaterSlotType::RequiredBits), "Invalid requiredBits");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,9 @@ namespace ShaderStage
 		Compute,
 		////////////////////////
 		Count,
+		RequiredBits = 3
 	};
+	static_assert(ShaderStage::Count <= (1 << ShaderStage::RequiredBits), "Invalid requiredBits");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -501,12 +503,11 @@ struct GfDepthState
 // This represents a binding slot in a Descriptor. Used to represent the layout of uniforms.
 struct alignas(4) GfDescriptorBindingSlot 
 {
-	u32 m_stageFlags : 12; // Stages accessing the resource. See EShaderStageFlags
-	u32 m_descriptorType : 4; // See EParamaterSlotType
+	u32 m_stageFlags : 12; // Stages accessing the resource. See ShaderStageFlags
+	ParamaterSlotType::Type m_descriptorType : ParamaterSlotType::RequiredBits; // See ParamaterSlotType
 	u32 m_bindingSlot : 16; //
 	u32 m_arraySize; // If array, the number of entries.
 };
-static_assert(ParamaterSlotType::Count <= (1<<4), "GfDescriptorBindingSlot::m_descriptorType overflows");
 static_assert(ShaderStage::Count <= 12, "GfDescriptorBindingSlot::m_stageFlags overflows");
 
 ////////////////////////////////////////////////////////////////////////////////

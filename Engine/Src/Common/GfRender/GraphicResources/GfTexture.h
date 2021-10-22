@@ -58,9 +58,44 @@ struct TextureDesc
 	u32						m_mipCount		= 1;
 	TextureNumSamples		m_numSamples	= TextureNumSamples::None;
 	TextureType				m_textureType	= TextureType::Type_2D;
-	TextureFormat::Type		m_format		= TextureFormat::R8G8B8A8_UNorm;
+	GfTextureFormat::Type		m_format		= GfTextureFormat::R8G8B8A8_UNorm;
 	TextureUsageMask		m_usage			= TextureUsage::Sample;
 	bool					m_mappable		= false;
+};
+
+struct GfTextureViewConfig 
+{
+	GfTextureViewConfig()
+		: m_firstMipLevel(0)
+		, m_mipLevelCount(0xffff)
+		, m_firstSlice(0)
+		, m_sliceCount(0xffff)
+	{}
+
+	u64 getHash() const { return *reinterpret_cast<const u64*>(this);  }
+
+	u32 m_firstMipLevel : 16;
+	u32 m_mipLevelCount : 16;
+	u32 m_firstSlice : 16;
+	u32 m_sliceCount : 16;
+};
+using GfTextureViewID = u64;
+
+// Used to configure what areas of the tetxure to view
+class GfTextureView
+{
+public:
+	GfTextureView(class GfTexture* texture, const GfTextureViewConfig& config);
+
+	u64 getViewID(const GfRenderContext& ctx);
+
+	GfTexture* getTexture() const { return m_texture; }
+
+private:
+	GfTextureView();
+
+	GfTextureViewConfig m_config;
+	class GfTexture* m_texture;
 };
 
 // Used to initialize swapchain iomages internally
@@ -68,7 +103,7 @@ struct SwapchainDesc : public GfExternTexInit_Platform
 {
 	u32						m_width;
 	u32						m_height;
-	TextureFormat::Type		m_format = TextureFormat::R8G8B8A8_UNorm;
+	GfTextureFormat::Type		m_format = GfTextureFormat::R8G8B8A8_UNorm;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +130,9 @@ public:
 	void Destroy(const GfRenderContext& kCtx);
 
 	// Init the Texture view with externally created resources (i.e. backbuffer)
-	void ExternalInit(const SwapchainDesc& kInitParams);
+	void ExternalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams);
+
+	GfTextureViewID getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config);
 
 	bool getIsInitialized() const { return (m_flags & Flags::Initialized) != 0; }
 
@@ -105,7 +142,7 @@ public:
 
 	u32 getMipMapCount() const;
 
-	TextureFormat::Type getFormat() const;
+	GfTextureFormat::Type getFormat() const;
 
 	bool isDepthBuffer() const;
 
@@ -127,8 +164,11 @@ public:
 
 protected:
 
+	u64 getDefaultViewID();
+
 	u32 m_flags;
 	TextureDesc m_desc;
+	u64 m_defaultViewID;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +182,7 @@ public:
 
 	GfTexture2D();
 
-	bool init(u32 width, u32 height, u32 mipCount, TextureFormat::Type format);
+	bool init(u32 width, u32 height, u32 mipCount, GfTextureFormat::Type format);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands
@@ -152,10 +192,65 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 };
 
-////////////////////////////////////////////////////////////////////////////////
-// Inline Members
+GF_FORCEINLINE u32 GfTexture::getMipMapCount() const
+{
+	return m_desc.m_mipCount;
+}
 
-#include "Common/GfRender/GraphicResources/GfTexture.inl"
+GF_FORCEINLINE GfTextureFormat::Type GfTexture::getFormat() const
+{
+	return m_desc.m_format;
+}
+
+GF_FORCEINLINE bool GfTexture::isDepthBuffer() const
+{
+	return (m_desc.m_usage & TextureUsage::DepthStencil) != 0;
+}
+
+GF_FORCEINLINE bool GfTexture::isRT() const
+{
+	return (m_desc.m_usage & TextureUsage::RenderTarget) != 0;
+}
+
+GF_FORCEINLINE u32 GfTexture::getWidth() const
+{
+	return m_desc.m_width;
+}
+
+GF_FORCEINLINE u32 GfTexture::getHeight() const
+{
+	return m_desc.m_height;
+}
+
+GF_FORCEINLINE u32 GfTexture::getDepth() const
+{
+	return m_desc.m_depth;
+}
+
+GF_FORCEINLINE u32 GfTexture::getSlices() const
+{
+	return m_desc.m_slices;
+}
+
+GF_FORCEINLINE TextureType GfTexture::getTextureType() const
+{
+	return m_desc.m_textureType;
+}
+
+GF_FORCEINLINE TextureUsageMask GfTexture::getTextureUsage() const
+{
+	return m_desc.m_usage;
+}
+
+GF_FORCEINLINE bool GfTexture::getIsMappable() const
+{
+	return m_desc.m_mappable;
+}
+
+GF_FORCEINLINE void GfTexture2D::LoadTexture2DDataFromStaging(const GfRenderContext& kCtx, const GfCmdBuffer& kCmdBuffer, const GfBuffer& kFrom, u32 uiBufferOffset)
+{
+	m_kPlatform.loadTexture2DDataFromStagingBufferRHI(kCtx, kCmdBuffer, kFrom, uiBufferOffset);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFTEXTURE_H__

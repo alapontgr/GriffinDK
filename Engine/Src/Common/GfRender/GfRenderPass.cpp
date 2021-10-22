@@ -33,7 +33,7 @@ GF_DEFINE_BASE_CTOR(GfRenderPass)
 struct HashableAttachmentEntry 
 {
 	u16 m_sampleCount;
-	TextureFormat::Type m_format;
+	GfTextureFormat::Type m_format;
 	LoadOp m_loadOp;
 	StoreOp m_storeOp;
 	LoadOp m_stencilLoadOp;
@@ -52,7 +52,7 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 	if (depthAttachment && depthAttachment->m_attachment) 
 	{
 		m_depthAttachment = *depthAttachment;
-		GF_ASSERT(m_depthAttachment.m_attachment->isDepthBuffer(), "Invalid usage");
+		GF_ASSERT(m_depthAttachment.m_attachment->getTexture()->isDepthBuffer(), "Invalid usage");
 	}
 	
 	m_outputCount = outputCount;
@@ -61,7 +61,7 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 	for (u32 i=0; i<outputCount; ++i) 
 	{
 		m_attachments[i] = output[i];
-		GF_ASSERT(m_attachments[i].m_attachment->isRT(), "Invalid usage");
+		GF_ASSERT(m_attachments[i].m_attachment->getTexture()->isRT(), "Invalid usage");
 	}
 
 	m_clearColor = clearColor;
@@ -83,7 +83,7 @@ void GfRenderPass::updateHash()
 	if (usesDepthAttachment())
 	{
 		pivot->m_sampleCount = 1; // TODO MSAA
-		pivot->m_format = m_depthAttachment.m_attachment->getFormat();
+		pivot->m_format = m_depthAttachment.m_attachment->getTexture()->getFormat();
 		pivot->m_loadOp = m_depthAttachment.m_loadOp;
 		pivot->m_storeOp = m_depthAttachment.m_storeOp;
 		pivot->m_stencilLoadOp = m_depthAttachment.m_stencilLoadOp;
@@ -93,7 +93,7 @@ void GfRenderPass::updateHash()
 	for (u32 i = 0; i < m_outputCount; ++i)
 	{
 		pivot->m_sampleCount = 1; // TODO MSAA
-		pivot->m_format = m_attachments[i].m_attachment->getFormat();
+		pivot->m_format = m_attachments[i].m_attachment->getTexture()->getFormat();
 		pivot->m_loadOp = m_attachments[i].m_loadOp;
 		pivot->m_storeOp = m_attachments[i].m_storeOp;
 		pivot->m_stencilLoadOp = m_attachments[i].m_stencilLoadOp;

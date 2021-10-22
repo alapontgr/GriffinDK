@@ -18,6 +18,9 @@
 // Multi-threaded stack allocator. Each thread holds an instance of a Stack allocator for temporal memory management
 using GfFrameMTStackAlloc = GfPerThreadStackAllocator<GfDefaultAllocator, GF_KB(64)>;
 
+// Use this for temporary allocations
+using GfFrameTmpAllocator = GfSingleton<GfLinearAllocator>;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace ParamaterSlotType
@@ -505,8 +508,7 @@ struct alignas(4) GfDescriptorBindingSlot
 {
 	u32 m_stageFlags : 12; // Stages accessing the resource. See ShaderStageFlags
 	ParamaterSlotType::Type m_descriptorType : ParamaterSlotType::RequiredBits; // See ParamaterSlotType
-	u32 m_bindingSlot : 16; //
-	u32 m_arraySize; // If array, the number of entries.
+	u32 m_arraySize : 16; // If array, the number of entries.
 };
 static_assert(ShaderStage::Count <= 12, "GfDescriptorBindingSlot::m_stageFlags overflows");
 

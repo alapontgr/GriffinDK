@@ -83,7 +83,7 @@ VkImageViewType convertToImageViewType(TextureType type, u32 w, u32 h, u32 d, u3
 GF_DEFINE_PLATFORM_CTOR(GfTexture)
 , m_currLayout(VK_IMAGE_LAYOUT_UNDEFINED)
 , m_image(VK_NULL_HANDLE)
-, m_view(nullptr)
+, m_defaultView(nullptr)
 , m_uiAspectMask(VK_IMAGE_ASPECT_COLOR_BIT)
 , m_pAlloc(nullptr)
 {
@@ -95,9 +95,25 @@ void GfTexture_Platform::init(const TextureDesc& desc)
 {
 }
 
-void GfTexture_Platform::ExternalInitPlat(const GfExternTexInit_Platform& kInitParams)
+void GfTexture_Platform::ExternalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& kInitParams)
 {
 	m_image = kInitParams.m_pExternalImage;
+
+	// Assign aspect mask
+	m_uiAspectMask = 0;
+	if (isDepthFormat(m_kBase.m_desc.m_format))
+	{
+		m_uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	if (isStencilFormat(m_kBase.m_desc.m_format))
+	{
+		m_uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
+	if (!m_uiAspectMask)
+	{
+		m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	}
+	createView(ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -191,25 +207,35 @@ bool GfTexture_Platform::bindImageWithMemoryRHI(const GfRenderContext &kCtx)
 
 void GfTexture_Platform::destroyRHI(const GfRenderContext &kCtx)
 {
-	if (m_image)
+	if (!m_kBase.getIsSwapchain()) 
 	{
-		vkDestroyImage(kCtx.Plat().m_pDevice, m_image, nullptr);
-		m_image = nullptr;
+		if (m_image)
+		{
+			vkDestroyImage(kCtx.Plat().m_pDevice, m_image, nullptr);
+			m_image = nullptr;
 
-	}
-	// Release allocated GPU memory
-	if (m_pAlloc)
-	{
-		vmaFreeMemory(kCtx.Plat().m_kAllocator, m_pAlloc);
-		m_pAlloc = nullptr;
-		// Not really needed
-		memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
+		}
+		// Release allocated GPU memory
+		if (m_pAlloc)
+		{
+			vmaFreeMemory(kCtx.Plat().m_kAllocator, m_pAlloc);
+			m_pAlloc = nullptr;
+			// Not really needed
+			memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
+		}
 	}
 
-	if (m_view) 
+	// Let the texture to release the view 
+	if (m_defaultView) 
 	{
-		vkDestroyImageView(kCtx.Plat().m_pDevice, m_view, nullptr);
-		m_view = nullptr;
+		vkDestroyImageView(kCtx.Plat().m_pDevice, m_defaultView, nullptr);
+		m_defaultView = nullptr;
+		
+		for (const auto& entry : m_views) 
+		{
+			vkDestroyImageView(kCtx.Plat().m_pDevice, entry.second, nullptr);
+		}
+		m_views.clear();
 	}
 }
 
@@ -307,10 +333,52 @@ void GfTexture_Platform::createView(const GfRenderContext& ctx)
 	viewCI.subresourceRange.levelCount = m_kBase.getMipMapCount();
 	viewCI.subresourceRange.baseArrayLayer = 0;
 	viewCI.subresourceRange.layerCount = m_kBase.getSlices();
-	if (!vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &m_view)) 
+	if (!vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &m_defaultView)) 
 	{
 		GF_ERROR("Failed to create image view");
 	}
+}
+
+u64 GfTexture_Platform::getViewIDForConfig(const GfRenderContext& ctx, const GfTextureViewConfig& config)
+{
+	u64 hash = config.getHash();
+	auto it = m_views.find(hash);
+	if (it != m_views.end()) 
+	{
+		return reinterpret_cast<u64>(it->second);
+	}
+
+	// Create new view
+	VkImageViewCreateInfo  viewCI{};
+	viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewCI.pNext = nullptr;
+	viewCI.flags = 0;
+	viewCI.image = m_image;
+	viewCI.viewType = convertToImageViewType(
+		m_kBase.getTextureType(),
+		m_kBase.getWidth(),
+		m_kBase.getHeight(),
+		m_kBase.getDepth(),
+		config.m_sliceCount);
+	viewCI.format = ConvertTextureFormat(m_kBase.getFormat());
+	viewCI.components = {
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// R
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// G
+		VK_COMPONENT_SWIZZLE_IDENTITY,		// B
+		VK_COMPONENT_SWIZZLE_IDENTITY };	// A
+	viewCI.subresourceRange.aspectMask = m_uiAspectMask;
+	viewCI.subresourceRange.baseMipLevel = GfMin(config.m_firstMipLevel, m_kBase.getMipMapCount() - 1);
+	viewCI.subresourceRange.levelCount = GfMin(m_kBase.getMipMapCount() - viewCI.subresourceRange.baseMipLevel, config.m_mipLevelCount);
+	viewCI.subresourceRange.baseArrayLayer = GfMin(config.m_firstSlice, m_kBase.getSlices() - 1);
+	viewCI.subresourceRange.layerCount = GfMin(m_kBase.getSlices() - viewCI.subresourceRange.baseArrayLayer, config.m_sliceCount);
+	VkImageView view(VK_NULL_HANDLE);
+	if (!vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &view)) 
+	{
+		GF_ERROR("Failed to create image view");
+	}
+
+	m_views[hash] = view;
+	return reinterpret_cast<u64>(view);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

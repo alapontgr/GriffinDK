@@ -281,48 +281,7 @@ void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
 			kInit.m_format = ConvertTextureFormatToVkFormat(m_kSwapChainFormat.format);
 			kInit.m_width = m_kBase.GetWidth();
 			kInit.m_height = m_kBase.GetHeight();
-			m_kBase.m_tSwapchainTextures[i].ExternalInit(kInit);
-		}
-	}
-
-	// Create the Image views for the back buffer
-	{
-		m_kBase.m_tSwapchainTextureViews.clear();
-		m_kBase.m_tSwapchainTextureViews.resize(uiImageCount);
-
-		m_tSwapChainImageView.resize(uiImageCount);
-
-		for (u32 i = 0; i < uiImageCount; i++)
-		{
-			VkImageViewCreateInfo kImageViewInfo{};
-			kImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			kImageViewInfo.pNext = nullptr;
-			kImageViewInfo.flags = 0;
-			kImageViewInfo.image = m_tSwapChainImages[i];
-			kImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-			kImageViewInfo.format = m_kSwapChainFormat.format;
-			kImageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			kImageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			kImageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			kImageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			kImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			kImageViewInfo.subresourceRange.baseMipLevel = 0;
-			kImageViewInfo.subresourceRange.levelCount = 1;
-			kImageViewInfo.subresourceRange.baseArrayLayer = 0;
-			kImageViewInfo.subresourceRange.layerCount = 1;
-
-			VkResult eResult = vkCreateImageView(kCtx.Plat().m_pDevice, &kImageViewInfo, nullptr, &m_tSwapChainImageView[i]);
-			GF_ASSERT(eResult == VK_SUCCESS, "Failed to create image view");
-		
-			// Init base res
-			GfExternTexView kInit;
-			kInit.m_pView = m_tSwapChainImageView[i];
-			kInit.m_eViewType = ETextureViewType::View2D;
-			kInit.m_uiBaseLayerIdx = 0;
-			kInit.m_uiLayerCount = 1;
-			kInit.m_uiBaseLod = 0;
-			kInit.m_uiLodCount = 1;
-			m_kBase.m_tSwapchainTextureViews[i].ExternalInit(kInit);
+			m_kBase.m_tSwapchainTextures[i].ExternalInit(kCtx, kInit);
 		}
 	}
 }

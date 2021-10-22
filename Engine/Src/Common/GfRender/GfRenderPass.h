@@ -19,7 +19,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfTexture;
+class GfTextureView;
 
 enum class LoadOp : u8
 {
@@ -38,7 +38,7 @@ enum class StoreOp : u8
 
 struct AttachmentDesc 
 {
-	const GfTexture* m_attachment;
+	GfTextureView* m_attachment;
 	LoadOp m_loadOp = LoadOp::Load;
 	StoreOp m_storeOp = StoreOp::Store;
 	LoadOp m_stencilLoadOp = LoadOp::DontCare;

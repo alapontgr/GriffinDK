@@ -26,6 +26,8 @@ public:
 
 	void returnToCache(GfCmdBuffer* cmdBuffer);
 
+	void shutdown(const GfRenderContext& ctx);
+
 private:
 
 	GfCmdBufferFactory m_factory;
@@ -67,6 +69,16 @@ void GfCmdBufferCache::returnToCache(GfCmdBuffer* cmdBuffer)
 	GF_ASSERT(m_factory.isInitialized(), "Factory was not initialized, how did this happen?");
 	std::lock_guard<std::mutex> lk(m_cacheMutex);
 	m_avalCmdBuffers.push(cmdBuffer);
+}
+
+void GfCmdBufferCache::shutdown(const GfRenderContext& ctx) 
+{
+	for (const GfUniquePtr<GfCmdBuffer>& buff : m_createdCmdBuffers) 
+	{
+		buff->shutdown();
+	}
+	m_createdCmdBuffers.clear();
+	m_factory.shutdown(ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +137,7 @@ GfCmdBuffer::GfCmdBuffer()
 	, m_queue(GfRenderContextFamilies::InvalidIdx)
 	, m_ctx(nullptr)
 	, m_cache(nullptr)
+	, m_linearAllocator(ms_allocatorDefaultMemory)
 {
 }
 
@@ -134,6 +147,7 @@ GfCmdBuffer::GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
 	, m_queue(queue)
 	, m_ctx(ctx)
 	, m_cache(cache)
+	, m_linearAllocator(ms_allocatorDefaultMemory)
 {
 }
 
@@ -141,6 +155,13 @@ void GfCmdBuffer::reset()
 {
 	GF_ASSERT(m_ctx, "Context was not initialized");
 	m_curState = GfRenderPipelineState();
+	m_linearAllocator.reset();
+}
+
+void GfCmdBuffer::shutdown() 
+{
+	m_linearAllocator.shutdown();
+	GF_ASSERT_ALWAYS("TODO: Destroy platform specific");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

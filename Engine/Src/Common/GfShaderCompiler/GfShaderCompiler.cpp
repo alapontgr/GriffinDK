@@ -451,8 +451,11 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 {
 	// TODO
 	GfArray<GfArray<GfDescriptorBindingSlot, s_MAX_BINDINGS_PER_SET>, s_MAX_DESCRIPTOR_SETS> uniforms;
-	GfArray<u16, s_MAX_DESCRIPTOR_SETS> usedBindings;
-	usedBindings.fill(0);
+	
+	static_assert(s_MAX_BINDINGS_PER_SET <= 32, "Overflow");
+	u32 usedBindings(0);
+
+	// Set default state
 	for (u32 set=0; set<s_MAX_DESCRIPTOR_SETS; ++set) 
 	{
 		for (u32 binding=0; binding<s_MAX_BINDINGS_PER_SET; ++binding) 
@@ -471,6 +474,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 			u32 set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 			u32 binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
 			
+			if (binding >= s_MAX_BINDINGS_PER_SET) 
+			{
+				outErrors += GfString("[REFLECTION ERROR] Invalid bind index.\n");
+				return false;
+			}
+			usedBindings |= (1<<binding);
+
 			const spirv_cross::SPIRType& typeInfo = compiler.get_type(resource.type_id);
 			u32 arraySize = 1;
 			if(typeInfo.array.size() != 0)
@@ -490,39 +500,20 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 				return false;
 			}
 
-			u32 bindIdx = 0;
-			for (bindIdx=0; bindIdx<s_MAX_BINDINGS_PER_SET; ++bindIdx) 
+			GfDescriptorBindingSlot& bindEntry = uniforms[set][binding];
+			if (bindEntry.m_descriptorType == ParamaterSlotType::Invalid) 
 			{
-				if (usedBindings[set] == bindIdx || uniforms[set][bindIdx].m_bindingSlot == binding) 
-				{
-					break;
-				}
+				bindEntry.m_descriptorType = type;
+				bindEntry.m_arraySize = arraySize;
+				bindEntry.m_stageFlags = (1<<stage);
 			}
-
-			GfDescriptorBindingSlot& bindEntry = uniforms[set][bindIdx];
-			if (bindIdx < s_MAX_DESCRIPTOR_SETS) 
+			else if (bindEntry.m_descriptorType == type) 
 			{
-				if ( usedBindings[set] == bindIdx) 
-				{
-					bindEntry.m_descriptorType = type;
-					bindEntry.m_bindingSlot = binding;
-					bindEntry.m_arraySize = arraySize;
-					bindEntry.m_stageFlags = (1<<stage);
-					usedBindings[set]++;
-				}
-				else if (bindEntry.m_descriptorType == type) 
-				{
-					bindEntry.m_stageFlags |= (1<<stage);
-				}
-				else 
-				{
-					outErrors += GfString("[REFLECTION ERROR] Trying to bind multiple resources of different type to same binding slot.\n");
-					return false;
-				}
+				bindEntry.m_stageFlags |= (1<<stage);
 			}
 			else 
 			{
-				outErrors += GfString("[REFLECTION ERROR] Exceding the number of bindings per set.\n");
+				outErrors += GfString("[REFLECTION ERROR] Trying to bind multiple resources of different type to same binding slot.\n");
 				return false;
 			}
 		}
@@ -551,18 +542,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 	// Add data to serializer and set offsets to variant
 	for (u32 set = 0; set < s_MAX_DESCRIPTOR_SETS; ++set) 
 	{
-		if (usedBindings[set] > 0)
+		if (usedBindings != 0)
 		{
-			std::sort(&uniforms[set][0], (&uniforms[set][0]) + usedBindings[set], [=](const GfDescriptorBindingSlot& l, const GfDescriptorBindingSlot& r)
-			{
-				return l.m_bindingSlot < r.m_bindingSlot;
-			});
-
-			u32 tmpOffset = serializer.addBindingsArray(&uniforms[set][0], usedBindings[set]);
+			u64 hash = GfHash::compute(&uniforms[set][0], sizeof(GfDescriptorBindingSlot) * s_MAX_BINDINGS_PER_SET);
+			u32 tmpOffset = serializer.addBindingsArray(uniforms[set], hash);
 			GF_ASSERT(tmpOffset <= 0x7fffu, "Invalid offset");
 			s16 offset = static_cast<s16>(tmpOffset);
-			s16 count = static_cast<s16>(usedBindings[set]);
-			variant->setDescriptorSetLayoutRangeAndHash(set, offset, count, GfHash::compute(&uniforms[set][0], sizeof(GfDescriptorBindingSlot) * usedBindings[set]));
+			variant->setDescriptorSetLayoutRangeAndHash(set, offset, hash);
 		}
 	}
 

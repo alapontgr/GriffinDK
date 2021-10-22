@@ -2,18 +2,18 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2019/04/04
-//	File: 	GfSamplerState.cpp
+//	File: 	GfSampler.cpp
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "Common/GfRender/GraphicResources/GfSamplerState.h"
+#include "Common/GfRender/GraphicResources/GfSampler.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_DEFINE_BASE_CTOR(GfSamplerState)
+GF_DEFINE_BASE_CTOR(GfSampler)
 	, m_eMinFilter(ETexFilter::Linear)
 	, m_eMagFilter(ETexFilter::Linear)
 	, m_eMipMapMode(ESamplerMipMapMode::Linear)
@@ -31,7 +31,7 @@ GF_DEFINE_BASE_CTOR(GfSamplerState)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::Create(const GfRenderContext& kCtxt)
+void GfSampler::Create(const GfRenderContext& kCtxt)
 {
 	if (!IsGPUReady()) 
 	{
@@ -48,7 +48,7 @@ void GfSamplerState::Create(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::Destroy(const GfRenderContext& kCtxt)
+void GfSampler::Destroy(const GfRenderContext& kCtxt)
 {
 	Plat().destroyRHI(kCtxt);
 	MarkAsDestroyed();
@@ -56,7 +56,7 @@ void GfSamplerState::Destroy(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMinFilter(ETexFilter::Type eFilter)
+void GfSampler::SetMinFilter(ETexFilter::Type eFilter)
 {
 	if (!IsGPUReady()) 
 	{
@@ -66,7 +66,7 @@ void GfSamplerState::SetMinFilter(ETexFilter::Type eFilter)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMagFilter(ETexFilter::Type eFilter)
+void GfSampler::SetMagFilter(ETexFilter::Type eFilter)
 {
 	if (!IsGPUReady()) 
 	{
@@ -76,7 +76,7 @@ void GfSamplerState::SetMagFilter(ETexFilter::Type eFilter)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMipMapMode(ESamplerMipMapMode::Type eMipMapMode)
+void GfSampler::SetMipMapMode(ESamplerMipMapMode::Type eMipMapMode)
 {
 	if (!IsGPUReady()) 
 	{
@@ -86,7 +86,7 @@ void GfSamplerState::SetMipMapMode(ESamplerMipMapMode::Type eMipMapMode)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetAddrU(ETexAddressMode::Type eAddrMode)
+void GfSampler::SetAddrU(ETexAddressMode::Type eAddrMode)
 {
 	if (!IsGPUReady()) 
 	{
@@ -96,7 +96,7 @@ void GfSamplerState::SetAddrU(ETexAddressMode::Type eAddrMode)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetAddrV(ETexAddressMode::Type eAddrMode)
+void GfSampler::SetAddrV(ETexAddressMode::Type eAddrMode)
 {
 	if (!IsGPUReady()) 
 	{
@@ -106,7 +106,7 @@ void GfSamplerState::SetAddrV(ETexAddressMode::Type eAddrMode)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetAddrW(ETexAddressMode::Type eAddrMode)
+void GfSampler::SetAddrW(ETexAddressMode::Type eAddrMode)
 {
 	if (!IsGPUReady()) 
 	{
@@ -116,7 +116,7 @@ void GfSamplerState::SetAddrW(ETexAddressMode::Type eAddrMode)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMipLodBias(f32 fBias)
+void GfSampler::SetMipLodBias(f32 fBias)
 {
 	if (!IsGPUReady()) 
 	{
@@ -126,7 +126,7 @@ void GfSamplerState::SetMipLodBias(f32 fBias)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMinLod(f32 fMinLod)
+void GfSampler::SetMinLod(f32 fMinLod)
 {
 	if (!IsGPUReady()) 
 	{
@@ -136,7 +136,7 @@ void GfSamplerState::SetMinLod(f32 fMinLod)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMaxLod(f32 fMaxLod)
+void GfSampler::SetMaxLod(f32 fMaxLod)
 {
 	if (!IsGPUReady()) 
 	{
@@ -146,7 +146,7 @@ void GfSamplerState::SetMaxLod(f32 fMaxLod)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetMaxAnisotropy(f32 fMaxAnisotropy)
+void GfSampler::SetMaxAnisotropy(f32 fMaxAnisotropy)
 {
 	if (!IsGPUReady()) 
 	{
@@ -156,7 +156,7 @@ void GfSamplerState::SetMaxAnisotropy(f32 fMaxAnisotropy)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState::SetUseAnisotropy(bool bUseAnisotropy)
+void GfSampler::SetUseAnisotropy(bool bUseAnisotropy)
 {
 	if (!IsGPUReady()) 
 	{
@@ -175,7 +175,7 @@ GfCombinedSamplerTexture::GfCombinedSamplerTexture()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfCombinedSamplerTexture::init(const GfSamplerState* pSampler, const GfTextureView* pView)
+void GfCombinedSamplerTexture::init(const GfSampler* pSampler, const GfTextureView* pView)
 {
 	if (!IsInitialised()) 
 	{

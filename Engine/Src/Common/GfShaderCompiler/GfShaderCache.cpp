@@ -226,10 +226,17 @@ s32 GfShaderSerializer::addShaderBytecode(ShaderBytecode shaderBytecode, u32 siz
 	return static_cast<s32>(idx);
 }
 
-s32 GfShaderSerializer::addBindingsArray(const GfDescriptorBindingSlot* bindingsArray, u32 count)
+s32 GfShaderSerializer::addBindingsArray(const GfArray<GfDescriptorBindingSlot, s_MAX_BINDINGS_PER_SET>& bindings, const u64 hash)
 {
+	auto it = m_bindingsIndexCache.find(hash);
+	if (it != m_bindingsIndexCache.end()) 
+	{
+		return it->second;
+	}
+
 	u32 idx = static_cast<u32>(m_descriptors.size());
-	m_descriptors.insert(m_descriptors.end(), bindingsArray, bindingsArray + count);
+	m_bindingsIndexCache[hash] = idx;
+	m_descriptors.insert(m_descriptors.end(), bindings.begin(), bindings.end());
 	return idx;
 }
 
@@ -251,10 +258,9 @@ void GfShaderSerializer::ShaderVariant::setVariantShaderBytecode(ShaderStage::Ty
 	m_data.m_stagesBytecodeIdxs[stage] = bytecodeIdx;
 }
 
-void GfShaderSerializer::ShaderVariant::setDescriptorSetLayoutRangeAndHash(u32 set, s16 idx, s16 count, u64 hash)
+void GfShaderSerializer::ShaderVariant::setDescriptorSetLayoutRangeAndHash(u32 set, s16 idx, u64 hash)
 {
 	m_data.m_setBindingsIdx[set] = idx;
-	m_data.m_setsBindingsCount[set] = count;
 	m_data.m_setsLayoutHash[set] = hash;
 }
 
@@ -310,18 +316,17 @@ const GfShaderVariantData* GfShaderDeserializer::getVariantData(u32 variantHash)
 	return (entry != m_variantsDataCache.end()) ? entry->second : nullptr;
 }
 
-const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindings(const GfShaderVariantData* variant, const u32 descSet, u32& bindingCount, u64& layoutHash) const
+const GfWeakArray<GfDescriptorBindingSlot> GfShaderDeserializer::getDescriptorBindings(const GfShaderVariantData* variant, const u32 descSet, u64& layoutHash) const
 {
 	GF_ASSERT(descSet < s_MAX_DESCRIPTOR_SETS, "Invalid descriptor set index");
 	GF_ASSERT(variant, "Invalid variant");
 	s16 bindingsIdx = variant->m_setBindingsIdx[descSet];
-	if (bindingsIdx >= 0 && variant->m_setsBindingsCount[descSet] > 0) 
+	if (bindingsIdx >= 0) 
 	{
-		bindingCount = static_cast<u32>(variant->m_setsBindingsCount[descSet]);
 		layoutHash = variant->m_setsLayoutHash[descSet];
-		return getDescriptorBindings(variant->m_setBindingsIdx[descSet]);
+		return GfWeakArray<GfDescriptorBindingSlot>(getDescriptorBindings(variant->m_setBindingsIdx[descSet]), s_MAX_BINDINGS_PER_SET);
 	}
-	return nullptr;
+	return GfWeakArray<GfDescriptorBindingSlot>(nullptr, 0);
 }
 
 const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVariantData* variant, ShaderStage::Type stage, size_t& bytecodeSize) const

@@ -13,6 +13,7 @@
 
 #include "Common/GfMemory/GfMemoryBase.h"
 #include "Common/GfMemory/GfRAII.h"
+#include "Common/GfMemory/GfLinearAllocator.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFMEMORY_H__

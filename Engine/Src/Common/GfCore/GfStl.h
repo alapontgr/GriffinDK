@@ -19,6 +19,8 @@
 #include <unordered_map>
 #include <array>
 
+#include "Common/GfMemory/GfRAII.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Vector
@@ -75,6 +77,46 @@ private:
 
 	const T* m_ptr;
 	u32 m_count;
+};
+
+template <typename T, u32 ChunkSize>
+class GfPool 
+{
+public:
+	GfPool() {}
+
+	T* pop() 
+	{
+		if (!m_aval.size()) 
+		{
+			allocateChunk();
+		}
+		T* entry = m_aval.front();
+		m_aval.pop();
+		return new (entry) T();
+	}
+
+	void push(T* entry) 
+	{
+		entry->~T();
+		m_aval.push_back(entry);
+	}
+
+private:
+
+	void allocateChunk() 
+	{
+		GfUniquePtr<T[]> ptr = GfUniquePtr<T[]>(new T[ChunkSize]);
+		m_chunks.push_back(std::move(ptr));
+		T* data = m_chunks.back().get();
+		for (u32 i = 0; i < ChunkSize; ++i)
+		{
+			m_aval.push(data+i);
+		}
+	}
+
+	GfQueue<T*> m_aval;
+	GfVector<GfUniquePtr<T[]>> m_chunks;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

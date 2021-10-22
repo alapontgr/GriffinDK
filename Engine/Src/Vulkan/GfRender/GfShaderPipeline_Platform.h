@@ -17,10 +17,18 @@
 struct GfRenderState;
 class GfRenderContext;
 
+class GfDescriptorSetCache;
+
+struct GfLayoutDataVK 
+{
+	VkPipelineLayout m_layout = VK_NULL_HANDLE;
+	GfArray<GfDescriptorSetCache*, s_MAX_DESCRIPTOR_SETS> m_setLayoutCaches;
+};
+
 struct GfVariantDataVK 
 {
-	VkPipeline m_pipeline;
-	VkPipelineLayout m_layout;
+	VkPipeline m_pipeline = VK_NULL_HANDLE;
+	const GfLayoutDataVK* m_layoutData = nullptr;
 };
 
 class GfShaderPipeline_Platform
@@ -28,7 +36,7 @@ class GfShaderPipeline_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfShaderPipeline);
 public:
 
-	GfVariantDataVK getOrCreateGraphicsPipeline(const GfRenderContext& ctx, 
+	const GfVariantDataVK* getOrCreateGraphicsPipeline(const GfRenderContext& ctx, 
 		const u64 hash,
 		const GfShaderVariantData* variantData,
 		const struct GfShaderPipeConfig* config,
@@ -52,8 +60,27 @@ private:
 	VkShaderModule getOrCreateModule(const GfRenderContext& ctx, const GfShaderVariantData* variantData, ShaderStage::Type stage);
 
 	GfMutex m_pipelineCacheMutex;
-	GfMap<GfVariantHash, GfVariantDataVK> m_pipelineCache;
+	GfMap<GfVariantHash, GfVariantDataVK*> m_pipelineCache;
+	GfPool<GfVariantDataVK, 16> m_pipelinePool;
 	GfMap<s32, VkShaderModule> m_modulesCache;
+};
+
+class GfDescriptorSetCache 
+{
+public:
+
+	GfDescriptorSetCache();
+
+	void init(VkDescriptorSetLayout layout, const GfWeakArray<GfDescriptorBindingSlot>& setBindings);
+
+	VkDescriptorSetLayout getLayout() const { return m_layout; }
+
+
+
+private:
+	VkDescriptorSetLayout m_layout;
+	GfArray<GfDescriptorBindingSlot, s_MAX_BINDINGS_PER_SET> m_bindingsDef;
+	u32 m_usedBindings;
 };
 
 class GfDescriptorSetFactoryVK
@@ -64,18 +91,16 @@ public:
 	{
 		// Use empty layout to fill gaps
 		GfWeakArray<GfDescriptorBindingSlot> emptyArray(nullptr, 0);
-		m_emptyDescSetLayout = createDescriptorSetLayout(emptyArray);
+		m_emptyDescSetLayout.init(createDescriptorSetLayout(emptyArray), emptyArray);
 	}
 
 	void shutdown();
 
 	void tick();
 
-	VkPipelineLayout getOrCreatePipelineLayout(const GfShaderDeserializer& deserializer, const GfShaderVariantData* variantData);
+	const GfLayoutDataVK* getOrCreatePipelineLayout(const GfShaderDeserializer& deserializer, const GfShaderVariantData* variantData);
 
-	VkDescriptorSetLayout getOrCreateDescriptorSetLayout(u64 hash, const GfWeakArray<GfDescriptorBindingSlot>& setBindings);
-
-	VkDescriptorSetLayout getEmptySetLayout() const { return m_emptyDescSetLayout; }
+	GfDescriptorSetCache* getOrCreateDescriptorSetLayoutCache(u64 hash, const GfWeakArray<GfDescriptorBindingSlot>& setBindings);
 
 private:
 
@@ -85,10 +110,13 @@ private:
 	VkDevice m_device;
 
 	GfMutex m_pipelineLayoutCacheMutex;
-	GfMap<u64, VkPipelineLayout> m_pipelineLayoutCache;
+	GfMap<u64, GfLayoutDataVK*> m_pipelineLayoutCache;
+	GfPool<GfLayoutDataVK, 16> m_layoutDataPool;
+
 	GfMutex m_descSetLayoutCacheMutex;
-	GfMap<u64, VkDescriptorSetLayout> m_descSetLayoutCache;
-	VkDescriptorSetLayout m_emptyDescSetLayout;
+	GfMap<u64, GfDescriptorSetCache*> m_descSetCacheCache;
+	GfPool<GfDescriptorSetCache, 64> m_descSetCachePool;
+	GfDescriptorSetCache m_emptyDescSetLayout;
 };
 
 #endif

@@ -9,19 +9,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 
-#include "Common/GfRender/GraphicResources/GfSamplerState.h"
+#include "Common/GfRender/GraphicResources/GfSampler.h"
 #include "Common/GfRender/GfRenderContext.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_DEFINE_PLATFORM_CTOR(GfSamplerState)
+GF_DEFINE_PLATFORM_CTOR(GfSampler)
 	, m_pSampler(nullptr)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfSamplerState_Platform::createRHI(const GfRenderContext& kCtxt)
+bool GfSampler_Platform::createRHI(const GfRenderContext& kCtxt)
 {
 	VkSamplerCreateInfo kSamplerInfo{};
 	kSamplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -46,7 +46,7 @@ bool GfSamplerState_Platform::createRHI(const GfRenderContext& kCtxt)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSamplerState_Platform::destroyRHI(const GfRenderContext& kCtxt)
+void GfSampler_Platform::destroyRHI(const GfRenderContext& kCtxt)
 {
 	if (m_pSampler) 
 	{

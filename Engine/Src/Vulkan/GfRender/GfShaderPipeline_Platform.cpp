@@ -141,7 +141,7 @@ GF_DEFINE_PLATFORM_CTOR(GfShaderPipeline)
 {
 }
 
-GfVariantDataVK GfShaderPipeline_Platform::getOrCreateGraphicsPipeline(const GfRenderContext& ctx, 
+const GfVariantDataVK* GfShaderPipeline_Platform::getOrCreateGraphicsPipeline(const GfRenderContext& ctx, 
 		const u64 hash,	
 		const GfShaderVariantData* variantData,
 		const GfShaderPipeConfig* config,
@@ -157,9 +157,9 @@ GfVariantDataVK GfShaderPipeline_Platform::getOrCreateGraphicsPipeline(const GfR
 
 	// Create it
 	const GfShaderDeserializer& deserializer = m_kBase.getDeserializer();
-	GfVariantDataVK res;
-	res.m_layout = ctx.Plat().getDescSetFactory()->getOrCreatePipelineLayout(deserializer, variantData);
-	res.m_pipeline = createPipeline(ctx, variantData, config, vertexFormat, renderPass->Plat().getRenderPass(), res.m_layout);
+	GfVariantDataVK* res = m_pipelinePool.pop();
+	res->m_layoutData = ctx.Plat().getDescSetFactory()->getOrCreatePipelineLayout(deserializer, variantData);
+	res->m_pipeline = createPipeline(ctx, variantData, config, vertexFormat, renderPass->Plat().getRenderPass(), res->m_layoutData->m_layout);
 	m_pipelineCache[hash] = res;
 	return res;
 }
@@ -334,7 +334,7 @@ void GfDescriptorSetFactoryVK::tick()
 	GF_ASSERT_ALWAYS("TODO: Implement me!");
 }
 
-VkPipelineLayout GfDescriptorSetFactoryVK::getOrCreatePipelineLayout(const GfShaderDeserializer& deserializer, const GfShaderVariantData* variantData)
+const GfLayoutDataVK* GfDescriptorSetFactoryVK::getOrCreatePipelineLayout(const GfShaderDeserializer& deserializer, const GfShaderVariantData* variantData)
 {
 	GfLock<GfMutex> lock(m_pipelineLayoutCacheMutex);
 
@@ -366,43 +366,44 @@ VkPipelineLayout GfDescriptorSetFactoryVK::getOrCreatePipelineLayout(const GfSha
 	ci.pSetLayouts = nullptr;
 	ci.flags = 0;
 
+	GfLayoutDataVK* layout = m_layoutDataPool.pop();
+	layout->m_setLayoutCaches.fill(VK_NULL_HANDLE);
+
 	StackMemBlock bindingsArray(static_cast<u32>(sizeof(VkDescriptorSetLayout)) * usedSetCount);
 	VkDescriptorSetLayout* setLayouts = reinterpret_cast<VkDescriptorSetLayout*>(bindingsArray.get());
-	u32 populated = 0;
-	while (populated < usedSetCount) 
+	for (u32 i = 0; i<usedSetCount; ++i) 
 	{
 		u32 bindingCount = 0;
 		u64 layoutHash = 0;
-		const GfDescriptorBindingSlot* bindings = deserializer.getDescriptorBindings(variantData, populated, bindingCount, layoutHash);
-		GfWeakArray<GfDescriptorBindingSlot> slotsArray(bindings, bindingCount);
-		setLayouts[populated] = (variantData->m_setsLayoutHash[populated] != 0) ?
-			getOrCreateDescriptorSetLayout(layoutHash, slotsArray) : m_emptyDescSetLayout;
-		populated++;
+		GfWeakArray<GfDescriptorBindingSlot> bindings(deserializer.getDescriptorBindings(variantData, i, layoutHash));
+		layout->m_setLayoutCaches[i] = (variantData->m_setsLayoutHash[i] != 0) ?
+			getOrCreateDescriptorSetLayoutCache(layoutHash, bindings) : &m_emptyDescSetLayout;
+		setLayouts[i] = layout->m_setLayoutCaches[i]->getLayout();
 	}
 	ci.setLayoutCount = usedSetCount;
 	ci.pSetLayouts = setLayouts;
 
-	VkPipelineLayout pipelineLayout = nullptr;
-	VkResult result = vkCreatePipelineLayout(m_device, &ci, nullptr, &pipelineLayout);
+	VkResult result = vkCreatePipelineLayout(m_device, &ci, nullptr, &layout->m_layout);
 	GF_ASSERT(result == VK_SUCCESS, "Failed to create Pipeline layout");
 
-	m_pipelineLayoutCache[pipelineLayoutHash] = pipelineLayout;
+	m_pipelineLayoutCache[pipelineLayoutHash] = layout;
 
-	return pipelineLayout;
+	return layout;
 }
 
-VkDescriptorSetLayout GfDescriptorSetFactoryVK::getOrCreateDescriptorSetLayout(u64 hash, const GfWeakArray<GfDescriptorBindingSlot>& setBindings)
+GfDescriptorSetCache* GfDescriptorSetFactoryVK::getOrCreateDescriptorSetLayoutCache(u64 hash, const GfWeakArray<GfDescriptorBindingSlot>& setBindings)
 {
 	GfLock<GfMutex> lock(m_descSetLayoutCacheMutex);
-	auto entry = m_descSetLayoutCache.find(hash);
-	if (entry != m_descSetLayoutCache.end()) 
+	auto entry = m_descSetCacheCache.find(hash);
+	if (entry != m_descSetCacheCache.end()) 
 	{
 		return entry->second;
 	}
 
-	VkDescriptorSetLayout layout = createDescriptorSetLayout(setBindings);
-	m_descSetLayoutCache[hash] = layout;
-	return layout;
+	GfDescriptorSetCache* res = m_descSetCachePool.pop();
+	res->init(createDescriptorSetLayout(setBindings), setBindings);
+	m_descSetCacheCache[hash] = res;
+	return res;
 }
 
 VkDescriptorSetLayout GfDescriptorSetFactoryVK::createDescriptorSetLayout(const GfWeakArray<GfDescriptorBindingSlot>& setBindings)
@@ -414,23 +415,52 @@ VkDescriptorSetLayout GfDescriptorSetFactoryVK::createDescriptorSetLayout(const 
 	ci.bindingCount = 0;
 	ci.pBindings = nullptr;
 
-	StackMemBlock bindingsArray(static_cast<u32>(sizeof(VkDescriptorSetLayoutBinding)) * setBindings.size());
-	VkDescriptorSetLayoutBinding* bindings = reinterpret_cast<VkDescriptorSetLayoutBinding*>(bindingsArray.get());
+	u32 bindingCount(0);
 	for (u32 i = 0; i < setBindings.size(); ++i) 
 	{
-		const GfDescriptorBindingSlot& slot = setBindings[i];
-		bindings[i].binding = slot.m_bindingSlot;
-		bindings[i].stageFlags = ConvertShaderStageFlags(slot.m_stageFlags);
-		bindings[i].descriptorCount = slot.m_arraySize;
-		bindings[i].descriptorType = ConvertDescriptorType(slot.m_descriptorType);
-		bindings[i].pImmutableSamplers = nullptr;
+		if (setBindings[i].m_descriptorType != ParamaterSlotType::Invalid) 
+		{
+			bindingCount++;
+		}
 	}
 
-	ci.bindingCount = setBindings.size();
+	StackMemBlock bindingsArray(static_cast<u32>(sizeof(VkDescriptorSetLayoutBinding)) * bindingCount);
+	VkDescriptorSetLayoutBinding* bindings = reinterpret_cast<VkDescriptorSetLayoutBinding*>(bindingsArray.get());
+	u32 currPopulated(0);
+	for (u32 i = 0; i < setBindings.size(); ++i) 
+	{
+		if (setBindings[i].m_descriptorType != ParamaterSlotType::Invalid) 
+		{
+			const GfDescriptorBindingSlot& slot = setBindings[i];
+			bindings[currPopulated].binding = i;
+			bindings[currPopulated].stageFlags = ConvertShaderStageFlags(slot.m_stageFlags);
+			bindings[currPopulated].descriptorCount = slot.m_arraySize;
+			bindings[currPopulated].descriptorType = ConvertDescriptorType(slot.m_descriptorType);
+			bindings[currPopulated].pImmutableSamplers = nullptr;
+			currPopulated++;
+		}
+	}
+
+	ci.bindingCount = bindingCount;
 	ci.pBindings = bindings;
 
 	VkDescriptorSetLayout layout;
 	VkResult result = vkCreateDescriptorSetLayout(m_device, &ci, nullptr, &layout);
 	GF_ASSERT(result == VK_SUCCESS, "Failed to create Desc Set Layout");
 	return layout;
+}
+
+GfDescriptorSetCache::GfDescriptorSetCache()
+	: m_layout(VK_NULL_HANDLE)
+	, m_usedBindings(0)
+{
+}
+
+void GfDescriptorSetCache::init(VkDescriptorSetLayout layout, const GfWeakArray<GfDescriptorBindingSlot>& setBindings)
+{
+	m_layout = layout;
+	m_usedBindings = setBindings.size();
+	GF_ASSERT(setBindings.size() <= s_MAX_BINDINGS_PER_SET, "Invalid number of bindings");
+	memcpy(&m_bindingsDef[0], &setBindings[0], sizeof(GfDescriptorBindingSlot) * s_MAX_BINDINGS_PER_SET);
+	GF_ASSERT_ALWAYS("TODO: Implement logic for Desc set caching");
 }

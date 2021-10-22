@@ -169,6 +169,8 @@ public:
 
 private:
 
+	static constexpr u32 ms_allocatorDefaultMemory = 16 * 1024; // 16 KB
+
 	GfCmdBuffer();
 
 	GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
@@ -176,11 +178,13 @@ private:
 
 	void reset();
 
+	void shutdown();
+
 	GfCmdBufferType::Type	m_type;
 	GfRenderContextFamilies::Type m_queue;
 	const GfRenderContext* m_ctx;
 	class GfCmdBufferCache* m_cache;
-
+	GfLinearAllocator m_linearAllocator;
 	GfRenderPipelineState m_curState;
 };
 

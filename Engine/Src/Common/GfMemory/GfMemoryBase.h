@@ -23,6 +23,12 @@ GF_FORCEINLINE T* GfAlign(T* pBase, AlignT uiAlign = 16)
 	return reinterpret_cast<T*>(ulBase + (ulOffset != 0 ? (uiAlign - ulOffset) : 0));
 }
 
+GF_FORCEINLINE u32 GfAlignUint(u32 val, u32 alignment = 16)
+{
+	u32 ulOffset = val & (alignment - 1);
+	return val + (ulOffset != 0 ? (alignment - ulOffset) : 0);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>

@@ -250,21 +250,21 @@ static const VkSamplerAddressMode g_pTexAddressModeConverter[] =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkFormat ConvertTextureFormat(TextureFormat::Type eTextureFormat)
+static GF_FORCEINLINE VkFormat ConvertTextureFormat(GfTextureFormat::Type eTextureFormat)
 {
 	return g_pTextureFormatConverter[eTextureFormat];
 }
 
-static GF_FORCEINLINE TextureFormat::Type ConvertTextureFormatToVkFormat(VkFormat eTextureFormat)
+static GF_FORCEINLINE GfTextureFormat::Type ConvertTextureFormatToVkFormat(VkFormat eTextureFormat)
 {
-	for (u32 i=0;i<TextureFormat::COUNT; ++i)
+	for (u32 i=0;i<GfTextureFormat::COUNT; ++i)
 	{
 		if (g_pTextureFormatConverter[i] == eTextureFormat) 
 		{
-			return (TextureFormat::Type)i;
+			return (GfTextureFormat::Type)i;
 		}
 	}
-	return TextureFormat::Undefined;
+	return GfTextureFormat::Undefined;
 }
 
 

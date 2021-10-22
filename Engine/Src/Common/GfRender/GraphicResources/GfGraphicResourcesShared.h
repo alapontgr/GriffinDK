@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace TextureFormat 
+namespace GfTextureFormat 
 {
 	// Ref: https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkFormat.html
 	enum Type : u16 
@@ -282,21 +282,21 @@ namespace ETexAddressMode
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE bool isDepthFormat(TextureFormat::Type format) 
+GF_FORCEINLINE bool isDepthFormat(GfTextureFormat::Type format) 
 {
-	return (format & (TextureFormat::D16_UNorm | 
-		TextureFormat::D16_UNorm_S8_UInt |
-		TextureFormat::D24_UNorm_S8_UInt |
-		TextureFormat::D32_SFloat | 
-		TextureFormat::D32_SFloat_S8_UInt)) != 0;
+	return (format & (GfTextureFormat::D16_UNorm | 
+		GfTextureFormat::D16_UNorm_S8_UInt |
+		GfTextureFormat::D24_UNorm_S8_UInt |
+		GfTextureFormat::D32_SFloat | 
+		GfTextureFormat::D32_SFloat_S8_UInt)) != 0;
 }
 
-GF_FORCEINLINE bool isStencilFormat(TextureFormat::Type format) 
+GF_FORCEINLINE bool isStencilFormat(GfTextureFormat::Type format) 
 {
-	return (format & (TextureFormat::D16_UNorm_S8_UInt |
-		TextureFormat::D24_UNorm_S8_UInt |
-		TextureFormat::S8_UInt | 
-		TextureFormat::D32_SFloat_S8_UInt)) != 0;
+	return (format & (GfTextureFormat::D16_UNorm_S8_UInt |
+		GfTextureFormat::D24_UNorm_S8_UInt |
+		GfTextureFormat::S8_UInt | 
+		GfTextureFormat::D32_SFloat_S8_UInt)) != 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

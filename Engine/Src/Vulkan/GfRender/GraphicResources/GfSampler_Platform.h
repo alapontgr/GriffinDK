@@ -1,51 +1,46 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
-//	Date: 	2019/04/21
-//	File: 	GfTextureView_Platform.h
+//	Date: 	2019/04/04
+//	File: 	GfSamplerState_Platform.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef __GFTEXTUREVIEW_PLATFORM_H__
-#define __GFTEXTUREVIEW_PLATFORM_H__
+#ifndef __GFSAMPLERSTATE_PLATFORM_H__
+#define __GFSAMPLERSTATE_PLATFORM_H__
+////////////////////////////////////////////////////////////////////////////////
+
+#include "Common/GfRender/GfGraphicsSDK.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 class GfRenderContext;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfExternTexView_Platform 
+class GfSampler_Platform 
 {
-	VkImageView m_pView;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
-class GfTextureView_Platform 
-{
-	GF_DECLARE_PLATFORM_MEMBERS(GfTextureView);
+	GF_DECLARE_PLATFORM_MEMBERS(GfSampler);
 public:
 
-	void ExternInitPlat(const GfExternTexView_Platform& kInitParams);
+	bool createRHI(const GfRenderContext& kCtxt);
 
-	bool createRHI(const GfRenderContext& kCtx);
+	void destroyRHI(const GfRenderContext& kCtxt);
 
-	void destroyRHI(const GfRenderContext& kCtx);
-
-	VkImageView GetView() const;
+	VkSampler GetSampler() const;
 
 private:
 
-	VkImageView	m_pImageView;
+	VkSampler m_pSampler;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkImageView GfTextureView_Platform::GetView() const
+GF_FORCEINLINE VkSampler GfSampler_Platform::GetSampler() const
 {
-	return m_pImageView;
+	return m_pSampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#endif // __GFTEXTUREVIEW_PLATFORM_H__
+#endif // __GFSAMPLERSTATE_PLATFORM_H__

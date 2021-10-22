@@ -2,7 +2,7 @@
 //
 //	Author: Sergio Alapont Granero (seralgrainf@gmail.com)
 //	Date: 	2019/04/04
-//	File: 	GfSamplerState.h
+//	File: 	GfSampler.h
 //
 //	Copyright (c) 2018 (See README.md)
 //
@@ -13,7 +13,7 @@
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GraphicResources/GfGraphicResourceBase.h"
-#include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfSamplerState_Platform.h)
+#include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfSampler_Platform.h)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -21,12 +21,12 @@ class GfTextureView;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfSamplerState : public GfGraphicsResourceBase
+class GfSampler : public GfGraphicsResourceBase
 {
-	GF_DECLARE_PLATFORM_INTERFACE(GfSamplerState);
+	GF_DECLARE_PLATFORM_INTERFACE(GfSampler);
 public:
 
-	GfSamplerState();
+	GfSampler();
 
 	void init();
 
@@ -104,20 +104,20 @@ public:
 
 	GfCombinedSamplerTexture();
 
-	void init(const GfSamplerState* pSampler, const GfTextureView* pView);
+	void init(const GfSampler* pSampler, const GfTextureView* pView);
 
-	const GfSamplerState* GetSampler() const;
+	const GfSampler* GetSampler() const;
 	const GfTextureView* GetView() const;
 
 private:
 
-	const GfSamplerState*		m_pSampler;
+	const GfSampler*		m_pSampler;
 	const GfTextureView*		m_pTextureView;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE const GfSamplerState* GfCombinedSamplerTexture::GetSampler() const
+GF_FORCEINLINE const GfSampler* GfCombinedSamplerTexture::GetSampler() const
 {
 	return m_pSampler;
 }

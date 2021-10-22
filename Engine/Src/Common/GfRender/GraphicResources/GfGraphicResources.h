@@ -12,10 +12,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Common/GfRender/GraphicResources/GfGraphicResourceBase.h"
-#include "Common/GfRender/GraphicResources/GfConstantBuffer.h"
+#include "Common/GfRender/GraphicResources/GfBuffer.h"
 #include "Common/GfRender/GraphicResources/GfTexture.h"
-#include "Common/GfRender/GraphicResources/GfTextureView.h"
-#include "Common/GfRender/GraphicResources/GfSamplerState.h"
+#include "Common/GfRender/GraphicResources/GfSampler.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

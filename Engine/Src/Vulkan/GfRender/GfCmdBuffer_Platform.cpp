@@ -14,8 +14,6 @@
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderPass.h"
 #include "Common/GfRender/GfShaderPipeline.h"
-#include "Common/GfRender/GfMaterial.h"
-#include "Common/GfRender/GfMatParamLayout.h"
 #include "GfCmdBuffer_Platform.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,15 +212,15 @@ void GfCmdBuffer_Platform::drawcallCommonGraphics(GfRenderPipelineState* state)
 	{
 		GfShaderPipeline* pipeline = state->getActivePipeline();
 		GF_ASSERT(pipeline->isCompute(), "Trying to render graphics with a Compute Shader");
-		GfVariantDataVK variantData = pipeline->Plat().getOrCreateGraphicsPipeline(
+		const GfVariantDataVK* variantData = pipeline->Plat().getOrCreateGraphicsPipeline(
 			*m_kBase.m_ctx, 
 			state->getHash(), 
 			state->getActiveVariantData(),
 			&state->getConfig(), 
 			state->getVertexFormat(), 
 			state->getCurRenderPass());
-		GF_ASSERT(variantData.m_pipeline != VK_NULL_HANDLE, "Failed to obtain valid pipeline");
-		vkCmdBindPipeline(getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, variantData.m_pipeline);
+		GF_ASSERT(variantData->m_pipeline != VK_NULL_HANDLE, "Failed to obtain valid pipeline");
+		vkCmdBindPipeline(getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, variantData->m_pipeline);
 		state->disableFlag(GfRenderStateFlags::BindMaterial);
 	}
 

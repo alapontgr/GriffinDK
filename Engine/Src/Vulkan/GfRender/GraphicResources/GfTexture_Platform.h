@@ -41,7 +41,7 @@ public:
 
 	void init(const TextureDesc& desc);
 
-	void ExternalInitPlat(const GfExternTexInit_Platform& initParams);
+	void ExternalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& initParams);
 
 	bool createRHI(const GfRenderContext& ctx);
 
@@ -55,7 +55,11 @@ public:
 
 	VkImage getImage() const;
 
-	VkImageView getView() const;
+	VkImageView getDefaultView() const;
+
+	u64 getDefaultViewID() const;
+
+	u64 getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config);
 
 	VkImageAspectFlags getAspectMask() const;
 
@@ -73,8 +77,10 @@ private:
 
 	VkImageLayout		m_currLayout;
 	VkImage				m_image;
-	VkImageView			m_view; // Used for RenderTarget textures
 	VkImageAspectFlags	m_uiAspectMask;
+	
+	VkImageView			m_defaultView; // Used for RenderTarget textures
+	GfUMap<u64, VkImageView> m_views;
 
 	// Vma Resources
 	VmaAllocation		m_pAlloc;
@@ -100,9 +106,15 @@ GF_FORCEINLINE VkImageLayout GfTexture_Platform::getCurrentLayout() const
 	return m_currLayout;
 }
 
-GF_FORCEINLINE VkImageView GfTexture_Platform::getView() const
+GF_FORCEINLINE VkImageView GfTexture_Platform::getDefaultView() const
 {
-	return m_view;
+	return m_defaultView;
+}
+
+static_assert(sizeof(u64) == sizeof(VkImageView), "Wops!");
+GF_FORCEINLINE u64 GfTexture_Platform::getDefaultViewID() const
+{
+	return reinterpret_cast<u64>(m_defaultView);
 }
 
 GF_FORCEINLINE void GfTexture_Platform::setCurrentLayout(VkImageLayout layout)

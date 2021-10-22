@@ -127,7 +127,7 @@ VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& ctx)
 	{
 		const AttachmentDesc* depthAttachment = &m_kBase.m_depthAttachment;
 		depthAttachmentDesc->flags = 0;
-		depthAttachmentDesc->format = ConvertTextureFormat(depthAttachment->m_attachment->getFormat());
+		depthAttachmentDesc->format = ConvertTextureFormat(depthAttachment->m_attachment->getTexture()->getFormat());
 		depthAttachmentDesc->samples = VkSampleCountFlagBits ::VK_SAMPLE_COUNT_1_BIT; // TODO: MSAA
 		depthAttachmentDesc->loadOp = convertLoadOp(depthAttachment->m_loadOp);
 		depthAttachmentDesc->storeOp = convertStoreOp(depthAttachment->m_storeOp);
@@ -146,7 +146,7 @@ VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& ctx)
 	for (u32 i=0; i<m_kBase.m_outputCount; ++i) 
 	{
 		outputAttachmentDescs[i].flags = 0;
-		outputAttachmentDescs[i].format = ConvertTextureFormat(colorAttachments[i].m_attachment->getFormat());
+		outputAttachmentDescs[i].format = ConvertTextureFormat(colorAttachments[i].m_attachment->getTexture()->getFormat());
 		outputAttachmentDescs[i].samples = VkSampleCountFlagBits ::VK_SAMPLE_COUNT_1_BIT; // TODO: MSAA
 		outputAttachmentDescs[i].loadOp = convertLoadOp(colorAttachments[i].m_loadOp);
 		outputAttachmentDescs[i].storeOp = convertStoreOp(colorAttachments[i].m_storeOp);
@@ -190,8 +190,8 @@ VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& ctx)
 
 VkFramebuffer GfRenderPass_Platform::getCreateFramebuffer(const GfRenderContext& ctx)
 {
-	const AttachmentDesc* depthAttachment = &m_kBase.m_depthAttachment;
-	const AttachmentDesc* colorAttachments = m_kBase.m_attachments.data();
+	AttachmentDesc* depthAttachment = &m_kBase.m_depthAttachment;
+	AttachmentDesc* colorAttachments = m_kBase.m_attachments.data();
 
 	bool useDepth = m_kBase.usesDepthAttachment();
 	u32 attachmentCount = m_kBase.m_outputCount + (useDepth ? 1 : 0);
@@ -215,11 +215,11 @@ VkFramebuffer GfRenderPass_Platform::getCreateFramebuffer(const GfRenderContext&
 	u32 idx = 0;
 	if (useDepth) 
 	{
-		attachmentViews[idx++] = depthAttachment->m_attachment->Plat().getView();
+		attachmentViews[idx++] = reinterpret_cast<VkImageView>(depthAttachment->m_attachment->getViewID(ctx));
 	}
 	for (u32 i = 0; i < m_kBase.m_outputCount; ++i) 
 	{
-		attachmentViews[idx++] = colorAttachments[i].m_attachment->Plat().getView();
+		attachmentViews[idx++] = reinterpret_cast<VkImageView>(colorAttachments[i].m_attachment->getViewID(ctx));
 	}
 	u64 fbHash = GfHash::compute(frameBufferCI, reqSize);
 

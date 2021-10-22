@@ -17,7 +17,6 @@
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfWindow_Platform.h)
 
 #include "Common/GfRender/GraphicResources/GfTexture.h"
-#include "Common/GfRender/GraphicResources/GfTextureView.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -84,7 +83,6 @@ private:
 	u32					m_uiCurrentFrameIdx;
 
 	GfVector<GfTexture2D>	m_tSwapchainTextures;
-	GfVector<GfTextureView>	m_tSwapchainTextureViews;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,20 +111,6 @@ GF_FORCEINLINE const char* GfWindow::GetWindowName()
 GF_FORCEINLINE u32 GfWindow::GetCurrentFrameIdx() const
 {
 	return m_uiCurrentFrameIdx;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE const GfTextureView* GfWindow::GetBackBufferView(u32 uiIdx) const
-{
-	return &m_tSwapchainTextureViews[uiIdx];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE const GfTextureView* GfWindow::GetCurrBackBufferView() const
-{
-	return &m_tSwapchainTextureViews[m_uiCurrentFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

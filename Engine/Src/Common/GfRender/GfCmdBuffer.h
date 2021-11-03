@@ -14,7 +14,6 @@
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfCmdBuffer_Platform.h)
-
 #include "Common/GfRender/GfShaderPipeline.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +161,18 @@ public:
 	void bindVertexBuffers(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount);
 	
 	void bindIndexBuffer(const GfBuffer& buffer, u32 offset, bool useShort);
+
+	// Resource binding
+
+	void bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size);
+
+	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+
+	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+
+	void bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler);
+
+	// Drawcalls
 
 	void drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiFirstVertex = 0, u32 uiFirstInstance = 0);
 

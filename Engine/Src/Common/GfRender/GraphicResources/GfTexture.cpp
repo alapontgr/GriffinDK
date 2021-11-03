@@ -18,6 +18,10 @@ GfTextureView::GfTextureView(GfTexture* texture, const GfTextureViewConfig& conf
 	, m_texture(texture)
 {}
 
+GfTextureView::GfTextureView() 
+	: m_texture(nullptr)
+{}
+
 u64 GfTextureView::getViewID(const GfRenderContext& ctx)
 {
 	return m_texture->getViewIDForConfig(ctx, m_config);

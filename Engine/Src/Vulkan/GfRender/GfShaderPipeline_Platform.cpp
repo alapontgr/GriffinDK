@@ -418,7 +418,7 @@ VkDescriptorSetLayout GfDescriptorSetFactoryVK::createDescriptorSetLayout(const 
 	u32 bindingCount(0);
 	for (u32 i = 0; i < setBindings.size(); ++i) 
 	{
-		if (setBindings[i].m_descriptorType != ParamaterSlotType::Invalid) 
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
 		{
 			bindingCount++;
 		}
@@ -429,7 +429,7 @@ VkDescriptorSetLayout GfDescriptorSetFactoryVK::createDescriptorSetLayout(const 
 	u32 currPopulated(0);
 	for (u32 i = 0; i < setBindings.size(); ++i) 
 	{
-		if (setBindings[i].m_descriptorType != ParamaterSlotType::Invalid) 
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
 		{
 			const GfDescriptorBindingSlot& slot = setBindings[i];
 			bindings[currPopulated].binding = i;

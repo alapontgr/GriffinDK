@@ -31,7 +31,7 @@ public:
 
 	void destroyRHI(const GfRenderContext& kCtxt);
 
-	VkBuffer GetHandle() const;
+	VkBuffer getHandle() const;
 
 	VkDeviceMemory GetMemory() const;
 
@@ -60,7 +60,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkBuffer GfBuffer_Platform::GetHandle() const
+GF_FORCEINLINE VkBuffer GfBuffer_Platform::getHandle() const
 {
 	return m_pBuffer;
 }

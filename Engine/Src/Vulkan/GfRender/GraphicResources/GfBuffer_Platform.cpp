@@ -212,7 +212,7 @@ void GfBuffer_Platform::copyRangeFromRHI(
 	// From buffer 
 	barriers[0].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 	barriers[0].pNext = nullptr;
-	barriers[0].buffer = kFrom.m_kPlatform.GetHandle();
+	barriers[0].buffer = kFrom.m_kPlatform.getHandle();
 	barriers[0].offset = uiFromOffset;
 	barriers[0].size = uiSize;
 	barriers[0].srcAccessMask = srcSettings.m_access;
@@ -244,7 +244,7 @@ void GfBuffer_Platform::copyRangeFromRHI(
 	kRegion.srcOffset = uiFromOffset;
 	kRegion.dstOffset = uiToOffset;
 	kRegion.size = uiSize;
-	vkCmdCopyBuffer(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().GetHandle(), m_pBuffer, 1, &kRegion);
+	vkCmdCopyBuffer(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().getHandle(), m_pBuffer, 1, &kRegion);
 
 	// Go back to the original state and sync with Compute and vertex
 	barriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;

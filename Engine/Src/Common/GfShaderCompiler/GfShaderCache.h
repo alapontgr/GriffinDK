@@ -46,18 +46,6 @@ struct GfPipelineBlobHeader
 	u32 m_variantsOffset;
 };
 
-struct GfShaderVariantData 
-{
-	// Indices to bytecode blobs in GfShaderSerializer::m_bytecodeCache
-	GfArray<s32, ShaderStage::Count> m_stagesBytecodeIdxs;
-	// Each entry is an index to the global cache
-	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setBindingsIdx;
-	GfArray<u64, s_MAX_DESCRIPTOR_SETS> m_setsLayoutHash; // TODO: If space becomes a problem, optimize this
-};
-static_assert((sizeof(GfShaderVariantData) % alignof(GfShaderVariantData)) == 0, "Invalid alignment");
-
-using GfVariantHash = u32;
-
 class GfShaderSerializer
 {
 public:

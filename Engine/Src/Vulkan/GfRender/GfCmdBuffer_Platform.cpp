@@ -14,7 +14,8 @@
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderPass.h"
 #include "Common/GfRender/GfShaderPipeline.h"
-#include "GfCmdBuffer_Platform.h"
+#include "Common/GfRender/GfCmdBuffer.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +82,20 @@ void GfCmdBuffer_Platform::initRHI (const GfRenderContext& ctx, const GfCmdBuffe
 
 	eResult = vkCreateFence(ctx.Plat().m_pDevice, &kFenceInfo, nullptr, &m_fence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create a fence");
+}
+
+void GfCmdBuffer_Platform::reset() 
+{
+	// Everything could be cleaned with a single memset. This is for clarity
+	for (u32 i = 0; i < s_MAX_DESCRIPTOR_SETS; ++i) 
+	{
+		memset(m_bindings[i].data(), 0, sizeof(GfArray<GfResourceBindingExt, s_MAX_BINDINGS_PER_SET>));
+	}
+}
+
+void GfCmdBuffer_Platform::shutdown(const GfRenderContext& ctx) 
+{
+	GF_ASSERT_ALWAYS("TODO: Implement me");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -277,7 +292,7 @@ void GfCmdBuffer_Platform::bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* v
 	for (u32 i = 0; i < vertexBufferCount; ++i) 
 	{
 		offsets[i] = static_cast<VkDeviceSize>(vertexBufferOffsets[i]);
-		buffers[i] = vertexBuffers[i]->Plat().GetHandle();
+		buffers[i] = vertexBuffers[i]->Plat().getHandle();
 	}
 	vkCmdBindVertexBuffers(m_cmdBuffer, 0, vertexBufferCount, buffers, offsets);
 }
@@ -285,9 +300,95 @@ void GfCmdBuffer_Platform::bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* v
 void GfCmdBuffer_Platform::bindIndexBufferRHI(const GfBuffer& buffer, u32 offset, bool useShort)
 {
 	vkCmdBindIndexBuffer(m_cmdBuffer, 
-		buffer.Plat().GetHandle(), 
+		buffer.Plat().getHandle(), 
 		static_cast<VkDeviceSize>(offset), 
 		useShort ? VkIndexType::VK_INDEX_TYPE_UINT16 : VkIndexType::VK_INDEX_TYPE_UINT32);
+}
+
+GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setIdx, const u32 bindingIdx)
+{
+	GF_ASSERT(setIdx < s_MAX_DESCRIPTOR_SETS, "Invalid index for Desc set");
+	GF_ASSERT(bindingIdx < s_MAX_BINDINGS_PER_SET, "Invalid index for binding");
+
+	GfLinearAllocator& allocator = m_kBase.m_linearAllocator;
+	GfResourceBindingExt& entryExt = m_bindings[setIdx][bindingIdx];
+	if (bindingIdx == 0 && entryExt.m_arrayCount <= 1)
+	{
+		entryExt.m_arrayCount = 1;
+		return entryExt.m_single;
+	}
+	else if (bindingIdx < entryExt.m_arrayCount)
+	{
+		return entryExt.m_array[bindingIdx];
+	}
+
+	// Grow. At this point bindingIdx >0
+	GfResourceBindingEntry entryZero{};
+	entryZero.m_type = GfParameterSlotType::Invalid;
+	if (entryExt.m_arrayCount == 1)
+	{
+		entryZero = entryExt.m_single;
+	}
+
+	u32 newEntryCount = glm::max(entryExt.m_arrayCount * 2, bindingIdx + 1);
+	u32 sizeOfEntry = static_cast<u32>(sizeof(GfResourceBindingEntry));
+	u32 newArraySize = newEntryCount * sizeOfEntry;
+	
+	GfResourceBindingEntry* newArray = reinterpret_cast<GfResourceBindingEntry*>(allocator.allocRaw(newArraySize));
+
+	u32 elementsToSkip(0);
+	if (entryExt.m_arrayCount == 1)
+	{
+		newArray[0] = entryExt.m_single;
+		elementsToSkip = 1;
+	}
+	else if(entryExt.m_arrayCount > 1)
+	{
+		memcpy(newArray, entryExt.m_array, entryExt.m_arrayCount * sizeOfEntry);
+		elementsToSkip = entryExt.m_arrayCount;
+	}
+	memset(newArray+elementsToSkip, 0, (newEntryCount-elementsToSkip) * sizeOfEntry);
+	entryExt.m_arrayCount = newEntryCount;
+	entryExt.m_array = newArray;
+
+	return entryExt.m_array[bindingIdx];
+}
+
+void GfCmdBuffer_Platform::bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size) 
+{
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	entry.m_type = GfParameterSlotType::UniformBuffer;
+	entry.m_bufferBind.m_buffer = buffer.Plat().getHandle();
+	entry.m_bufferBind.m_offset = offset;
+	entry.m_bufferBind.m_size = size;
+	GF_ASSERT(entry.m_bufferBind.m_buffer != VK_NULL_HANDLE, "Resource has not been created");
+}
+
+void GfCmdBuffer_Platform::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+{
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	entry.m_type = GfParameterSlotType::SampledImage;
+	entry.m_sampledTextureBind.m_view = reinterpret_cast<VkImageView>(texture->getViewID(*m_kBase.m_ctx));
+	entry.m_sampledTextureBind.m_layout = texture->getTexture()->Plat().getCurrentLayout();
+	GF_ASSERT(entry.m_sampledTextureBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
+	GF_ASSERT(entry.m_sampledTextureBind.m_view != VK_NULL_HANDLE, "Resource has not been created");
+}
+
+void GfCmdBuffer_Platform::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+{
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	entry.m_type = GfParameterSlotType::StorageImage;
+	entry.m_imageBind.m_view = reinterpret_cast<VkImageView>(texture->getViewID(*m_kBase.m_ctx));
+	GF_ASSERT(entry.m_sampledTextureBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
+	GF_ASSERT(entry.m_imageBind.m_view != VK_NULL_HANDLE, "Resource has not been created");
+}
+
+void GfCmdBuffer_Platform::bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler) 
+{
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	entry.m_type = GfParameterSlotType::Sampler;
+	entry.m_samplerBind.m_sampler = sampler.Plat().GetSampler();
+	GF_ASSERT(entry.m_samplerBind.m_sampler != VK_NULL_HANDLE, "Resource has not been created");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

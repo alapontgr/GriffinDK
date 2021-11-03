@@ -15,7 +15,6 @@
 
 #include "Common/GfMemory/GfRAII.h"
 #include "Common/GfCore/GfSingleton.h"
-#include "Common/GfRender/GfMaterial.h"
 #include "Common/GfRender/GfRender.h"
 #include "Common/GfFile/GfFile.h"
 

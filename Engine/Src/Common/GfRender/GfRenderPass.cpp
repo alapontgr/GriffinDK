@@ -16,7 +16,6 @@
 
 GF_DEFINE_BASE_CTOR(GfRenderPass)
 	, m_outputCount(0)
-	, m_depthAttachment()
 	, m_hash(0)
 	, m_clearColor(0.0f)
 	, m_depthClear(0.0f)
@@ -48,11 +47,11 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount, const v4& clearColor,
 	const AttachmentDesc* depthAttachment, f32 clearDepth, u32 clearStencil) 
 {
-	m_depthAttachment.m_attachment = nullptr;
-	if (depthAttachment && depthAttachment->m_attachment) 
+	m_depthAttachment.m_attachment = GfTextureView();
+	if (depthAttachment && depthAttachment->m_attachment.getTexture()) 
 	{
 		m_depthAttachment = *depthAttachment;
-		GF_ASSERT(m_depthAttachment.m_attachment->getTexture()->isDepthBuffer(), "Invalid usage");
+		GF_ASSERT(m_depthAttachment.m_attachment.getTexture()->isDepthBuffer(), "Invalid usage");
 	}
 	
 	m_outputCount = outputCount;
@@ -61,7 +60,7 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 	for (u32 i=0; i<outputCount; ++i) 
 	{
 		m_attachments[i] = output[i];
-		GF_ASSERT(m_attachments[i].m_attachment->getTexture()->isRT(), "Invalid usage");
+		GF_ASSERT(m_attachments[i].m_attachment.getTexture()->isRT(), "Invalid usage");
 	}
 
 	m_clearColor = clearColor;
@@ -83,7 +82,7 @@ void GfRenderPass::updateHash()
 	if (usesDepthAttachment())
 	{
 		pivot->m_sampleCount = 1; // TODO MSAA
-		pivot->m_format = m_depthAttachment.m_attachment->getTexture()->getFormat();
+		pivot->m_format = m_depthAttachment.m_attachment.getTexture()->getFormat();
 		pivot->m_loadOp = m_depthAttachment.m_loadOp;
 		pivot->m_storeOp = m_depthAttachment.m_storeOp;
 		pivot->m_stencilLoadOp = m_depthAttachment.m_stencilLoadOp;
@@ -93,7 +92,7 @@ void GfRenderPass::updateHash()
 	for (u32 i = 0; i < m_outputCount; ++i)
 	{
 		pivot->m_sampleCount = 1; // TODO MSAA
-		pivot->m_format = m_attachments[i].m_attachment->getTexture()->getFormat();
+		pivot->m_format = m_attachments[i].m_attachment.getTexture()->getFormat();
 		pivot->m_loadOp = m_attachments[i].m_loadOp;
 		pivot->m_storeOp = m_attachments[i].m_storeOp;
 		pivot->m_stencilLoadOp = m_attachments[i].m_stencilLoadOp;

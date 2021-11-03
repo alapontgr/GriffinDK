@@ -23,11 +23,11 @@ using GfFrameTmpAllocator = GfSingleton<GfLinearAllocator>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ParamaterSlotType
+namespace GfParameterSlotType
 {
 	enum Type : u32
 	{
-		Sampler = 0,
+		Sampler = 1,
 		CombinedImageSampler,
 		SampledImage,
 		StorageImage,
@@ -39,11 +39,11 @@ namespace ParamaterSlotType
 		StorageBufferDynamic,
 		InputAttachment,
 		////////////////////////////////////////////////////////////////////////////////
-		Count,
-		Invalid = (~0u),
+		Count = InputAttachment -1,
+		Invalid = (0u),
 		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
-	static_assert(ParamaterSlotType::Count <= (1 << ParamaterSlotType::RequiredBits), "Invalid requiredBits");
+	static_assert(GfParameterSlotType::Count <= (1 << GfParameterSlotType::RequiredBits), "Invalid requiredBits");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -502,20 +502,32 @@ struct GfDepthState
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// Shaders related
+
+static constexpr u32 s_MAX_DESCRIPTOR_SETS = 8;
+static constexpr u32 s_MAX_BINDINGS_PER_SET = 16;
 
 // This represents a binding slot in a Descriptor. Used to represent the layout of uniforms.
 struct alignas(4) GfDescriptorBindingSlot 
 {
 	u32 m_stageFlags : 12; // Stages accessing the resource. See ShaderStageFlags
-	ParamaterSlotType::Type m_descriptorType : ParamaterSlotType::RequiredBits; // See ParamaterSlotType
+	GfParameterSlotType::Type m_descriptorType : GfParameterSlotType::RequiredBits; // See ParamaterSlotType
 	u32 m_arraySize : 16; // If array, the number of entries.
 };
 static_assert(ShaderStage::Count <= 12, "GfDescriptorBindingSlot::m_stageFlags overflows");
+static_assert(sizeof(GfDescriptorBindingSlot) == sizeof(u32), "Size of GfDescriptorBindingSlot is invalid");
 
-////////////////////////////////////////////////////////////////////////////////
+struct GfShaderVariantData 
+{
+	// Indices to bytecode blobs in GfShaderSerializer::m_bytecodeCache
+	GfArray<s32, ShaderStage::Count> m_stagesBytecodeIdxs;
+	// Each entry is an index to the global cache
+	GfArray<s16, s_MAX_DESCRIPTOR_SETS> m_setBindingsIdx;
+	GfArray<u64, s_MAX_DESCRIPTOR_SETS> m_setsLayoutHash; // TODO: If space becomes a problem, optimize this
+};
+static_assert((sizeof(GfShaderVariantData) % alignof(GfShaderVariantData)) == 0, "Invalid alignment");
 
-static constexpr u32 s_MAX_DESCRIPTOR_SETS = 8;
-static constexpr u32 s_MAX_BINDINGS_PER_SET = 16;
+using GfVariantHash = u32;
 
 ////////////////////////////////////////////////////////////////////////////////
 

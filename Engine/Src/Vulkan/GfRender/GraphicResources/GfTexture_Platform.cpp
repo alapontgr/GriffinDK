@@ -98,21 +98,8 @@ void GfTexture_Platform::init(const TextureDesc& desc)
 void GfTexture_Platform::ExternalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& kInitParams)
 {
 	m_image = kInitParams.m_pExternalImage;
-
-	// Assign aspect mask
-	m_uiAspectMask = 0;
-	if (isDepthFormat(m_kBase.m_desc.m_format))
-	{
-		m_uiAspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
-	}
-	if (isStencilFormat(m_kBase.m_desc.m_format))
-	{
-		m_uiAspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-	}
-	if (!m_uiAspectMask)
-	{
-		m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	}
+	GF_ASSERT(m_image != VK_NULL_HANDLE, "Ups!");
+	m_uiAspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	createView(ctx);
 }
 
@@ -289,7 +276,7 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 		m_kBase.getHeight(),
 		1
 	};
-	vkCmdCopyBufferToImage(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().GetHandle(), pImage,
+	vkCmdCopyBufferToImage(kCmdBuffer.Plat().getCmdBuffer(), kFrom.Plat().getHandle(), pImage,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &kRegion);
 
 	// Transit image layout to ready to be read by shaders
@@ -311,6 +298,7 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 
 void GfTexture_Platform::createView(const GfRenderContext& ctx)
 {
+	GF_ASSERT(m_image != VK_NULL_HANDLE, "Ups!");
 	VkImageViewCreateInfo  viewCI{};
 	viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewCI.pNext = nullptr;
@@ -349,6 +337,7 @@ u64 GfTexture_Platform::getViewIDForConfig(const GfRenderContext& ctx, const GfT
 	}
 
 	// Create new view
+	GF_ASSERT(m_image != VK_NULL_HANDLE, "Texture has still not been created");
 	VkImageViewCreateInfo  viewCI{};
 	viewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewCI.pNext = nullptr;

@@ -274,7 +274,7 @@ void TestApp::CreateMaterialsAndParamSets()
 	// Prepare parameter layout
 	{
 		GfShaderAccessMask uiAccessMask(ShaderStageFlags::Vertex);
-		m_kParamLayout.DefineParameter(ParamaterSlotType::UniformBuffer, uiAccessMask, 0);
+		m_kParamLayout.DefineParameter(GfParameterSlotType::UniformBuffer, uiAccessMask, 0);
 	}
 	m_kParamLayout.Create(m_kContext);
 
@@ -294,8 +294,8 @@ void TestApp::CreateMaterialsAndParamSets()
 	}
 
 	// Prepare uniform factory
-	m_kUniformFactory.SetMaxAllocationsPerParamType(ParamaterSlotType::UniformBuffer, 1);
-	m_kUniformFactory.SetMaxAllocationsPerParamType(ParamaterSlotType::CombinedTextureSampler, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(GfParameterSlotType::UniformBuffer, 1);
+	m_kUniformFactory.SetMaxAllocationsPerParamType(GfParameterSlotType::CombinedTextureSampler, 1);
 	m_kUniformFactory.SetMaxAllocatedParamSets(16);
 	m_kUniformFactory.Create(m_kContext);
 

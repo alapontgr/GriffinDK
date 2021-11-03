@@ -59,10 +59,6 @@ public:
 
 	u32 GetCurrentFrameIdx() const;
 
-	const GfTextureView* GetBackBufferView(u32 uiIdx) const;
-
-	const GfTextureView* GetCurrBackBufferView() const;
-
 	const GfTexture2D* GetBackBuffer(u32 uiIdx) const;
 
 	const GfTexture2D* GetCurrBackBuffer() const;

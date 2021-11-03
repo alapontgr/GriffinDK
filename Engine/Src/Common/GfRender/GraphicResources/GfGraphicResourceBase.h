@@ -27,7 +27,7 @@ public:
 
 	bool IsTexturedResource() const;
 
-	ParamaterSlotType::Type GetResourceType() const;
+	GfParameterSlotType::Type GetResourceType() const;
 
 	bool IsGPUReady() const;
 
@@ -56,13 +56,13 @@ protected:
 
 	void MarkAsExternallyInitiailized();
 
-	ParamaterSlotType::Type m_eResourceType;
+	GfParameterSlotType::Type m_eResourceType;
 	GfBitMask<u32>	m_uiGraphicResFlags;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE ParamaterSlotType::Type GfGraphicsResourceBase::GetResourceType() const
+GF_FORCEINLINE GfParameterSlotType::Type GfGraphicsResourceBase::GetResourceType() const
 {
 	return m_eResourceType;
 }

@@ -86,13 +86,15 @@ class GfTextureView
 {
 public:
 	GfTextureView(class GfTexture* texture, const GfTextureViewConfig& config);
+	GfTextureView();
 
 	u64 getViewID(const GfRenderContext& ctx);
 
 	GfTexture* getTexture() const { return m_texture; }
 
+	const GfTextureViewConfig& getConfig() const { return m_config; }
+
 private:
-	GfTextureView();
 
 	GfTextureViewConfig m_config;
 	class GfTexture* m_texture;

@@ -14,12 +14,11 @@
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderCommon.h"
+#include "Common/GfRender/GraphicResources/GfTexture.h"
 #include "Common/GfCore/GfMaths.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfRenderPass_Platform.h)
 
 ////////////////////////////////////////////////////////////////////////////////
-
-class GfTextureView;
 
 enum class LoadOp : u8
 {
@@ -38,7 +37,7 @@ enum class StoreOp : u8
 
 struct AttachmentDesc 
 {
-	GfTextureView* m_attachment;
+	GfTextureView m_attachment;
 	LoadOp m_loadOp = LoadOp::Load;
 	StoreOp m_storeOp = StoreOp::Store;
 	LoadOp m_stencilLoadOp = LoadOp::DontCare;
@@ -71,7 +70,7 @@ public:
 
 	u64 getHash() const { GF_ASSERT(m_hash, "Hash was not calculated, something went wrong"); return m_hash; }
 
-	bool usesDepthAttachment() const { return m_depthAttachment.m_attachment != nullptr; }
+	bool usesDepthAttachment() const { return m_depthAttachment.m_attachment.getTexture() != nullptr; }
 
 	u32 getAttachmentCount() const { return m_outputCount; }
 

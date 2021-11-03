@@ -155,13 +155,14 @@ void GfCmdBuffer::reset()
 {
 	GF_ASSERT(m_ctx, "Context was not initialized");
 	m_curState = GfRenderPipelineState();
+	m_kPlatform.reset();
 	m_linearAllocator.reset();
 }
 
 void GfCmdBuffer::shutdown() 
 {
 	m_linearAllocator.shutdown();
-	GF_ASSERT_ALWAYS("TODO: Destroy platform specific");
+	m_kPlatform.shutdown(*m_ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,6 +248,28 @@ void GfCmdBuffer::submit(
 	m_kPlatform.submitRHI(*m_ctx, kWindow, m_queue, bLast);
 	GF_ASSERT(m_cache, "Invalid cache");
 	m_cache->returnToCache(this);
+}
+
+void GfCmdBuffer::bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size) 
+{
+	m_kPlatform.bindUniformBuffer(setIdx, bindIdx, buffer, offset, size);
+}
+
+void GfCmdBuffer::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+{
+	GF_ASSERT((texture->getTexture()->getTextureUsage() & TextureUsage::Sample) != 0, "Trying to bind a texture without the Sample flag as a sampled texture");
+	m_kPlatform.bindSampledTexture(setIdx, bindIdx, texture, arrayIdx);
+}
+
+void GfCmdBuffer::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+{
+	GF_ASSERT((texture->getTexture()->getTextureUsage() & TextureUsage::Storage) != 0, "Trying to bind a texture without the Storage flag as an storage image");
+	m_kPlatform.bindStorageImage(setIdx, bindIdx, texture, arrayIdx);
+}
+
+void GfCmdBuffer::bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler) 
+{
+	m_kPlatform.bindSampler(setIdx, bindIdx, sampler);
 }
 
 void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)

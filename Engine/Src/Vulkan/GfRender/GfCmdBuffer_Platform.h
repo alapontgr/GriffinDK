@@ -23,15 +23,62 @@ class GfRenderContext;
 class GfWindow;
 class GfRenderPass;
 class GfBuffer;
-class GfMaterialTemplate;
-class GfMaterialParamSet;
-class GfTexture2D;
+class GfTextureView;
+class GfSampler;
 struct GfViewport;
 struct GfScissor;
+struct GfRenderPipelineState;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfRenderPipelineState;
+struct GfResourceBindingEntry 
+{
+	struct BufferBinding 
+	{
+		VkBuffer m_buffer;
+		u32 m_offset;
+		u32 m_size;
+	};
+	struct SamplerBinding 
+	{
+		VkSampler m_sampler;
+	};
+	struct SampledTextureBinding 
+	{
+		VkImageView m_view;
+		VkImageLayout m_layout;
+	};
+	struct ImageBinding 
+	{
+		VkImageView m_view;
+	};
+	struct CombinedSamplerTexture 
+	{
+		VkImageView m_view;
+		VkSampler m_sampler;
+		VkImageLayout m_layout;
+	};
+
+	union 
+	{
+		BufferBinding m_bufferBind;
+		SamplerBinding m_samplerBind;
+		SampledTextureBinding m_sampledTextureBind;
+		ImageBinding m_imageBind;
+		CombinedSamplerTexture m_combinedSamplerTextureBind;
+	};
+	GfParameterSlotType::Type m_type;
+};
+
+struct GfResourceBindingExt 
+{
+	u32 m_arrayCount = 0;
+	union 
+	{
+		GfResourceBindingEntry m_single;
+		GfResourceBindingEntry* m_array;
+	};
+};
 
 class GfCmdBuffer_Platform
 {
@@ -49,6 +96,10 @@ public:
 private:
 
 	void initRHI(const GfRenderContext& ctx, const class GfCmdBufferFactory& factory, u32 type);
+
+	void reset();
+
+	void shutdown(const GfRenderContext& ctx);
 
 	void waitForReadyRHI(const GfRenderContext& ctx);
 
@@ -78,6 +129,18 @@ private:
 
 	////////////////////////////////////////////////////////////////////////////////
 
+	GfResourceBindingEntry& getEntryForBinding(const u32 setIdx, const u32 bindingIdx);
+
+	void bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size);
+
+	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+
+	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx);
+
+	void bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler);
+
+	////////////////////////////////////////////////////////////////////////////////
+
 	void drawcallCommonGraphics(GfRenderPipelineState* state);
 
 	void drawIndexedRHI(GfRenderPipelineState* state, u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset = 0, u32 uiVertexOffset = 0, u32 uiFirstInstanceId = 0);
@@ -93,6 +156,9 @@ private:
 	// Perform Multi buffering of the command buffers to avoid waiting for the end of a previous execution
 	VkCommandBuffer m_cmdBuffer;
 	VkFence			m_fence;
+
+	// Resources
+	GfArray<GfArray<GfResourceBindingExt, s_MAX_BINDINGS_PER_SET>, s_MAX_DESCRIPTOR_SETS> m_bindings;
 };
 
 class GfCmdBufferFactory_Platform

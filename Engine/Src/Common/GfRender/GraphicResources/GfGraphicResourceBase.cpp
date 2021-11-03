@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GfGraphicsResourceBase::GfGraphicsResourceBase()
-	: m_eResourceType(ParamaterSlotType::Invalid)
+	: m_eResourceType(GfParameterSlotType::Invalid)
 {
 }
 

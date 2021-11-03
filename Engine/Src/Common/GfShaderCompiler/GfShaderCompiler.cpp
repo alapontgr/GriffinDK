@@ -460,13 +460,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 	{
 		for (u32 binding=0; binding<s_MAX_BINDINGS_PER_SET; ++binding) 
 		{
-			uniforms[set][binding].m_descriptorType = ParamaterSlotType::Invalid;
+			uniforms[set][binding].m_descriptorType = GfParameterSlotType::Invalid;
 			uniforms[set][binding].m_stageFlags = 0;
 			uniforms[set][binding].m_arraySize = 0;
 		}
 	}
 
-	auto addDescriptorsOfType = [&](ShaderStage::Type stage, ParamaterSlotType::Type type, 
+	auto addDescriptorsOfType = [&](ShaderStage::Type stage, GfParameterSlotType::Type type, 
 		const spirv_cross::Compiler& compiler, const spirv_cross::SmallVector<spirv_cross::Resource>& resources) -> bool
 	{
 		for (auto &resource : resources)
@@ -501,7 +501,7 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 			}
 
 			GfDescriptorBindingSlot& bindEntry = uniforms[set][binding];
-			if (bindEntry.m_descriptorType == ParamaterSlotType::Invalid) 
+			if (bindEntry.m_descriptorType == GfParameterSlotType::Invalid) 
 			{
 				bindEntry.m_descriptorType = type;
 				bindEntry.m_arraySize = arraySize;
@@ -529,13 +529,13 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 			const u32 sizeInBytes = serializer.m_bytecodeSizes[idx];
 			spirv_cross::Compiler compiler(bytecode, sizeInBytes / (sizeof(u32)));
 			spirv_cross::ShaderResources resources = compiler.get_shader_resources();
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::UniformBuffer, compiler, resources.uniform_buffers)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageBuffer, compiler, resources.storage_buffers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::UniformBuffer, compiler, resources.uniform_buffers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::StorageBuffer, compiler, resources.storage_buffers)) return false;
 			//if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::InputAttachment, compiler, resources.stage_inputs)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::StorageImage, compiler, resources.storage_images)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::CombinedImageSampler, compiler, resources.sampled_images)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::SampledImage, compiler, resources.separate_images)) return false;
-			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), ParamaterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::StorageImage, compiler, resources.storage_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::CombinedImageSampler, compiler, resources.sampled_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::SampledImage, compiler, resources.separate_images)) return false;
+			if(!addDescriptorsOfType(static_cast<ShaderStage::Type>(i), GfParameterSlotType::Sampler, compiler, resources.separate_samplers)) return false;
 		}
 	}
 

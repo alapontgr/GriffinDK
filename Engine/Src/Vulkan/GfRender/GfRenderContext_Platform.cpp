@@ -102,7 +102,7 @@ void GfRenderContext_Platform::shutdown()
 
 void GfRenderContext_Platform::tick() 
 {
-	getDescSetFactory()->tick();
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////

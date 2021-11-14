@@ -27,7 +27,7 @@ namespace GfParameterSlotType
 {
 	enum Type : u32
 	{
-		Sampler = 1,
+		Sampler = 0,
 		CombinedImageSampler,
 		SampledImage,
 		StorageImage,
@@ -39,8 +39,8 @@ namespace GfParameterSlotType
 		StorageBufferDynamic,
 		InputAttachment,
 		////////////////////////////////////////////////////////////////////////////////
-		Count = InputAttachment -1,
-		Invalid = (0u),
+		Count,
+		Invalid = Count, // Use count as invalid value so we rest of types begin at 0
 		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 	static_assert(GfParameterSlotType::Count <= (1 << GfParameterSlotType::RequiredBits), "Invalid requiredBits");

@@ -55,6 +55,8 @@ void GfCmdBufferFactory_Platform::shutdown(const GfRenderContext& ctx)
 GF_DEFINE_PLATFORM_CTOR(GfCmdBuffer)
 	, m_cmdBuffer(nullptr)
 	, m_fence(0)
+	, m_curBoundVariant(nullptr)
+	, m_curBoundSet(VK_NULL_HANDLE)
 {
 }
 
@@ -86,11 +88,16 @@ void GfCmdBuffer_Platform::initRHI (const GfRenderContext& ctx, const GfCmdBuffe
 
 void GfCmdBuffer_Platform::reset() 
 {
-	// Everything could be cleaned with a single memset. This is for clarity
+	// Everything could be cleaned with a single memset. This is for clarity.
 	for (u32 i = 0; i < s_MAX_DESCRIPTOR_SETS; ++i) 
 	{
-		memset(m_bindings[i].data(), 0, sizeof(GfArray<GfResourceBindingExt, s_MAX_BINDINGS_PER_SET>));
+		for (u32 j = 0; j < s_MAX_BINDINGS_PER_SET; ++j) 
+		{
+			m_bindings[i][j].m_arrayCount = 0;
+			m_bindings[i][j].m_array = nullptr;
+		}
 	}
+	m_curBoundVariant = nullptr;
 }
 
 void GfCmdBuffer_Platform::shutdown(const GfRenderContext& ctx) 
@@ -227,22 +234,42 @@ void GfCmdBuffer_Platform::drawcallCommonGraphics(GfRenderPipelineState* state)
 	{
 		GfShaderPipeline* pipeline = state->getActivePipeline();
 		GF_ASSERT(pipeline->isCompute(), "Trying to render graphics with a Compute Shader");
-		const GfVariantDataVK* variantData = pipeline->Plat().getOrCreateGraphicsPipeline(
+		m_curBoundVariant = pipeline->Plat().getOrCreateGraphicsPipeline(
 			*m_kBase.m_ctx, 
 			state->getHash(), 
 			state->getActiveVariantData(),
 			&state->getConfig(), 
 			state->getVertexFormat(), 
 			state->getCurRenderPass());
-		GF_ASSERT(variantData->m_pipeline != VK_NULL_HANDLE, "Failed to obtain valid pipeline");
-		vkCmdBindPipeline(getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, variantData->m_pipeline);
+		GF_ASSERT(m_curBoundVariant->m_pipeline != VK_NULL_HANDLE, "Failed to obtain valid pipeline");
+		vkCmdBindPipeline(getCmdBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_curBoundVariant->m_pipeline);
 		state->disableFlag(GfRenderStateFlags::BindMaterial);
 	}
 
 	// Get descriptor set (create, update if needed)
-	GF_ASSERT_ALWAYS("TODO: Implement descriptor sets logic");
-	// Bind descriptor sets
-
+	const GfShaderVariantData* variantData = state->getActiveVariantData();
+	GfShaderPipeline* pipeline = state->getActivePipeline();
+	GF_ASSERT(m_curBoundVariant != nullptr, "A variant was npot bound");
+	for (u32 i=0; i<s_MAX_DESCRIPTOR_SETS; ++i) 
+	{
+		// If the set is used, get a Descriptor set and bind it
+		if (variantData->m_setsLayoutHash[i] != 0) 
+		{
+			const GfShaderDeserializer& deserializer = pipeline->getDeserializer();
+			u64 layoutHash(0);
+			const GfWeakArray<GfDescriptorBindingSlot>& setBindings = deserializer.getDescriptorBindings(variantData, i, layoutHash);
+			const GfWeakArray<GfResourceBindingExt> resourceBindings(m_bindings[i].data(), s_MAX_BINDINGS_PER_SET);
+			GfDescriptorSetCache* setCache = m_kBase.m_ctx->Plat().getDescSetFactory()->getOrCreateDescriptorSetLayoutCache(layoutHash, setBindings);
+			m_curBoundSet = setCache->getOrCreateDescSet(*m_kBase.m_ctx, m_kBase.m_linearAllocator, setBindings, resourceBindings);
+			
+			vkCmdBindDescriptorSets(getCmdBuffer(), 
+				VK_PIPELINE_BIND_POINT_GRAPHICS, 
+				m_curBoundVariant->m_layoutData->m_layout,
+				i, 1,
+				&m_curBoundSet, 
+				0, nullptr);
+		}
+	}
 }
 
 void GfCmdBuffer_Platform::setViewport(const GfRenderContext& ctx, const GfViewport& viewport)
@@ -347,7 +374,14 @@ GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setId
 		memcpy(newArray, entryExt.m_array, entryExt.m_arrayCount * sizeOfEntry);
 		elementsToSkip = entryExt.m_arrayCount;
 	}
-	memset(newArray+elementsToSkip, 0, (newEntryCount-elementsToSkip) * sizeOfEntry);
+	
+	// Invalidate new entries
+	GfResourceBindingEntry* tail = newArray + elementsToSkip;
+	for (u32 i=0; i<(newEntryCount-elementsToSkip); ++i) 
+	{
+		tail[i].m_type = GfParameterSlotType::Invalid;
+	}
+
 	entryExt.m_arrayCount = newEntryCount;
 	entryExt.m_array = newArray;
 
@@ -379,7 +413,8 @@ void GfCmdBuffer_Platform::bindStorageImage(const u32 setIdx, const u32 bindIdx,
 	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
 	entry.m_type = GfParameterSlotType::StorageImage;
 	entry.m_imageBind.m_view = reinterpret_cast<VkImageView>(texture->getViewID(*m_kBase.m_ctx));
-	GF_ASSERT(entry.m_sampledTextureBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
+	entry.m_imageBind.m_layout = texture->getTexture()->Plat().getCurrentLayout();
+	GF_ASSERT(entry.m_imageBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
 	GF_ASSERT(entry.m_imageBind.m_view != VK_NULL_HANDLE, "Resource has not been created");
 }
 

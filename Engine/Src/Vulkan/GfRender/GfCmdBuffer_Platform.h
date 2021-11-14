@@ -51,6 +51,7 @@ struct GfResourceBindingEntry
 	struct ImageBinding 
 	{
 		VkImageView m_view;
+		VkImageLayout m_layout;
 	};
 	struct CombinedSamplerTexture 
 	{
@@ -159,6 +160,10 @@ private:
 
 	// Resources
 	GfArray<GfArray<GfResourceBindingExt, s_MAX_BINDINGS_PER_SET>, s_MAX_DESCRIPTOR_SETS> m_bindings;
+
+	// Cur state
+	const GfVariantDataVK* m_curBoundVariant;
+	VkDescriptorSet m_curBoundSet;
 };
 
 class GfCmdBufferFactory_Platform

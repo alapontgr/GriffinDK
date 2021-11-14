@@ -11,6 +11,7 @@
 #include "Common/GfRender/GfShaderPipeline.h"
 #include "Common/GfRender/GfRenderContext.h"
 #include "Common/GfRender/GfRenderPass.h"
+#include "Common/GfRender/GfCmdBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -324,12 +325,15 @@ VkShaderModule GfShaderPipeline_Platform::getOrCreateModule(const GfRenderContex
 	return module;
 }
 
-void GfDescriptorSetFactoryVK::shutdown()
+GfDescriptorSetFactoryVK::GfDescriptorSetFactoryVK(VkDevice device) 
+	: m_device(device)
 {
-	GF_ASSERT_ALWAYS("TODO: Implement me!");
+	// Use empty layout to fill gaps
+	GfWeakArray<GfDescriptorBindingSlot> emptyArray(nullptr, 0);
+	m_emptyDescSetLayout.init(createDescriptorSetLayout(emptyArray), emptyArray);
 }
 
-void GfDescriptorSetFactoryVK::tick()
+void GfDescriptorSetFactoryVK::shutdown()
 {
 	GF_ASSERT_ALWAYS("TODO: Implement me!");
 }
@@ -452,15 +456,321 @@ VkDescriptorSetLayout GfDescriptorSetFactoryVK::createDescriptorSetLayout(const 
 
 GfDescriptorSetCache::GfDescriptorSetCache()
 	: m_layout(VK_NULL_HANDLE)
-	, m_usedBindings(0)
+	, m_curPool(VK_NULL_HANDLE)
+	, m_avalSetsInPool(0)
 {
 }
 
 void GfDescriptorSetCache::init(VkDescriptorSetLayout layout, const GfWeakArray<GfDescriptorBindingSlot>& setBindings)
 {
 	m_layout = layout;
-	m_usedBindings = setBindings.size();
-	GF_ASSERT(setBindings.size() <= s_MAX_BINDINGS_PER_SET, "Invalid number of bindings");
-	memcpy(&m_bindingsDef[0], &setBindings[0], sizeof(GfDescriptorBindingSlot) * s_MAX_BINDINGS_PER_SET);
-	GF_ASSERT_ALWAYS("TODO: Implement logic for Desc set caching");
+	GF_ASSERT(setBindings.size() <= s_MAX_BINDINGS_PER_SET, "Invalid number of bindings");	
+	m_perResourceTypeCount.fill(0);
+	m_usedBindings = 0;
+	m_reqImageWrites = 0;
+	m_reqBufferWrites = 0;
+	for (u32 i = 0; i < setBindings.size(); ++i) 
+	{
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
+		{
+			m_usedBindings++;
+			m_perResourceTypeCount[setBindings[i].m_descriptorType] += setBindings[i].m_arraySize;
+
+			switch (setBindings[i].m_descriptorType) 
+			{
+			case GfParameterSlotType::Sampler:
+			case GfParameterSlotType::CombinedImageSampler:
+			case GfParameterSlotType::SampledImage:
+			case GfParameterSlotType::StorageImage:
+				m_reqImageWrites += setBindings[i].m_arraySize;
+				break;
+
+			case GfParameterSlotType::UniformBuffer:
+			case GfParameterSlotType::StorageBuffer:
+				m_reqBufferWrites += setBindings[i].m_arraySize;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+VkDescriptorSet GfDescriptorSetCache::getOrCreateDescSet(
+	const GfRenderContext& ctx,
+	GfLinearAllocator& alloc,
+	const GfWeakArray<GfDescriptorBindingSlot>& setBindings,
+	const GfWeakArray<GfResourceBindingExt>& resourceBindings) 
+{
+	u64 bindingsHash = computeBindingsHash(alloc, setBindings, resourceBindings);
+
+	auto entry = m_setsCache.find(bindingsHash);
+	if (entry != m_setsCache.end()) 
+	{
+		entry->second->m_lastUsedFrame = ctx.getCurFrame();
+		m_perFrameOrderedSets.erase(entry->second);
+		m_perFrameOrderedSets.pushBack(entry->second);
+		return entry->second->m_set;
+	}
+
+	// Failed to find a set, try to reuse one
+	u32 curFrame = ctx.getCurFrame();
+	DescSetEntry* result = m_perFrameOrderedSets.front(); // Oldest Desc Set
+	if (result && (result->m_lastUsedFrame - curFrame) > ms_descSetBufferingFrames) 
+	{
+		// Reuse
+		m_setsCache.erase(result->m_hash);
+		m_perFrameOrderedSets.erase(result);
+		m_perFrameOrderedSets.pushBack(result);
+	}
+	else 
+	{
+		// Create new one
+		result = m_setsPool.pop();
+		GF_ASSERT(result, "Failed to allocate");
+		m_perFrameOrderedSets.pushBack(entry->second);
+		result->m_set = createDescSet(ctx, setBindings);
+	}
+
+	result->m_hash = bindingsHash;
+	result->m_lastUsedFrame = curFrame;
+	m_setsCache[bindingsHash] = result;
+
+	// Update set bindings
+	updateDescSet(ctx, alloc, result->m_set, setBindings, resourceBindings);
+
+	GF_ASSERT(result && result->m_set != VK_NULL_HANDLE, "Something went wrong!");
+	return result->m_set;
+}
+
+u64 GfDescriptorSetCache::computeBindingsHash(
+	GfLinearAllocator& alloc,
+	const GfWeakArray<GfDescriptorBindingSlot>& setBindings,
+	const GfWeakArray<GfResourceBindingExt>& resourceBindings) const 
+{
+	size_t reqSize(0);
+	for (u32 i = 0; i < s_MAX_BINDINGS_PER_SET; ++i) 
+	{
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
+		{
+			switch (setBindings[i].m_descriptorType) 
+			{
+			case GfParameterSlotType::UniformBuffer:
+			case GfParameterSlotType::StorageBuffer:
+				reqSize += sizeof(GfResourceBindingEntry::BufferBinding) * setBindings[i].m_arraySize;
+				break;
+			case GfParameterSlotType::StorageImage:
+				reqSize += sizeof(GfResourceBindingEntry::ImageBinding) * setBindings[i].m_arraySize;
+				break;
+			case GfParameterSlotType::CombinedImageSampler:
+				reqSize += sizeof(GfResourceBindingEntry::CombinedSamplerTexture) * setBindings[i].m_arraySize;
+				break;
+			case GfParameterSlotType::SampledImage:
+				reqSize += sizeof(GfResourceBindingEntry::SampledTextureBinding) * setBindings[i].m_arraySize;
+				break;
+			case GfParameterSlotType::Sampler:
+				reqSize += sizeof(GfResourceBindingEntry::SamplerBinding) * setBindings[i].m_arraySize;
+				break;
+			default:
+				GF_ERROR("Trying to use non supported resource");
+				break;
+			}
+		}
+	}
+
+	static constexpr u32 s_StackMemLimit = 1024;
+	bool allocFromStack = (reqSize < s_StackMemLimit);
+	u32 allocateFromStack(allocFromStack ? reqSize : 0);
+	StackMemBlock toHashStackMemBlock(allocateFromStack);
+	GfLinearAllocator::Block linearMemBlock(alloc.allocBlock(allocFromStack ? 0 : reqSize));
+	// If tiny enough use stack memory
+	u8* toHash = reinterpret_cast<u8*>(allocFromStack ?	toHashStackMemBlock.get() : linearMemBlock.get());
+	size_t pivot(0);
+	
+	#define ADD_RES_TO_HASH(TYPE, VAR) *reinterpret_cast<TYPE*>(toHash + pivot) = entry->VAR; pivot += sizeof(TYPE);
+
+	for (u32 i = 0; i < s_MAX_BINDINGS_PER_SET; ++i)
+	{
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
+		{
+			GF_ASSERT(resourceBindings[i].m_arrayCount >= setBindings[i].m_arraySize, "Not enough entries bound");
+			for (u32 idx = 0; idx<setBindings[i].m_arraySize; ++idx) 
+			{
+				const GfResourceBindingEntry* entry = (resourceBindings[i].m_arrayCount == 1) ?
+					&resourceBindings[i].m_single :
+					&resourceBindings[i].m_array[idx];
+				GF_ASSERT(entry->m_type == setBindings[i].m_descriptorType, "Invalid resource type");
+				
+				switch (setBindings[i].m_descriptorType) 
+				{
+				case GfParameterSlotType::UniformBuffer:
+				case GfParameterSlotType::StorageBuffer:
+					ADD_RES_TO_HASH(GfResourceBindingEntry::BufferBinding, m_bufferBind);
+					break;
+				case GfParameterSlotType::StorageImage:
+					ADD_RES_TO_HASH(GfResourceBindingEntry::ImageBinding, m_imageBind);
+					break;
+				case GfParameterSlotType::CombinedImageSampler:
+					ADD_RES_TO_HASH(GfResourceBindingEntry::CombinedSamplerTexture, m_combinedSamplerTextureBind);
+					break;
+				case GfParameterSlotType::SampledImage:
+					ADD_RES_TO_HASH(GfResourceBindingEntry::SampledTextureBinding, m_sampledTextureBind);
+					break;
+				case GfParameterSlotType::Sampler:
+					ADD_RES_TO_HASH(GfResourceBindingEntry::SamplerBinding, m_samplerBind);
+					break;
+				default:
+					GF_ERROR("Trying to use non supported resource");
+					break;
+				}
+			}
+		}
+	}
+	#undef ADD_RES_TO_HASH
+
+	GF_ASSERT(pivot == reqSize, "Something went wrong, buggy!");
+	return GfHash::compute(toHash, reqSize);
+}
+
+VkDescriptorSet GfDescriptorSetCache::createDescSet(
+	const GfRenderContext& ctx,
+	const GfWeakArray<GfDescriptorBindingSlot>& setBindings) 
+{
+	VkDescriptorSetAllocateInfo setAllocInfo{};
+	setAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	setAllocInfo.pNext = nullptr;
+	setAllocInfo.descriptorSetCount = 1;
+	setAllocInfo.pSetLayouts = &m_layout;
+	setAllocInfo.descriptorPool = getPoolToAllocateFrom(ctx);
+
+	VkDescriptorSet set(VK_NULL_HANDLE);
+	VkResult resVk = vkAllocateDescriptorSets(ctx.Plat().m_pDevice, &setAllocInfo, &set);
+	GF_ASSERT(resVk == VK_SUCCESS, "Failed to allocate Descriptor set");
+	return set;
+}
+
+static bool isBufferType(const GfParameterSlotType::Type type) 
+{
+	return (type == GfParameterSlotType::UniformBuffer) ||
+		(type == GfParameterSlotType::StorageBuffer);
+}
+
+void GfDescriptorSetCache::updateDescSet(
+	const GfRenderContext& ctx,
+	GfLinearAllocator& alloc,
+	const VkDescriptorSet set,
+	const GfWeakArray<GfDescriptorBindingSlot>& setBindings,
+	const GfWeakArray<GfResourceBindingExt>& resourceBindings) const 
+{
+	GfLinearAllocator::Block imageWritesBlock(alloc.allocBlock(sizeof(VkDescriptorImageInfo) * m_reqImageWrites));
+	GfLinearAllocator::Block bufferWritesBlock(alloc.allocBlock(sizeof(VkDescriptorBufferInfo) * m_reqBufferWrites));
+	GfLinearAllocator::Block descriptorWritesBlock(alloc.allocBlock(sizeof(VkWriteDescriptorSet) * m_usedBindings));
+
+	VkDescriptorImageInfo* imageWrites = reinterpret_cast<VkDescriptorImageInfo*>(imageWritesBlock.get());
+	u32 imageWritesPivot(0);
+	VkDescriptorBufferInfo* bufferWrites = reinterpret_cast<VkDescriptorBufferInfo*>(bufferWritesBlock.get());
+	u32 bufferWritesPivot(0);
+	VkWriteDescriptorSet* descriptorWrites = reinterpret_cast<VkWriteDescriptorSet*>(descriptorWritesBlock.get());
+	u32 descriptorWritesPivot(0);
+
+	for (u32 i=0; i<s_MAX_BINDINGS_PER_SET; ++i) 
+	{
+		if (setBindings[i].m_descriptorType != GfParameterSlotType::Invalid) 
+		{
+			VkWriteDescriptorSet* write(descriptorWrites+descriptorWritesPivot);
+			descriptorWritesPivot++;
+
+			write->sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write->pNext = nullptr;
+			write->dstSet = set;
+			write->dstBinding = i;
+			write->dstArrayElement = setBindings[i].m_arraySize;
+			write->descriptorType = ConvertDescriptorType(setBindings[i].m_descriptorType);
+			write->pTexelBufferView = nullptr;
+			VkDescriptorImageInfo* imageW(nullptr);
+			VkDescriptorBufferInfo* bufferW(nullptr);
+			if (isBufferType(setBindings[i].m_descriptorType)) 
+			{
+				bufferW = (bufferWrites + bufferWritesPivot);
+				write->pBufferInfo = (bufferWrites + bufferWritesPivot);
+				bufferWritesPivot += write->dstArrayElement;
+			}
+			else 
+			{
+				imageW = (imageWrites + imageWritesPivot);
+				write->pImageInfo = (imageWrites + imageWritesPivot);
+				imageWritesPivot += write->dstArrayElement;
+			}
+
+			for (u32 i = 0; i < write->dstArrayElement; ++i) 
+			{
+				const GfResourceBindingEntry* entry = (resourceBindings[i].m_arrayCount == 1) ?
+					&resourceBindings[i].m_single :
+					&resourceBindings[i].m_array[i];
+
+				switch (setBindings[i].m_descriptorType) 
+				{
+				case GfParameterSlotType::Sampler:
+					imageW[i].sampler = entry->m_samplerBind.m_sampler;
+					break;
+				case GfParameterSlotType::CombinedImageSampler:
+					imageW[i].sampler = entry->m_combinedSamplerTextureBind.m_sampler;
+					imageW[i].imageView = entry->m_combinedSamplerTextureBind.m_view;
+					imageW[i].imageLayout = entry->m_combinedSamplerTextureBind.m_layout;
+					break;
+				case GfParameterSlotType::SampledImage:
+					imageW[i].imageView = entry->m_sampledTextureBind.m_view;
+					imageW[i].imageLayout = entry->m_sampledTextureBind.m_layout;
+					break;
+				case GfParameterSlotType::StorageImage:
+					imageW[i].imageView = entry->m_imageBind.m_view;
+					imageW[i].imageLayout = entry->m_imageBind.m_layout;
+					break;
+				case GfParameterSlotType::UniformBuffer:
+				case GfParameterSlotType::StorageBuffer:
+					bufferW[i].buffer = entry->m_bufferBind.m_buffer;
+					bufferW[i].offset = entry->m_bufferBind.m_offset;
+					bufferW[i].range = entry->m_bufferBind.m_size;
+					break;
+				default:
+					GF_ERROR("Trying to use non supported resource");
+					break;
+				}
+			}
+		}
+	}
+	vkUpdateDescriptorSets(ctx.Plat().m_pDevice, m_usedBindings, descriptorWrites, 0, nullptr);
+}
+
+VkDescriptorPool GfDescriptorSetCache::getPoolToAllocateFrom(const GfRenderContext& ctx) 
+{
+	if (m_avalSetsInPool > 0) 
+	{
+		return m_curPool;
+	}
+
+	GfArray<VkDescriptorPoolSize, GfParameterSlotType::Count> descriptorSizes;
+	u32 pivot(0);
+	for (u32 i = 0; i < GfParameterSlotType::Count; ++i) 
+	{
+		if (m_perResourceTypeCount[i] > 0) 
+		{
+			descriptorSizes[pivot].type = ConvertDescriptorType(i);
+			descriptorSizes[pivot].descriptorCount = m_perResourceTypeCount[i] * ms_descSetCountInPool;
+			pivot++;
+		}
+	}
+
+	VkDescriptorPoolCreateInfo  createPoolCI{};
+	createPoolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	createPoolCI.pNext = nullptr;
+	createPoolCI.flags = 0;
+	createPoolCI.maxSets = ms_descSetCountInPool;
+	createPoolCI.poolSizeCount = pivot;
+	createPoolCI.pPoolSizes = descriptorSizes.data();
+	VkResult createPoolRes = vkCreateDescriptorPool(ctx.Plat().m_pDevice, &createPoolCI, nullptr, &m_curPool);
+	GF_ASSERT(createPoolRes == VK_SUCCESS, "Failed to create DescriptorPool");
+	m_avalSetsInPool = ms_descSetCountInPool;
+	m_createdPools.push_back(m_curPool);
+	return m_curPool;
 }

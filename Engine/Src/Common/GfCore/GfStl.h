@@ -13,11 +13,13 @@
 // Includes
 
 #include <vector>
+#include <list>
 #include <stack>
 #include <queue>
 #include <map>
 #include <unordered_map>
 #include <array>
+#include <type_traits>
 
 #include "Common/GfMemory/GfRAII.h"
 
@@ -26,6 +28,9 @@
 // Vector
 template <typename... Ts>
 using GfVector = std::vector<Ts...>;
+
+template <typename... Ts>
+using GfList = std::list<Ts...>;
 
 // Stack
 template <typename... Ts>
@@ -68,9 +73,7 @@ public:
 	}
 
 	const T& operator[] (u32 i) const { GF_ASSERT(i >= 0 && i < m_count, "Invalid index"); return m_ptr[i]; }
-
 	const u32 size() const { return m_count; }
-
 	const T* data() const { return m_ptr; }
 
 private:
@@ -84,40 +87,102 @@ class GfPool
 {
 public:
 	GfPool() {}
+	GfPool(GfPool&& other);
 
-	T* pop() 
-	{
-		if (!m_aval.size()) 
-		{
-			allocateChunk();
-		}
-		T* entry = m_aval.front();
-		m_aval.pop();
-		return new (entry) T();
-	}
-
-	void push(T* entry) 
-	{
-		entry->~T();
-		m_aval.push_back(entry);
-	}
+	T* pop();
+	void push(T* entry);
+	void clear();
 
 private:
 
-	void allocateChunk() 
-	{
-		GfUniquePtr<T[]> ptr = GfUniquePtr<T[]>(new T[ChunkSize]);
-		m_chunks.push_back(std::move(ptr));
-		T* data = m_chunks.back().get();
-		for (u32 i = 0; i < ChunkSize; ++i)
-		{
-			m_aval.push(data+i);
-		}
-	}
+	void allocateChunk();
 
 	GfQueue<T*> m_aval;
 	GfVector<GfUniquePtr<T[]>> m_chunks;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Double linked list that works with externally allocated objects
+template <typename T>
+class GfIntrusiveList 
+{
+public:
+
+	class GfListEntry 
+	{
+	public:
+		friend class GfIntrusiveList;
+
+		GfListEntry();
+		GfListEntry* getPrev() const { return m_prev; }
+		GfListEntry* getNext() const { return m_prev; }
+
+	private:
+		GfListEntry* m_prev;
+		GfListEntry* m_next;
+	};
+	
+	class Iterator 
+	{
+	public:
+		Iterator(GfListEntry* entry);
+		Iterator();
+
+		GfListEntry* getVal() const { return m_valPtr; }
+		Iterator& operator++();
+		GfListEntry* operator->() const { return getVal(); }
+		GfListEntry& operator*() const { return *getVal(); }
+		bool operator==(const Iterator& other) const;
+		bool operator!=(const Iterator& other) const;
+
+	private:
+		GfListEntry* m_valPtr;
+	};
+
+	GfIntrusiveList()
+		: m_head(nullptr)
+		, m_back(nullptr)
+		, m_size(0)
+	{}
+
+	GfIntrusiveList(GfIntrusiveList&& other)
+		: m_head(other.m_head)
+		, m_back(other.m_back)
+		, m_size(other.m_size)
+	{}
+
+	T* front();
+	const T* front() const;
+	T* back();
+	const T* back() const;
+	bool empty() const;
+	u32 size() const;
+	void clear();
+	void insert(const u32 pos, T* val);
+	void erase(const u32 pos);
+	void erase(T* val);
+	void pushFront(T* val);
+	void pushBack(T* val);
+	void popFront();
+	void popBack();
+
+	Iterator begin() const;
+	Iterator end() const;
+
+	const T* operator[](const u32 idx) const;
+	T* operator[](const u32 idx);
+
+private:
+
+	static constexpr u32 s_PoolBatchSize = 128;
+
+	GfListEntry* m_head;
+	GfListEntry* m_back;
+	u32 m_size;
+};
+
+#include "Common/GfCore/GfStl.inl"
 
 ////////////////////////////////////////////////////////////////////////////////
 #endif // __GFSTL_H__

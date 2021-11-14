@@ -96,9 +96,19 @@ public:
 		m_memBlock = nullptr;
 	}
 
+	StackMemBlock(StackMemBlock&& other) 
+		: m_memBlock(other.m_memBlock)
+	{
+		other.m_memBlock = nullptr;
+	}
+
 	void* get() const { return m_memBlock; }
 
 private:
+
+	StackMemBlock(const StackMemBlock&);
+	StackMemBlock& operator=(const StackMemBlock&);
+
 	void* m_memBlock;
 };
 

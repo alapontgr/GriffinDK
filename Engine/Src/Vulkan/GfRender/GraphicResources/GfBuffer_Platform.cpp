@@ -53,7 +53,7 @@ u32 FindMemTypeIdx(const u32 uiTypeFilter, VkMemoryPropertyFlags uiMemProperties
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void getBufferFlags(BufferType::Type type, bool isMappable, VkBufferUsageFlags& usageFlags, VkMemoryPropertyFlags& memoryFlags)
+static void getBufferFlags(BufferType type, bool isMappable, VkBufferUsageFlags& usageFlags, VkMemoryPropertyFlags& memoryFlags)
 {
 	usageFlags = 0;
 	memoryFlags = 0;
@@ -67,11 +67,11 @@ static void getBufferFlags(BufferType::Type type, bool isMappable, VkBufferUsage
 	}
 	switch (type)
 	{
-	case BufferType::Vertex:
+	case BufferType::VertexBuffer:
 		usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		break;
-	case BufferType::Index:
+	case BufferType::IndexBuffer:
 		usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		break;

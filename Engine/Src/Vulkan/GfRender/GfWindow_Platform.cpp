@@ -191,6 +191,8 @@ void GfWindow_Platform::CreateSwapchain(const GfRenderContext& kCtx)
 	kExtend.height = m_kBase.GetHeight();
 
 	// Get the number of buffers to create in the swap chain
+	GF_ASSERT(m_pCapabilities.minImageCount >= GfRenderConstants::ms_uiNBufferingCount && 
+		GfRenderConstants::ms_uiNBufferingCount <=m_pCapabilities.maxImageCount, "Invalid number of images");
 	u32 bufferCount = GfClamp<u32>(GfRenderConstants::ms_uiNBufferingCount, m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount);
 	// Select a image format to use in the swap chain
 	m_kSwapChainFormat = SelectSwapchainFormat();

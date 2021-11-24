@@ -104,6 +104,21 @@ private:
 
 class GfBuffer;
 
+struct GfTextureBarrier 
+{
+	GfTextureView* m_view = nullptr;
+	TextureUsageFlags::Mask m_oldUsage;
+	TextureUsageFlags::Mask m_newUsage;
+};
+struct GfBufferBarrier 
+{
+	GfBuffer* m_buffer = nullptr;
+	u32 m_offset = 0;
+	u32 m_size;
+	BufferUsageFlags::Mask m_oldUsage;
+	BufferUsageFlags::Mask m_newUsage;
+};
+
 class GfCmdBuffer
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBuffer);
@@ -171,6 +186,12 @@ public:
 	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
 
 	void bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler);
+
+	// Sync
+
+	void addTextureBarrier(GfTextureView* texture, TextureUsageFlags::Mask newUsage);
+
+	void addBufferBarrier(GfBuffer* buffer, u32 offset, u32 size, BufferUsageFlags::Mask newUsage);
 
 	// Drawcalls
 

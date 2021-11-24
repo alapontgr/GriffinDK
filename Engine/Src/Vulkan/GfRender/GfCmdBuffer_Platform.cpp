@@ -98,6 +98,8 @@ void GfCmdBuffer_Platform::reset()
 		}
 	}
 	m_curBoundVariant = nullptr;
+
+	vkResetCommandBuffer(m_cmdBuffer, 0);
 }
 
 void GfCmdBuffer_Platform::shutdown(const GfRenderContext& ctx) 
@@ -312,10 +314,10 @@ void GfCmdBuffer_Platform::drawRHI(GfRenderPipelineState* state, u32 uiVertexCou
 
 void GfCmdBuffer_Platform::bindVertexBuffersRHI(GfBuffer** vertexBuffers, u32* vertexBufferOffsets, u32 vertexBufferCount)
 {
-	GfFrameMTStackAlloc::GfMemScope kMemScope(GfFrameMTStackAlloc::Get());
-
-	VkDeviceSize* offsets(GfFrameMTStackAlloc::Get()->Alloc<VkDeviceSize>(vertexBufferCount));
-	VkBuffer* buffers(GfFrameMTStackAlloc::Get()->Alloc<VkBuffer>(vertexBufferCount));
+	StackMemBlock offsetsMem(static_cast<u32>(sizeof(VkDeviceSize) * vertexBufferCount));
+	StackMemBlock buffersMem(static_cast<u32>(sizeof(VkBuffer) * vertexBufferCount));
+	VkDeviceSize* offsets(reinterpret_cast<VkDeviceSize*>(offsetsMem.get()));
+	VkBuffer* buffers(reinterpret_cast<VkBuffer*>(buffersMem.get()));
 	for (u32 i = 0; i < vertexBufferCount; ++i) 
 	{
 		offsets[i] = static_cast<VkDeviceSize>(vertexBufferOffsets[i]);

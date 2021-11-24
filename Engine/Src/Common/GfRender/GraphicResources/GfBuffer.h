@@ -13,23 +13,8 @@
 // Includes
 
 #include "Common/GfCore/GfCoreMinimal.h"
+#include "Common/GfRender/GfRenderCommon.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfBuffer_Platform.h)
-#include "Common/GfRender/GfRenderConstants.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-namespace BufferType 
-{
-	enum Type : u32
-	{
-		Staging = 1,
-		Vertex,
-		Index,
-		Uniform,
-		Storage,
-		// ...
-	};
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +29,7 @@ public:
 
 	struct GfBufferDesc
 	{
-		BufferType::Type	m_bufferType;
+		BufferType			m_bufferType;
 		u32					m_size			= 0;
 		u32					m_alignment		= 1;
 		bool				m_mappable		= false;

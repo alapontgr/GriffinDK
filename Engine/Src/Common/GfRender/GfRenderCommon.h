@@ -12,14 +12,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Common/GfCore/GfCoreMinimal.h"
-#include "Common/GfMemory/GfStackAllocator.h"
 #include "Common/GfCore/GfBitMask.h"
-
-// Multi-threaded stack allocator. Each thread holds an instance of a Stack allocator for temporal memory management
-using GfFrameMTStackAlloc = GfPerThreadStackAllocator<GfDefaultAllocator, GF_KB(64)>;
-
-// Use this for temporary allocations
-using GfFrameTmpAllocator = GfSingleton<GfLinearAllocator>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +33,7 @@ namespace GfParameterSlotType
 		InputAttachment,
 		////////////////////////////////////////////////////////////////////////////////
 		Count,
-		Invalid = Count, // Use count as invalid value so we rest of types begin at 0
+		Invalid = Count, // Use count as invalid value
 		RequiredBits = 4 // Precision needed to represent this type as a bit-field
 	};
 	static_assert(GfParameterSlotType::Count <= (1 << GfParameterSlotType::RequiredBits), "Invalid requiredBits");
@@ -375,6 +368,61 @@ namespace StencilFace
 	};
 	static_assert(StencilFace::Count <= (1 << StencilFace::RequiredBits), "Invalid requiredBits");
 }
+
+namespace TextureUsageFlags 
+{
+	enum Type : u32
+	{
+		SRVVertex		= 1 << 0,
+		SRVFragment		= 1 << 1,
+		SRVCompute		= 1 << 2,
+
+		UAVVertex		= 1 << 3,
+		UAVFragment		= 1 << 4,
+		UAVCompute		= 1 << 5,
+
+		SrcTransfer		= 1 << 6,
+		DstTransfer		= 1 << 7,
+
+		ColorAttachment = 1 << 8,
+		InputAttachment = 1 << 9,
+		DepthStencil	= 1 << 10,
+
+		// Swapchain
+		Present			= 1 << 11,
+
+		// Initialization?
+		Undefined		= 1 << 12,
+
+		// Helpers
+		SRVAll = SRVVertex | SRVFragment | SRVCompute,
+		UAVAll	= UAVVertex | UAVFragment | UAVCompute,
+
+		Sampled = SRVAll,
+		Storage = UAVAll
+	};
+	using Mask = u32;
+}
+
+namespace BufferUsageFlags 
+{
+	enum Type : u32 
+	{
+		VertexBuffer	= 1<<0,
+		IndexBuffer		= 1<<1,
+		Uniform			= 1<<3,
+		Storage			= 1<<4,
+		Indirect		= 1<<5,
+
+		SrcTransfer		= 1<<6,
+		DstTransfer		= 1<<7,
+
+		// Special
+		Staging = SrcTransfer | DstTransfer,
+	};
+	using Mask = u32;
+}
+using BufferType = BufferUsageFlags::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 

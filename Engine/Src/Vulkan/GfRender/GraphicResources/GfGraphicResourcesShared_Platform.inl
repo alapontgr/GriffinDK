@@ -267,14 +267,6 @@ static GF_FORCEINLINE GfTextureFormat::Type ConvertTextureFormatToVkFormat(VkFor
 	return GfTextureFormat::Undefined;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-
-static GF_FORCEINLINE VkImageUsageFlags ConvertTextureUsageShift(ETextureUsageShift::Type eShift)
-{
-	return g_pImageUsageBitsConverter[eShift];
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 static GF_FORCEINLINE VkImageViewType ConvertViewType(ETextureViewType::Type eViewType)

@@ -27,28 +27,28 @@ VkImageType getImageType(TextureType type)
 	return s_VulkanTextureTypes[static_cast<u32>(type)];
 }
 
-VkImageUsageFlags convertToVulkanUsage(TextureType type, TextureUsageMask usage) 
+VkImageUsageFlags convertToVulkanUsage(TextureType type, TextureUsageFlags::Mask usage) 
 {
 	VkImageUsageFlags vkUsage = 0;
 
 	vkUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-	if ((usage & TextureUsage::Sample) != 0) 
+	if ((usage & TextureUsageFlags::SRVAll) != 0) 
 	{
 		vkUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 	}
 
-	if ((usage & TextureUsage::Storage) != 0) 
+	if ((usage & TextureUsageFlags::Storage) != 0) 
 	{
 		vkUsage |= VK_IMAGE_USAGE_STORAGE_BIT;
 	}
 
-	if ((usage & TextureUsage::RenderTarget) != 0) 
+	if ((usage & TextureUsageFlags::ColorAttachment) != 0) 
 	{
 		vkUsage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 	}
 
-	if ((usage & TextureUsage::DepthStencil) != 0) 
+	if ((usage & TextureUsageFlags::DepthStencil) != 0) 
 	{
 		vkUsage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 	}

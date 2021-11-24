@@ -206,27 +206,6 @@ namespace GfTextureFormat
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETextureUsageShift 
-{
-	// Ref: https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/VkImageUsageFlagBits.html
-	enum Type : u16 
-	{
-		Transfer_Src = 0,
-		Transfer_Dst,
-		Sampled,
-		Storage,
-		ColorAttachment,
-		DepthStencilAttachment,
-		TransientAttachment,
-		InputAttachment,
-
-		////////////////////////////////////////////////////////////////////////////////
-		COUNT
-	};
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 namespace ETextureViewType
 {
 	enum Type : u32

@@ -43,7 +43,7 @@ bool GfTexture::init(const TextureDesc& desc)
 	if (!getIsInitialized())
 	{
 		bool isDepth = isDepthFormat(desc.m_format);
-		if (!isDepth || (isDepth && (desc.m_usage & TextureUsage::DepthStencil) != 0)) 
+		if (!isDepth || (isDepth && (desc.m_usage & TextureUsageFlags::DepthStencil) != 0)) 
 		{
 			m_desc = desc;
 			m_flags |= Flags::Initialized;
@@ -139,7 +139,7 @@ bool GfTexture2D::init(u32 width, u32 height, u32 mips,
 	desc.m_mipCount = mips;
 	desc.m_textureType = TextureType::Type_2D;
 	desc.m_format = format;
-	desc.m_usage = TextureUsage::Sample;
+	desc.m_usage = TextureUsageFlags::Sampled;
 	return GfTexture::init(desc);
 }
 

@@ -12,7 +12,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Common/GfCore/GfCoreMinimal.h"
-#include "Common/GfRender/GraphicResources/GfGraphicResourceBase.h"
+#include "Common/GfRender/GfRenderCommon.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResourcesShared.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfTexture_Platform.h)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,18 +38,6 @@ enum class TextureNumSamples : u32
 	x16
 };
 
-namespace TextureUsage 
-{
-	enum Type
-	{
-		Sample			= 1<<0,
-		RenderTarget	= 1<<1,
-		DepthStencil	= 1<<2,
-		Storage			= 1<<3
-	};
-};
-using TextureUsageMask = u32;
-
 struct TextureDesc
 {
 	u32						m_width			= 0;
@@ -58,8 +47,8 @@ struct TextureDesc
 	u32						m_mipCount		= 1;
 	TextureNumSamples		m_numSamples	= TextureNumSamples::None;
 	TextureType				m_textureType	= TextureType::Type_2D;
-	GfTextureFormat::Type		m_format		= GfTextureFormat::R8G8B8A8_UNorm;
-	TextureUsageMask		m_usage			= TextureUsage::Sample;
+	GfTextureFormat::Type	m_format		= GfTextureFormat::R8G8B8A8_UNorm;
+	TextureUsageFlags::Mask	m_usage			= TextureUsageFlags::SRVAll;
 	bool					m_mappable		= false;
 };
 
@@ -160,7 +149,7 @@ public:
 
 	TextureType getTextureType() const;
 
-	TextureUsageMask getTextureUsage() const;
+	TextureUsageFlags::Mask getTextureUsage() const;
 
 	bool getIsMappable() const;
 
@@ -206,12 +195,12 @@ GF_FORCEINLINE GfTextureFormat::Type GfTexture::getFormat() const
 
 GF_FORCEINLINE bool GfTexture::isDepthBuffer() const
 {
-	return (m_desc.m_usage & TextureUsage::DepthStencil) != 0;
+	return (m_desc.m_usage & TextureUsageFlags::DepthStencil) != 0;
 }
 
 GF_FORCEINLINE bool GfTexture::isRT() const
 {
-	return (m_desc.m_usage & TextureUsage::RenderTarget) != 0;
+	return (m_desc.m_usage & TextureUsageFlags::ColorAttachment) != 0;
 }
 
 GF_FORCEINLINE u32 GfTexture::getWidth() const
@@ -239,7 +228,7 @@ GF_FORCEINLINE TextureType GfTexture::getTextureType() const
 	return m_desc.m_textureType;
 }
 
-GF_FORCEINLINE TextureUsageMask GfTexture::getTextureUsage() const
+GF_FORCEINLINE TextureUsageFlags::Mask GfTexture::getTextureUsage() const
 {
 	return m_desc.m_usage;
 }

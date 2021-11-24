@@ -35,7 +35,7 @@ class GfRenderConstants
 public:
 
 	// This constant defines the number of buffered buffers used by the application.
-	static constexpr u32 ms_uiNBufferingCount = 2;
+	static constexpr u32 ms_uiNBufferingCount = 3;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

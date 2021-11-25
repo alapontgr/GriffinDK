@@ -53,7 +53,7 @@ u32 FindMemTypeIdx(const u32 uiTypeFilter, VkMemoryPropertyFlags uiMemProperties
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void getBufferFlags(BufferType type, bool isMappable, VkBufferUsageFlags& usageFlags, VkMemoryPropertyFlags& memoryFlags)
+static void getBufferFlags(BufferUsageFlags::Mask usage, bool isMappable, VkBufferUsageFlags& usageFlags, VkMemoryPropertyFlags& memoryFlags)
 {
 	usageFlags = 0;
 	memoryFlags = 0;
@@ -65,27 +65,50 @@ static void getBufferFlags(BufferType type, bool isMappable, VkBufferUsageFlags&
 	{
 		memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	}
-	switch (type)
+
+	// Enable all buffers with transfer operations for now
+	usageFlags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+	// Valid usage types
+	if ((usage & BufferUsageFlags::VertexBuffer) != 0) 
 	{
-	case BufferType::VertexBuffer:
-		usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		break;
-	case BufferType::IndexBuffer:
-		usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		break;
-	case BufferType::Uniform:
-		usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memoryFlags |= isMappable ? 0 : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		break;
-	case BufferType::Staging:
-		usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		break;
-	default:
-		GF_ASSERT_ALWAYS("Buffer type not supported");
-		break;
+		usageFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	}
+
+	if ((usage & BufferUsageFlags::IndexBuffer) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	}
+
+	if ((usage & BufferUsageFlags::AllUniform) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	}
+
+	// Transfer
+	if ((usage & BufferUsageFlags::Staging) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		memoryFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	}
+	if ((usage & BufferUsageFlags::SrcTransfer) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	}
+	if ((usage & BufferUsageFlags::DstTransfer) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	}
+
+	// Indirect
+	if ((usage & BufferUsageFlags::Indirect) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+	}
+
+	if ((usage & BufferUsageFlags::AllStorage) != 0) 
+	{
+		usageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT  ;
 	}
 }
 

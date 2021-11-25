@@ -397,7 +397,6 @@ namespace TextureUsageFlags
 		// Helpers
 		SRVAll = SRVVertex | SRVFragment | SRVCompute,
 		UAVAll	= UAVVertex | UAVFragment | UAVCompute,
-
 		Sampled = SRVAll,
 		Storage = UAVAll
 	};
@@ -408,21 +407,29 @@ namespace BufferUsageFlags
 {
 	enum Type : u32 
 	{
-		VertexBuffer	= 1<<0,
-		IndexBuffer		= 1<<1,
-		Uniform			= 1<<3,
-		Storage			= 1<<4,
-		Indirect		= 1<<5,
+		SrcTransfer		= 1<<0,
+		DstTransfer		= 1<<1,
+		AllTransfer		= SrcTransfer | DstTransfer,
+		
+		VertexBuffer	= 1<<2,
+		IndexBuffer		= 1<<3,
+		Indirect		= 1<<4,
+		
+		UniformVertex	= 1<<5,
+		UniformFragment	= 1<<6,
+		UniformCompute	= 1<<7,
 
-		SrcTransfer		= 1<<6,
-		DstTransfer		= 1<<7,
+		StorageVertex	= 1<<8,
+		StorageFragment	= 1<<9,
+		StorageCompute	= 1<<10,
 
-		// Special
-		Staging = SrcTransfer | DstTransfer,
+		// Special & Helpers
+		Staging			= 1<<11,
+		AllUniform		= UniformVertex | UniformFragment | UniformCompute, 
+		AllStorage		= UniformVertex | UniformFragment | UniformCompute, 
 	};
 	using Mask = u32;
 }
-using BufferType = BufferUsageFlags::Type;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -548,6 +555,24 @@ struct GfDepthState
 	GfStencilState m_stencilFront;
 	GfStencilState m_stencilBack;
 };
+
+struct GfTextureViewConfig 
+{
+	GfTextureViewConfig()
+		: m_firstMipLevel(0)
+		, m_mipLevelCount(0xffff)
+		, m_firstSlice(0)
+		, m_sliceCount(0xffff)
+	{}
+
+	u64 getHash() const { return *reinterpret_cast<const u64*>(this);  }
+
+	u32 m_firstMipLevel : 16;
+	u32 m_mipLevelCount : 16;
+	u32 m_firstSlice : 16;
+	u32 m_sliceCount : 16;
+};
+using GfTextureViewID = u64;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Shaders related

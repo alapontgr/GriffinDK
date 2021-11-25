@@ -29,7 +29,7 @@ public:
 
 	struct GfBufferDesc
 	{
-		BufferType			m_bufferType;
+		BufferUsageFlags::Mask	m_bufferType;
 		u32					m_size			= 0;
 		u32					m_alignment		= 1;
 		bool				m_mappable		= false;

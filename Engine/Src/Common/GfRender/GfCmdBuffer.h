@@ -38,6 +38,7 @@ namespace GfRenderStateFlags
 	};
 }
 
+// Render state
 struct GfShaderPipeState 
 {
 	GfShaderPipeline* m_curPipeline = nullptr;
@@ -103,22 +104,38 @@ private:
 };
 
 class GfBuffer;
+class GfTexture;
 
+// Barriers
 struct GfTextureBarrier 
 {
-	GfTextureView* m_view = nullptr;
+	const GfTexture* m_texture = nullptr;
+	GfTextureViewConfig m_viewConfig;
 	TextureUsageFlags::Mask m_oldUsage;
 	TextureUsageFlags::Mask m_newUsage;
 };
+struct GfTextureBarrierArray 
+{
+	GfTextureBarrier* m_array;
+	u32 m_size = 0;
+	u32 m_capacity = 0;
+};
 struct GfBufferBarrier 
 {
-	GfBuffer* m_buffer = nullptr;
+	const GfBuffer* m_buffer = nullptr;
 	u32 m_offset = 0;
 	u32 m_size;
 	BufferUsageFlags::Mask m_oldUsage;
 	BufferUsageFlags::Mask m_newUsage;
 };
+struct GfBufferBarrierArray 
+{
+	GfBufferBarrier* m_array;
+	u32 m_size = 0;
+	u32 m_capacity = 0;
+};
 
+// CommandBuffer class
 class GfCmdBuffer
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfCmdBuffer);
@@ -181,17 +198,17 @@ public:
 
 	void bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size);
 
-	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx = 0);
 
-	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx = 0);
 
 	void bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler);
 
 	// Sync
 
-	void addTextureBarrier(GfTextureView* texture, TextureUsageFlags::Mask newUsage);
+	void addTextureBarrier(const GfTextureView& textureView, TextureUsageFlags::Mask oldUsage, TextureUsageFlags::Mask newUsage);
 
-	void addBufferBarrier(GfBuffer* buffer, u32 offset, u32 size, BufferUsageFlags::Mask newUsage);
+	void addBufferBarrier(const GfBuffer& buffer, u32 offset, u32 size, BufferUsageFlags::Mask oldUsage, BufferUsageFlags::Mask newUsage);
 
 	// Drawcalls
 
@@ -212,12 +229,17 @@ private:
 
 	void shutdown();
 
+	void flushBarriers();
+
 	GfCmdBufferType::Type	m_type;
 	GfRenderContextFamilies::Type m_queue;
 	const GfRenderContext* m_ctx;
 	class GfCmdBufferCache* m_cache;
 	GfLinearAllocator m_linearAllocator;
 	GfRenderPipelineState m_curState;
+
+	GfTextureBarrierArray m_textureBarriers;
+	GfBufferBarrierArray m_bufferBarriers;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -258,6 +280,7 @@ GF_FORCEINLINE void GfCmdBuffer::beginRecording()
 
 GF_FORCEINLINE void GfCmdBuffer::endRecording()
 {
+	flushBarriers();
 	m_kPlatform.endRecordingRHI(*m_ctx);
 }
 

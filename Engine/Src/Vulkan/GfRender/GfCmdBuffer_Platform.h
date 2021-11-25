@@ -28,6 +28,8 @@ class GfSampler;
 struct GfViewport;
 struct GfScissor;
 struct GfRenderPipelineState;
+struct GfTextureBarrier;
+struct GfBufferBarrier;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -134,11 +136,17 @@ private:
 
 	void bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size);
 
-	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx = 0);
+	void bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx = 0);
 
-	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx);
+	void bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx);
 
 	void bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampler& sampler);
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	void flushBarriers(
+		const GfWeakArray<GfTextureBarrier>& textureBarriers, 
+		const GfWeakArray<GfBufferBarrier>& bufferBarriers);
 
 	////////////////////////////////////////////////////////////////////////////////
 

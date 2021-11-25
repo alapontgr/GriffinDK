@@ -156,6 +156,16 @@ void GfCmdBuffer::reset()
 	GF_ASSERT(m_ctx, "Context was not initialized");
 	m_curState = GfRenderPipelineState();
 	m_linearAllocator.reset();
+
+	// Reset barriers
+	m_textureBarriers.m_array = nullptr;
+	m_textureBarriers.m_capacity = 0;
+	m_textureBarriers.m_size = 0;
+
+	m_bufferBarriers.m_array = nullptr;
+	m_bufferBarriers.m_capacity = 0;
+	m_bufferBarriers.m_size = 0;
+
 	m_kPlatform.reset();
 }
 
@@ -163,6 +173,13 @@ void GfCmdBuffer::shutdown()
 {
 	m_linearAllocator.shutdown();
 	m_kPlatform.shutdown(*m_ctx);
+}
+
+void GfCmdBuffer::flushBarriers()
+{
+	m_kPlatform.flushBarriers(
+		GfWeakArray<GfTextureBarrier>(m_textureBarriers.m_array, m_textureBarriers.m_size),
+		GfWeakArray<GfBufferBarrier>(m_bufferBarriers.m_array, m_bufferBarriers.m_size));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +234,9 @@ void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 	GF_ASSERT(!m_curState.getCurRenderPass(), "Trying to begin a pass before end");
 	GF_ASSERT(renderPass->getWidth() != 0 && renderPass->getHeight(), "Resolution was not initialized");
 
+	// Flush barriers
+	flushBarriers();
+
 	m_curState.setRenderPass(renderPass);
 	m_kPlatform.setViewport(*m_ctx, renderPass->getViewport());
 	m_kPlatform.setScissors(*m_ctx, renderPass->getScissor());
@@ -255,15 +275,15 @@ void GfCmdBuffer::bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const G
 	m_kPlatform.bindUniformBuffer(setIdx, bindIdx, buffer, offset, size);
 }
 
-void GfCmdBuffer::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+void GfCmdBuffer::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
-	GF_ASSERT((texture->getTexture()->getTextureUsage() & TextureUsageFlags::Sampled) != 0, "Trying to bind a texture without the Sample flag as a sampled texture");
+	GF_ASSERT((texture.getTexture()->getTextureUsage() & TextureUsageFlags::Sampled) != 0, "Trying to bind a texture without the Sample flag as a sampled texture");
 	m_kPlatform.bindSampledTexture(setIdx, bindIdx, texture, arrayIdx);
 }
 
-void GfCmdBuffer::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+void GfCmdBuffer::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
-	GF_ASSERT((texture->getTexture()->getTextureUsage() & TextureUsageFlags::Storage) != 0, "Trying to bind a texture without the Storage flag as an storage image");
+	GF_ASSERT((texture.getTexture()->getTextureUsage() & TextureUsageFlags::Storage) != 0, "Trying to bind a texture without the Storage flag as an storage image");
 	m_kPlatform.bindStorageImage(setIdx, bindIdx, texture, arrayIdx);
 }
 
@@ -272,14 +292,59 @@ void GfCmdBuffer::bindSampler(const u32 setIdx, const u32 bindIdx, const GfSampl
 	m_kPlatform.bindSampler(setIdx, bindIdx, sampler);
 }
 
-void GfCmdBuffer::addTextureBarrier(GfTextureView* texture, TextureUsageFlags::Mask newUsage)
+void GfCmdBuffer::addTextureBarrier(
+	const GfTextureView& textureView, 
+	TextureUsageFlags::Mask oldUsage,
+	TextureUsageFlags::Mask newUsage)
 {
-	GF_ASSERT_ALWAYS("TODO: Implement me!");
+	u32 idx = m_textureBarriers.m_size;
+	u32 newSize = idx + 1;
+	// Grow if needed
+	if (newSize > m_textureBarriers.m_capacity) 
+	{
+		u32 newCapacity = 2 * glm::max(m_textureBarriers.m_capacity, 1u);
+		void* newArray = m_linearAllocator.allocRaw(static_cast<u32>(sizeof(GfTextureBarrier) * newCapacity));
+		if (m_textureBarriers.m_capacity > 0) 
+		{
+			memcpy(newArray, m_textureBarriers.m_array, sizeof(GfTextureBarrier) * m_textureBarriers.m_capacity);
+		}
+		m_textureBarriers.m_capacity = newCapacity;
+		m_textureBarriers.m_array = reinterpret_cast<GfTextureBarrier*>(newArray);
+	}
+	m_textureBarriers.m_size = newSize;
+	GfTextureBarrier& barrier = m_textureBarriers.m_array[idx];
+	barrier.m_oldUsage = oldUsage;
+	barrier.m_newUsage = newUsage;
+	barrier.m_viewConfig = textureView.getConfig();
+	barrier.m_texture = textureView.getTexture();
 }
 
-void GfCmdBuffer::addBufferBarrier(GfBuffer* buffer, u32 offset, u32 size, BufferUsageFlags::Mask newUsage)
+void GfCmdBuffer::addBufferBarrier(
+	const GfBuffer& buffer, u32 offset, u32 size, 
+	BufferUsageFlags::Mask oldUsage, 
+	BufferUsageFlags::Mask newUsage)
 {
-	GF_ASSERT_ALWAYS("TODO: Implement me!");
+	u32 idx = m_bufferBarriers.m_size;
+	u32 newSize = idx + 1;
+	// Grow if needed
+	if (newSize > m_bufferBarriers.m_capacity) 
+	{
+		u32 newCapacity = 2 * glm::max(m_bufferBarriers.m_capacity, 1u);
+		void* newArray = m_linearAllocator.allocRaw(static_cast<u32>(sizeof(GfBufferBarrier) * newCapacity));
+		if (m_bufferBarriers.m_capacity > 0) 
+		{
+			memcpy(newArray, m_bufferBarriers.m_array, sizeof(GfBufferBarrier) * m_bufferBarriers.m_capacity);
+		}
+		m_bufferBarriers.m_capacity = newCapacity;
+		m_bufferBarriers.m_array = reinterpret_cast<GfBufferBarrier*>(newArray);
+	}
+	m_bufferBarriers.m_size = newSize;
+	GfBufferBarrier& barrier = m_bufferBarriers.m_array[idx];
+	barrier.m_oldUsage = oldUsage;
+	barrier.m_newUsage = newUsage;
+	barrier.m_offset = offset;
+	barrier.m_size = size;
+	barrier.m_buffer = &buffer;
 }
 
 void GfCmdBuffer::drawIndexed(u32 uiIdxCount, u32 uiInstanceCount, u32 uiIdxOffset /*= 0*/, u32 uiVertexOffset /*= 0*/, u32 uiFirstInstanceId /*= 0*/)

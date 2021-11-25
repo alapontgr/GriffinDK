@@ -23,6 +23,148 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static void getStagesAndAccessForBufferUsage(
+	const BufferUsageFlags::Mask bufferUsage,
+	VkAccessFlags& access, 
+	VkPipelineStageFlags& stages) 
+{
+	access = 0;
+	stages = 0;
+
+	if ((bufferUsage & BufferUsageFlags::SrcTransfer) != 0) 
+	{
+		access |= VK_ACCESS_TRANSFER_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+	if ((bufferUsage & BufferUsageFlags::DstTransfer) != 0) 
+	{
+		access |= VK_ACCESS_TRANSFER_WRITE_BIT;
+		stages |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+
+	if ((bufferUsage & BufferUsageFlags::VertexBuffer) != 0) 
+	{
+		access |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+	}
+	if ((bufferUsage & BufferUsageFlags::IndexBuffer) != 0) 
+	{
+		access |= VK_ACCESS_INDEX_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+	}
+	if ((bufferUsage & BufferUsageFlags::AllUniform) != 0) 
+	{
+		access |= VK_ACCESS_UNIFORM_READ_BIT;
+		stages |= ((bufferUsage & BufferUsageFlags::UniformVertex) != 0) ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT : 0;
+		stages |= ((bufferUsage & BufferUsageFlags::UniformFragment) != 0) ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : 0;
+		stages |= ((bufferUsage & BufferUsageFlags::UniformCompute) != 0) ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : 0;
+	}
+	if ((bufferUsage & BufferUsageFlags::AllStorage) != 0) 
+	{
+		access |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+		stages |= ((bufferUsage & BufferUsageFlags::StorageVertex) != 0) ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT : 0;
+		stages |= ((bufferUsage & BufferUsageFlags::StorageFragment) != 0) ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : 0;
+		stages |= ((bufferUsage & BufferUsageFlags::StorageCompute) != 0) ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : 0;
+	}
+	if ((bufferUsage & BufferUsageFlags::Indirect) != 0) 
+	{
+		access |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT ;
+	}
+}
+
+static void getStagesAccessAspectAndLayoutForTextureUsage(
+	const TextureUsageFlags::Mask textureUsage, bool isNewLayout,
+	VkAccessFlags& access, 
+	VkPipelineStageFlags& stages, 
+	VkImageAspectFlags& aspect, 
+	VkImageLayout& layout) 
+{
+	access = 0;
+	stages = 0;
+	aspect = 0;
+	layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	// Special cases
+	if ((textureUsage & TextureUsageFlags::Undefined) != 0) 
+	{
+		layout = VK_IMAGE_LAYOUT_UNDEFINED;
+		return;
+	}
+	if ((textureUsage & TextureUsageFlags::Present) != 0) 
+	{
+		layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		stages |= isNewLayout ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : 0;
+		return;
+	}
+
+	// Normal cases
+	if ((textureUsage & TextureUsageFlags::SRVAll) != 0) 
+	{
+		layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		access |= VK_ACCESS_SHADER_READ_BIT;
+		stages |= ((textureUsage & TextureUsageFlags::SRVVertex) != 0) ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT : 0;
+		stages |= ((textureUsage & TextureUsageFlags::SRVFragment) != 0) ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : 0;
+		stages |= ((textureUsage & TextureUsageFlags::SRVCompute) != 0) ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : 0;
+	}
+
+	if ((textureUsage & TextureUsageFlags::UAVAll) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_GENERAL;
+		aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		access |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+		stages |= ((textureUsage & TextureUsageFlags::UAVVertex) != 0) ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT : 0;
+		stages |= ((textureUsage & TextureUsageFlags::UAVFragment) != 0) ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT : 0;
+		stages |= ((textureUsage & TextureUsageFlags::UAVCompute) != 0) ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : 0;
+	}
+
+	if ((textureUsage & TextureUsageFlags::SrcTransfer) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		aspect = 0;
+		access |= VK_ACCESS_TRANSFER_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+	if ((textureUsage & TextureUsageFlags::DstTransfer) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		aspect = 0;
+		access |= VK_ACCESS_TRANSFER_WRITE_BIT;
+		stages |= VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+
+	if ((textureUsage & TextureUsageFlags::ColorAttachment) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+		access |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		stages |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+	if ((textureUsage & TextureUsageFlags::InputAttachment) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ;
+		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+		access |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+	if ((textureUsage & TextureUsageFlags::DepthStencil) != 0) 
+	{
+		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
+		layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT | VkImageAspectFlagBits::VK_IMAGE_ASPECT_STENCIL_BIT;
+		access |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+		stages |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 GfCmdBufferFactory_Platform::GfCmdBufferFactory_Platform()
 	: m_pool(VK_NULL_HANDLE)
 {
@@ -400,23 +542,21 @@ void GfCmdBuffer_Platform::bindUniformBuffer(const u32 setIdx, const u32 bindIdx
 	GF_ASSERT(entry.m_bufferBind.m_buffer != VK_NULL_HANDLE, "Resource has not been created");
 }
 
-void GfCmdBuffer_Platform::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+void GfCmdBuffer_Platform::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
 	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
 	entry.m_type = GfParameterSlotType::SampledImage;
-	entry.m_sampledTextureBind.m_view = reinterpret_cast<VkImageView>(texture->getViewID(*m_kBase.m_ctx));
-	entry.m_sampledTextureBind.m_layout = texture->getTexture()->Plat().getCurrentLayout();
-	GF_ASSERT(entry.m_sampledTextureBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
+	entry.m_sampledTextureBind.m_view = reinterpret_cast<VkImageView>(texture.getViewID(*m_kBase.m_ctx));
+	entry.m_sampledTextureBind.m_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	GF_ASSERT(entry.m_sampledTextureBind.m_view != VK_NULL_HANDLE, "Resource has not been created");
 }
 
-void GfCmdBuffer_Platform::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView* texture, const u32 arrayIdx) 
+void GfCmdBuffer_Platform::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
 	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
 	entry.m_type = GfParameterSlotType::StorageImage;
-	entry.m_imageBind.m_view = reinterpret_cast<VkImageView>(texture->getViewID(*m_kBase.m_ctx));
-	entry.m_imageBind.m_layout = texture->getTexture()->Plat().getCurrentLayout();
-	GF_ASSERT(entry.m_imageBind.m_layout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, "This texture has not been transitioned to the correct layout");
+	entry.m_imageBind.m_view = reinterpret_cast<VkImageView>(texture.getViewID(*m_kBase.m_ctx));
+	entry.m_imageBind.m_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	GF_ASSERT(entry.m_imageBind.m_view != VK_NULL_HANDLE, "Resource has not been created");
 }
 
@@ -426,6 +566,66 @@ void GfCmdBuffer_Platform::bindSampler(const u32 setIdx, const u32 bindIdx, cons
 	entry.m_type = GfParameterSlotType::Sampler;
 	entry.m_samplerBind.m_sampler = sampler.Plat().GetSampler();
 	GF_ASSERT(entry.m_samplerBind.m_sampler != VK_NULL_HANDLE, "Resource has not been created");
+}
+
+void GfCmdBuffer_Platform::flushBarriers(const GfWeakArray<GfTextureBarrier>& textureBarriers, const GfWeakArray<GfBufferBarrier>& bufferBarriers)
+{
+	VkPipelineStageFlags srcStages(0);
+	VkPipelineStageFlags dstStages(0);
+
+	GfLinearAllocator::Block imageBarriersMem = m_kBase.m_linearAllocator.allocBlock(static_cast<u32>(sizeof(VkImageMemoryBarrier) * textureBarriers.size()));
+	VkImageMemoryBarrier* imageB = reinterpret_cast<VkImageMemoryBarrier*>(imageBarriersMem.get());
+	for (u32 i=0; i<textureBarriers.size(); ++i) 
+	{
+		const GfTextureBarrier& barrier = textureBarriers[i];
+		imageB[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageB[i].pNext = nullptr;
+		imageB[i].srcQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		imageB[i].dstQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		imageB[i].image = barrier.m_texture->Plat().getImage();
+		imageB[i].subresourceRange.baseArrayLayer = barrier.m_viewConfig.m_firstSlice;
+		imageB[i].subresourceRange.layerCount = barrier.m_viewConfig.m_sliceCount;
+		imageB[i].subresourceRange.baseMipLevel = barrier.m_viewConfig.m_firstMipLevel;
+		imageB[i].subresourceRange.levelCount = barrier.m_viewConfig.m_mipLevelCount;
+		VkPipelineStageFlags oldStages(0); VkPipelineStageFlags newStages(0);
+		VkImageAspectFlags oldAspect(0);
+		getStagesAccessAspectAndLayoutForTextureUsage(barrier.m_oldUsage, false, imageB[i].srcAccessMask, oldStages, oldAspect, imageB[i].oldLayout);
+		getStagesAccessAspectAndLayoutForTextureUsage(barrier.m_newUsage, true, imageB[i].dstAccessMask, newStages, imageB[i].subresourceRange.aspectMask, imageB[i].newLayout);
+
+		// Unefficient for Mali
+		srcStages |= oldStages;
+		dstStages |= newStages;
+	}
+
+	GfLinearAllocator::Block bufferBarriersMem = m_kBase.m_linearAllocator.allocBlock(static_cast<u32>(sizeof(VkBufferMemoryBarrier) * bufferBarriers.size()));
+	VkBufferMemoryBarrier* bufferB = reinterpret_cast<VkBufferMemoryBarrier*>(bufferBarriersMem.get());
+	for (u32 i=0; i<bufferBarriers.size(); ++i) 
+	{
+		const GfBufferBarrier& barrier = bufferBarriers[i];
+		bufferB[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+		bufferB[i].pNext = nullptr;
+		bufferB[i].offset = barrier.m_offset;
+		bufferB[i].size = barrier.m_size;
+		bufferB[i].buffer = barrier.m_buffer->Plat().getHandle();
+		bufferB[i].srcQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		bufferB[i].dstQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		VkPipelineStageFlags oldStages(0); VkPipelineStageFlags newStages(0);
+		getStagesAndAccessForBufferUsage(barrier.m_oldUsage, bufferB[i].srcAccessMask, oldStages);
+		getStagesAndAccessForBufferUsage(barrier.m_newUsage, bufferB[i].dstAccessMask, newStages);
+		
+		// Unefficient for Mali
+		srcStages |= oldStages;
+		dstStages |= newStages;
+	}
+
+	vkCmdPipelineBarrier(
+		m_cmdBuffer,
+		srcStages,
+		dstStages,
+		0, // TODO: Enable Per Region dependencies
+		0, nullptr,
+		bufferBarriers.size(), bufferB,
+		textureBarriers.size(), imageB);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

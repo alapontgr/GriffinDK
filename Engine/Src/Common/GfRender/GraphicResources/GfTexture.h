@@ -52,24 +52,6 @@ struct TextureDesc
 	bool					m_mappable		= false;
 };
 
-struct GfTextureViewConfig 
-{
-	GfTextureViewConfig()
-		: m_firstMipLevel(0)
-		, m_mipLevelCount(0xffff)
-		, m_firstSlice(0)
-		, m_sliceCount(0xffff)
-	{}
-
-	u64 getHash() const { return *reinterpret_cast<const u64*>(this);  }
-
-	u32 m_firstMipLevel : 16;
-	u32 m_mipLevelCount : 16;
-	u32 m_firstSlice : 16;
-	u32 m_sliceCount : 16;
-};
-using GfTextureViewID = u64;
-
 // Used to configure what areas of the tetxure to view
 class GfTextureView
 {

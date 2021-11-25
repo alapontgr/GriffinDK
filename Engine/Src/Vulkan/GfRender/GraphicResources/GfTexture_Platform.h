@@ -63,10 +63,6 @@ public:
 
 	VkImageAspectFlags getAspectMask() const;
 
-	VkImageLayout getCurrentLayout() const;
-
-	void setCurrentLayout(VkImageLayout layout);
-
 	void loadTexture2DDataFromStagingBufferRHI(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer, const GfBuffer& from, u32 bufferOffset);
 
 protected:
@@ -101,11 +97,6 @@ GF_FORCEINLINE VkImageAspectFlags GfTexture_Platform::getAspectMask() const
 	return m_uiAspectMask;
 }
 
-GF_FORCEINLINE VkImageLayout GfTexture_Platform::getCurrentLayout() const
-{
-	return m_currLayout;
-}
-
 GF_FORCEINLINE VkImageView GfTexture_Platform::getDefaultView() const
 {
 	return m_defaultView;
@@ -115,11 +106,6 @@ static_assert(sizeof(u64) == sizeof(VkImageView), "Wops!");
 GF_FORCEINLINE u64 GfTexture_Platform::getDefaultViewID() const
 {
 	return reinterpret_cast<u64>(m_defaultView);
-}
-
-GF_FORCEINLINE void GfTexture_Platform::setCurrentLayout(VkImageLayout layout)
-{
-	m_currLayout = layout;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

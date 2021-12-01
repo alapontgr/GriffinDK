@@ -29,14 +29,6 @@ struct GfWindowInitParams_Platform
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct GfFrameSyncing
-{
-	VkSemaphore m_pFinishedRendering;
-	VkSemaphore	m_pImageReady;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
 struct GfWindowInitParams;
 
 class GfWindow_Platform
@@ -63,8 +55,6 @@ public:
 
 	VkImage GetCurrentBackBuffer() const;
 
-	const GfFrameSyncing& GetFrameSyncPrimitives() const;
-
 	VkSurfaceKHR GetSurface() const;
 
 private:
@@ -74,8 +64,6 @@ private:
 	void CreateSurface(const GfRenderContext& kCtx);
 
 	void CreateSwapchain(const GfRenderContext& kCtx);
-
-	void CreateSyncPrimitives(const GfRenderContext& kCtx);
 
 	Bool TickRHI();
 
@@ -110,8 +98,6 @@ private:
 	GfVector<VkSurfaceFormatKHR>	m_tSupportedFormats;
 	GfVector<VkPresentModeKHR>		m_tSupportedPresentModes;
 
-	// Sync
-	GfFrameSyncing					m_pFrameSyncEntries[GfRenderConstants::ms_uiNBufferingCount];
 };
 
 ////////////////////////////////////////////////////////////////////////////////

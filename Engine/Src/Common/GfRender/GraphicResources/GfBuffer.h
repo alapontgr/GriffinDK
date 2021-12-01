@@ -46,10 +46,6 @@ public:
 
 	GfBuffer();
 
-	void init(const GfBufferDesc& desc);
-
-	bool create(const GfRenderContext& ctx);
-
 	bool create(const GfRenderContext& ctx, const GfBufferDesc& desc);
 
 	void destroy(const GfRenderContext& ctx);

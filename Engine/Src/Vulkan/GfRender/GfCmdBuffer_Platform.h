@@ -25,6 +25,7 @@ class GfRenderPass;
 class GfBuffer;
 class GfTextureView;
 class GfSampler;
+class GfSemaphore;
 struct GfViewport;
 struct GfScissor;
 struct GfRenderPipelineState;
@@ -109,10 +110,10 @@ private:
 	bool isReady(const GfRenderContext& ctx);
 
 	void submitRHI(
-		const GfRenderContext& kCtx, 
-		const GfWindow& kWindow,
+		const GfRenderContext& ctx,
 		GfRenderContextFamilies::Type eQueueType, 
-		Bool bLast);
+		const GfSemaphore* waitSemaphore = nullptr,
+		const GfSemaphore* signalSemaphore = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////////
 

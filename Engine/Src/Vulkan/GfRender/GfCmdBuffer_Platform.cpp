@@ -268,28 +268,36 @@ bool GfCmdBuffer_Platform::isReady(const GfRenderContext& kCtx)
 ////////////////////////////////////////////////////////////////////////////////
 
 void GfCmdBuffer_Platform::submitRHI(
-	const GfRenderContext& kCtx,
-	const GfWindow& kWindow,
+	const GfRenderContext& ctx,
 	GfRenderContextFamilies::Type eQueueType,
-	Bool bLast)
+	const GfSemaphore* waitSemaphorePtr,
+	const GfSemaphore* signalSemaphorePtr)
 {
-	const GfFrameSyncing& kSyncPrimitives(kWindow.Plat().GetFrameSyncPrimitives());
 	VkPipelineStageFlags uiFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	VkSubmitInfo kInfo{};
 	kInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	kInfo.pNext = nullptr;
-	if (bLast) 
+	
+	VkSemaphore waitSemaphore = VK_NULL_HANDLE;
+	VkSemaphore signalSemaphore = VK_NULL_HANDLE;
+
+	if (waitSemaphorePtr) 
 	{
+		waitSemaphore = waitSemaphorePtr->Plat().getHandle();
 		kInfo.waitSemaphoreCount = 1;
-		kInfo.pWaitSemaphores = &kSyncPrimitives.m_pImageReady;
-		kInfo.pWaitDstStageMask = &uiFlags;
-		kInfo.signalSemaphoreCount = 1;
-		kInfo.pSignalSemaphores = &kSyncPrimitives.m_pFinishedRendering;
+		kInfo.pWaitSemaphores = &waitSemaphore;
 	}
+	if (signalSemaphorePtr) 
+	{
+		signalSemaphore = signalSemaphorePtr->Plat().getHandle();
+		kInfo.signalSemaphoreCount = 1;
+		kInfo.pSignalSemaphores = &signalSemaphore;
+	}
+
 	kInfo.commandBufferCount = 1;
 	kInfo.pCommandBuffers = &m_cmdBuffer;
 
-	VkResult eResult = vkQueueSubmit(kCtx.Plat().GetQueue(eQueueType), 1, &kInfo, m_fence);
+	VkResult eResult = vkQueueSubmit(ctx.Plat().GetQueue(eQueueType), 1, &kInfo, m_fence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
 }
 

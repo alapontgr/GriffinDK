@@ -20,21 +20,12 @@ GF_DEFINE_BASE_CTOR(GfBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfBuffer::init(const GfBufferDesc& kDesc)
+bool GfBuffer::create(const GfRenderContext& kCtxt, const GfBufferDesc& desc)
 {
 	if (!isInitialised()) 
 	{
-		m_desc = kDesc;
+		m_desc = desc;
 		m_flags |= EFlag::Initialised;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfBuffer::create(const GfRenderContext& kCtxt)
-{
-	if (isInitialised()) 
-	{
 		if (m_kPlatform.createRHI(kCtxt)) 
 		{
 			m_flags |= EFlag::GPUReady;
@@ -54,14 +45,6 @@ void GfBuffer::destroy(const GfRenderContext& ctx)
 	}
 	m_desc = GfBufferDesc();
 	m_flags = 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfBuffer::create(const GfRenderContext& ctx, const GfBufferDesc& desc)
-{
-	init(desc);
-	return create(ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

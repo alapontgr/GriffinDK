@@ -17,6 +17,7 @@
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfWindow_Platform.h)
 
 #include "Common/GfRender/GraphicResources/GfTexture.h"
+#include "Common/GfRender/GraphicResources/GfRenderSync.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -57,11 +58,17 @@ public:
 
 	const char* GetWindowName();
 
-	u32 GetCurrentFrameIdx() const;
+	u32 getCurrentFrameIdx() const;
 
-	const GfTexture2D* GetBackBuffer(u32 uiIdx) const;
+	u32 getNextFrameIdx() const;
 
-	const GfTexture2D* GetCurrBackBuffer() const;
+	const GfTexture2D* getBackBuffer(u32 uiIdx) const;
+
+	const GfTexture2D* getCurrBackBuffer() const;
+
+	const GfSemaphore& getImageReadySemaphore() const;
+
+	const GfSemaphore& getFinishedRenderingSemaphore() const;
 
 private:
 
@@ -79,6 +86,8 @@ private:
 	u32					m_uiCurrentFrameIdx;
 
 	GfVector<GfTexture2D>	m_tSwapchainTextures;
+	GfVector<GfSemaphore>	m_swapchainImageReady;
+	GfVector<GfSemaphore>	m_swapchainFinishRendering;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,23 +113,33 @@ GF_FORCEINLINE const char* GfWindow::GetWindowName()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfWindow::GetCurrentFrameIdx() const
+GF_FORCEINLINE u32 GfWindow::getCurrentFrameIdx() const
 {
 	return m_uiCurrentFrameIdx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE const GfTexture2D* GfWindow::GetBackBuffer(u32 uiIdx) const
+GF_FORCEINLINE const GfTexture2D* GfWindow::getBackBuffer(u32 uiIdx) const
 {
 	return &m_tSwapchainTextures[uiIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE const GfTexture2D* GfWindow::GetCurrBackBuffer() const
+GF_FORCEINLINE const GfTexture2D* GfWindow::getCurrBackBuffer() const
 {
 	return &m_tSwapchainTextures[m_uiCurrentFrameIdx];
+}
+
+GF_FORCEINLINE const GfSemaphore& GfWindow::getImageReadySemaphore() const
+{
+	return m_swapchainImageReady[getCurrentFrameIdx()];
+}
+
+GF_FORCEINLINE const GfSemaphore& GfWindow::getFinishedRenderingSemaphore() const
+{
+	return m_swapchainFinishRendering[getCurrentFrameIdx()];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

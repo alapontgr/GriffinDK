@@ -283,29 +283,8 @@ void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
 			kInit.m_format = ConvertTextureFormatToVkFormat(m_kSwapChainFormat.format);
 			kInit.m_width = m_kBase.GetWidth();
 			kInit.m_height = m_kBase.GetHeight();
-			m_kBase.m_tSwapchainTextures[i].ExternalInit(kCtx, kInit);
+			m_kBase.m_tSwapchainTextures[i].externalInit(kCtx, kInit);
 		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfWindow_Platform::CreateSyncPrimitives(const GfRenderContext& kCtx)
-{
-	// Semaphore config
-	VkSemaphoreCreateInfo kSemaphoreInfo{};
-	kSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	kSemaphoreInfo.pNext = nullptr;
-	kSemaphoreInfo.flags = 0;
-
-	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
-	{
-		VkResult eResult = vkCreateSemaphore(kCtx.Plat().m_pDevice, &kSemaphoreInfo, nullptr,
-			&m_pFrameSyncEntries[i].m_pFinishedRendering);
-		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create semaphore");
-		eResult = vkCreateSemaphore(kCtx.Plat().m_pDevice, &kSemaphoreInfo, nullptr,
-			&m_pFrameSyncEntries[i].m_pImageReady);
-		GF_ASSERT(eResult == VK_SUCCESS, "Failed to create semaphore");
 	}
 }
 
@@ -390,13 +369,6 @@ VkImage GfWindow_Platform::GetCurrentBackBuffer() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const GfFrameSyncing& GfWindow_Platform::GetFrameSyncPrimitives() const
-{
-	return m_pFrameSyncEntries[m_kBase.m_uiCurrentFrameIdx];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 VkSurfaceKHR GfWindow_Platform::GetSurface() const
 {
 	return m_pSurface;
@@ -406,9 +378,8 @@ VkSurfaceKHR GfWindow_Platform::GetSurface() const
 
 void GfWindow_Platform::BeginFrameRHI(const GfRenderContext& kCtx)
 {
-	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
 	VkResult eResult = vkAcquireNextImageKHR(kCtx.Plat().m_pDevice, m_pSwapChain, UINT64_MAX,
-		kSyncPrimitives.m_pImageReady, VK_NULL_HANDLE,
+		m_kBase.getImageReadySemaphore().Plat().getHandle(), VK_NULL_HANDLE,
 		&m_kBase.m_uiCurrentFrameIdx);
 	switch (eResult)
 	{
@@ -425,13 +396,13 @@ void GfWindow_Platform::BeginFrameRHI(const GfRenderContext& kCtx)
 
 void GfWindow_Platform::EndFrameRHI(const GfRenderContext& kCtx)
 {
-	const GfFrameSyncing& kSyncPrimitives(GetFrameSyncPrimitives());
+	VkSemaphore finishedRendering = m_kBase.getFinishedRenderingSemaphore().Plat().getHandle();
 
 	VkPresentInfoKHR kInfo;
 	kInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	kInfo.pNext = nullptr;
 	kInfo.waitSemaphoreCount = 1;
-	kInfo.pWaitSemaphores = &kSyncPrimitives.m_pFinishedRendering;
+	kInfo.pWaitSemaphores = &finishedRendering;
 	kInfo.swapchainCount = 1;
 	kInfo.pSwapchains = &m_pSwapChain;
 	kInfo.pImageIndices = &m_kBase.m_uiCurrentFrameIdx;

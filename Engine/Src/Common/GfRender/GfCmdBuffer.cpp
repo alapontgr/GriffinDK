@@ -261,11 +261,9 @@ void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
 	m_curState.setShaderPipe(pipeline, variantHash);
 }
 
-void GfCmdBuffer::submit(
-	const GfWindow& kWindow,
-	Bool bLast)
+void GfCmdBuffer::submit(const GfSemaphore* waitSemaphore, const GfSemaphore* signalSemaphore)
 {
-	m_kPlatform.submitRHI(*m_ctx, kWindow, m_queue, bLast);
+	m_kPlatform.submitRHI(*m_ctx, m_queue, waitSemaphore, signalSemaphore);
 	GF_ASSERT(m_cache, "Invalid cache");
 	m_cache->returnToCache(this);
 }

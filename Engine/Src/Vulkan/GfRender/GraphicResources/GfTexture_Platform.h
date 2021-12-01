@@ -39,13 +39,11 @@ public:
 
 	friend class GfTexture;
 
-	void init(const TextureDesc& desc);
+	void externalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& initParams);
 
-	void ExternalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& initParams);
+	bool create(const GfRenderContext& ctx);
 
-	bool createRHI(const GfRenderContext& ctx);
-
-	void destroyRHI(const GfRenderContext& ctx);
+	void destroy(const GfRenderContext& ctx);
 
 	bool allocateImageMemoryRHI(const GfRenderContext &ctx, VmaAllocationCreateInfo* allocInfo);
 

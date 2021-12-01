@@ -91,11 +91,7 @@ GF_DEFINE_PLATFORM_CTOR(GfTexture)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture_Platform::init(const TextureDesc& desc)
-{
-}
-
-void GfTexture_Platform::ExternalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& kInitParams)
+void GfTexture_Platform::externalInitPlat(const GfRenderContext& ctx, const GfExternTexInit_Platform& kInitParams)
 {
 	m_image = kInitParams.m_pExternalImage;
 	GF_ASSERT(m_image != VK_NULL_HANDLE, "Ups!");
@@ -105,7 +101,7 @@ void GfTexture_Platform::ExternalInitPlat(const GfRenderContext& ctx, const GfEx
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexture_Platform::createRHI(const GfRenderContext &kCtx)
+bool GfTexture_Platform::create(const GfRenderContext & ctx)
 {
 	VkImageCreateInfo kTextureInfo{};
 	kTextureInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -126,7 +122,7 @@ bool GfTexture_Platform::createRHI(const GfRenderContext &kCtx)
 	kTextureInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 	
-	if (vkCreateImage(kCtx.Plat().m_pDevice, &kTextureInfo, nullptr, &m_image) != VK_SUCCESS)
+	if (vkCreateImage(ctx.Plat().m_pDevice, &kTextureInfo, nullptr, &m_image) != VK_SUCCESS)
 	{
 		return false;
 	}
@@ -157,11 +153,11 @@ bool GfTexture_Platform::createRHI(const GfRenderContext &kCtx)
 	kAllocInfo.pool = VK_NULL_HANDLE; // TODO: Use pool for textures
 	kAllocInfo.pUserData = nullptr;
 
-	if (allocateImageMemoryRHI(kCtx, &kAllocInfo))
+	if (allocateImageMemoryRHI(ctx, &kAllocInfo))
 	{
-		if (bindImageWithMemoryRHI(kCtx))
+		if (bindImageWithMemoryRHI(ctx))
 		{
-			createView(kCtx);
+			createView(ctx);
 			return true;
 		}
 	}
@@ -192,20 +188,20 @@ bool GfTexture_Platform::bindImageWithMemoryRHI(const GfRenderContext &kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture_Platform::destroyRHI(const GfRenderContext &kCtx)
+void GfTexture_Platform::destroy(const GfRenderContext & ctx)
 {
 	if (!m_kBase.getIsSwapchain()) 
 	{
 		if (m_image)
 		{
-			vkDestroyImage(kCtx.Plat().m_pDevice, m_image, nullptr);
+			vkDestroyImage(ctx.Plat().m_pDevice, m_image, nullptr);
 			m_image = nullptr;
 
 		}
 		// Release allocated GPU memory
 		if (m_pAlloc)
 		{
-			vmaFreeMemory(kCtx.Plat().m_kAllocator, m_pAlloc);
+			vmaFreeMemory(ctx.Plat().m_kAllocator, m_pAlloc);
 			m_pAlloc = nullptr;
 			// Not really needed
 			memset(&m_kAllocInfo, 0, sizeof(VmaAllocationInfo));
@@ -215,12 +211,12 @@ void GfTexture_Platform::destroyRHI(const GfRenderContext &kCtx)
 	// Let the texture to release the view 
 	if (m_defaultView) 
 	{
-		vkDestroyImageView(kCtx.Plat().m_pDevice, m_defaultView, nullptr);
+		vkDestroyImageView(ctx.Plat().m_pDevice, m_defaultView, nullptr);
 		m_defaultView = nullptr;
 		
 		for (const auto& entry : m_views) 
 		{
-			vkDestroyImageView(kCtx.Plat().m_pDevice, entry.second, nullptr);
+			vkDestroyImageView(ctx.Plat().m_pDevice, entry.second, nullptr);
 		}
 		m_views.clear();
 	}

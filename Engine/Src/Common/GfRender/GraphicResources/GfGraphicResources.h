@@ -15,6 +15,7 @@
 #include "Common/GfRender/GraphicResources/GfBuffer.h"
 #include "Common/GfRender/GraphicResources/GfTexture.h"
 #include "Common/GfRender/GraphicResources/GfSampler.h"
+#include "Common/GfRender/GraphicResources/GfRenderSync.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 

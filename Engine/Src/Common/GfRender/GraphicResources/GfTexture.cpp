@@ -38,24 +38,7 @@ GF_DEFINE_BASE_CTOR(GfTexture)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool GfTexture::init(const TextureDesc& desc)
-{
-	if (!getIsInitialized())
-	{
-		bool isDepth = isDepthFormat(desc.m_format);
-		if (!isDepth || (isDepth && (desc.m_usage & TextureUsageFlags::DepthStencil) != 0)) 
-		{
-			m_desc = desc;
-			m_flags |= Flags::Initialized;
-			m_defaultViewID = getDefaultViewID();
-			m_kPlatform.init(m_desc);
-			return true;
-		}
-	}
-	return false;
-}
-
-void GfTexture::ExternalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams)
+void GfTexture::externalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams)
 {
 	if (!getIsInitialized())
 	{
@@ -65,39 +48,36 @@ void GfTexture::ExternalInit(const GfRenderContext& ctx, const SwapchainDesc& kI
 		m_desc.m_mipCount = 1;
 		m_desc.m_mappable = false;
 		m_defaultViewID = getDefaultViewID();
-		m_kPlatform.ExternalInitPlat(ctx, kInitParams);
+		m_kPlatform.externalInitPlat(ctx, kInitParams);
 		m_flags |= InitializedAsSwapchain;
-		m_flags |= Flags::GPUReady;
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture::Create(const GfRenderContext& kCtx)
+bool GfTexture::create(const GfRenderContext& ctx, const TextureDesc& desc)
 {
-	if (getIsInitialized()) 
+	if (!getIsInitialized())
 	{
-		if (!m_kPlatform.createRHI(kCtx))
+		m_desc = desc;
+		m_kPlatform.create(ctx);
+		bool isDepth = isDepthFormat(desc.m_format);
+		if (!isDepth || (isDepth && (desc.m_usage & TextureUsageFlags::DepthStencil) != 0)) 
 		{
-			m_kPlatform.destroyRHI(kCtx);
+			m_flags |= Flags::Initialized;
+			m_defaultViewID = getDefaultViewID();
 		}
-		else 
-		{
-			m_flags |= Flags::GPUReady;
-		}
+		return true;
 	}
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfTexture::Destroy(const GfRenderContext& kCtx)
+void GfTexture::destroy(const GfRenderContext& ctx)
 {
-	// Destroy only if needed. Do not worry if the texture was initialized with an external source
-	if (getIsGPUReady())
-	{
-		m_kPlatform.destroyRHI(kCtx);
-		m_flags = 0;
-	}
+	m_kPlatform.destroy(ctx);
+	m_flags = 0;
 }
 
 GfTextureViewID GfTexture::getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config) 
@@ -124,23 +104,6 @@ u64 GfTexture::getDefaultViewID()
 GfTexture2D::GfTexture2D() 
 	: GfTexture()
 {	
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-bool GfTexture2D::init(u32 width, u32 height, u32 mips,
-	GfTextureFormat::Type format)
-{
-	TextureDesc desc;
-	desc.m_width = width;
-	desc.m_height = height;
-	desc.m_depth = 1;
-	desc.m_slices = 1;
-	desc.m_mipCount = mips;
-	desc.m_textureType = TextureType::Type_2D;
-	desc.m_format = format;
-	desc.m_usage = TextureUsageFlags::Sampled;
-	return GfTexture::init(desc);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

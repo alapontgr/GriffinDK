@@ -15,6 +15,7 @@
 #include "Common/GfCore/GfCoreMinimal.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GfCmdBuffer_Platform.h)
 #include "Common/GfRender/GfShaderPipeline.h"
+#include "Common/GfRender/GraphicResources/GfRenderSync.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -106,35 +107,6 @@ private:
 class GfBuffer;
 class GfTexture;
 
-// Barriers
-struct GfTextureBarrier 
-{
-	const GfTexture* m_texture = nullptr;
-	GfTextureViewConfig m_viewConfig;
-	TextureUsageFlags::Mask m_oldUsage;
-	TextureUsageFlags::Mask m_newUsage;
-};
-struct GfTextureBarrierArray 
-{
-	GfTextureBarrier* m_array;
-	u32 m_size = 0;
-	u32 m_capacity = 0;
-};
-struct GfBufferBarrier 
-{
-	const GfBuffer* m_buffer = nullptr;
-	u32 m_offset = 0;
-	u32 m_size;
-	BufferUsageFlags::Mask m_oldUsage;
-	BufferUsageFlags::Mask m_newUsage;
-};
-struct GfBufferBarrierArray 
-{
-	GfBufferBarrier* m_array;
-	u32 m_size = 0;
-	u32 m_capacity = 0;
-};
-
 // CommandBuffer class
 class GfCmdBuffer
 {
@@ -160,7 +132,7 @@ public:
 	// Sync point to avoid start recording while the command buffer is still being processed
 	void waitForReady();
 
-	void submit(const GfWindow& kWindow, Bool bLast);
+	void submit(const GfSemaphore* waitSemaphore = nullptr, const GfSemaphore* signalSemaphore = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////////
 

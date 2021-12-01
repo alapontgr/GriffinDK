@@ -43,7 +43,14 @@ void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 
 	// Finally, after everything has been initialized, create the swapchain
 	m_kPlatform.CreateSwapchain(kCtx);
-	m_kPlatform.CreateSyncPrimitives(kCtx);
+
+	m_swapchainImageReady.resize(GfRenderConstants::ms_uiNBufferingCount);
+	m_swapchainFinishRendering.resize(GfRenderConstants::ms_uiNBufferingCount);
+	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
+	{
+		m_swapchainImageReady[i].create(kCtx);
+		m_swapchainFinishRendering[i].create(kCtx);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,9 +86,14 @@ void GfWindow::EndFrame(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+u32 GfWindow::getNextFrameIdx() const
+{
+	return GfWrap(m_uiCurrentFrameIdx + 1, 0u, GfRenderConstants::ms_uiNBufferingCount);
+}
+
 void GfWindow::Flip()
 {
-	m_uiCurrentFrameIdx = GfWrap(m_uiCurrentFrameIdx + 1, 0u, GfRenderConstants::ms_uiNBufferingCount);
+	m_uiCurrentFrameIdx = getNextFrameIdx();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

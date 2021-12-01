@@ -91,25 +91,20 @@ public:
 	{
 		Initialized = 1<<0,
 		InitializedAsSwapchain = 1<<1 | Initialized,
-		GPUReady = 1<<2,
 	};
 
 	GfTexture();
 
-	bool init(const TextureDesc& desc);
+	bool create(const GfRenderContext& ctx, const TextureDesc& desc);
 
-	void Create(const GfRenderContext& kCtx);
-
-	void Destroy(const GfRenderContext& kCtx);
+	void destroy(const GfRenderContext& ctx);
 
 	// Init the Texture view with externally created resources (i.e. backbuffer)
-	void ExternalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams);
+	void externalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams);
 
 	GfTextureViewID getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config);
 
 	bool getIsInitialized() const { return (m_flags & Flags::Initialized) != 0; }
-
-	bool getIsGPUReady() const { return (m_flags & Flags::GPUReady) != 0; }
 
 	bool getIsSwapchain() const {return (m_flags & Flags::InitializedAsSwapchain) != 0; };
 
@@ -154,8 +149,6 @@ public:
 	using Id = s32;
 
 	GfTexture2D();
-
-	bool init(u32 width, u32 height, u32 mipCount, GfTextureFormat::Type format);
 
 	////////////////////////////////////////////////////////////////////////////////
 	// Commands

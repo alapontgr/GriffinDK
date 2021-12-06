@@ -34,6 +34,9 @@
 #define GF_DEFINE_BASE_CTOR(TYPE)	\
 	TYPE::TYPE() : m_kPlatform(*this)
 
+#define GF_DEFINE_BASE_CTOR_EXT(TYPE, ...)	\
+	TYPE::TYPE(__VA_ARGS__) : m_kPlatform(*this)
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

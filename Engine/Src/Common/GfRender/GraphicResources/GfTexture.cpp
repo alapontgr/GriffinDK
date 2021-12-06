@@ -18,6 +18,11 @@ GfTextureView::GfTextureView(GfTexture* texture, const GfTextureViewConfig& conf
 	, m_texture(texture)
 {}
 
+GfTextureView::GfTextureView(GfTexture* texture)
+	: m_config(texture->getDefaultViewConfig())
+	, m_texture(texture)
+{}
+
 GfTextureView::GfTextureView() 
 	: m_texture(nullptr)
 {}
@@ -80,6 +85,16 @@ void GfTexture::destroy(const GfRenderContext& ctx)
 	m_flags = 0;
 }
 
+GfTextureViewConfig GfTexture::getDefaultViewConfig() const 
+{
+	GfTextureViewConfig view{};
+	view.m_firstMipLevel = 0;
+	view.m_mipLevelCount = getMipMapCount();
+	view.m_firstSlice = 0;
+	view.m_sliceCount = getSlices();
+	return view;
+}
+
 GfTextureViewID GfTexture::getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config) 
 {
 	if (config.getHash() == m_defaultViewID)
@@ -91,11 +106,7 @@ GfTextureViewID GfTexture::getViewIDForConfig(const GfRenderContext& ctx, const 
 
 u64 GfTexture::getDefaultViewID() 
 {
-	GfTextureViewConfig view{};
-	view.m_firstMipLevel = 0;
-	view.m_mipLevelCount = getMipMapCount();
-	view.m_firstSlice = 0;
-	view.m_sliceCount = getSlices();
+	GfTextureViewConfig view = getDefaultViewConfig();
 	return view.getHash();
 }
 

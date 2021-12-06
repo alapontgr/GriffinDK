@@ -37,12 +37,12 @@ void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 
 	// Will pre-initialize the Render context only once (further calls will have no effect)
 	kCtx.PreInit(this);
-	m_kPlatform.CreateSurface(kCtx);
+	m_kPlatform.createSurface(kCtx);
 	// Only the first time this call will perform any actions
 	kCtx.init(this);
 
 	// Finally, after everything has been initialized, create the swapchain
-	m_kPlatform.CreateSwapchain(kCtx);
+	m_kPlatform.createSwapchain(kCtx);
 
 	m_swapchainImageReady.resize(GfRenderConstants::ms_uiNBufferingCount);
 	m_swapchainFinishRendering.resize(GfRenderConstants::ms_uiNBufferingCount);
@@ -55,32 +55,32 @@ void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool GfWindow::Tick()
+Bool GfWindow::tick()
 {
-	return m_kPlatform.TickRHI();
+	return m_kPlatform.tickRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow::Shutdown()
+void GfWindow::shutdown()
 {
-	m_kPlatform.ShutdownRHI();
+	m_kPlatform.shutdownRHI();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool GfWindow::BeginFrame(const GfRenderContext& kCtx)
+Bool GfWindow::beginFrame(const GfRenderContext& kCtx)
 {
-	Bool bResult(Tick());
-	m_kPlatform.BeginFrameRHI(kCtx);
+	Bool bResult(tick());
+	m_kPlatform.beginFrameRHI(kCtx);
 	return bResult;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow::EndFrame(const GfRenderContext& kCtx)
+void GfWindow::endFrame(const GfRenderContext& kCtx)
 {
-	m_kPlatform.EndFrameRHI(kCtx);
+	m_kPlatform.endFrameRHI(kCtx);
 	Flip();
 }
 

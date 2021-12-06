@@ -518,10 +518,10 @@ struct GfViewport
 
 struct GfScissor
 {
-	s32 m_siOffsetX = 0;
-	s32 m_siOffsetY = 0;
-	s32 m_siWidth;
-	s32 m_siHeight;
+	u32 m_siOffsetX = 0;
+	u32 m_siOffsetY = 0;
+	u32 m_siWidth;
+	u32 m_siHeight;
 };
 
 

@@ -36,50 +36,50 @@ class GfWindow_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfWindow);
 public:
 
-	void BeginFrameRHI(const GfRenderContext& kCtx);
+	void beginFrameRHI(const GfRenderContext& kCtx);
 
-	void EndFrameRHI(const GfRenderContext& kCtx);
+	void endFrameRHI(const GfRenderContext& kCtx);
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	HWND GetHwnd();
+	HWND getHwnd();
 
-	HINSTANCE GetInstance();
+	HINSTANCE getInstance();
 
-	VkFormat GetSwapchainFormat() const;
+	VkFormat getSwapchainFormat() const;
 
 	// Used as the final target of the frame
-	VkImageView GetCurrentBackBufferView() const;
+	VkImageView getCurrentBackBufferView() const;
 
-	VkImageView GetBackBufferView(u32 uiFrameIdx) const;
+	VkImageView getBackBufferView(u32 uiFrameIdx) const;
 
-	VkImage GetCurrentBackBuffer() const;
+	VkImage getCurrentBackBuffer() const;
 
-	VkSurfaceKHR GetSurface() const;
+	VkSurfaceKHR getSurface() const;
 
 private:
 
 	void initRHI(GfWindowInitParams& kInitParams);
 
-	void CreateSurface(const GfRenderContext& kCtx);
+	void createSurface(const GfRenderContext& kCtx);
 
-	void CreateSwapchain(const GfRenderContext& kCtx);
+	void createSwapchain(const GfRenderContext& kCtx);
 
-	Bool TickRHI();
+	Bool tickRHI();
 
-	void ShutdownRHI();
+	void shutdownRHI();
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	void CheckSwapchainImages(const GfRenderContext& kCtx);
+	void checkSwapchainImages(const GfRenderContext& kCtx);
 
-	VkSurfaceFormatKHR SelectSwapchainFormat();
+	VkSurfaceFormatKHR selectSwapchainFormat();
 
-	VkSurfaceTransformFlagBitsKHR SelectSwapchainTransform();
+	VkSurfaceTransformFlagBitsKHR selectSwapchainTransform();
 
-	VkImageUsageFlags SelectSwapchainFlags();
+	VkImageUsageFlags selectSwapchainFlags();
 
-	VkPresentModeKHR SelectSwapchainPresentMode();
+	VkPresentModeKHR selectSwapchainPresentMode();
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -102,21 +102,21 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE HWND GfWindow_Platform::GetHwnd() 
+GF_FORCEINLINE HWND GfWindow_Platform::getHwnd() 
 {
 	return m_pHwnd;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE HINSTANCE GfWindow_Platform::GetInstance()
+GF_FORCEINLINE HINSTANCE GfWindow_Platform::getInstance()
 {
 	return m_pInstance;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkImageView GfWindow_Platform::GetBackBufferView(u32 uiFrameIdx) const
+GF_FORCEINLINE VkImageView GfWindow_Platform::getBackBufferView(u32 uiFrameIdx) const
 {
 	return m_tSwapChainImageView[uiFrameIdx];
 }

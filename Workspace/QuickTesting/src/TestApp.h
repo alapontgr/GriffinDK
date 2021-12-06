@@ -15,7 +15,6 @@
 
 #include "Common/GfMemory/GfRAII.h"
 #include "Common/GfCore/GfSingleton.h"
-#include "Common/GfRender/GfMaterial.h"
 #include "Common/GfRender/GfRender.h"
 #include "Common/GfFile/GfFile.h"
 #include "GfMesh.h" 
@@ -38,39 +37,10 @@ private:
 
 	void Shutdown();
 
-	void CreateCmdBuffers();
+	GfWindow		m_window;
+	GfRenderContext m_context;
 
-	void CreateRenderPasses();
-
-	void CreateMaterialsAndParamSets();
-
-	void CreateResources();
-
-	void loadGLTF();
-
-	GfWindow		m_kWindow;
-	GfRenderContext m_kContext;
-
-	GfCmdBufferFactory	m_kCmdBufferFactory;
-	GfCmdBuffer			m_pCmdBuffes[GfRenderConstants::ms_uiNBufferingCount];
-
-	GfRenderPass		m_kRenderPass;
-
-	GfUniquePtr<GfMesh> m_damagedHelmet;
-
-	GfBuffer			m_kStagingBuffer;
-	GfBuffer			m_kConstantBufferPool;
-
-	GfMaterialTemplate	m_kMaterialT;
-	GfMatUniformFactory	m_kUniformFactory;
-	GfMatParamLayout	m_kParamLayout;
-	GfMaterialParamSet	m_kParamSet;
-
-	GfConstantBuffer	m_kPerFrameCB;
-	GfUniquePtr<char[]>	m_pTestTextureData;
-
-	GfViewport		m_kViewport;
-	GfScissor		m_kScissor;
+	GfRenderPass m_renderPass;
 
 	// Camera
 	GfCamera		m_kCamera;

@@ -91,8 +91,6 @@ public:
 
 	friend class GfCmdBufferFactory_Platform;
 
-	GfCmdBuffer_Platform();
-
 	VkCommandBuffer getCmdBuffer() const { return m_cmdBuffer; }
 
 	VkFence getFence() const { return m_fence; }

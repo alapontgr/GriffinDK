@@ -59,10 +59,12 @@ public:
 		const AttachmentDesc* depthAttachment, f32 clearDepth = 0.0f, u32 clearStencil = 0);
 
 	void setViewport(const GfViewport& kViewport);
+	void setViewport(f32 width, f32 height, f32 offsetX, f32 offsetY, f32 minDepth = 0.0f, f32 maxDepth = 1.0f);
 
 	void setScissor(const GfScissor& kScissor);
-	
-	void setRenderArea(u32 offsetX, u32 offsetY, u32 width, u32 height);
+	void setScissor(u32 width, u32 height, u32 offsetX, u32 offsetY);
+
+	void setRenderArea(u32 width, u32 height, u32 offsetX, u32 offsetY);
 
 	void setClearColor(const v4& clearColor, f32 clearDepth = 0.0f, u32 clearStencil = 0);
 
@@ -121,12 +123,34 @@ GF_FORCEINLINE void GfRenderPass::setViewport(const GfViewport& viewport)
 	m_viewport = viewport;
 }
 
+GF_FORCEINLINE void GfRenderPass::setViewport(f32 width, f32 height, f32 offsetX, f32 offsetY, f32 minDepth, f32 maxDepth) 
+{
+	GfViewport viewport{};
+	viewport.m_fWidth = width;
+	viewport.m_fHeight = height;
+	viewport.m_fOffsetX = offsetX;
+	viewport.m_fOffsetY = offsetY;
+	viewport.m_fMinDepth = minDepth;
+	viewport.m_fMaxDepth = maxDepth;
+	setViewport(viewport);
+}
+
 GF_FORCEINLINE void GfRenderPass::setScissor(const GfScissor& scissor)
 {
 	m_scissor = scissor;
 }
 
-GF_FORCEINLINE void GfRenderPass::setRenderArea(u32 offsetX, u32 offsetY, u32 width, u32 height) 
+GF_FORCEINLINE void GfRenderPass::setScissor(u32 width, u32 height, u32 offsetX, u32 offsetY) 
+{
+	GfScissor scissor{};
+	scissor.m_siWidth = width;
+	scissor.m_siHeight = height;
+	scissor.m_siOffsetX = offsetX;
+	scissor.m_siOffsetY = offsetY;
+	setScissor(scissor);
+}
+
+GF_FORCEINLINE void GfRenderPass::setRenderArea(u32 width, u32 height, u32 offsetX, u32 offsetY) 
 {
 	m_offsetX = offsetX;
 	m_offsetY = offsetY;

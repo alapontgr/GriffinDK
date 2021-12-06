@@ -35,7 +35,9 @@ namespace GfRenderStateFlags
 {
 	enum Type : u32 
 	{
-		BindMaterial = 1<<0
+		BindMaterial = 1<<0,
+		InCache = 1<<1,
+		Recording = 1<<2,
 	};
 }
 
@@ -127,7 +129,16 @@ public:
 
 	void endRecording();
 
-	bool isReady();
+	// Is ready to be used
+	bool isReadyForRecording(); 
+
+	// Is this CmdBuffer in a valid state for recording by the user?
+	bool isValid() const;
+
+	bool isRecording() const;
+
+	bool isInsideRenderPass() const;
+
 
 	// Sync point to avoid start recording while the command buffer is still being processed
 	void waitForReady();
@@ -209,6 +220,7 @@ private:
 	class GfCmdBufferCache* m_cache;
 	GfLinearAllocator m_linearAllocator;
 	GfRenderPipelineState m_curState;
+	u32 m_curStateFlags;
 
 	GfTextureBarrierArray m_textureBarriers;
 	GfBufferBarrierArray m_bufferBarriers;
@@ -241,24 +253,24 @@ GF_FORCEINLINE void GfCmdBuffer::waitForReady()
 	m_kPlatform.waitForReadyRHI(*m_ctx);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::beginRecording()
-{
-	m_kPlatform.beginRecordingRHI(*m_ctx);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE void GfCmdBuffer::endRecording()
-{
-	flushBarriers();
-	m_kPlatform.endRecordingRHI(*m_ctx);
-}
-
-GF_FORCEINLINE bool GfCmdBuffer::isReady()
+GF_FORCEINLINE bool GfCmdBuffer::isReadyForRecording()
 {
 	return m_kPlatform.isReady(*m_ctx);
+}
+
+GF_FORCEINLINE bool GfCmdBuffer::isValid() const 
+{
+	return (m_curStateFlags & GfRenderStateFlags::InCache) == 0;
+}
+
+GF_FORCEINLINE bool GfCmdBuffer::isRecording() const 
+{
+	return (m_curStateFlags & GfRenderStateFlags::Recording) == 0;
+}
+
+GF_FORCEINLINE bool GfCmdBuffer::isInsideRenderPass() const 
+{
+	return m_curState.getCurRenderPass() != nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

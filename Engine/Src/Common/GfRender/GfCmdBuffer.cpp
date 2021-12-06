@@ -48,7 +48,7 @@ GfCmdBuffer* GfCmdBufferCache::get(const GfRenderContext* ctx, GfCmdBufferType::
 	if (m_avalCmdBuffers.size() > 0) 
 	{
 		GfCmdBuffer* buffer = m_avalCmdBuffers.front();
-		if (buffer->isReady()) 
+		if (buffer->isReadyForRecording()) 
 		{
 			m_avalCmdBuffers.pop();
 			buffer->reset();
@@ -132,8 +132,8 @@ GfCmdBuffer* GfCmdBuffer::get(const GfRenderContext* ctx,
 	return res;
 }
 
-GfCmdBuffer::GfCmdBuffer()
-	: m_type(GfCmdBufferType::Invalid)
+GF_DEFINE_BASE_CTOR(GfCmdBuffer)
+	, m_type(GfCmdBufferType::Invalid)
 	, m_queue(GfRenderContextFamilies::InvalidIdx)
 	, m_ctx(nullptr)
 	, m_cache(nullptr)
@@ -141,14 +141,33 @@ GfCmdBuffer::GfCmdBuffer()
 {
 }
 
-GfCmdBuffer::GfCmdBuffer(const GfRenderContext* ctx, GfCmdBufferCache* cache,
+GF_DEFINE_BASE_CTOR_EXT(GfCmdBuffer, const GfRenderContext* ctx, GfCmdBufferCache* cache,
 	const GfCmdBufferType::Type type, GfRenderContextFamilies::Type queue)
-	: m_type(type)
+	, m_type(type)
 	, m_queue(queue)
 	, m_ctx(ctx)
 	, m_cache(cache)
 	, m_linearAllocator(ms_allocatorDefaultMemory)
 {
+}
+
+void GfCmdBuffer::beginRecording()
+{
+	if (!isRecording())
+	{
+		m_curStateFlags |= GfRenderStateFlags::Recording;
+		m_kPlatform.beginRecordingRHI(*m_ctx);
+	}
+}
+
+void GfCmdBuffer::endRecording()
+{
+	if (isRecording()) 
+	{
+		m_curStateFlags &= ~GfRenderStateFlags::Recording;
+		flushBarriers();
+		m_kPlatform.endRecordingRHI(*m_ctx);
+	}
 }
 
 void GfCmdBuffer::reset() 
@@ -165,6 +184,8 @@ void GfCmdBuffer::reset()
 	m_bufferBarriers.m_array = nullptr;
 	m_bufferBarriers.m_capacity = 0;
 	m_bufferBarriers.m_size = 0;
+
+	m_curStateFlags = 0;
 
 	m_kPlatform.reset();
 }
@@ -231,23 +252,32 @@ void GfCmdBuffer::setStencilReferenceValue(StencilFace::Type targetFace, u32 ref
 
 void GfCmdBuffer::beginRenderPass(GfRenderPass* renderPass)
 {
-	GF_ASSERT(!m_curState.getCurRenderPass(), "Trying to begin a pass before end");
+	GF_ASSERT(isRecording(), "The command buffer is not recording");
 	GF_ASSERT(renderPass->getWidth() != 0 && renderPass->getHeight(), "Resolution was not initialized");
 
-	// Flush barriers
-	flushBarriers();
+	if (!isInsideRenderPass()) 
+	{	
+		// Flush barriers
+		flushBarriers();
 
-	m_curState.setRenderPass(renderPass);
-	m_kPlatform.setViewport(*m_ctx, renderPass->getViewport());
-	m_kPlatform.setScissors(*m_ctx, renderPass->getScissor());
-	m_kPlatform.beginRenderPass(*m_ctx, renderPass);
+		m_curState.setRenderPass(renderPass);
+		m_kPlatform.setViewport(*m_ctx, renderPass->getViewport());
+		m_kPlatform.setScissors(*m_ctx, renderPass->getScissor());
+		m_kPlatform.beginRenderPass(*m_ctx, renderPass);
+	}
+	else 
+	{
+		GF_WARNING("Trying to begin a RenderPass while another being active");
+	}
 }
 
 void GfCmdBuffer::endRenderPass()
 {
-	GF_ASSERT(m_curState.getCurRenderPass(), "Trying to end an invalid pass");
-	m_kPlatform.endRenderPass();
-	m_curState.setRenderPass(nullptr);
+	if (isInsideRenderPass())
+	{
+		m_kPlatform.endRenderPass();
+		m_curState.setRenderPass(nullptr);
+	}
 }
 
 void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
@@ -264,6 +294,9 @@ void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
 void GfCmdBuffer::submit(const GfSemaphore* waitSemaphore, const GfSemaphore* signalSemaphore)
 {
 	m_kPlatform.submitRHI(*m_ctx, m_queue, waitSemaphore, signalSemaphore);
+
+	// Return to cache
+	m_curStateFlags = GfRenderStateFlags::InCache;
 	GF_ASSERT(m_cache, "Invalid cache");
 	m_cache->returnToCache(this);
 }

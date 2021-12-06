@@ -138,6 +138,7 @@ GfMesh::~GfMesh()
 
 void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 {
+	/*
 	GF_ASSERT(m_vertexBuffer == -1 && m_indexBuffer == -1, "Already initialized");
 	// Calculate sizes and offsets
 	u32 indexBufferSize = 0;
@@ -226,6 +227,7 @@ void GfMesh::create(const GfRenderContext& ctx, const GfCmdBuffer& cmdBuffer)
 	indexBuffer->copyRangeFrom(cmdBuffer, *stagingBuffer, vertexBufferSize, 0, indexBufferSize);
 	
 	GfBufferFactory::removeRef(staging);
+	*/
 }
 
 void GfMesh::destroy()

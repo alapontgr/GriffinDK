@@ -245,7 +245,7 @@ void GfRenderContext_Platform::CreateInstance(GfWindow* pWindow)
 	VkApplicationInfo kAppInfo;
 	kAppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	kAppInfo.pNext = nullptr;
-	kAppInfo.pApplicationName = pWindow->GetWindowName();
+	kAppInfo.pApplicationName = pWindow->getWindowName();
 	kAppInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
 	kAppInfo.pEngineName = GF_ENGINE_NAME;
 	kAppInfo.engineVersion = GF_ENGINE_VERSION;
@@ -289,7 +289,7 @@ void GfRenderContext_Platform::CreateDevice(GfWindow* pWindow)
 		// Search for valid family indices for the different queues
 		for (u32 i = 0; i < uiDeviceCount; i++)
 		{
-			if (CheckPhysicalDeviceProperties(devices[i], pWindow->Plat().GetSurface(), uiGraphicsFamilyIdx, uiPresentFamilyIdx))
+			if (CheckPhysicalDeviceProperties(devices[i], pWindow->Plat().getSurface(), uiGraphicsFamilyIdx, uiPresentFamilyIdx))
 			{
 				// This device supports graphics and using swap chains
 				m_pPhysicalDevice = devices[i];

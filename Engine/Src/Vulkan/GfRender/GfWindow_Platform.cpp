@@ -143,7 +143,7 @@ void GfWindow_Platform::initRHI(GfWindowInitParams& kInitParams)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::CreateSurface(const GfRenderContext& kCtx)
+void GfWindow_Platform::createSurface(const GfRenderContext& kCtx)
 {
 	VkWin32SurfaceCreateInfoKHR kSurfaceInfo;
 	kSurfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -157,7 +157,7 @@ void GfWindow_Platform::CreateSurface(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::CreateSwapchain(const GfRenderContext& kCtx)
+void GfWindow_Platform::createSwapchain(const GfRenderContext& kCtx)
 {
 	// Get the capabilities of the surface
 	VkResult eResult = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(kCtx.Plat().m_pPhysicalDevice, m_pSurface, &m_pCapabilities);
@@ -187,22 +187,22 @@ void GfWindow_Platform::CreateSwapchain(const GfRenderContext& kCtx)
 
 	// Images extend
 	VkExtent2D kExtend;
-	kExtend.width = m_kBase.GetWidth();
-	kExtend.height = m_kBase.GetHeight();
+	kExtend.width = m_kBase.getWidth();
+	kExtend.height = m_kBase.getHeight();
 
 	// Get the number of buffers to create in the swap chain
 	GF_ASSERT(m_pCapabilities.minImageCount >= GfRenderConstants::ms_uiNBufferingCount && 
 		GfRenderConstants::ms_uiNBufferingCount <=m_pCapabilities.maxImageCount, "Invalid number of images");
 	u32 bufferCount = GfClamp<u32>(GfRenderConstants::ms_uiNBufferingCount, m_pCapabilities.minImageCount, m_pCapabilities.maxImageCount);
 	// Select a image format to use in the swap chain
-	m_kSwapChainFormat = SelectSwapchainFormat();
+	m_kSwapChainFormat = selectSwapchainFormat();
 	// Get the transform to apply to the swap chain (Useful in mobiles when using
 	// Landscape or portrait)
-	VkSurfaceTransformFlagBitsKHR transform = SelectSwapchainTransform();
+	VkSurfaceTransformFlagBitsKHR transform = selectSwapchainTransform();
 	// Get the flags to use in the images of the swap chain
-	VkImageUsageFlags usageFlags = SelectSwapchainFlags();
+	VkImageUsageFlags usageFlags = selectSwapchainFlags();
 	// Get the Present mode to use
-	VkPresentModeKHR presentMode = SelectSwapchainPresentMode();
+	VkPresentModeKHR presentMode = selectSwapchainPresentMode();
 
 	VkSwapchainKHR oldSwapChain = VK_NULL_HANDLE;
 	VkSwapchainCreateInfoKHR swapChainInfo{};
@@ -230,12 +230,12 @@ void GfWindow_Platform::CreateSwapchain(const GfRenderContext& kCtx)
 	if (oldSwapChain != VK_NULL_HANDLE) {
 		vkDestroySwapchainKHR(kCtx.Plat().m_pDevice, oldSwapChain, nullptr);
 	}
-	CheckSwapchainImages(kCtx);
+	checkSwapchainImages(kCtx);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool GfWindow_Platform::TickRHI()
+Bool GfWindow_Platform::tickRHI()
 {
 	MSG msg;
 	// Check to see if any messages are waiting in the queue
@@ -252,7 +252,7 @@ Bool GfWindow_Platform::TickRHI()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::ShutdownRHI()
+void GfWindow_Platform::shutdownRHI()
 {
 	CloseWindow(m_pHwnd);
 	m_pHwnd = nullptr;
@@ -260,7 +260,7 @@ void GfWindow_Platform::ShutdownRHI()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
+void GfWindow_Platform::checkSwapchainImages(const GfRenderContext& kCtx)
 {
 	u32 uiImageCount(0);
 	VkResult eResult = vkGetSwapchainImagesKHR(kCtx.Plat().m_pDevice, m_pSwapChain, &uiImageCount, nullptr);
@@ -281,8 +281,8 @@ void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
 			SwapchainDesc kInit;
 			kInit.m_pExternalImage = m_tSwapChainImages[i];
 			kInit.m_format = ConvertTextureFormatToVkFormat(m_kSwapChainFormat.format);
-			kInit.m_width = m_kBase.GetWidth();
-			kInit.m_height = m_kBase.GetHeight();
+			kInit.m_width = m_kBase.getWidth();
+			kInit.m_height = m_kBase.getHeight();
 			m_kBase.m_tSwapchainTextures[i].externalInit(kCtx, kInit);
 		}
 	}
@@ -290,7 +290,7 @@ void GfWindow_Platform::CheckSwapchainImages(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkSurfaceFormatKHR GfWindow_Platform::SelectSwapchainFormat()
+VkSurfaceFormatKHR GfWindow_Platform::selectSwapchainFormat()
 {
 	if (m_tSupportedFormats.size() == 1 &&
 		m_tSupportedFormats[0].format == VK_FORMAT_UNDEFINED) {
@@ -309,7 +309,7 @@ VkSurfaceFormatKHR GfWindow_Platform::SelectSwapchainFormat()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkSurfaceTransformFlagBitsKHR GfWindow_Platform::SelectSwapchainTransform()
+VkSurfaceTransformFlagBitsKHR GfWindow_Platform::selectSwapchainTransform()
 {
 	if (m_pCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
 		return VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
@@ -319,7 +319,7 @@ VkSurfaceTransformFlagBitsKHR GfWindow_Platform::SelectSwapchainTransform()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkImageUsageFlags GfWindow_Platform::SelectSwapchainFlags()
+VkImageUsageFlags GfWindow_Platform::selectSwapchainFlags()
 {
 	if (m_pCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
 		return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
@@ -332,7 +332,7 @@ VkImageUsageFlags GfWindow_Platform::SelectSwapchainFlags()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkPresentModeKHR GfWindow_Platform::SelectSwapchainPresentMode()
+VkPresentModeKHR GfWindow_Platform::selectSwapchainPresentMode()
 {
 	// Priorise MAILBOX mode (best option for games: When an image is generated it
 	// replaces the image in the queue. So it is always going to show the latest
@@ -355,28 +355,28 @@ VkPresentModeKHR GfWindow_Platform::SelectSwapchainPresentMode()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkImageView GfWindow_Platform::GetCurrentBackBufferView() const
+VkImageView GfWindow_Platform::getCurrentBackBufferView() const
 {
 	return m_tSwapChainImageView[m_kBase.m_uiCurrentFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkImage GfWindow_Platform::GetCurrentBackBuffer() const
+VkImage GfWindow_Platform::getCurrentBackBuffer() const
 {
 	return m_tSwapChainImages[m_kBase.m_uiCurrentFrameIdx];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkSurfaceKHR GfWindow_Platform::GetSurface() const
+VkSurfaceKHR GfWindow_Platform::getSurface() const
 {
 	return m_pSurface;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::BeginFrameRHI(const GfRenderContext& kCtx)
+void GfWindow_Platform::beginFrameRHI(const GfRenderContext& kCtx)
 {
 	VkResult eResult = vkAcquireNextImageKHR(kCtx.Plat().m_pDevice, m_pSwapChain, UINT64_MAX,
 		m_kBase.getImageReadySemaphore().Plat().getHandle(), VK_NULL_HANDLE,
@@ -394,7 +394,7 @@ void GfWindow_Platform::BeginFrameRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfWindow_Platform::EndFrameRHI(const GfRenderContext& kCtx)
+void GfWindow_Platform::endFrameRHI(const GfRenderContext& kCtx)
 {
 	VkSemaphore finishedRendering = m_kBase.getFinishedRenderingSemaphore().Plat().getHandle();
 
@@ -423,7 +423,7 @@ void GfWindow_Platform::EndFrameRHI(const GfRenderContext& kCtx)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-VkFormat GfWindow_Platform::GetSwapchainFormat() const
+VkFormat GfWindow_Platform::getSwapchainFormat() const
 {
 	return m_kSwapChainFormat.format;
 }

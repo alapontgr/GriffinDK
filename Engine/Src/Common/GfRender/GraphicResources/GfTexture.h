@@ -53,22 +53,24 @@ struct TextureDesc
 };
 
 // Used to configure what areas of the tetxure to view
+class GfTexture;
 class GfTextureView
 {
 public:
-	GfTextureView(class GfTexture* texture, const GfTextureViewConfig& config);
+	GfTextureView(GfTexture* texture, const GfTextureViewConfig& config);
+	GfTextureView(GfTexture* texture);
 	GfTextureView();
 
 	u64 getViewID(const GfRenderContext& ctx);
 
-	GfTexture* getTexture() const { return m_texture; }
+	const GfTexture* getTexture() const { return m_texture; }
 
 	const GfTextureViewConfig& getConfig() const { return m_config; }
 
 private:
 
 	GfTextureViewConfig m_config;
-	class GfTexture* m_texture;
+	GfTexture* m_texture;
 };
 
 // Used to initialize swapchain iomages internally
@@ -103,6 +105,8 @@ public:
 	void externalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams);
 
 	GfTextureViewID getViewIDForConfig(const GfRenderContext& ctx, const struct GfTextureViewConfig& config);
+
+	GfTextureViewConfig getDefaultViewConfig() const;
 
 	bool getIsInitialized() const { return (m_flags & Flags::Initialized) != 0; }
 

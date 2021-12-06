@@ -65,41 +65,24 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 {
 	init(kEntryParams);
 	
-	while (m_kWindow.BeginFrame(m_kContext))
+	while (m_window.beginFrame(m_context))
 	{
 		Update();
 
-		u32 uiCurrFrameIdx(m_kWindow.GetCurrentFrameIdx());
-		GfCmdBuffer& kCmdBuffer(m_pCmdBuffes[uiCurrFrameIdx]);
+		u32 uiCurrFrameIdx(m_window.getCurrentFrameIdx());
+		GfCmdBuffer* cmdBuffer = GfCmdBuffer::get(&m_context, GfCmdBufferType::Primary, GfRenderContextFamilies::Graphics);
 
-		// Wait for the command buffer to be ready
-		kCmdBuffer.waitForReady(m_kContext);
+		Render(*cmdBuffer);
 
-		// Begin the Command buffer
-		kCmdBuffer.beginRecording(m_kContext);
+		// Final submit
+		const GfSemaphore& imageReady = m_window.getImageReadySemaphore();
+		const GfSemaphore& signalSemaphore = m_window.getFinishedRenderingSemaphore();
+		cmdBuffer->submit(&imageReady, &signalSemaphore);
 
-		static bool pendingInitialization(true);
-		if(pendingInitialization)
-		{
-			pendingInitialization = false;
-			//DoTransferOperations(kCmdBuffer);
-			GF_INFO("Create: %s", "Damaged helmet");
-			m_damagedHelmet->create(m_kContext, kCmdBuffer);
-			GF_INFO("After Create: %s", "Damaged helmet");
-		}
-
-		Render(kCmdBuffer);
-
-		// End the command buffer
-		kCmdBuffer.endRecording(m_kContext);
-
-		// Submit command buffer
-		kCmdBuffer.submit(m_kContext, m_kWindow, GfRenderContextFamilies::Present, GF_TRUE);
-
-		m_kWindow.EndFrame(m_kContext);
+		m_window.endFrame(m_context);
 
 		// Remove pending resources to delete
-		GfBufferFactory::removePending(m_kContext);
+		GfBufferFactory::removePending(m_context);
 	}
 	return 0;
 }
@@ -118,19 +101,13 @@ void TestApp::init(const GfEntryArgs& kEntryParams)
 	kWindowInit.m_bVSync = false;
 	kWindowInit.m_bFullScreen = false;
 	kWindowInit.m_szWindowName = "TestGriffinApp";
-	m_kWindow.init(kWindowInit, m_kContext);
+	m_window.init(kWindowInit, m_context);
 
 	GfInput::init();
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	// Create resources
-	CreateRenderPasses();
-	CreateMaterialsAndParamSets();
-	CreateCmdBuffers();
-	CreateResources();
-
-	m_kCamera.UpdatePerspective(GF_DEG_TO_RAD(45.0f), (f32)m_kWindow.GetWidth() / (f32)m_kWindow.GetHeight(), 0.1f, 1000.0f);
+	m_kCamera.UpdatePerspective(GF_DEG_TO_RAD(45.0f), (f32)m_window.getWidth() / (f32)m_window.getHeight(), 0.1f, 1000.0f);
 	m_kCamera.UpdateViewWithTarget(v3(0.0f, 5.0f, 10.0f), v3(0.0f), v3(0.0f, 1.0f, 0.0f));
 }
 
@@ -163,80 +140,32 @@ void TestApp::Update()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void TestApp::CreateCmdBuffers()
+void TestApp::Render(GfCmdBuffer& cmdBuffer)
 {
-	m_kCmdBufferFactory.init(m_kContext, GfRenderContextFamilies::Graphics);
-	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
+	f32 width = static_cast<f32>(m_window.getWidth());
+	f32 height = static_cast<f32>(m_window.getHeight());
+
+	GfTextureView backBufferView(m_window.getCurrBackBuffer());
+	static constexpr u32 s_AttachmentCount = 1;
+	AttachmentDesc attachments[] = 
 	{
-		m_kCmdBufferFactory.CreateCmdBuffer(m_kContext, GfCmdBufferType::Primary, m_pCmdBuffes[i]);
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void TestApp::CreateRenderPasses()
-{
-	//m_kRenderPass.Create(m_kContext, &m_kWindow);
-
-	// Init Viewport and Scissor state
-	m_kViewport.m_fWidth = (f32)m_kWindow.GetWidth();
-	m_kViewport.m_fHeight = (f32)m_kWindow.GetHeight();
-
-	m_kScissor.m_siWidth = (s32)m_kViewport.m_fWidth;
-	m_kScissor.m_siHeight = (s32)m_kViewport.m_fHeight;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void TestApp::Render(GfCmdBuffer& kCmdBuffer)
-{
-	// Update PerFrameCB
-	g_kPerFrameCBData.m_mView = m_kCamera.GetView(); // Identity
-	g_kPerFrameCBData.m_mProjection = m_kCamera.GetProjection(); // Identity
-	g_kPerFrameCBData.m_mViewProjection = (g_kPerFrameCBData.m_mProjection * g_kPerFrameCBData.m_mView);
-
-	GfPerFrameCB* pData = m_kPerFrameCB.MapAs<GfPerFrameCB>(m_kContext);
-	if (pData) 
-	{
-		*pData = g_kPerFrameCBData;
-		m_kPerFrameCB.UnMap(m_kContext);
-	}
-
-	// Begin render pass
-	m_kRenderPass.BeginPass(m_kContext, kCmdBuffer, &m_kWindow);
-
-	// Set Viewport and Scissor
-	m_kRenderPass.SetViewport(kCmdBuffer, m_kViewport);
-	m_kRenderPass.SetScissor(kCmdBuffer, m_kScissor);
-
-	// Add commands
-	m_kMaterialT.Bind(kCmdBuffer);
-	m_kParamSet.BindSet(kCmdBuffer, m_kMaterialT, 0);
-
-	// Bind buffers
-	GfBuffer* vertexBuffers[2] = 
-	{
-		GfBufferFactory::get(m_damagedHelmet->getVertexBuffer()),
-		GfBufferFactory::get(m_damagedHelmet->getVertexBuffer())
+		{GfTextureView(m_window.getCurrBackBuffer()), LoadOp::Clear, StoreOp::Store} 
 	};
-	u32 vertexBufferOffsets[] = { 0,0 };
-	GfBuffer* indexBuffer(GfBufferFactory::get(m_damagedHelmet->getIndexBuffer()));
-	u32 meshCount = m_damagedHelmet->getMeshCount();
-	for (u32 i = 0; i < meshCount; ++i) 
-	{
-		const GfSubMesh& mesh = m_damagedHelmet->getMeshAt(i);
-		vertexBufferOffsets[0] = mesh.getVertexBufferOffset(0);
-		vertexBufferOffsets[1] = mesh.getVertexBufferOffset(1);
-		kCmdBuffer.bindVertexBuffers(vertexBuffers, vertexBufferOffsets, 2);
-		kCmdBuffer.bindIndexBuffer(*indexBuffer, mesh.getIndexBufferOffset(), mesh.doesUseShortForIndex());
-		kCmdBuffer.drawIndexed(mesh.getIndexCount(), 1);
-	}
+	m_renderPass.setAttachments(attachments, s_AttachmentCount, nullptr);
+	m_renderPass.setViewport(width, height, 0.0f, 0.0f);
+	m_renderPass.setScissor(m_window.getWidth(), m_window.getHeight(), 0, 0);
+	m_renderPass.setRenderArea(m_window.getWidth(), m_window.getHeight(), 0, 0);
+	m_renderPass.setClearColor(v4(1.0f, 0.0f, 0.0f, 0.0f));
 
-	// Draw
-	//kCmdBuffer.draw(6, 1);
+	// Recording
 
-	// End render pass
-	m_kRenderPass.EndPass(kCmdBuffer);
+	cmdBuffer.beginRecording();
+
+	cmdBuffer.beginRenderPass(&m_renderPass);
+
+	cmdBuffer.endRenderPass();
+
+	cmdBuffer.endRecording();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -244,108 +173,6 @@ void TestApp::Render(GfCmdBuffer& kCmdBuffer)
 void TestApp::Shutdown()
 {
 	GfInput::Shutdown();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void TestApp::CreateMaterialsAndParamSets()
-{
-	// Create material
-	u32 uiVertexSize, uiFragmentSize;
-	GfUniquePtr<char[]> pVertexSrc(LoadFileSrc("Shaders/bin/OpaqueTestVS.vert.spv", uiVertexSize));
-	GfUniquePtr<char[]> pFragSrc(LoadFileSrc("Shaders/bin/OpaqueTestFS.frag.spv", uiFragmentSize));
-
-	// Define vertex format
-	GfVertexDeclaration kVertexFormat;
-	GfVertexDeclaration::AttributeDesc vertexAttribs[4] =
-	{
-		{static_cast<u32>(offsetof(PosVertexBuffer, m_pos)),					0, 0, AttributeFormat::SFloat3}, // Position
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_normal)),	1, 1, AttributeFormat::SFloat3}, // Normal
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_tangent)),	2, 1, AttributeFormat::SFloat3}, // Tangent
-		{static_cast<u32>(offsetof(NormalsTangentUvVertexBuffer, m_uv)),		3, 1, AttributeFormat::SFloat2}, // UVs
-	};
-	GfVertexDeclaration::VertexBufferBinding vertexBufferBindings[] = 
-	{
-		{0, static_cast<u32>(sizeof(PosVertexBuffer)), EVertexInputRate::PerVertex},
-		{1, static_cast<u32>(sizeof(NormalsTangentUvVertexBuffer)), EVertexInputRate::PerVertex},
-	};
-	kVertexFormat.init(vertexAttribs, 4, vertexBufferBindings, 2);
-
-	// Prepare parameter layout
-	{
-		GfShaderAccessMask uiAccessMask(ShaderStageFlags::Vertex);
-		m_kParamLayout.DefineParameter(GfParameterSlotType::UniformBuffer, uiAccessMask, 0);
-	}
-	m_kParamLayout.Create(m_kContext);
-
-	// Define material
-	if (uiVertexSize && uiFragmentSize) 
-	{
-		m_kMaterialT.SetTopology(PrimitiveTopology::TriList);
-		m_kMaterialT.SetRasterState(GfRasterState());		// Use default RasterState
-		m_kMaterialT.SetMSState(GfMultiSamplingState());	// Default MSState (disabled)
-		m_kMaterialT.SetBlendState(GfBlendState());		// Default BlendState (disabled)
-		m_kMaterialT.SetVertexFormat(kVertexFormat);
-		m_kMaterialT.SetMaterialPass(&m_kRenderPass);
-		m_kMaterialT.SetShaderData(ShaderStage::Vertex, "main", pVertexSrc.get(), uiVertexSize);
-		m_kMaterialT.SetShaderData(ShaderStage::Fragment, "main", pFragSrc.get(), uiFragmentSize);
-		m_kMaterialT.AssignLayout(0, &m_kParamLayout);
-		m_kMaterialT.Create(m_kContext);
-	}
-
-	// Prepare uniform factory
-	m_kUniformFactory.SetMaxAllocationsPerParamType(GfParameterSlotType::UniformBuffer, 1);
-	m_kUniformFactory.SetMaxAllocationsPerParamType(GfParameterSlotType::CombinedTextureSampler, 1);
-	m_kUniformFactory.SetMaxAllocatedParamSets(16);
-	m_kUniformFactory.Create(m_kContext);
-
-	// Prepare descriptor set
-	m_kParamSet.init(&m_kParamLayout);
-	m_kParamSet.Create(m_kContext, m_kUniformFactory);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void TestApp::CreateResources()
-{
-	loadGLTF();
-
-	////////////////////////////////////////////////////////////////////////////////
-
-	// Create staging buffer
-	GfBuffer::GfBufferDesc kDesc;
-	kDesc.m_size = 16 << 20; // 16MB
-	kDesc.m_alignment = 16;
-	kDesc.m_bufferType = BufferType::Staging;
-	m_kStagingBuffer.init(kDesc);
-	m_kStagingBuffer.create(m_kContext);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Init constant buffer pool
-
-	kDesc.m_size = sizeof(GfPerFrameCB);
-	kDesc.m_alignment = 16;
-	kDesc.m_bufferType = BufferType::Uniform;
-	kDesc.m_mappable = true;
-	m_kConstantBufferPool.init(kDesc);
-	m_kConstantBufferPool.create(m_kContext);
-
-	GfBuffer::GfRange kRange;
-	kRange.m_pBuffer = &m_kConstantBufferPool;
-	kRange.m_uiOffset = 0;
-	kRange.m_uiSize = sizeof(GfPerFrameCB);
-	m_kPerFrameCB.BindBuffer(kRange);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Bind
-
-	m_kParamSet.BindResource(0, &m_kPerFrameCB);
-	m_kParamSet.Update(m_kContext);
-}
-
-void TestApp::loadGLTF()
-{
-	m_damagedHelmet = GfGltfLoader::Load("./Models/DamagedHelmet/glTF/DamagedHelmet.gltf");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

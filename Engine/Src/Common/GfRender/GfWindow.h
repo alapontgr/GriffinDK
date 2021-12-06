@@ -44,27 +44,27 @@ public:
 	void init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx);
 
 	// returns GF_FALSE when the user wants to close the application
-	Bool Tick();
+	Bool tick();
 
-	void Shutdown();
+	void shutdown();
 
-	Bool BeginFrame(const GfRenderContext& kCtx);
+	Bool beginFrame(const GfRenderContext& kCtx);
 
-	void EndFrame(const GfRenderContext& kCtx);
+	void endFrame(const GfRenderContext& kCtx);
 
-	u32 GetWidth() const;
+	u32 getWidth() const;
 
-	u32 GetHeight() const;
+	u32 getHeight() const;
 
-	const char* GetWindowName();
+	const char* getWindowName();
 
 	u32 getCurrentFrameIdx() const;
 
 	u32 getNextFrameIdx() const;
 
-	const GfTexture2D* getBackBuffer(u32 uiIdx) const;
+	GfTexture2D* getBackBuffer(u32 uiIdx);
 
-	const GfTexture2D* getCurrBackBuffer() const;
+	GfTexture2D* getCurrBackBuffer();
 
 	const GfSemaphore& getImageReadySemaphore() const;
 
@@ -92,42 +92,32 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfWindow::GetWidth() const
+GF_FORCEINLINE u32 GfWindow::getWidth() const
 {
 	return m_width;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE u32 GfWindow::GetHeight() const
+GF_FORCEINLINE u32 GfWindow::getHeight() const
 {
 	return m_height;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE const char* GfWindow::GetWindowName() 
+GF_FORCEINLINE const char* GfWindow::getWindowName() 
 {
 	return m_szAppName;
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 GF_FORCEINLINE u32 GfWindow::getCurrentFrameIdx() const
 {
 	return m_uiCurrentFrameIdx;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE const GfTexture2D* GfWindow::getBackBuffer(u32 uiIdx) const
+GF_FORCEINLINE GfTexture2D* GfWindow::getBackBuffer(u32 uiIdx)
 {
 	return &m_tSwapchainTextures[uiIdx];
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-GF_FORCEINLINE const GfTexture2D* GfWindow::getCurrBackBuffer() const
+GF_FORCEINLINE GfTexture2D* GfWindow::getCurrBackBuffer()
 {
 	return &m_tSwapchainTextures[m_uiCurrentFrameIdx];
 }

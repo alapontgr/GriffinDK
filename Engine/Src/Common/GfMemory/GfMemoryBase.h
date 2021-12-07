@@ -88,7 +88,7 @@ class StackMemBlock
 public:
 	StackMemBlock(u32 size) : m_memBlock (GfAlloca(size)) 
 	{
-		GF_VERIFY(m_memBlock, "Stack Overflow!!!");
+		GF_VERIFY(m_memBlock || size == 0, "Stack Overflow!!!");
 	}
 	~StackMemBlock() 
 	{

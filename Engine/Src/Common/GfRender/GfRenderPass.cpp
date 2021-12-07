@@ -56,7 +56,7 @@ void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount,
 	
 	m_outputCount = outputCount;
 	m_attachments.clear();
-	m_attachments.reserve(outputCount);
+	m_attachments.resize(outputCount);
 	for (u32 i=0; i<outputCount; ++i) 
 	{
 		m_attachments[i] = output[i];

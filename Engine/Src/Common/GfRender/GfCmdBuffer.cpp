@@ -28,6 +28,8 @@ public:
 
 	void shutdown(const GfRenderContext& ctx);
 
+	const GfCmdBufferFactory& getFactory() const { return m_factory; }
+
 private:
 
 	GfCmdBufferFactory m_factory;
@@ -139,6 +141,7 @@ GF_DEFINE_BASE_CTOR(GfCmdBuffer)
 	, m_cache(nullptr)
 	, m_linearAllocator(ms_allocatorDefaultMemory)
 {
+	GF_ASSERT_ALWAYS("Should never be called given the workflow!");
 }
 
 GF_DEFINE_BASE_CTOR_EXT(GfCmdBuffer, const GfRenderContext* ctx, GfCmdBufferCache* cache,
@@ -149,6 +152,7 @@ GF_DEFINE_BASE_CTOR_EXT(GfCmdBuffer, const GfRenderContext* ctx, GfCmdBufferCach
 	, m_cache(cache)
 	, m_linearAllocator(ms_allocatorDefaultMemory)
 {
+	m_kPlatform.initRHI(*ctx, cache->getFactory(), type);
 }
 
 void GfCmdBuffer::beginRecording()
@@ -164,9 +168,9 @@ void GfCmdBuffer::endRecording()
 {
 	if (isRecording()) 
 	{
-		m_curStateFlags &= ~GfRenderStateFlags::Recording;
 		flushBarriers();
 		m_kPlatform.endRecordingRHI(*m_ctx);
+		m_curStateFlags &= ~GfRenderStateFlags::Recording;
 	}
 }
 
@@ -201,6 +205,8 @@ void GfCmdBuffer::flushBarriers()
 	m_kPlatform.flushBarriers(
 		GfWeakArray<GfTextureBarrier>(m_textureBarriers.m_array, m_textureBarriers.m_size),
 		GfWeakArray<GfBufferBarrier>(m_bufferBarriers.m_array, m_bufferBarriers.m_size));
+	m_textureBarriers.m_size = 0;
+	m_bufferBarriers.m_size = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -11,6 +11,7 @@
 
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderContext.h" 
+#include "Common/GfRender/GfCmdBuffer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +52,17 @@ void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 		m_swapchainImageReady[i].create(kCtx);
 		m_swapchainFinishRendering[i].create(kCtx);
 	}
+
+	// Transition to Present
+	GfCmdBuffer* cmdBuffer = GfCmdBuffer::get(&kCtx, GfCmdBufferType::Primary, GfRenderContextFamilies::Graphics);
+	cmdBuffer->beginRecording();
+	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
+	{
+		GfTextureView view(&m_tSwapchainTextures[i]);
+		cmdBuffer->addTextureBarrier(view, TextureUsageFlags::Undefined, TextureUsageFlags::Present);
+	}
+	cmdBuffer->endRecording();
+	cmdBuffer->submit();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

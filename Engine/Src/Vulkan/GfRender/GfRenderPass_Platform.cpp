@@ -140,8 +140,8 @@ VkRenderPass GfRenderPass_Platform::createRenderPass(const GfRenderContext& ctx)
 		depthAttachmentRef->layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	VkAttachmentDescription* outputAttachmentDescs = depthAttachmentDesc+1;
-	VkAttachmentReference* outputRefs = depthAttachmentRef+1;
+	VkAttachmentDescription* outputAttachmentDescs = depthAttachmentDesc + (useDepth ? 1 : 0);
+	VkAttachmentReference* outputRefs = depthAttachmentRef + (useDepth ? 1 : 0);
 	const AttachmentDesc* colorAttachments = m_kBase.m_attachments.data();
 	for (u32 i=0; i<m_kBase.m_outputCount; ++i) 
 	{

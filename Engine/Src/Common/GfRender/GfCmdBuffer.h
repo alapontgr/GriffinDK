@@ -260,12 +260,12 @@ GF_FORCEINLINE bool GfCmdBuffer::isReadyForRecording()
 
 GF_FORCEINLINE bool GfCmdBuffer::isValid() const 
 {
-	return (m_curStateFlags & GfRenderStateFlags::InCache) == 0;
+	return (m_curStateFlags & GfRenderStateFlags::InCache) != 0;
 }
 
 GF_FORCEINLINE bool GfCmdBuffer::isRecording() const 
 {
-	return (m_curStateFlags & GfRenderStateFlags::Recording) == 0;
+	return (m_curStateFlags & GfRenderStateFlags::Recording) != 0;
 }
 
 GF_FORCEINLINE bool GfCmdBuffer::isInsideRenderPass() const 

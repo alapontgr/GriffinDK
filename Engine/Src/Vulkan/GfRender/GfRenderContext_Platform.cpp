@@ -44,7 +44,7 @@ static constexpr u32 g_uiLayerCount = 0;
 #endif // USE_VALIDATION_LAYERS
 static const char* g_pLayerNames[] = 
 { 
-	"VK_LAYER_LUNARG_standard_validation" 
+	"VK_LAYER_KHRONOS_validation" 
 };
 
 // Device extensions
@@ -180,6 +180,9 @@ bool GfRenderContext_Platform::CheckPhysicalDeviceProperties(
 
 void GfRenderContext_Platform::CheckValidationLayerSupport()
 {
+#if !GF_USE_VALIDATION_LAYERS
+	return;
+#endif
 	u32 uiLayerCount;
 	vkEnumerateInstanceLayerProperties(&uiLayerCount, nullptr);
 

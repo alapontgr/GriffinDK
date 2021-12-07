@@ -52,6 +52,7 @@ void GfTexture::externalInit(const GfRenderContext& ctx, const SwapchainDesc& kI
 		m_desc.m_format = kInitParams.m_format;
 		m_desc.m_mipCount = 1;
 		m_desc.m_mappable = false;
+		m_desc.m_usage = TextureUsageFlags::ColorAttachment; // See platform creation of swapchain
 		m_defaultViewID = getDefaultViewID();
 		m_kPlatform.externalInitPlat(ctx, kInitParams);
 		m_flags |= InitializedAsSwapchain;

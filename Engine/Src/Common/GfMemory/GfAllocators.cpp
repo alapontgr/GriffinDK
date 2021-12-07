@@ -112,10 +112,6 @@ GfLinearAllocator::Block::Block(GfLinearAllocator* alloc, void* ptr, u32 size)
 
 GfLinearAllocator::Block::Block(Block&& other)
 {
-	if (m_ptr) 
-	{
-		release();
-	}
 	m_alloc = other.m_alloc;
 	m_ptr = other.m_ptr;
 	m_blockSize = other.m_blockSize;

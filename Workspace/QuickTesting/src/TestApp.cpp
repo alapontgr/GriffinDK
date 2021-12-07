@@ -79,6 +79,7 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 		const GfSemaphore& signalSemaphore = m_window.getFinishedRenderingSemaphore();
 		cmdBuffer->submit(&imageReady, &signalSemaphore);
 
+		m_context.tick();
 		m_window.endFrame(m_context);
 
 		// Remove pending resources to delete
@@ -155,15 +156,35 @@ void TestApp::Render(GfCmdBuffer& cmdBuffer)
 	m_renderPass.setViewport(width, height, 0.0f, 0.0f);
 	m_renderPass.setScissor(m_window.getWidth(), m_window.getHeight(), 0, 0);
 	m_renderPass.setRenderArea(m_window.getWidth(), m_window.getHeight(), 0, 0);
-	m_renderPass.setClearColor(v4(1.0f, 0.0f, 0.0f, 0.0f));
+
+	u32 curFrameIdx(m_context.getCurFrame());
+
+	m_renderPass.setClearColor(v4(
+		static_cast<f32>(curFrameIdx & 0xff) / 255.0f, 
+		static_cast<f32>((curFrameIdx>>8) & 0xff) / 255.0f,
+		static_cast<f32>((curFrameIdx>>16) & 0xff) / 255.0f,
+		0.0f));
 
 	// Recording
 
 	cmdBuffer.beginRecording();
 
+	// Transit swapchain to Color attachment
+	if (m_context.getCurFrame() == 0) 
+	{
+		cmdBuffer.addTextureBarrier(attachments[0].m_attachment, TextureUsageFlags::Undefined, TextureUsageFlags::ColorAttachment);
+	}
+	else 
+	{
+		cmdBuffer.addTextureBarrier(attachments[0].m_attachment, TextureUsageFlags::Present, TextureUsageFlags::ColorAttachment);
+	}
+
 	cmdBuffer.beginRenderPass(&m_renderPass);
 
 	cmdBuffer.endRenderPass();
+
+	// Transit to present
+	cmdBuffer.addTextureBarrier(attachments[0].m_attachment, TextureUsageFlags::ColorAttachment, TextureUsageFlags::Present);
 
 	cmdBuffer.endRecording();
 }

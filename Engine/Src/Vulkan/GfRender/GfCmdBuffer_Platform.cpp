@@ -82,19 +82,20 @@ static void getStagesAccessAspectAndLayoutForTextureUsage(
 {
 	access = 0;
 	stages = 0;
-	aspect = 0;
+	aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 	layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 	// Special cases
 	if ((textureUsage & TextureUsageFlags::Undefined) != 0) 
 	{
+		stages = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 		layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		return;
 	}
 	if ((textureUsage & TextureUsageFlags::Present) != 0) 
 	{
 		layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		stages |= isNewLayout ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : 0;
+		stages |= isNewLayout ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT : VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		return;
 	}
 
@@ -141,7 +142,7 @@ static void getStagesAccessAspectAndLayoutForTextureUsage(
 	{
 		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
 		layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+		aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 		access |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		stages |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
@@ -149,7 +150,7 @@ static void getStagesAccessAspectAndLayoutForTextureUsage(
 	{
 		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
 		layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ;
-		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+		aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 		access |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
 		stages |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
@@ -157,7 +158,7 @@ static void getStagesAccessAspectAndLayoutForTextureUsage(
 	{
 		GF_ASSERT(layout == VK_IMAGE_LAYOUT_UNDEFINED, "trying to use the resource for multiple incompatible usages here");
 		layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		aspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT | VkImageAspectFlagBits::VK_IMAGE_ASPECT_STENCIL_BIT;
+		aspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 		access |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 		stages |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 	}
@@ -281,11 +282,13 @@ void GfCmdBuffer_Platform::submitRHI(
 	VkSemaphore waitSemaphore = VK_NULL_HANDLE;
 	VkSemaphore signalSemaphore = VK_NULL_HANDLE;
 
+	VkPipelineStageFlags stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	if (waitSemaphorePtr) 
 	{
 		waitSemaphore = waitSemaphorePtr->Plat().getHandle();
 		kInfo.waitSemaphoreCount = 1;
 		kInfo.pWaitSemaphores = &waitSemaphore;
+		kInfo.pWaitDstStageMask = &stageFlags;
 	}
 	if (signalSemaphorePtr) 
 	{
@@ -294,8 +297,13 @@ void GfCmdBuffer_Platform::submitRHI(
 		kInfo.pSignalSemaphores = &signalSemaphore;
 	}
 
+
+
 	kInfo.commandBufferCount = 1;
 	kInfo.pCommandBuffers = &m_cmdBuffer;
+
+	VkResult result = vkResetFences(ctx.Plat().m_pDevice, 1, &m_fence);
+	GF_ASSERT(result == VK_SUCCESS, "Failed to reset the fences");
 
 	VkResult eResult = vkQueueSubmit(ctx.Plat().GetQueue(eQueueType), 1, &kInfo, m_fence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
@@ -310,13 +318,6 @@ void GfCmdBuffer_Platform::beginRecordingRHI(const GfRenderContext& kCtx)
 	kInfo.pNext = nullptr;
 	kInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 	kInfo.pInheritanceInfo = nullptr;
-
-	VkImageSubresourceRange range;
-	range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	range.baseMipLevel = 0;
-	range.levelCount = 1;
-	range.baseArrayLayer = 0;
-	range.layerCount = 1;
 
 	// begin command buffer
 	VkResult eResult = vkBeginCommandBuffer(m_cmdBuffer, &kInfo);
@@ -625,6 +626,8 @@ void GfCmdBuffer_Platform::flushBarriers(const GfWeakArray<GfTextureBarrier>& te
 		srcStages |= oldStages;
 		dstStages |= newStages;
 	}
+
+	GF_ASSERT(srcStages != 0, "SrcStage must not be 0");
 
 	vkCmdPipelineBarrier(
 		m_cmdBuffer,

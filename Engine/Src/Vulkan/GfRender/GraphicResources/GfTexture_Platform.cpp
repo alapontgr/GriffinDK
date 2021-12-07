@@ -317,10 +317,8 @@ void GfTexture_Platform::createView(const GfRenderContext& ctx)
 	viewCI.subresourceRange.levelCount = m_kBase.getMipMapCount();
 	viewCI.subresourceRange.baseArrayLayer = 0;
 	viewCI.subresourceRange.layerCount = m_kBase.getSlices();
-	if (!vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &m_defaultView)) 
-	{
-		GF_ERROR("Failed to create image view");
-	}
+	VkResult result = vkCreateImageView(ctx.Plat().m_pDevice, &viewCI, nullptr, &m_defaultView);
+	GF_ASSERT(result == VK_SUCCESS, "Failed to create image view");
 }
 
 u64 GfTexture_Platform::getViewIDForConfig(const GfRenderContext& ctx, const GfTextureViewConfig& config)

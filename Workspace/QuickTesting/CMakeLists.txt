@@ -15,5 +15,7 @@ set(includeDirs
 )
 target_include_directories(QuickTesting PUBLIC ${includeDirs})
 
+set_property(TARGET QuickTesting PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+
 # Link against engine
 target_link_libraries(QuickTesting ${engineName})

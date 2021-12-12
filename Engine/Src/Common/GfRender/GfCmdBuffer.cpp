@@ -178,6 +178,8 @@ void GfCmdBuffer::reset()
 {
 	GF_ASSERT(m_ctx, "Context was not initialized");
 	m_curState = GfRenderPipelineState();
+	m_curState.updateHash(); // Calculate default hash
+
 	m_linearAllocator.reset();
 
 	// Reset barriers
@@ -283,6 +285,7 @@ void GfCmdBuffer::endRenderPass()
 	{
 		m_kPlatform.endRenderPass();
 		m_curState.setRenderPass(nullptr);
+		m_curState.setVertexFormat(nullptr);
 	}
 }
 
@@ -291,7 +294,6 @@ void GfCmdBuffer::bindShaderPipe(const GfShaderVariant& shaderVariant)
 	GfShaderPipeline* pipeline = shaderVariant.getPipeline();
 	GfVariantHash variantHash = shaderVariant.getVariantHash();
 
-	GF_ASSERT(pipeline->isCompute() || m_curState.getVertexFormat(), "Invalid active vertex format");
 	GF_ASSERT(pipeline->isCompute() || m_curState.getCurRenderPass(), "Invalid active Render Pass");
 
 	m_curState.setShaderPipe(pipeline, variantHash);

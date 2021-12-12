@@ -125,9 +125,11 @@ class GfShaderDeserializer
 {
 public:
 
-	GfShaderDeserializer() {}
+	GfShaderDeserializer();
 
 	void deserialize(GfUniquePtr<u8[]>&& blob);
+
+	void deserialize(const GfWeakArray<u8>& blob);
 
 	s32 findIdxForMutator(const GfString& mutatorName) const;
 
@@ -151,9 +153,14 @@ private:
 
 	const u32* getBytecodePtr(u32 idx) const;
 
+	void deserializeBlob();
+
 	u32 getBytecodeSize(u32 idx) const;
 
 	GfUniquePtr<u8[]> m_binary;
+	GfWeakArray<u8> m_binaryWeak;
+	const u8* m_blob;
+
 	GfWeakArray<u32> m_stringOffsets;
 	GfWeakArray<u32> m_bytecodeOffsets;
 	GfWeakArray<u32> m_bytecodeSizes;
@@ -185,7 +192,18 @@ public:
 
 	GfString getShaderFile(const GfString& shaderName) const;
 	
+	GfString getShaderFilename(const GfString& shaderName, const GfString& cacheDirPath) const;
+
+	GfWeakArray<u8> getShaderBlob(const GfString& shaderName);
+
+
 private:
+
+	struct BlobWithSize 
+	{
+		GfUniquePtr<u8[]> m_blob;
+		u32 m_size;
+	};
 
 	static GfString getShaderFilename(const u64 shaderFileHash, const GfString& basePath);
 
@@ -193,9 +211,12 @@ private:
 
 	void saveCache(const GfString& filePath);
 
+	GfWeakArray<u8> loadShaderBlobFromFile(const GfString& shaderName);
+
 	GfString m_cacheDirPath;
 	GfUMap<u64, u64> m_filenameToHash;
 	GfUMap<u64, GfString> m_fileHashToName;
+	GfUMap<u64, BlobWithSize> m_fileHashToBlob;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

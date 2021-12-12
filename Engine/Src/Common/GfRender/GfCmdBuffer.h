@@ -93,9 +93,9 @@ public:
 		m_stateFlags &= ~flag;
 	}
 
+	void updateHash();
 
 private:
-	void updateHash();
 
 	const GfVertexDeclaration* m_curVertexFormat = nullptr;
 	GfRenderPass* m_curRenderPass = nullptr;

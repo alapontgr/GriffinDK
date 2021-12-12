@@ -201,14 +201,14 @@ void GfShaderCompiler::init(const GfString& globalShaderPath, const GfString& ba
 	m_engineShaderDirPath = globalShaderPath;
 }
 
-GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& filename, const GfString& src, GfShaderCache& filter, GfString& outErrors)
+bool GfShaderCompiler::compileShader(const GfString& filename, const GfString& src, GfShaderCache& filter, GfString& outErrors)
 {
 	GfUniquePtr<GfShaderSerializer> shaderSerializer = std::make_unique<GfShaderSerializer>();
 
 	GfString parsedSrc;
 	if (!parse(filename, src, *shaderSerializer.get(), parsedSrc, outErrors)) 
 	{		
-		return nullptr;
+		return false;
 	}
 
 	// Create an absolute hash
@@ -217,7 +217,7 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 	// Filter based on hash (likely to check against hash in cache)
 	if (filter.skipCompilation(filename, srcHash)) 
 	{
-		return nullptr;
+		return false;
 	}
 
 	// Uberize based on mutators
@@ -253,7 +253,7 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 	if (!success) 
 	{
 		outErrors = compilationErrors;
-		return nullptr;
+		return false;
 	}
 
 	// Add bytecodes to the cache of the serializer
@@ -274,13 +274,13 @@ GfUniquePtr<GfShaderSerializer> GfShaderCompiler::compileShader(const GfString& 
 	if (!success) 
 	{
 		outErrors = compilationErrors;
-		return nullptr;
+		return false;
 	}
 
 	// Register this shader in the cache
 	filter.registerShaderBlob(filename, srcHash, *shaderSerializer);
 
-	return shaderSerializer;
+	return true;
 }
 
 bool GfShaderCompiler::parse(const GfString& filename, const GfString& src, GfShaderSerializer& outSerializer, GfString& outSrc, GfString& outErrors)
@@ -296,6 +296,11 @@ bool GfShaderCompiler::parse(const GfString& filename, const GfString& src, GfSh
 		GfVector<GfString>::const_iterator tokenIter = tokens.begin();
 
 		if (tokens.size() == 0) 
+		{
+			continue;
+		}
+
+		if (tokenIter[0].rfind("//", 0) == 0) 
 		{
 			continue;
 		}
@@ -479,7 +484,7 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 				outErrors += GfString("[REFLECTION ERROR] Invalid bind index.\n");
 				return false;
 			}
-			usedBindings |= (1<<binding);
+			usedBindings |= (1<<set);
 
 			const spirv_cross::SPIRType& typeInfo = compiler.get_type(resource.type_id);
 			u32 arraySize = 1;
@@ -542,7 +547,7 @@ bool GfShaderCompiler::reflectVariant(GfShaderSerializer& serializer, GfShaderSe
 	// Add data to serializer and set offsets to variant
 	for (u32 set = 0; set < s_MAX_DESCRIPTOR_SETS; ++set) 
 	{
-		if (usedBindings != 0)
+		if ((usedBindings & (1<<set)) != 0)
 		{
 			u64 hash = GfHash::compute(&uniforms[set][0], sizeof(GfDescriptorBindingSlot) * s_MAX_BINDINGS_PER_SET);
 			u32 tmpOffset = serializer.addBindingsArray(uniforms[set], hash);

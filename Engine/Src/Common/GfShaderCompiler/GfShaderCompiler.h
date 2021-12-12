@@ -25,7 +25,7 @@ public:
 
 	void init(const GfString& globalShaderPath, const GfString& baseShaderPath);
 
-	GfUniquePtr<GfShaderSerializer> compileShader(const GfString& filename, const GfString& src, GfShaderCache& filter, GfString& outErrors);
+	bool compileShader(const GfString& filename, const GfString& src, GfShaderCache& filter, GfString& outErrors);
 
 private:
 

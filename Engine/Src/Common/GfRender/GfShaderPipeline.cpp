@@ -41,6 +41,11 @@ void GfShaderPipeline::setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob)
 	m_shaderData.deserialize(std::move(shaderBlob));
 }
 
+void GfShaderPipeline::setShaderBlob(const GfWeakArray<u8>& shaderBlob) 
+{
+	m_shaderData.deserialize(shaderBlob);
+}
+
 GfShaderVariant::GfShaderVariant(GfShaderPipeline* shaderPipeline)
 	: m_pipeline(shaderPipeline)
 	, m_variantHash(0)

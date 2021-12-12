@@ -40,7 +40,10 @@ private:
 	GfWindow		m_window;
 	GfRenderContext m_context;
 
+	GfShaderCacheFile m_shaderCache;
+
 	GfRenderPass m_renderPass;
+	GfShaderPipeline m_shader;
 
 	// Camera
 	GfCamera		m_kCamera;

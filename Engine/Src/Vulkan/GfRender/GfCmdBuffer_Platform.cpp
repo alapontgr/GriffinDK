@@ -386,7 +386,7 @@ void GfCmdBuffer_Platform::drawcallCommonGraphics(GfRenderPipelineState* state)
 	if ((state->getFlags() & GfRenderStateFlags::BindMaterial) != 0) 
 	{
 		GfShaderPipeline* pipeline = state->getActivePipeline();
-		GF_ASSERT(pipeline->isCompute(), "Trying to render graphics with a Compute Shader");
+		GF_ASSERT(!pipeline->isCompute(), "Trying to render graphics with a Compute Shader");
 		m_curBoundVariant = pipeline->Plat().getOrCreateGraphicsPipeline(
 			*m_kBase.m_ctx, 
 			state->getHash(), 

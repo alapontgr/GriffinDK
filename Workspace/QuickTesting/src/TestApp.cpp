@@ -11,6 +11,7 @@
 
 #include "./src/TestApp.h"
 #include "Common/GfInput/GfInput.h"
+#include "Common/GfShaderCompiler/GfShaderCompiler.h"
 
 #include "stb/stb_image.h"
 
@@ -34,7 +35,8 @@ static GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSiz
 	uiOutFileSize = static_cast<u32>(kFile.GetFileSize());
 	if (uiOutFileSize > 0) 
 	{
-		GfUniquePtr<char[]> pSrc(new char[uiOutFileSize]);
+		GfUniquePtr<char[]> pSrc(new char[uiOutFileSize+1]);
+		pSrc[uiOutFileSize] = 0;
 		u32 uiRead = GfFile::ReadBytes(kFile, uiOutFileSize, pSrc.get());
 		GfFile::CloseFile(kFile);
 		GF_ASSERT(uiRead == uiOutFileSize, "Invalid size read");
@@ -105,6 +107,45 @@ void TestApp::init(const GfEntryArgs& kEntryParams)
 	m_window.init(kWindowInit, m_context);
 
 	GfInput::init();
+
+	////////////////////////////////////////////////////////////////////////////////
+
+	GfString shaderCache = GfCommandLine::getArg(GfHash::compute("-sc"), ".");
+	GfString testShader = GfCommandLine::getArg(GfHash::compute("-f"));
+
+	if (shaderCache.size() == 0) 
+	{
+		GF_ASSERT_ALWAYS("Need to provide path for shader cache");
+	}
+
+	if (testShader.size() == 0) 
+	{
+		GF_ASSERT_ALWAYS("Need to provide path for shader to test");
+	}
+
+	u32 srcSize = 0;
+	GfUniquePtr<char[]> src = LoadFileSrc(testShader.c_str(), srcSize);
+	GfString shaderSrc(src.get());
+	std::replace( shaderSrc.begin(), shaderSrc.end(), '\\', '/');
+	if (shaderSrc.find("\r\n") != GfString::npos) 
+	{
+		shaderSrc.erase(std::remove(shaderSrc.begin(), shaderSrc.end(), '\r'), shaderSrc.end());
+	}
+
+	GfString errors;
+	m_shaderCache.init(shaderCache);
+	GfShaderCompiler compiler;
+	compiler.init("", "");
+	compiler.compileShader(testShader.c_str(), shaderSrc, m_shaderCache, errors);
+
+	if (errors.size() > 0) 
+	{
+		GF_ERROR("%s", errors.c_str());
+	}
+
+	u32 shaderBlobSize(0);
+	m_shader.setShaderBlob(m_shaderCache.getShaderBlob(testShader));
+
 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -180,6 +221,12 @@ void TestApp::Render(GfCmdBuffer& cmdBuffer)
 	}
 
 	cmdBuffer.beginRenderPass(&m_renderPass);
+
+	// Render
+	GfShaderVariant variant(&m_shader);
+	cmdBuffer.bindShaderPipe(variant);
+	cmdBuffer.draw(3, 1);
+
 
 	cmdBuffer.endRenderPass();
 

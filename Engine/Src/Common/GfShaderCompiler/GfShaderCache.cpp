@@ -100,7 +100,7 @@ void GfShaderSerializer::serialize(u8* data, u32& size) const
 			bytecodesSizes = bytecodesOffsets + bytecodesCount;
 			bytecodesData = reinterpret_cast<u8*>(bytecodesSizes + bytecodesCount);
 			header->m_bytecodeCacheOffsets = pivot;
-			header->m_bytecodeSizes = pivot + bytecodesCount * tableSize;			
+			header->m_bytecodeSizes = pivot + tableSize;			
 		}
 		pivot += tableSize * 2; // *2 because dealing with two tables (bytecodesSizes & bytecodesOffsets)
 		for (u32 i=0; i<bytecodesCount; ++i) 
@@ -279,27 +279,47 @@ GfUniquePtr<u8[]> GfShaderSerializer::serializeToBlob(u32& reqSize) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GfShaderDeserializer::GfShaderDeserializer() 
+	: m_binary(nullptr)
+	, m_binaryWeak(nullptr, 0)
+	, m_blob(nullptr)
+{}
+
 void GfShaderDeserializer::deserialize(GfUniquePtr<u8[]>&& blob)
 {
+	GF_ASSERT(!m_blob, "Already deserialized");
 	m_binary = std::move(blob);
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(blob.get());
-	m_stringOffsets.set(reinterpret_cast<u32*>(blob.get() + header->m_stringCacheOffsets), header->m_stringCount);
-	m_bytecodeOffsets.set(reinterpret_cast<u32*>(blob.get() + header->m_bytecodeCacheOffsets), header->m_bytecodesCount);
-	m_bytecodeSizes.set(reinterpret_cast<u32*>(blob.get() + header->m_bytecodeSizes), header->m_bytecodesCount);
-	m_mutators.set(reinterpret_cast<s32*>(blob.get() + header->m_mutatorsOffset), header->m_mutatorCount);
+	deserializeBlob();
+}
+
+void GfShaderDeserializer::deserialize(const GfWeakArray<u8>& blob) 
+{
+	GF_ASSERT(!m_blob, "Already deserialized");
+	m_binaryWeak = blob;
+	deserializeBlob();
+}
+
+void GfShaderDeserializer::deserializeBlob() 
+{
+	m_blob = (m_binary != nullptr) ? m_binary.get() : m_binaryWeak.data();
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
+	m_stringOffsets.set(reinterpret_cast<const u32*>(m_blob + header->m_stringCacheOffsets), header->m_stringCount);
+	m_bytecodeOffsets.set(reinterpret_cast<const u32*>(m_blob + header->m_bytecodeCacheOffsets), header->m_bytecodesCount);
+	m_bytecodeSizes.set(reinterpret_cast<const u32*>(m_blob + header->m_bytecodeSizes), header->m_bytecodesCount);
+	m_mutators.set(reinterpret_cast<const s32*>(m_blob + header->m_mutatorsOffset), header->m_mutatorCount);
 	// Deserialize variants data
 	m_variantsDataCache.clear();
 	for (u32 i = 0; i < header->m_variantsCount; ++i) 
 	{
-		u32 variantHash = reinterpret_cast<const u32*>(m_binary.get() + header->m_variantsHashesArrayOffset)[i];
-		const GfShaderVariantData* variantData = reinterpret_cast<const GfShaderVariantData*>(m_binary.get() + header->m_variantsOffset) + i;
+		u32 variantHash = reinterpret_cast<const u32*>(m_blob + header->m_variantsHashesArrayOffset)[i];
+		const GfShaderVariantData* variantData = reinterpret_cast<const GfShaderVariantData*>(m_blob + header->m_variantsOffset) + i;
 		m_variantsDataCache[variantHash] = variantData;
 	}
 }
 
 s32 GfShaderDeserializer::findIdxForMutator(const GfString& mutatorName) const
 {
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
 	for (s32 i = 0; i < static_cast<s32>(header->m_mutatorCount); ++i) 
 	{
 		if (mutatorName == getCachedString(m_mutators[i])) 
@@ -338,38 +358,38 @@ const u32* GfShaderDeserializer::getStageBytecodeForVariant(const GfShaderVarian
 
 bool GfShaderDeserializer::isGraphics() const
 {
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
 	return (header->m_usedStages & ((1<<ShaderStage::Vertex) | (1 << ShaderStage::Fragment))) != 0;
 }
 
 bool GfShaderDeserializer::isCompute() const
 {
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
 	return (header->m_usedStages & (1<<ShaderStage::Compute)) != 0;;
 }
 
 u32 GfShaderDeserializer::getUsedStages() const
 {
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
 	return header->m_usedStages;
 }
 
 const GfDescriptorBindingSlot* GfShaderDeserializer::getDescriptorBindings(u32 idx) const
 {
-	GfPipelineBlobHeader* header = reinterpret_cast<GfPipelineBlobHeader*>(m_binary.get());
-	GfDescriptorBindingSlot* descriptorBindings = reinterpret_cast<GfDescriptorBindingSlot*>(m_binary.get() + header->m_descriptorsOffset);
+	const GfPipelineBlobHeader* header = reinterpret_cast<const GfPipelineBlobHeader*>(m_blob);
+	const GfDescriptorBindingSlot* descriptorBindings = reinterpret_cast<const GfDescriptorBindingSlot*>(m_blob + header->m_descriptorsOffset);
 	return descriptorBindings + idx;
 }
 
 const char* GfShaderDeserializer::getCachedString(u32 idx) const
 {
-	const char* str = reinterpret_cast<const char*>(m_binary.get() + m_stringOffsets[idx]);
+	const char* str = reinterpret_cast<const char*>(m_blob + m_stringOffsets[idx]);
 	return str;
 }
 
 const u32* GfShaderDeserializer::getBytecodePtr(u32 idx) const
 {
-	const u32* bytecode = reinterpret_cast<const u32*>(m_binary.get() + m_bytecodeOffsets[idx]);
+	const u32* bytecode = reinterpret_cast<const u32*>(m_blob + m_bytecodeOffsets[idx]);
 	return bytecode;
 }
 
@@ -396,6 +416,10 @@ void GfShaderCacheFile::init(const GfString& cacheDirPath)
 	if (GfFile::DoesFileExist(filePath.c_str()))
 	{
 		loadParseCache(filePath);
+	}
+	else 
+	{
+		GfFile::CreateDir(m_cacheDirPath.c_str());
 	}
 }
 
@@ -429,6 +453,9 @@ void GfShaderCacheFile::registerShaderBlob(const GfString& filename, const u64 s
 		GfFile::CloseFile(kFile);
 	}
 
+	// Keep a copy of the blob
+	m_fileHashToBlob[nameHash] = { std::move(blob), blobSize };
+
 	saveCache(m_cacheDirPath + s_ShaderCacheFilename);
 }
 
@@ -442,6 +469,54 @@ GfString GfShaderCacheFile::getShaderFile(const GfString& shaderName) const
 		return getShaderFilename(nameHash, m_cacheDirPath);
 	}
 	return "";
+}
+
+GfString GfShaderCacheFile::getShaderFilename(const GfString& shaderName, const GfString& cacheDirPath) const 
+{
+	u64 nameHash = GfHash::compute(shaderName);
+	GfString shaderFile = cacheDirPath;
+	std::ostringstream oss;
+	oss << nameHash;
+	shaderFile += oss.str();
+	return std::move(shaderFile);
+}
+
+
+GfWeakArray<u8> GfShaderCacheFile::getShaderBlob(const GfString& shaderName) 
+{
+	u64 nameHash = GfHash::compute(shaderName);
+	const auto entry = m_fileHashToBlob.find(nameHash);
+	if (entry != m_fileHashToBlob.end()) 
+	{
+		return GfWeakArray<u8>(entry->second.m_blob.get(), entry->second.m_size);
+	}
+	return loadShaderBlobFromFile(shaderName);
+}
+
+GfWeakArray<u8> GfShaderCacheFile::loadShaderBlobFromFile(const GfString& shaderName) 
+{
+	u64 nameHash = GfHash::compute(shaderName);
+	const auto entry = m_fileHashToBlob.find(nameHash);
+	if (entry == m_fileHashToBlob.end()) 
+	{
+		GfString shaderFile = getShaderFilename(nameHash, m_cacheDirPath);
+
+		GfFileHandle file;
+		if (GfFile::OpenFile(shaderFile.c_str(), EFileAccessMode::Read, file)) 
+		{
+			u32 fileSize = static_cast<u32>(GfFile::GetFileSize(file));
+			GfUniquePtr<u8[]> blob(new u8[fileSize]);
+			GfFile::ReadBytes(file, fileSize, blob.get());
+			GfFile::CloseFile(file);
+			GF_ASSERT(blob != nullptr, "Something went wrong");
+
+			GfWeakArray<u8> result(blob.get(), fileSize);
+
+			m_fileHashToBlob[nameHash] = { std::move(blob), fileSize };
+			return std::move(result);
+		}
+	}
+	return GfWeakArray<u8>(nullptr, 0);
 }
 
 GfString GfShaderCacheFile::getShaderFilename(const u64 srcHash, const GfString& basePath)

@@ -81,6 +81,8 @@ public:
 
 	void setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob);
 
+	void setShaderBlob(const GfWeakArray<u8>& shaderBlob);
+
 	const GfShaderDeserializer& getDeserializer() const { return m_shaderData; }
 
 	bool isCompute() const { return m_shaderData.isCompute(); }

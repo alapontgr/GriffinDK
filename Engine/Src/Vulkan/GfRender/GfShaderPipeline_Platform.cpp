@@ -195,19 +195,25 @@ VkPipeline GfShaderPipeline_Platform::createPipeline(const GfRenderContext& ctx,
 	ci.pStages = stages;
 
 	// Fill vertex definition
-	StackMemBlock vertexAttribsMem(static_cast<u32>(sizeof(VkVertexInputAttributeDescription)) * vertexFormat->getAttribCount());
-	StackMemBlock vertexBufferBindingsMem(static_cast<u32>(sizeof(VkVertexInputBindingDescription)) * vertexFormat->getVertexBufferBindCount());
+	u32 atribCount(vertexFormat ? vertexFormat->getAttribCount() : 0);
+	u32 vertexBufferBindingsCount(vertexFormat ? vertexFormat->getVertexBufferBindCount() : 0);
+
+	StackMemBlock vertexAttribsMem(static_cast<u32>(sizeof(VkVertexInputAttributeDescription)) * atribCount);
+	StackMemBlock vertexBufferBindingsMem(static_cast<u32>(sizeof(VkVertexInputBindingDescription)) * vertexBufferBindingsCount);
 	VkVertexInputAttributeDescription* vertexAttributeDescriptions = reinterpret_cast<VkVertexInputAttributeDescription*>(vertexAttribsMem.get());
 	VkVertexInputBindingDescription* vertexBindingDescriptions = reinterpret_cast<VkVertexInputBindingDescription*>(vertexBufferBindingsMem.get());
 	VkPipelineVertexInputStateCreateInfo vertexCi{};
 	vertexCi.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	vertexCi.pNext = nullptr;
 	vertexCi.flags = 0;
-	vertexCi.vertexAttributeDescriptionCount = vertexFormat->getAttribCount();
-	vertexCi.vertexBindingDescriptionCount = vertexFormat->getVertexBufferBindCount();
+	vertexCi.vertexAttributeDescriptionCount = atribCount;
+	vertexCi.vertexBindingDescriptionCount = vertexBufferBindingsCount;
 	vertexCi.pVertexAttributeDescriptions = vertexAttributeDescriptions;
 	vertexCi.pVertexBindingDescriptions = vertexBindingDescriptions;
-	convertInputVertex(vertexFormat, vertexBindingDescriptions, vertexAttributeDescriptions);
+	if (vertexFormat) 
+	{
+		convertInputVertex(vertexFormat, vertexBindingDescriptions, vertexAttributeDescriptions);
+	}
 	ci.pVertexInputState = &vertexCi;
 
 	// Input assembly
@@ -298,6 +304,7 @@ void GfShaderPipeline_Platform::populateShaderStages(const GfRenderContext& ctx,
 			stagesToFill[idx].pName = "main";
 			stagesToFill[idx].pSpecializationInfo = nullptr;
 			stagesToFill[idx].module = getOrCreateModule(ctx, variantData, static_cast<ShaderStage::Type>(i));
+			idx++;
 		}
 	}
 }

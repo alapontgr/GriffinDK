@@ -134,13 +134,19 @@ u32 GfFile::WriteBytes(const GfFileHandle& kHandle, u32 uiToWrite, const void* p
 
 void GfFile::CreateDir(const char* dirPath) 
 {
-	if(CreateDirectoryA(dirPath, NULL) == 0)
+	GfString fullPath(dirPath);
+	u64 pos = 0;
+	GfString tmpPath("");
+	do
 	{
+		pos = fullPath.find_first_of("\\/", pos + 1);
+		tmpPath = fullPath.substr(0, pos);
+		CreateDirectoryA(tmpPath.c_str(), NULL);
 		if (GetLastError() != ERROR_ALREADY_EXISTS) 
 		{
-			GF_PRINT("Failed to create directory %s", dirPath);
+			GF_PRINT("Failed to create directory %s", tmpPath);
 		}
-	}
+	} while (pos != std::string::npos);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

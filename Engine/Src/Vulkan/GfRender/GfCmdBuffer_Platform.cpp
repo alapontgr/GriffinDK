@@ -573,7 +573,7 @@ void GfCmdBuffer_Platform::bindSampler(const u32 setIdx, const u32 bindIdx, cons
 {
 	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
 	entry.m_type = GfParameterSlotType::Sampler;
-	entry.m_samplerBind.m_sampler = sampler.Plat().GetSampler();
+	entry.m_samplerBind.m_sampler = sampler.Plat().getSampler();
 	GF_ASSERT(entry.m_samplerBind.m_sampler != VK_NULL_HANDLE, "Resource has not been created");
 }
 

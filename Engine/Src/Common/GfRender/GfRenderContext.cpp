@@ -13,6 +13,7 @@
 #include "Common/GfRender/GfWindow.h"
 #include "Common/GfRender/GfRenderConstants.h"
 #include "Common/GfCore/GfMaths.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResources.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,6 +32,10 @@ void GfRenderContext::tick()
 {
 	m_curFrame++;
 	m_kPlatform.tick();
+
+	ResourceFactory<GfBuffer>::tick(*this);
+	ResourceFactory<GfTexture>::tick(*this);
+	ResourceFactory<GfSampler>::tick(*this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,6 +64,10 @@ void GfRenderContext::init(GfWindow* pWindow)
 
 void GfRenderContext::Shutdown()
 {
+	ResourceFactory<GfBuffer>::shutdown(*this);
+	ResourceFactory<GfTexture>::shutdown(*this);
+	ResourceFactory<GfSampler>::shutdown(*this);
+
 	GF_ASSERT_ALWAYS("To Implement");
 }
 

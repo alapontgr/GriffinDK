@@ -37,7 +37,7 @@ template<typename T, u32 ChunkSize>
 GF_FORCEINLINE void GfPool<T, ChunkSize>::push(T* entry)
 {
 	entry->~T();
-	m_aval.push_back(entry);
+	m_aval.push(entry);
 }
 
 template<typename T, u32 ChunkSize>

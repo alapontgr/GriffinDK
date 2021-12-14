@@ -206,7 +206,7 @@ namespace GfTextureFormat
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETextureViewType
+namespace ImageView
 {
 	enum Type : u32
 	{
@@ -224,7 +224,7 @@ namespace ETextureViewType
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETexFilter
+namespace ImageFilter
 {
 	enum Type : u32
 	{
@@ -236,7 +236,7 @@ namespace ETexFilter
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ESamplerMipMapMode
+namespace SamplerMipMapMode
 {
 	enum Type : u32
 	{
@@ -247,7 +247,7 @@ namespace ESamplerMipMapMode
 
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ETexAddressMode
+namespace ImageAddressMode
 {
 	enum Type : u32
 	{
@@ -277,6 +277,89 @@ GF_FORCEINLINE bool isStencilFormat(GfTextureFormat::Type format)
 		GfTextureFormat::S8_UInt | 
 		GfTextureFormat::D32_SFloat_S8_UInt)) != 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+class GfRenderContext;
+
+// Use this helper to do reference counting of resources
+template <typename T>
+class ResourceFactory
+{
+public:
+
+	static constexpr u32 s_RemovingFrameDelay = 3;
+	static constexpr u32 s_ChunkSize = 64;
+
+	using Pool = GfPool<T, s_ChunkSize>;
+
+	static T* create();
+
+	static void destroy(T* resource);
+
+	static void shutdown(const GfRenderContext& ctx);
+
+	static void tick(const GfRenderContext& ctx);
+
+private:
+
+	static void flip() 
+	{
+		m_currFrameIdx = (m_currFrameIdx + 1) % s_RemovingFrameDelay;
+	}
+
+	static void destroyToRemove(const GfRenderContext& ctx, u32 idx);
+
+	static GfPool<T, s_ChunkSize> m_pool;
+	static GfArray<GfStack<T*>, s_RemovingFrameDelay> m_toRemove;
+	static u32 m_currFrameIdx;
+};
+
+template <typename T> GfPool<T, ResourceFactory<T>::s_ChunkSize> ResourceFactory<T>::m_pool;
+template <typename T> GfArray<GfStack<T*>, ResourceFactory<T>::s_RemovingFrameDelay> ResourceFactory<T>::m_toRemove;
+template <typename T> u32 ResourceFactory<T>::m_currFrameIdx = 0;
+
+template<typename T>
+GF_FORCEINLINE T* ResourceFactory<T>::create()
+{
+	return m_pool.pop();
+}
+
+template<typename T>
+GF_FORCEINLINE void ResourceFactory<T>::destroy(T* resource)
+{
+	m_toRemove[m_currFrameIdx].push(resource);
+}
+
+template<typename T>
+GF_FORCEINLINE void ResourceFactory<T>::shutdown(const GfRenderContext& ctx)
+{
+	for (u32 i=0; i<s_RemovingFrameDelay; ++i) 
+	{
+		destroyToRemove(ctx, i);
+	}
+}
+
+template<typename T>
+GF_FORCEINLINE void ResourceFactory<T>::tick(const GfRenderContext& ctx)
+{
+	flip();
+	
+	destroyToRemove(ctx, m_currFrameIdx);
+}
+
+template<typename T>
+GF_FORCEINLINE void ResourceFactory<T>::destroyToRemove(const GfRenderContext& ctx, u32 idx)
+{
+	while (!m_toRemove[idx].empty()) 
+	{
+		T* res = m_toRemove[idx].top();
+		res->destroy(ctx);
+		m_toRemove[idx].pop();
+		m_pool.push(res);
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

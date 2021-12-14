@@ -89,17 +89,20 @@ class GfTexture
 	GF_DECLARE_PLATFORM_INTERFACE(GfTexture);
 public:
 
+	friend class ResourceFactory<GfTexture>;
+	friend class ResourceFactory<GfTexture>::Pool;
+
 	enum Flags : u32 
 	{
 		Initialized = 1<<0,
 		InitializedAsSwapchain = 1<<1 | Initialized,
 	};
 
-	GfTexture();
+	static GfTexture* newTexture();
 
 	bool create(const GfRenderContext& ctx, const TextureDesc& desc);
 
-	void destroy(const GfRenderContext& ctx);
+	void release();
 
 	// Init the Texture view with externally created resources (i.e. backbuffer)
 	void externalInit(const GfRenderContext& ctx, const SwapchainDesc& kInitParams);
@@ -136,6 +139,10 @@ public:
 
 protected:
 
+	GfTexture();
+
+	void destroy(const GfRenderContext& ctx);
+
 	u64 getDefaultViewID();
 
 	u32 m_flags;
@@ -149,8 +156,6 @@ protected:
 class GfTexture2D : public GfTexture
 {
 public:
-
-	using Id = s32;
 
 	GfTexture2D();
 

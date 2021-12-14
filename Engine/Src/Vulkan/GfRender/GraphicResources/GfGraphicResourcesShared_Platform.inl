@@ -11,6 +11,8 @@
 #define __GFGRAPHICRESOURCESSHARED_PLATFORM_INL__
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "Common/GfRender/GfGraphicsSDK.h"
+
 static const VkFormat g_pTextureFormatConverter[] =
 {
 	VK_FORMAT_UNDEFINED,
@@ -269,28 +271,28 @@ static GF_FORCEINLINE GfTextureFormat::Type ConvertTextureFormatToVkFormat(VkFor
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkImageViewType ConvertViewType(ETextureViewType::Type eViewType)
+static GF_FORCEINLINE VkImageViewType ConvertViewType(ImageView::Type eViewType)
 {
 	return g_pViewTypeConverter[eViewType];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkFilter ConvertTexFilter(ETexFilter::Type eTexFilter)
+static GF_FORCEINLINE VkFilter ConvertTexFilter(ImageFilter::Type eTexFilter)
 {
 	return g_pTexFilterConverter[eTexFilter];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkSamplerMipmapMode ConvertTexMipMapMode(ESamplerMipMapMode::Type eMipMapMode)
+static GF_FORCEINLINE VkSamplerMipmapMode ConvertTexMipMapMode(SamplerMipMapMode::Type eMipMapMode)
 {
 	return g_pSamplerMipMapModeConverter[eMipMapMode];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static GF_FORCEINLINE VkSamplerAddressMode ConvertTexAddressMode(ETexAddressMode::Type eTexAddressMode)
+static GF_FORCEINLINE VkSamplerAddressMode ConvertTexAddressMode(ImageAddressMode::Type eTexAddressMode)
 {
 	return g_pTexAddressModeConverter[eTexAddressMode];
 }

@@ -24,22 +24,22 @@ class GfSampler_Platform
 	GF_DECLARE_PLATFORM_MEMBERS(GfSampler);
 public:
 
-	bool createRHI(const GfRenderContext& kCtxt);
+	bool create(const GfRenderContext& kCtxt);
 
-	void destroyRHI(const GfRenderContext& kCtxt);
+	void destroy(const GfRenderContext& kCtxt);
 
-	VkSampler GetSampler() const;
+	VkSampler getSampler() const;
 
 private:
 
-	VkSampler m_pSampler;
+	VkSampler m_sampler;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkSampler GfSampler_Platform::GetSampler() const
+GF_FORCEINLINE VkSampler GfSampler_Platform::getSampler() const
 {
-	return m_pSampler;
+	return m_sampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

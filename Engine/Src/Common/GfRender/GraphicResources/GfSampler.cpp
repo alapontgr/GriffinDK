@@ -14,175 +14,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 GF_DEFINE_BASE_CTOR(GfSampler)
-	, m_eMinFilter(ETexFilter::Linear)
-	, m_eMagFilter(ETexFilter::Linear)
-	, m_eMipMapMode(ESamplerMipMapMode::Linear)
-	, m_eAddrU(ETexAddressMode::ClampToEdge)
-	, m_eAddrV(ETexAddressMode::ClampToEdge)
-	, m_eAddrW(ETexAddressMode::ClampToEdge)
-	, m_fMipLodBias(0.0f)
-	, m_fMinLod(0.0f)
-	, m_fMaxLod(1.0f)
-	, m_fMaxAnisotropy(1.0f)
-	, m_bUseAnisotropy(false)
+	, m_desc{}
+	, m_flags(0)
 {
-	m_eResourceType = GfParameterSlotType::Sampler;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSampler::Create(const GfRenderContext& kCtxt)
+GfSampler* GfSampler::newSampler()
 {
-	if (!IsGPUReady()) 
+	return ResourceFactory<GfSampler>::create();
+}
+
+bool GfSampler::create(const GfRenderContext& ctx, const SamplerDesc& desc)
+{
+	if (!getIsInitialized())
 	{
-		if (!Plat().createRHI(kCtxt)) 
-		{
-			Destroy(kCtxt);
-		}
-		else 
-		{
-			MarkAsGPUReady();
-		}
+		m_desc = desc;
+		m_kPlatform.create(ctx);
+		m_flags |= Flags::Initialized;
+		return true;
 	}
+	return false;
+}
+
+void GfSampler::release()
+{
+	ResourceFactory<GfSampler>::destroy(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfSampler::Destroy(const GfRenderContext& kCtxt)
+void GfSampler::destroy(const GfRenderContext& ctx)
 {
-	Plat().destroyRHI(kCtxt);
-	MarkAsDestroyed();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMinFilter(ETexFilter::Type eFilter)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eMinFilter = eFilter;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMagFilter(ETexFilter::Type eFilter)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eMagFilter = eFilter;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMipMapMode(ESamplerMipMapMode::Type eMipMapMode)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eMipMapMode = eMipMapMode;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetAddrU(ETexAddressMode::Type eAddrMode)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eAddrU = eAddrMode;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetAddrV(ETexAddressMode::Type eAddrMode)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eAddrV = eAddrMode;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetAddrW(ETexAddressMode::Type eAddrMode)
-{
-	if (!IsGPUReady()) 
-	{
-		m_eAddrW = eAddrMode;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMipLodBias(f32 fBias)
-{
-	if (!IsGPUReady()) 
-	{
-		m_fMipLodBias = fBias;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMinLod(f32 fMinLod)
-{
-	if (!IsGPUReady()) 
-	{
-		m_fMinLod = fMinLod;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMaxLod(f32 fMaxLod)
-{
-	if (!IsGPUReady()) 
-	{
-		m_fMaxLod = fMaxLod;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetMaxAnisotropy(f32 fMaxAnisotropy)
-{
-	if (!IsGPUReady()) 
-	{
-		m_fMaxAnisotropy = fMaxAnisotropy;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfSampler::SetUseAnisotropy(bool bUseAnisotropy)
-{
-	if (!IsGPUReady()) 
-	{
-		m_bUseAnisotropy = bUseAnisotropy;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-GfCombinedSamplerTexture::GfCombinedSamplerTexture()
-	: m_pSampler(nullptr)
-	, m_pTextureView(nullptr)
-{
-	m_eResourceType = GfParameterSlotType::CombinedImageSampler;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void GfCombinedSamplerTexture::init(const GfSampler* pSampler, const GfTextureView* pView)
-{
-	if (!IsInitialised()) 
-	{
-		m_uiGraphicResFlags |= EGraphicResFlags::Initialised;
-		m_pSampler = pSampler;
-		m_pTextureView = pView;
-	}
+	m_kPlatform.destroy(ctx);
+	m_flags = 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

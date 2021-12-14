@@ -61,6 +61,11 @@ void GfTexture::externalInit(const GfRenderContext& ctx, const SwapchainDesc& kI
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GfTexture* GfTexture::newTexture()
+{
+	return ResourceFactory<GfTexture>::create();
+}
+
 bool GfTexture::create(const GfRenderContext& ctx, const TextureDesc& desc)
 {
 	if (!getIsInitialized())
@@ -76,6 +81,11 @@ bool GfTexture::create(const GfRenderContext& ctx, const TextureDesc& desc)
 		return true;
 	}
 	return false;
+}
+
+void GfTexture::release()
+{
+	ResourceFactory<GfTexture>::destroy(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

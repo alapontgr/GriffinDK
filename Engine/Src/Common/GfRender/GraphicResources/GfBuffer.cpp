@@ -20,6 +20,11 @@ GF_DEFINE_BASE_CTOR(GfBuffer)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+GfBuffer* GfBuffer::newBuffer()
+{
+	return ResourceFactory<GfBuffer>::create();
+}
+
 bool GfBuffer::create(const GfRenderContext& kCtxt, const GfBufferDesc& desc)
 {
 	if (!isInitialised()) 
@@ -33,6 +38,11 @@ bool GfBuffer::create(const GfRenderContext& kCtxt, const GfBufferDesc& desc)
 		}	
 	}
 	return false;
+}
+
+void GfBuffer::release()
+{
+	ResourceFactory<GfBuffer>::destroy(this);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

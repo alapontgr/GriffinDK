@@ -14,6 +14,7 @@
 
 #include "Common/GfCore/GfCoreMinimal.h"
 #include "Common/GfRender/GfRenderCommon.h"
+#include "Common/GfRender/GraphicResources/GfGraphicResourcesShared.h"
 #include GF_SOLVE_GFX_API_PATH(GfRender/GraphicResources/GfBuffer_Platform.h)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,8 +25,8 @@ class GfBuffer
 public:
 
 	friend class GfBuffer_Platform;
-
-	using Id = s32;
+	friend class ResourceFactory<GfBuffer>;
+	friend class ResourceFactory<GfBuffer>::Pool;
 
 	struct GfBufferDesc
 	{
@@ -44,11 +45,11 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	GfBuffer();
+	static GfBuffer* newBuffer();
 
 	bool create(const GfRenderContext& ctx, const GfBufferDesc& desc);
 
-	void destroy(const GfRenderContext& ctx);
+	void release();
 
 	bool isMappable() const;
 
@@ -79,6 +80,10 @@ private:
 		Initialised = 1<<1,
 		GPUReady = 1<<2
 	};
+
+	GfBuffer();
+
+	void destroy(const GfRenderContext& ctx);
 
 	GfBufferDesc	m_desc;
 	u32				m_flags;

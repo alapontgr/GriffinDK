@@ -45,12 +45,12 @@ void GfWindow::init(GfWindowInitParams& kInitParams, GfRenderContext& kCtx)
 	// Finally, after everything has been initialized, create the swapchain
 	m_kPlatform.createSwapchain(kCtx);
 
-	m_swapchainImageReady.resize(GfRenderConstants::ms_uiNBufferingCount);
-	m_swapchainFinishRendering.resize(GfRenderConstants::ms_uiNBufferingCount);
+	m_swapchainSemaphores.resize(GfRenderConstants::ms_uiNBufferingCount);
+	m_presentationSemaphore.resize(GfRenderConstants::ms_uiNBufferingCount);
 	for (u32 i = 0; i < GfRenderConstants::ms_uiNBufferingCount; ++i)
 	{
-		m_swapchainImageReady[i].create(kCtx);
-		m_swapchainFinishRendering[i].create(kCtx);
+		m_swapchainSemaphores[i].create(kCtx);
+		m_presentationSemaphore[i].create(kCtx);
 	}
 
 	// Transition to Present

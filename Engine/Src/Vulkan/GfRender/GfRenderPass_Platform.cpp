@@ -95,6 +95,23 @@ void GfRenderPass_Platform::getOrCreateRenderPass(const GfRenderContext& ctx)
 	}
 }
 
+void GfRenderPass_Platform::shutdown(const GfRenderContext& ctx)
+{
+	GfLock<GfMutex> lock(ms_framebuffercacheMutex);
+
+	for (auto it = ms_framebufferCache.begin(); it != ms_framebufferCache.end(); it++)
+	{
+		vkDestroyFramebuffer(ctx.Plat().m_pDevice, it->second, nullptr);
+	}
+	ms_framebufferCache.clear();
+
+	for (auto it = ms_renderPassCache.begin(); it != ms_renderPassCache.end(); it++)
+	{
+		vkDestroyRenderPass(ctx.Plat().m_pDevice, it->second, nullptr);
+	}
+	ms_renderPassCache.clear();
+}
+
 void GfRenderPass_Platform::markAsChanged()
 {
 	m_renderPass = VK_NULL_HANDLE;

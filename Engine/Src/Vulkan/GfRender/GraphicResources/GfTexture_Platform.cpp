@@ -242,8 +242,8 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 	kBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	kBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	kBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
-	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
+	kBarrier.srcQueueFamilyIndex = kCtx.getFamilyIdx(GfRenderContextFamilies::Graphics);
+	kBarrier.dstQueueFamilyIndex = kCtx.getFamilyIdx(GfRenderContextFamilies::Transfer);
 
 	vkCmdPipelineBarrier(kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
@@ -281,8 +281,8 @@ void GfTexture_Platform::loadTexture2DDataFromStagingBufferRHI(const GfRenderCon
 	kBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 	kBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	kBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	kBarrier.srcQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Transfer);
-	kBarrier.dstQueueFamilyIndex = kCtx.GetFamilyIdx(GfRenderContextFamilies::Graphics);
+	kBarrier.srcQueueFamilyIndex = kCtx.getFamilyIdx(GfRenderContextFamilies::Transfer);
+	kBarrier.dstQueueFamilyIndex = kCtx.getFamilyIdx(GfRenderContextFamilies::Graphics);
 	vkCmdPipelineBarrier(kCmdBuffer.Plat().getCmdBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,

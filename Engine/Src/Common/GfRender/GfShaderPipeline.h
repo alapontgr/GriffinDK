@@ -70,14 +70,13 @@ private:
 	u64 m_hash;
 };
 
-class GfShaderPipeline 
+class GfShaderPipeline : public GfFactory<GfShaderPipeline, 32>
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfShaderPipeline);
 public:
 
-	GfShaderPipeline();
-
-	GfShaderPipeline(GfUniquePtr<u8[]>&& shaderBlob);
+	using Factory = GfFactory<GfShaderPipeline, 32>;
+	friend class Factory::Pool;
 
 	void setShaderBlob(GfUniquePtr<u8[]>&& shaderBlob);
 
@@ -90,6 +89,10 @@ public:
 	u32 getUsedStages() const { return m_shaderData.getUsedStages(); }
 
 private:
+
+	GfShaderPipeline();
+
+	GfShaderPipeline(GfUniquePtr<u8[]>&& shaderBlob);
 
 	GfShaderDeserializer m_shaderData;
 };

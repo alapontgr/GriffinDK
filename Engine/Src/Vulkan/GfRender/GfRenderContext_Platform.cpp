@@ -89,6 +89,11 @@ void GfRenderContext_Platform::initRHI(GfWindow* pWindow)
 	m_descSetFactory = new GfDescriptorSetFactoryVK(m_pDevice);
 }
 
+void GfRenderContext_Platform::waitForIdle(GfRenderContextFamilies::Type queue) const
+{
+	vkQueueWaitIdle(getQueue(queue));
+}
+
 void GfRenderContext_Platform::shutdown()
 {
 	m_descSetFactory->shutdown();
@@ -359,7 +364,7 @@ void GfRenderContext_Platform::RetrieveQueues()
 	// Get access to the queues we will use
 	for (u32 i=0; i<GfRenderContextFamilies::Count; ++i) 
 	{
-		u32 uiFamilyIdx(m_kBase.GetFamilyIdx((GfRenderContextFamilies::Type)i));
+		u32 uiFamilyIdx(m_kBase.getFamilyIdx((GfRenderContextFamilies::Type)i));
 		if (uiFamilyIdx != GfRenderContextFamilies::InvalidIdx) 
 		{
 			vkGetDeviceQueue(m_pDevice, uiFamilyIdx, 0, &m_pQueues[i]);	

@@ -17,7 +17,6 @@
 #include "Common/GfCore/GfSingleton.h"
 #include "Common/GfRender/GfRender.h"
 #include "Common/GfFile/GfFile.h"
-#include "GfMesh.h" 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +41,8 @@ private:
 
 	GfShaderCacheFile m_shaderCache;
 
-	GfRenderPass m_renderPass;
-	GfShaderPipeline m_shader;
+	GfRenderPass* m_renderPass;
+	GfShaderPipeline* m_shader;
 
 	// Camera
 	GfCamera		m_kCamera;

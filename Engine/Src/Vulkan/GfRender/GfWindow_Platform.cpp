@@ -407,7 +407,7 @@ void GfWindow_Platform::endFrameRHI(const GfRenderContext& kCtx)
 	kInfo.pSwapchains = &m_pSwapChain;
 	kInfo.pImageIndices = &m_kBase.m_uiCurrentFrameIdx;
 	kInfo.pResults = nullptr;
-	auto result = vkQueuePresentKHR(kCtx.Plat().GetQueue(GfRenderContextFamilies::Graphics), &kInfo);
+	auto result = vkQueuePresentKHR(kCtx.Plat().getQueue(GfRenderContextFamilies::Graphics), &kInfo);
 	switch (result)
 	{
 	case VK_SUCCESS:

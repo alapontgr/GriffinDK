@@ -25,9 +25,11 @@ public:
 
 	GfRenderContext();
 
-	void Shutdown();
+	void shutdown();
 
-	u32 GetFamilyIdx(GfRenderContextFamilies::Type eType) const;
+	void waitForIdle(GfRenderContextFamilies::Type queue) const;
+
+	u32 getFamilyIdx(GfRenderContextFamilies::Type eType) const;
 
 	void tick();
 
@@ -53,7 +55,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE u32 GfRenderContext::GetFamilyIdx(GfRenderContextFamilies::Type eType) const
+GF_FORCEINLINE u32 GfRenderContext::getFamilyIdx(GfRenderContextFamilies::Type eType) const
 {
 	GF_ASSERT(eType >= 0 && eType < GfRenderContextFamilies::Count, "Invalid family");
 	return m_pAvailableFamilies[eType];

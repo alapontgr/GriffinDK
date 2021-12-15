@@ -46,12 +46,15 @@ struct AttachmentDesc
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class GfRenderPass
+class GfRenderPass : public GfFactory<GfRenderPass, 8>
 {
 	GF_DECLARE_PLATFORM_INTERFACE(GfRenderPass);
 public:
 
-	GfRenderPass();
+	using Factory = GfFactory<GfRenderPass, 8>;
+	friend class GfFactory<GfRenderPass, 8>::Pool;
+
+	static void shutdown(const GfRenderContext& ctx);
 
 	void setAttachments(const AttachmentDesc* output, u32 outputCount, const AttachmentDesc* depthAttachment);
 
@@ -95,6 +98,8 @@ public:
 	GfScissor getScissor() const { return m_scissor; }
 
 private:
+
+	GfRenderPass();
 
 	static constexpr u32 s_MAX_ATTACHMENTS = 8;
 

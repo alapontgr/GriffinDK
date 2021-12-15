@@ -32,9 +32,11 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	VkQueue GetQueue(GfRenderContextFamilies::Type eType) const;	
+	VkQueue getQueue(GfRenderContextFamilies::Type eType) const;	
 
 	GfDescriptorSetFactoryVK* getDescSetFactory() const { return m_descSetFactory; }
+
+	void waitForIdle(GfRenderContextFamilies::Type queue) const;
 
 	// Main settings
 	VkInstance						m_pInstance;
@@ -93,7 +95,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GF_FORCEINLINE VkQueue GfRenderContext_Platform::GetQueue(GfRenderContextFamilies::Type eType) const
+GF_FORCEINLINE VkQueue GfRenderContext_Platform::getQueue(GfRenderContextFamilies::Type eType) const
 {
 	GF_ASSERT(eType >= 0 && eType < GfRenderContextFamilies::Count, "Invalid family");
 	return m_pQueues[eType];

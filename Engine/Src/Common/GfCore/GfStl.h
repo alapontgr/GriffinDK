@@ -103,6 +103,34 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+template <typename T, u32 PoolChunkSize>
+class GfFactory 
+{
+public:
+
+	using Pool = GfPool<T, PoolChunkSize>;
+
+	class FactoryItem 
+	{
+		public:
+			T* newInstance();
+			void release();
+		//private:
+			FactoryItem() {}
+	};
+
+	GfFactory() {}
+
+	static T* newInstance();
+	void deleteInstance(T* entry);
+
+private:
+
+	static GfPool<T, PoolChunkSize> ms_pool;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 // Double linked list that works with externally allocated objects
 template <typename T>
 class GfIntrusiveList 

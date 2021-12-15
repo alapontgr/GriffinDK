@@ -179,7 +179,7 @@ void GfCmdBufferFactory_Platform::initRHI(const GfRenderContext& kCtx, GfRenderC
 	kInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	kInfo.pNext = nullptr;
 	kInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	kInfo.queueFamilyIndex = kCtx.GetFamilyIdx(queueType);
+	kInfo.queueFamilyIndex = kCtx.getFamilyIdx(queueType);
 	VkResult eResult = vkCreateCommandPool(kCtx.Plat().m_pDevice, &kInfo, nullptr, &m_pool);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to create command pool");
 }
@@ -305,7 +305,7 @@ void GfCmdBuffer_Platform::submitRHI(
 	VkResult result = vkResetFences(ctx.Plat().m_pDevice, 1, &m_fence);
 	GF_ASSERT(result == VK_SUCCESS, "Failed to reset the fences");
 
-	VkResult eResult = vkQueueSubmit(ctx.Plat().GetQueue(eQueueType), 1, &kInfo, m_fence);
+	VkResult eResult = vkQueueSubmit(ctx.Plat().getQueue(eQueueType), 1, &kInfo, m_fence);
 	GF_ASSERT(eResult == VK_SUCCESS, "Failed to submit cmd block");
 }
 
@@ -589,8 +589,8 @@ void GfCmdBuffer_Platform::flushBarriers(const GfWeakArray<GfTextureBarrier>& te
 		const GfTextureBarrier& barrier = textureBarriers[i];
 		imageB[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageB[i].pNext = nullptr;
-		imageB[i].srcQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
-		imageB[i].dstQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		imageB[i].srcQueueFamilyIndex = m_kBase.m_ctx->getFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		imageB[i].dstQueueFamilyIndex = m_kBase.m_ctx->getFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
 		imageB[i].image = barrier.m_texture->Plat().getImage();
 		imageB[i].subresourceRange.baseArrayLayer = barrier.m_viewConfig.m_firstSlice;
 		imageB[i].subresourceRange.layerCount = barrier.m_viewConfig.m_sliceCount;
@@ -616,8 +616,8 @@ void GfCmdBuffer_Platform::flushBarriers(const GfWeakArray<GfTextureBarrier>& te
 		bufferB[i].offset = barrier.m_offset;
 		bufferB[i].size = barrier.m_size;
 		bufferB[i].buffer = barrier.m_buffer->Plat().getHandle();
-		bufferB[i].srcQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
-		bufferB[i].dstQueueFamilyIndex = m_kBase.m_ctx->GetFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		bufferB[i].srcQueueFamilyIndex = m_kBase.m_ctx->getFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
+		bufferB[i].dstQueueFamilyIndex = m_kBase.m_ctx->getFamilyIdx(GfRenderContextFamilies::Graphics); // TODO: Deal with different queues
 		VkPipelineStageFlags oldStages(0); VkPipelineStageFlags newStages(0);
 		getStagesAndAccessForBufferUsage(barrier.m_oldUsage, bufferB[i].srcAccessMask, oldStages);
 		getStagesAndAccessForBufferUsage(barrier.m_newUsage, bufferB[i].dstAccessMask, newStages);

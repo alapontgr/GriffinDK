@@ -66,6 +66,35 @@ GF_FORCEINLINE void GfPool<T, ChunkSize>::allocateChunk()
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// GfFactory
+
+template <typename T, u32 PoolChunkSize> GfPool<T, PoolChunkSize> GfFactory<T, PoolChunkSize>::ms_pool;
+
+template<typename T, u32 PoolChunkSize>
+GF_FORCEINLINE T* GfFactory<T, PoolChunkSize>::newInstance()
+{
+	return ms_pool.pop();
+}
+
+template<typename T, u32 PoolChunkSize>
+GF_FORCEINLINE void GfFactory<T, PoolChunkSize>::deleteInstance(T* entry)
+{
+	ms_pool.push(entry);
+}
+
+template<typename T, u32 PoolChunkSize>
+GF_FORCEINLINE T* GfFactory<T, PoolChunkSize>::FactoryItem::newInstance()
+{
+	return GfFactory<T, PoolChunkSize>::newInstance();
+}
+
+template<typename T, u32 PoolChunkSize>
+GF_FORCEINLINE void GfFactory<T, PoolChunkSize>::FactoryItem::release()
+{
+	GfFactory<T, PoolChunkSize>::deleteInstance(this);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // GfIntrusiveList

@@ -40,6 +40,8 @@ public:
 
 	void getOrCreateRenderPass(const GfRenderContext& ctx);
 
+	static void shutdown(const GfRenderContext& ctx);
+
 protected:
 
 	void markAsChanged();

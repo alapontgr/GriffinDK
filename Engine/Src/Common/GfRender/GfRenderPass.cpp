@@ -39,6 +39,11 @@ struct HashableAttachmentEntry
 	StoreOp m_stencilStoreOp;
 };
 
+void GfRenderPass::shutdown(const GfRenderContext& ctx)
+{
+	GfRenderPass_Platform::shutdown(ctx);
+}
+
 void GfRenderPass::setAttachments(const AttachmentDesc* output, u32 outputCount, const AttachmentDesc* depthAttachment)
 {
 	setAttachments(output, outputCount, v4(0.0f), depthAttachment);

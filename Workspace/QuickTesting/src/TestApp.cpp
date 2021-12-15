@@ -47,19 +47,19 @@ static GfUniquePtr<char[]> LoadFileSrc(const char* szFilepath, u32& uiOutFileSiz
 
 ////////////////////////////////////////////////////////////////////////////////
 
-GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& siHeight, s32& siComponentCount) 
-{
-	// Force 4 components
-	u32 uiReqComponents(4);
-	unsigned char *pData = stbi_load(szTexturePath, &siWidth, &siHeight, &siComponentCount, uiReqComponents);
-	size_t uiTextureSize((size_t)siWidth * siHeight * uiReqComponents);
-	
-	GfUniquePtr<char[]> pSrc(new char[uiTextureSize]);
-	memcpy(pSrc.get(), pData, uiTextureSize);
-	stbi_image_free(pData);
-
-	return pSrc;
-}
+//GfUniquePtr<char[]> LoadTexture(const char* szTexturePath, s32& siWidth, s32& siHeight, s32& siComponentCount) 
+//{
+//	// Force 4 components
+//	u32 uiReqComponents(4);
+//	unsigned char *pData = stbi_load(szTexturePath, &siWidth, &siHeight, &siComponentCount, uiReqComponents);
+//	size_t uiTextureSize((size_t)siWidth * siHeight * uiReqComponents);
+//	
+//	GfUniquePtr<char[]> pSrc(new char[uiTextureSize]);
+//	memcpy(pSrc.get(), pData, uiTextureSize);
+//	stbi_image_free(pData);
+//
+//	return pSrc;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -83,9 +83,6 @@ s32 TestApp::Run(const GfEntryArgs& kEntryParams)
 
 		m_context.tick();
 		m_window.endFrame(m_context);
-
-		// Remove pending resources to delete
-		GfBufferFactory::removePending(m_context);
 	}
 	return 0;
 }
@@ -109,6 +106,9 @@ void TestApp::init(const GfEntryArgs& kEntryParams)
 	GfInput::init();
 
 	////////////////////////////////////////////////////////////////////////////////
+
+	m_renderPass = GfRenderPass::newInstance();
+	m_shader = GfShaderPipeline::newInstance();
 
 	GfString shaderCache = GfCommandLine::getArg(GfHash::compute("-sc"), ".");
 	GfString testShader = GfCommandLine::getArg(GfHash::compute("-f"));
@@ -144,7 +144,8 @@ void TestApp::init(const GfEntryArgs& kEntryParams)
 	}
 
 	u32 shaderBlobSize(0);
-	m_shader.setShaderBlob(m_shaderCache.getShaderBlob(testShader));
+	
+	m_shader->setShaderBlob(m_shaderCache.getShaderBlob(testShader));
 
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -193,14 +194,14 @@ void TestApp::Render(GfCmdBuffer& cmdBuffer)
 	{
 		{GfTextureView(m_window.getCurrBackBuffer()), LoadOp::Clear, StoreOp::Store} 
 	};
-	m_renderPass.setAttachments(attachments, s_AttachmentCount, nullptr);
-	m_renderPass.setViewport(width, height, 0.0f, 0.0f);
-	m_renderPass.setScissor(m_window.getWidth(), m_window.getHeight(), 0, 0);
-	m_renderPass.setRenderArea(m_window.getWidth(), m_window.getHeight(), 0, 0);
+	m_renderPass->setAttachments(attachments, s_AttachmentCount, nullptr);
+	m_renderPass->setViewport(width, height, 0.0f, 0.0f);
+	m_renderPass->setScissor(m_window.getWidth(), m_window.getHeight(), 0, 0);
+	m_renderPass->setRenderArea(m_window.getWidth(), m_window.getHeight(), 0, 0);
 
 	u32 curFrameIdx(m_context.getCurFrame());
 
-	m_renderPass.setClearColor(v4(
+	m_renderPass->setClearColor(v4(
 		static_cast<f32>(curFrameIdx & 0xff) / 255.0f, 
 		static_cast<f32>((curFrameIdx>>8) & 0xff) / 255.0f,
 		static_cast<f32>((curFrameIdx>>16) & 0xff) / 255.0f,
@@ -220,10 +221,10 @@ void TestApp::Render(GfCmdBuffer& cmdBuffer)
 		cmdBuffer.addTextureBarrier(attachments[0].m_attachment, TextureUsageFlags::Present, TextureUsageFlags::ColorAttachment);
 	}
 
-	cmdBuffer.beginRenderPass(&m_renderPass);
+	cmdBuffer.beginRenderPass(m_renderPass);
 
 	// Render
-	GfShaderVariant variant(&m_shader);
+	GfShaderVariant variant(m_shader);
 	cmdBuffer.bindShaderPipe(variant);
 	cmdBuffer.draw(3, 1);
 

@@ -14,6 +14,7 @@
 #include "Common/GfRender/GfRenderConstants.h"
 #include "Common/GfCore/GfMaths.h"
 #include "Common/GfRender/GraphicResources/GfGraphicResources.h"
+#include "Common/GfRender/GfRenderPass.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -62,13 +63,24 @@ void GfRenderContext::init(GfWindow* pWindow)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void GfRenderContext::Shutdown()
+void GfRenderContext::shutdown()
 {
+	waitForIdle(GfRenderContextFamilies::Graphics);
+	waitForIdle(GfRenderContextFamilies::Compute);
+
+	GfRenderPass::shutdown(*this);
 	ResourceFactory<GfBuffer>::shutdown(*this);
 	ResourceFactory<GfTexture>::shutdown(*this);
 	ResourceFactory<GfSampler>::shutdown(*this);
 
+	// TODO: Destroy everything related with pipelines
+
 	GF_ASSERT_ALWAYS("To Implement");
+}
+
+void GfRenderContext::waitForIdle(GfRenderContextFamilies::Type queue) const
+{
+	m_kPlatform.waitForIdle(queue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -86,8 +86,8 @@ private:
 	u32					m_uiCurrentFrameIdx;
 
 	GfVector<GfTexture2D>	m_tSwapchainTextures;
-	GfVector<GfSemaphore>	m_swapchainImageReady;
-	GfVector<GfSemaphore>	m_swapchainFinishRendering;
+	GfVector<GfSemaphore>	m_swapchainSemaphores;
+	GfVector<GfSemaphore>	m_presentationSemaphore;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,12 +124,12 @@ GF_FORCEINLINE GfTexture2D* GfWindow::getCurrBackBuffer()
 
 GF_FORCEINLINE const GfSemaphore& GfWindow::getImageReadySemaphore() const
 {
-	return m_swapchainImageReady[getCurrentFrameIdx()];
+	return m_swapchainSemaphores[getCurrentFrameIdx()];
 }
 
 GF_FORCEINLINE const GfSemaphore& GfWindow::getFinishedRenderingSemaphore() const
 {
-	return m_swapchainFinishRendering[getCurrentFrameIdx()];
+	return m_presentationSemaphore[getCurrentFrameIdx()];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

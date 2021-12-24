@@ -113,9 +113,6 @@ private:
 
 	VkDescriptorSetLayout m_layout;
 	GfArray<u32, GfParameterSlotType::Count> m_perResourceTypeCount;
-	u32 m_usedBindings;
-	u32 m_reqImageWrites;
-	u32 m_reqBufferWrites;
 
 	// Caching
 	GfMap<u64, DescSetEntry*> m_setsCache;

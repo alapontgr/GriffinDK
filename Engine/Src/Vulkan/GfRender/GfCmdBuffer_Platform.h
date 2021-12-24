@@ -71,17 +71,16 @@ struct GfResourceBindingEntry
 		ImageBinding m_imageBind;
 		CombinedSamplerTexture m_combinedSamplerTextureBind;
 	};
+	GfResourceBindingEntry* m_next;
 	GfParameterSlotType::Type m_type;
+	u32 m_bindIdx;
 };
 
 struct GfResourceBindingExt 
 {
 	u32 m_arrayCount = 0;
-	union 
-	{
-		GfResourceBindingEntry m_single;
-		GfResourceBindingEntry* m_array;
-	};
+	GfResourceBindingEntry* m_front;
+	GfResourceBindingEntry* m_back;
 };
 
 class GfCmdBuffer_Platform
@@ -131,7 +130,7 @@ private:
 
 	////////////////////////////////////////////////////////////////////////////////
 
-	GfResourceBindingEntry& getEntryForBinding(const u32 setIdx, const u32 bindingIdx);
+	GfResourceBindingEntry& getEntryForBinding(const u32 setIdx, const u32 bindingIdx, const u32 idx = 0);
 
 	void bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size);
 

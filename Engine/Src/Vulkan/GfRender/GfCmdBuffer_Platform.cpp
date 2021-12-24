@@ -237,7 +237,8 @@ void GfCmdBuffer_Platform::reset()
 		for (u32 j = 0; j < s_MAX_BINDINGS_PER_SET; ++j) 
 		{
 			m_bindings[i][j].m_arrayCount = 0;
-			m_bindings[i][j].m_array = nullptr;
+			m_bindings[i][j].m_front = nullptr;
+			m_bindings[i][j].m_back = nullptr;
 		}
 	}
 	m_curBoundVariant = nullptr;
@@ -485,60 +486,52 @@ void GfCmdBuffer_Platform::bindIndexBufferRHI(const GfBuffer& buffer, u32 offset
 		useShort ? VkIndexType::VK_INDEX_TYPE_UINT16 : VkIndexType::VK_INDEX_TYPE_UINT32);
 }
 
-GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setIdx, const u32 bindingIdx)
+GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setIdx, const u32 bindingIdx, const u32 idx)
 {
 	GF_ASSERT(setIdx < s_MAX_DESCRIPTOR_SETS, "Invalid index for Desc set");
 	GF_ASSERT(bindingIdx < s_MAX_BINDINGS_PER_SET, "Invalid index for binding");
 
 	GfLinearAllocator& allocator = m_kBase.m_linearAllocator;
 	GfResourceBindingExt& entryExt = m_bindings[setIdx][bindingIdx];
-	if (bindingIdx == 0 && entryExt.m_arrayCount <= 1)
+
+	static constexpr u32 sizeOfEntry = static_cast<u32>(sizeof(GfResourceBindingEntry));
+	GfResourceBindingEntry* newEntry = reinterpret_cast<GfResourceBindingEntry*>(allocator.allocRaw(sizeOfEntry));
+	if (idx == 0) 
 	{
-		entryExt.m_arrayCount = 1;
-		return entryExt.m_single;
+		newEntry->m_next = entryExt.m_front;
+		entryExt.m_front = newEntry;
+		if (entryExt.m_arrayCount == 0) 
+		{
+			entryExt.m_back = newEntry;
+		}
 	}
-	else if (bindingIdx < entryExt.m_arrayCount)
+	else if (idx == entryExt.m_arrayCount)
 	{
-		return entryExt.m_array[bindingIdx];
+		if (entryExt.m_arrayCount == 0) 
+		{
+			entryExt.m_front = newEntry;
+		}
+		else 
+		{
+			entryExt.m_back->m_next = newEntry;
+		}
+		newEntry->m_next = nullptr;
+		entryExt.m_back = newEntry;
+	}
+	else 
+	{
+		GfResourceBindingEntry* pivot(entryExt.m_front);
+		for (u32 i = 1; i < idx; ++i) 
+		{
+			pivot = pivot->m_next;
+		}	
+		newEntry->m_next = pivot->m_next;
+		pivot->m_next = newEntry;
 	}
 
-	// Grow. At this point bindingIdx >0
-	GfResourceBindingEntry entryZero{};
-	entryZero.m_type = GfParameterSlotType::Invalid;
-	if (entryExt.m_arrayCount == 1)
-	{
-		entryZero = entryExt.m_single;
-	}
-
-	u32 newEntryCount = glm::max(entryExt.m_arrayCount * 2, bindingIdx + 1);
-	u32 sizeOfEntry = static_cast<u32>(sizeof(GfResourceBindingEntry));
-	u32 newArraySize = newEntryCount * sizeOfEntry;
-	
-	GfResourceBindingEntry* newArray = reinterpret_cast<GfResourceBindingEntry*>(allocator.allocRaw(newArraySize));
-
-	u32 elementsToSkip(0);
-	if (entryExt.m_arrayCount == 1)
-	{
-		newArray[0] = entryExt.m_single;
-		elementsToSkip = 1;
-	}
-	else if(entryExt.m_arrayCount > 1)
-	{
-		memcpy(newArray, entryExt.m_array, entryExt.m_arrayCount * sizeOfEntry);
-		elementsToSkip = entryExt.m_arrayCount;
-	}
-	
-	// Invalidate new entries
-	GfResourceBindingEntry* tail = newArray + elementsToSkip;
-	for (u32 i=0; i<(newEntryCount-elementsToSkip); ++i) 
-	{
-		tail[i].m_type = GfParameterSlotType::Invalid;
-	}
-
-	entryExt.m_arrayCount = newEntryCount;
-	entryExt.m_array = newArray;
-
-	return entryExt.m_array[bindingIdx];
+	entryExt.m_arrayCount++;
+	newEntry->m_bindIdx = idx;
+	return *newEntry;
 }
 
 void GfCmdBuffer_Platform::bindUniformBuffer(const u32 setIdx, const u32 bindIdx, const GfBuffer& buffer, const u32 offset, const u32 size) 
@@ -553,7 +546,7 @@ void GfCmdBuffer_Platform::bindUniformBuffer(const u32 setIdx, const u32 bindIdx
 
 void GfCmdBuffer_Platform::bindSampledTexture(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
-	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx, arrayIdx);
 	entry.m_type = GfParameterSlotType::SampledImage;
 	entry.m_sampledTextureBind.m_view = reinterpret_cast<VkImageView>(texture.getViewID(*m_kBase.m_ctx));
 	entry.m_sampledTextureBind.m_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -562,7 +555,7 @@ void GfCmdBuffer_Platform::bindSampledTexture(const u32 setIdx, const u32 bindId
 
 void GfCmdBuffer_Platform::bindStorageImage(const u32 setIdx, const u32 bindIdx, GfTextureView& texture, const u32 arrayIdx) 
 {
-	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx);
+	GfResourceBindingEntry& entry = getEntryForBinding(setIdx, bindIdx, arrayIdx);
 	entry.m_type = GfParameterSlotType::StorageImage;
 	entry.m_imageBind.m_view = reinterpret_cast<VkImageView>(texture.getViewID(*m_kBase.m_ctx));
 	entry.m_imageBind.m_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

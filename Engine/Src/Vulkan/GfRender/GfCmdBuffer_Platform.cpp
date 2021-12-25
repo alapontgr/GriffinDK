@@ -494,6 +494,18 @@ GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setId
 	GfLinearAllocator& allocator = m_kBase.m_linearAllocator;
 	GfResourceBindingExt& entryExt = m_bindings[setIdx][bindingIdx];
 
+	// Find existing entry
+	GfResourceBindingEntry* entry(entryExt.m_front);
+	while (entry && entry->m_bindIdx < idx) { entry = entry->m_next; }
+
+	// If an entry for this index was found, return it
+	if (entry && entry->m_bindIdx == idx) 
+	{
+		entry->m_type = GfParameterSlotType::Invalid;
+		return *entry;
+	}
+
+	// At this point we haven't found a valid entry to return, create one
 	static constexpr u32 sizeOfEntry = static_cast<u32>(sizeof(GfResourceBindingEntry));
 	GfResourceBindingEntry* newEntry = reinterpret_cast<GfResourceBindingEntry*>(allocator.allocRaw(sizeOfEntry));
 	if (idx == 0) 
@@ -530,6 +542,7 @@ GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setId
 	}
 
 	entryExt.m_arrayCount++;
+	newEntry->m_type = GfParameterSlotType::Invalid;
 	newEntry->m_bindIdx = idx;
 	return *newEntry;
 }

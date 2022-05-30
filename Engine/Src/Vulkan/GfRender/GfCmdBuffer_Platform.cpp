@@ -532,11 +532,9 @@ GfResourceBindingEntry& GfCmdBuffer_Platform::getEntryForBinding(const u32 setId
 	}
 	else 
 	{
+		// Find last entry with a bind index lower
 		GfResourceBindingEntry* pivot(entryExt.m_front);
-		for (u32 i = 1; i < idx; ++i) 
-		{
-			pivot = pivot->m_next;
-		}	
+		while (pivot->m_next && pivot->m_next->m_bindIdx < idx) { pivot = pivot->m_next; }	
 		newEntry->m_next = pivot->m_next;
 		pivot->m_next = newEntry;
 	}
